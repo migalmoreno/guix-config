@@ -1,5 +1,5 @@
 (define-module (efimerspan packages desktop)
-  #:use-module (franesio packages python-xyz)
+  #:use-module (efimerspan packages python-xyz)
   #:use-module (guix packages)
   #:use-module (gnu build-system gnu)
   #:use-module (guix git-download)
