@@ -1,4 +1,4 @@
-(define-module (franesio packages hardware)
+(define-module (efimerspan packages hardware)
   #:use-module (gnu packages hardware)
   #:use-module (gnu packages linux)
   #:use-module (guix packages))

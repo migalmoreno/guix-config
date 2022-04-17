@@ -1,4 +1,4 @@
-(define-module (franesio packages android)
+(define-module (efimerspan packages android)
   #:use-module (gnu packages android)
   #:use-module (guix git-download)
   #:use-module (guix packages)

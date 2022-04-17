@@ -1,4 +1,4 @@
-(define-module (franesio packages desktop)
+(define-module (efimerspan packages desktop)
   #:use-module (franesio packages python-xyz)
   #:use-module (guix packages)
   #:use-module (gnu build-system gnu)

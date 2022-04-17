@@ -1,4 +1,4 @@
-(define-module (franesio packages misc)
+(define-module (efimerspan packages misc)
   #:use-module (gnu build-system trivial))
 
 (define-public emacs-meditate-logo

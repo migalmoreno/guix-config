@@ -1,4 +1,4 @@
-(define-module (franesio packages linux)
+(define-module (efimerspan packages linux)
   #:use-module (guix packages)
   #:use-module (guix git-download)
   #:use-module (gnu packages linux))

@@ -1,4 +1,4 @@
-(define-module (franesio packages emacs-xyz)
+(define-module (efimerspan packages emacs-xyz)
   #:use-module (guix packages)
   #:use-module (guix build-system emacs)
   #:use-module (guix download)

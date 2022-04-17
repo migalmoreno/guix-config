@@ -1,4 +1,4 @@
-(define-module (franesio packages python-xyz)
+(define-module (efimerspan packages python-xyz)
   #:use-module (guix packages)
   #:use-module (guix build-system)
   #:use-module (guix build-system trivial)
