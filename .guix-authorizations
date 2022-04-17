@@ -1,5 +1,5 @@
 ;;; -*- mode: scheme; -*-
 (authorizations
  (version 0)
- (("0E5C 5D11 59DF D6CF F6BC  1FA9 C1E4 192C 0B23 87D0")
-  (name "efimerspan")))
+ (("0E5C 5D11 59DF D6CF F6BC  1FA9 C1E4 192C 0B23 87D0"
+   (name "efimerspan"))))
