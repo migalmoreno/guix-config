@@ -2,10 +2,9 @@
 (channel
  (version 0)
  (keyring-reference "keyring")
- (url "https://github.com/efimerspan/guix-channel.git")
  (dependencies
   (channel
-   (name 'rde)
+   (name rde)
    (url "https://git.sr.ht/~abcdw/rde")
    (introduction
     (make-channel-introduction
