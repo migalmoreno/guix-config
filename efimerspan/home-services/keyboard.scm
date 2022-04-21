@@ -8,8 +8,7 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (ice-9 match)
-  #:export (home-qmk-service-type
-            home-xmodmap-service-type
+  #:export (home-xmodmap-service-type
             home-xmodmap-configuration))
 
 (define-configuration/no-serialization home-xmodmap-configuration
