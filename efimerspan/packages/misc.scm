@@ -1,5 +1,5 @@
 (define-module (efimerspan packages misc)
-  #:use-module (gnu build-system trivial))
+  #:use-module (guix build-system trivial))
 
 (define-public emacs-meditate-logo
   (package

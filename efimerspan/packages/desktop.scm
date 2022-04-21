@@ -1,7 +1,7 @@
 (define-module (efimerspan packages desktop)
   #:use-module (efimerspan packages python-xyz)
   #:use-module (guix packages)
-  #:use-module (gnu build-system gnu)
+  #:use-module (guix build-system gnu)
   #:use-module (guix git-download)
   #:use-module ((guix licenses) #:prefix license:))
 
