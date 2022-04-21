@@ -3,6 +3,8 @@
   #:use-module (guix packages)
   #:use-module (guix build-system gnu)
   #:use-module (guix git-download)
+  #:use-module (gnu packages xorg)
+  #:use-module (gnu packages image)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public bibata-cursor-theme

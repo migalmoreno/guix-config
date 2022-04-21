@@ -6,11 +6,16 @@
   #:use-module (guix git-download)
   #:use-module (guix download)
   #:use-module (gnu packages mail)
+  #:use-module (gnu packages check)
   #:use-module (gnu packages protobuf)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
+  #:use-module (gnu packages python-web)
+  #:use-module (gnu packages python-crypto)
   #:use-module (gnu packages image)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages gnupg)
   #:use-module (guix gexp)
   #:use-module ((guix licenses) #:prefix license:))
 
@@ -74,7 +79,7 @@ using industry standard OAuth2 and OpenID Connect.")
          (sha256
           (base32 "09fhhr6yhnrdp2jx14dryk8g9krn1dn13y1ycylc5qvvvrvfd5la"))))
       (propagated-inputs
-       (list mbsync python-pyxdg python-gnupg python-msal))
+       (list isync python-pyxdg python-gnupg python-msal))
       (build-system trivial-build-system)
       (synopsis "XOauth2 compatible O365 token fetcher.")
       (description "This tool can be used to fetch oauth2 tokens from the Microsoft
