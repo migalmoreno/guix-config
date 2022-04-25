@@ -48,7 +48,7 @@
       (format #f "~a = ~a\n" name value)))
 
   (list
-   `("config/pantalaimon/pantalaimon.conf"
+   `("pantalaimon/pantalaimon.conf"
      ,(mixed-text-file
        "pantalaimon.conf"
        (generic-serialize-ini-config
@@ -64,7 +64,7 @@
    (extensions
     (list
      (service-extension
-      home-files-service-type
+      home-xdg-configuration-files-service-type
       add-pantalaimon-configuration)
       (service-extension
        home-profile-service-type

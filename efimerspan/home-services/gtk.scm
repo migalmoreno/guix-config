@@ -52,13 +52,13 @@
       (e e)))
 
   (list
-   `("config/gtk-3.0/settings.ini"
+   `("gtk-3.0/settings.ini"
      ,(mixed-text-file
        "settings.ini"
        (generic-serialize-ini-config
         #:serialize-field serialize-field
         #:fields (home-gtk-configuration-settings config))))
-   `("config/gtk-3.0/gtk.css"
+   `("gtk-3.0/gtk.css"
      ,(mixed-text-file
        "gtk.css"
        (string-join (map serialize-block (home-gtk-configuration-theme config)) "\n")))))
@@ -69,7 +69,7 @@
    (extensions
     (list
      (service-extension
-      home-files-service-type
+      home-xdg-configuration-files-service-type
       add-gtk-settings)))
    (description "Configure GTK settings and theme.")
    (default-value (home-gtk-configuration))))
