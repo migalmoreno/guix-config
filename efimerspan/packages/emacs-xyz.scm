@@ -71,6 +71,27 @@ and easily switch to and manipulate them.")
 IPC interface.")
     (license license:gpl3+)))
 
+(define-public emacs-mpv-next
+  (let ((branch "feature-listing-commands")
+        (commit "03ca4a6700f5ffb729a0e6f4e636e1ef5f670238"))
+    (package
+      (inherit emacs-mpv)
+      (name "emacs-mpv-next")
+      (version (git-version "1" branch commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://github.com/efimerspan/mpv.el")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "11xvkjna8ysir8h3pv4ayhb07qwxiz22p9v387abh8l7pa0wrm5y"))))
+      (propagated-inputs
+       (modify-inputs (package-inputs emacs-mpv)
+         (append emacs-consult))))))
+
 (define-public emacs-calc-currency
   (let ((commit "7021d892ef38b01b875082aba4bae2517ce47ae6")
         (revision "0"))
