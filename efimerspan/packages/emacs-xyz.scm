@@ -9,7 +9,7 @@
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-fdroid
-  (let ((commit "e864df19c29c223cfdcbf5ffbfa902d8c230015d")
+  (let ((commit "2b1b198644241d4fb3fa")
         (revision "0"))
     (package
       (name "emacs-fdroid")
@@ -23,7 +23,7 @@
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "02vb9z8908iajm9n117vdyqs9nkijn1jpl0z253fjpyn1481ksh5"))))
+          (base32 "0r27pxyaz10v98hskfwfyjvdzfh77n9g667cdsv6cx3vql692w5s"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-consult emacs-embark))
