@@ -7,7 +7,7 @@
   #:use-module (guix packages))
 
 (define-public nyxt-next
-  (let ((commit "8ba300a668adc2d99aae743f3a3c0ace0a6d6b51")
+  (let ((commit "363b407e7e4e3201c8346db9c94d8bb1f4d85fa5")
         (revision "2"))
     (package
       (inherit nyxt)
@@ -21,7 +21,7 @@
          (file-name (git-file-name "nyxt" version))
          (sha256
           (base32
-           "12j8smr7zc17dg10885bm94an31fx82z0wwy7lrv668hnmdx9xv8"))))
+           "12z3s1jcdhnalxwkridhfhg4rayz0rs51cyagzk7f0ximkw7ji5s"))))
       (inputs
        (modify-inputs (package-inputs nyxt)
          (prepend sbcl-cl-gopher sbcl-nhooks sbcl-phos sbcl-cl-tld sbcl-nfiles))))))
