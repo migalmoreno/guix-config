@@ -1,4 +1,5 @@
 (define-module (efimerspan home-services gtk)
+  #:use-module (rde serializers css)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu services configuration)
@@ -36,21 +37,6 @@
           (value (serialize-term val)))
       (format #f "~a = ~a\n" name value)))
 
-  (define serialize-rule
-    (match-lambda
-      ((attr . val)
-       (format #f "  ~a: ~a;" attr val))))
-
-  (define serialize-block
-    (match-lambda
-      ((selector (? list? rules))
-       (string-append
-        (maybe-object->string selector)
-        " {\n"
-        (string-join (interpose (map serialize-rule rules) "\n" 'suffix))
-        "}"))
-      (e e)))
-
   (list
    `("gtk-3.0/settings.ini"
      ,(mixed-text-file
@@ -59,9 +45,9 @@
         #:serialize-field serialize-field
         #:fields (home-gtk-configuration-settings config))))
    `("gtk-3.0/gtk.css"
-     ,(mixed-text-file
-       "gtk.css"
-       (string-join (map serialize-block (home-gtk-configuration-theme config)) "\n")))))
+     ,(apply mixed-text-file
+             "gtk.css"
+             (serialize-css-config (home-gtk-configuration-theme config))))))
 
 (define home-gtk-service-type
   (service-type
