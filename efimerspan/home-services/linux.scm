@@ -64,7 +64,7 @@
 
 (define home-pipewire-service-type
   (service-type
-   (name 'pipewire)
+   (name 'home-pipewire)
    (extensions
     (list
      (service-extension
