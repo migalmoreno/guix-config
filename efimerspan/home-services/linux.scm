@@ -21,8 +21,8 @@
 (define (pipewire-shepherd-service config)
   (list
    (shepherd-service
-    (provision '(pipewire))
-    (requirement '(dbus-home))
+    (provision '(home-pipewire))
+    (requirement '(home-dbus))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
               (list #$(file-append (home-pipewire-configuration-package config) "/bin/pipewire"))
@@ -30,8 +30,8 @@
               (append (list "DISABLE_RTKIT=1")
                       (default-environment-variables)))))
    (shepherd-service
-    (provision '(wireplumber))
-    (requirement '(pipewire))
+    (provision '(home-wireplumber))
+    (requirement '(home-pipewire))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
               (list #$(file-append wireplumber "/bin/wireplumber"))
@@ -44,8 +44,8 @@
               (append (list "DISABLE_RTKIT=1")
                       (default-environment-variables)))))
    (shepherd-service
-    (provision '(pipewire-pulse))
-    (requirement '(pipewire))
+    (provision '(home-pipewire-pulse))
+    (requirement '(home-pipewire))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
               (list #$(file-append (home-pipewire-configuration-package config) "/bin/pipewire-pulse"))

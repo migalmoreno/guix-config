@@ -1,8 +1,11 @@
 (define-module (efimerspan home-services lisp)
   #:use-module (gnu services configuration)
   #:use-module (gnu services)
+  #:use-module (guix packages)
+  #:use-module (guix gexp)
   #:use-module (gnu home services)
-  #:use-module (efimerspan home-services web-browsers)
+  #:use-module (gnu packages lisp)
+  #:use-module (efimerspan serializers lisp)
   #:export (home-lisp-configuration
             home-lisp-service-type))
 
@@ -23,9 +26,9 @@ The list of expressions will be interposed with \n and everything will end up in
    (lisp-config '())
    "As per @code{slynk-config}, but everything will be placed in @file{sbclrc.lisp}."))
 
-(define (get-lisp-configuration-files config)
+(define (add-lisp-configuration-files config)
   (define (filter-fields field)
-    (filter-configuration-fields home-nyxt-configuration-fields
+    (filter-configuration-fields home-lisp-configuration-fields
                                  (list field)))
 
   (define (serialize-field field)
@@ -50,9 +53,6 @@ The list of expressions will be interposed with \n and everything will end up in
     (file-if-not-empty 'sbclrc-lisp)
     (file-if-not-empty 'slynk-lisp))))
 
-(define (add-lisp-configuration config)
-  (get-lisp-configuration-files config))
-
 (define (lisp-profile-service config)
   (list (home-lisp-configuration-package config)))
 
@@ -62,10 +62,11 @@ The list of expressions will be interposed with \n and everything will end up in
    (extensions
     (list
      (service-extension
-      home-profile-service-type)
+      home-profile-service-type
+      lisp-profile-service)
      (service-extension
       home-files-service-type
-      add-lisp-configuration)))
+      add-lisp-configuration-files)))
    (default-value (home-lisp-configuration))
    (description "Configures Lisp-related settings.")))
 
@@ -73,4 +74,4 @@ The list of expressions will be interposed with \n and everything will end up in
   (generate-documentation
    `((home-lisp-configuration
       ,home-lisp-configuration-fields))
-   ,home-lisp-configuration))
+   'home-lisp-configuration))

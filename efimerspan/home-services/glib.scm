@@ -5,13 +5,13 @@
   #:use-module (gnu home services shepherd)
   #:use-module (guix gexp)
   #:use-module (gnu packages glib)
-  #:export (dbus-home
+  #:export (home-dbus
             home-dbus-service-type))
 
 (define (dbus-shepherd-service config)
   (list
    (shepherd-service
-    (provision '(dbus-home))
+    (provision '(home-dbus))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor (list
                                          #$(file-append dbus "/bin/dbus-daemon")

@@ -7,16 +7,16 @@
 
 (define lisp-config? list?)
 (define (lisp-serialize field-name val)
-  (define (serialize-list-element)
-    (match-lambda
-      ((? gexp? e) e)
-      (e
-       #~(string-trim-right
-          (with-output-to-string
-            (lambda ()
-              ((@ (ice-9 pretty-print) pretty-print)
-               '#$e #:max-expr-width 79)))
-          #\newline))))
+  (define (serialize-list-element elem)
+    (cond
+     ((gexp? elem) elem)
+     (else
+      #~(string-trim-right
+         (with-output-to-string
+           (lambda ()
+             ((@ (ice-9 pretty-print) pretty-print)
+              '#$elem #:max-expr-width 79)))
+         #\newline))))
 
   #~(string-append
      #$@(interpose

@@ -2,13 +2,19 @@
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home-services-utils)
+  #:use-module (gnu home services utils)
   #:use-module (guix packages)
-  #:use-module (gnu packages scheme)
+  #:use-module (gnu packages guile)
   #:use-module (gnu home services)
   #:use-module (guix gexp)
+  #:use-module (ice-9 match)
   #:use-module (efimerspan serializers lisp)
-  #:export (home-guile-service-type
+  #:export (home-guix-service-type
+            home-guix-configuration
+            home-guile-service-type
             home-guile-configuration))
+
+(define serialize-alist empty-serializer)
 
 (define-configuration home-guix-configuration
   (channels
@@ -21,7 +27,7 @@ in @file{channels.scm}.")
 automatically be prepended with ``@code{GUIX_}'', meaning that @code{profile} will result
 in ``@code{GUIX_PROFILE}''."))
 
-(define (add-guile-environment-variables config)
+(define (add-guix-environment-variables config)
   (define (serialize-field field-name val)
     (cons
      (string-append "GUIX_"
@@ -34,9 +40,9 @@ in ``@code{GUIX_PROFILE}''."))
          ((car . cdr) (serialize-field car cdr)))
        (home-guix-configuration-envs config)))
 
-(define (get-guix-configuration-files config)
+(define (add-guix-configuration-files config)
   (define (filter-fields field)
-    (filter-configuration-fields home-nyxt-configuration-fields
+    (filter-configuration-fields home-guix-configuration-fields
                                  (list field)))
 
   (define (serialize-field field)
@@ -51,9 +57,6 @@ in ``@code{GUIX_PROFILE}''."))
         "channels.scm"
         (serialize-field 'channels))))))
 
-(define (add-guix-configuration config)
-  (get-lisp-configuration-files config))
-
 (define home-guix-service-type
   (service-type
    (name 'home-guix)
@@ -61,7 +64,7 @@ in ``@code{GUIX_PROFILE}''."))
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-guix-configuration)
+      add-guix-configuration-files)
      (service-extension
       home-environment-variables-service-type
       add-guix-environment-variables)))
@@ -100,9 +103,9 @@ in ``@code{GUILE_LOAD_PATH}''."))
          ((car . cdr) (serialize-field car cdr)))
        (home-guile-configuration-envs config)))
 
-(define (get-guile-configuration-files config)
+(define (add-guile-configuration-files config)
   (define (filter-fields field)
-    (filter-configuration-fields home-nyxt-configuration-fields
+    (filter-configuration-fields home-guile-configuration-fields
                                  (list field)))
 
   (define (serialize-field field)
@@ -117,9 +120,6 @@ in ``@code{GUILE_LOAD_PATH}''."))
         ".guile"
         (serialize-field 'config))))))
 
-(define (add-guile-configuration config)
-  (get-guile-configuration config))
-
 (define (guile-profile-service config)
   (list (home-guile-configuration-package config)))
 
@@ -133,7 +133,7 @@ in ``@code{GUILE_LOAD_PATH}''."))
       guile-profile-service)
      (service-extension
       home-files-service-type
-      add-guile-configuration)
+      add-guile-configuration-files)
      (service-extension
       home-environment-variables-service-type
       add-guile-environment-variables)))

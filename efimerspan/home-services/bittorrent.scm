@@ -4,8 +4,11 @@
   #:use-module (guix packages)
   #:use-module (gnu home services)
   #:use-module (guix gexp)
+  #:use-module (gnu packages bittorrent)
   #:use-module (gnu services shepherd)
-  #:use-module (gnu home services shepherd))
+  #:use-module (gnu home services shepherd)
+  #:export (home-transmission-configuration
+            home-transmission-service-type))
 
 (define-configuration/no-serialization home-transmission-configuration
   (package
@@ -15,7 +18,7 @@
 (define (transmission-shepherd-service config)
   (list
    (shepherd-service
-    (provision '(transmission))
+    (provision '(home-transmission))
     (start #~(make-forkexec-constructor
               (list #$(file-append (home-transmission-configuration-package config)
                                    "/bin/transmission-daemon")

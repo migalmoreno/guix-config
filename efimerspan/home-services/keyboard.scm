@@ -14,39 +14,56 @@
             home-qmk-service-type
             home-qmk-configuration))
 
-(define-configuration home-qmk-configuration
+(define-configuration/no-serialization home-qmk-configuration
   (config
-   (qmk-config '())
+   (alist '())
    "Alist of key and value pairs for the @code{QMK} configuration file."))
 
-(define (serialize-qmk-config config)
+(define (add-qmk-configuration config)
   (define (serialize-field key val)
     (let ((val (match val
                  ((? list? v) (string-join (map maybe-object->string val)))
                  ((? boolean? v) (boolean->true-or-false v))
                  (v v))))
-      (format #f "~a = ~\n" key val)))
+      (format #f "~a = ~a\n" key val)))
 
   `(("qmk/qmk.ini"
-     (mixed-text-file
-      "qmk/qmk.ini"
-      (generic-serialize-init-config
-       #:serialize-field serialize-field
-       #:fields (home-qmk-configuration-config config))))))
+     ,(mixed-text-file
+       "qmk/qmk.ini"
+       (generic-serialize-init-config
+        #:serialize-field serialize-field
+        #:fields (home-qmk-configuration-config config))))))
 
-(define (add-qmk-config config)
-  (serialize-qmk-config config))
-
-(define qmk-service-type
+(define home-qmk-service-type
   (service-type
    (name 'home-qmk)
    (extensions
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-qmk-configuration)))))
+      add-qmk-configuration)))
+   (default-value (home-qmk-configuration))
+   (description "Sets up the QMK Firmware configuration.")))
 
-(define (serialize-xmodmap-config field-name val)
+(define-configuration/no-serialization home-xmodmap-configuration
+  (package
+    (package xmodmap)
+    "The xmodmap package to use.")
+  (config
+   (alist '())
+   "Association list of key and value pairs for the @code{xmodmap} configuration file."))
+
+(define (xmodmap-shepherd-service config)
+  (list
+   (shepherd-service
+    (provision '(home-xmodmap))
+    (start #~(make-system-constructor
+              (string-join
+               (list #$(file-append (home-xmodmap-configuration-package config) "/bin/xmodmap")
+                     #$(home-xmodmap-file config)))))
+    (one-shot? #t))))
+
+(define (get-xmodmap-configuration field-name val)
   (define serialize-term
     (match-lambda
       ((? symbol? e) (symbol->string e))
@@ -75,30 +92,14 @@
       (key (string-append (serialize-term key)))))
 
   #~(string-append
-     #$@(interpose (map serialize-field val) "\n" 'suffix)))
-
-(define-configuration home-xmodmap-configuration
-  (package
-    (package xmodmap)
-    "The xmodmap package to use.")
-  (config
-   (xmodmap-config'())
-   "Association list of key and value pairs for the @code{xmodmap} configuration file."))
-
-(define (xmodmap-shepherd-service config)
-  (list
-   (shepherd-service
-    (provision '(home-xmodmap))
-    (start #~(make-system-constructor
-              (string-join
-               (list #$(file-append (home-xmodmap-configuration-package config) "/bin/xmodmap")
-                     #$(home-xmodmap-file config)))))
-    (one-shot? #t))))
+     #$@(interpose
+         (map serialize-field val)
+         "\n" 'suffix)))
 
 (define (home-xmodmap-file config)
   (mixed-text-file
        "config"
-       (serialize-xmodmap-config #f (home-xmodmap-configuration-config config))))
+       (get-xmodmap-configuration #f (home-xmodmap-configuration-config config))))
 
 (define (add-xmodmap-configuration config)
   (filter (compose not null?)

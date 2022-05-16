@@ -1,10 +1,13 @@
-(define-module (efimerspan home-services unclutter)
+(define-module (efimerspan home-services xorg)
+  #:use-module (efimerspan home-services glib)
   #:use-module (gnu services configuration)
   #:use-module (gnu packages)
+  #:use-module (guix packages)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu home services shepherd)
+  #:use-module (guix gexp)
   #:export (home-unclutter-service-type
             home-unclutter-configuration))
 
@@ -17,7 +20,7 @@
   (list
    (shepherd-service
     (provision '(home-unclutter))
-    (requirement '(dbus-home))
+    (requirement '(home-dbus))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
               (list
@@ -30,6 +33,6 @@
    (extensions
     (list
      (service-extension home-shepherd-service-type
-                        unclutter-shepher-service)))
+                        unclutter-shepherd-service)))
    (default-value (home-unclutter-configuration))
    (description "Sets up an unclutter daemon.")))

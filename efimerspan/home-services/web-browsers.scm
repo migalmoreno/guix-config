@@ -8,19 +8,13 @@
   #:use-module (guix gexp)
   #:use-module (gnu services shepherd)
   #:use-module (gnu home services shepherd)
-  #:use-module (ice-9 pretty-print)
+  #:use-module (srfi srfi-1)
   #:export (home-nyxt-configuration
             home-nyxt-service-type
             nyxt-configuration-service))
 
-(define* (nyxt-configuration-service #:optional (lisp-expressions '())
-                                     #:key (lisp-packages '()))
-  (simple-service
-   (gensym "nyxt-configuration-service")
-   home-nyxt-service-type
-   (home-nyxt-extension
-    (init-lisp `(,@lisp-expressions))
-    (lisp-packages lisp-packages))))
+(define packages? (list-of package?))
+(define serialize-packages empty-serializer)
 
 (define-configuration home-nyxt-configuration
   (package
@@ -39,7 +33,8 @@ Gexps should be strings and their value will be appended to the resulting Lisp f
 The list of expressions will be interposed with \n and everything will end up in the
 @file{init.lisp}.")
   (auto-mode-rules-lisp
-   (lisp-config '())))
+   (lisp-config '())
+   "List of @code{auto-mode} rules. See @code{init-lisp} for information on the format."))
 
 (define-configuration home-nyxt-extension
   (lisp-packages
@@ -74,11 +69,11 @@ home-nyxt-service-type for more information."))
 
   (filter
    (compose not null?)
-   (map (lamda (file)
-               (file-if-not-empty file))
+   (map (lambda (file)
+          (file-if-not-empty file))
         files)))
 
-(define (add-nyxt-config-configuration config)
+(define (add-nyxt-init-configuration config)
   (get-nyxt-configuration-files config (list 'init-lisp)))
 
 (define (add-nyxt-data-configuration config)
@@ -109,7 +104,7 @@ home-nyxt-service-type for more information."))
       nyxt-profile-service)
      (service-extension
       home-xdg-configuration-files-service-type
-      add-nyxt-configuration)
+      add-nyxt-init-configuration)
      (service-extension
       home-xdg-data-files-service-type
       add-nyxt-data-configuration)))
@@ -123,3 +118,12 @@ home-nyxt-service-type for more information."))
    `((home-nyxt-configuration
       ,home-nyxt-configuration-fields))
    'home-nyxt-configuration))
+
+(define* (nyxt-configuration-service #:optional (lisp-expressions '())
+                                     #:key (lisp-packages '()))
+  (simple-service
+   (gensym "nyxt-configuration-service")
+   home-nyxt-service-type
+   (home-nyxt-extension
+    (init-lisp `(,@lisp-expressions))
+    (lisp-packages lisp-packages))))
