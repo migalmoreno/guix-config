@@ -10,7 +10,7 @@
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-elibs
-  (let ((commit "b6874dcc2dc41939070839dcf3417838cc10e240")
+  (let ((commit "290c7e7efa8fa9897081cc3644dc61c03bd911f4")
         (revision "0"))
     (package
       (name "emacs-elibs")
@@ -24,7 +24,7 @@
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "1fiikzdf6ssh02w7hiycamz4m7dvvs4qm1ynzhknkrxywq398spn"))))
+          (base32 "1b0by59j6q21gndk24rimn09rj941ihj37r6y16glvpfprnwjz71"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-consult
