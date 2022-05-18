@@ -30,7 +30,7 @@
   `(("qmk/qmk.ini"
      ,(mixed-text-file
        "qmk/qmk.ini"
-       (generic-serialize-init-config
+       (generic-serialize-ini-config
         #:serialize-field serialize-field
         #:fields (home-qmk-configuration-config config))))))
 
