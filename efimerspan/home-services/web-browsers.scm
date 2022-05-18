@@ -45,7 +45,7 @@ The list of expressions will be interposed with \n and everything will end up in
    "List of expressions to add to @file{init-lisp}. See
 home-nyxt-service-type for more information."))
 
-(define (get-nyxt-configuration-files config)
+(define (add-nyxt-configuration-files config)
   (define (filter-fields field)
     (filter-configuration-fields home-nyxt-configuration-fields
                                  (list field)))
@@ -57,14 +57,10 @@ home-nyxt-service-type for more information."))
 
   (filter
    (compose not null?)
-   `((".config/nyxt/init.lisp"
+   `(("nyxt/init.lisp"
       ,(mixed-text-file
-        "init.lisp"
-        (serialize-field 'init-lisp)))
-     (".local/share/auto-mode-rules.lisp"
-      ,(mixed-text-file
-        "auto-mode-rules.lisp"
-        (serialize-field 'auto-mode-rules-lisp))))))
+        "init-lisp"
+        (serialize-field 'init-lisp))))))
 
 (define (home-nyxt-extensions original-config extension-configs)
   (home-nyxt-configuration
@@ -90,7 +86,7 @@ home-nyxt-service-type for more information."))
       home-profile-service-type
       nyxt-profile-service)
      (service-extension
-      home-files-service-type
+      home-xdg-configuration-files-service-type
       add-nyxt-configuration-files)))
    (compose identity)
    (extend home-nyxt-extensions)
