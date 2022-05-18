@@ -117,7 +117,7 @@ in ``@code{GUILE_LOAD_PATH}''."))
    (compose not null?)
    `((".guile"
       ,(mixed-text-file
-        ".guile"
+        "guile"
         (serialize-field 'config))))))
 
 (define (guile-profile-service config)

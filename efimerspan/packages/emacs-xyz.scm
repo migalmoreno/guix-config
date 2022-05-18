@@ -6,7 +6,54 @@
   #:use-module (guix git-download)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages mail)
+  #:use-module (gnu packages ocaml)
   #:use-module ((guix licenses) #:prefix license:))
+
+(define-public emacs-elibs
+  (let ((commit "b6874dcc2dc41939070839dcf3417838cc10e240")
+        (revision "0"))
+    (package
+      (name "emacs-elibs")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://git.sr.ht/~mt08gh/elibs")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "1fiikzdf6ssh02w7hiycamz4m7dvvs4qm1ynzhknkrxywq398spn"))))
+      (build-system emacs-build-system)
+      (propagated-inputs
+       (list emacs-consult
+             emacs-org
+             emacs-org-roam
+             emacs-org-superstar
+             emacs-geiser
+             emacs-sly
+             emacs-modus-themes
+             emacs-dashboard
+             emacs-pdf-tools
+             emacs-emms
+             emacs-ytdl
+             emacs-mpv-next
+             emacs-tuareg
+             ocaml-merlin
+             emacs-ednc
+             emacs-exwm
+             emacs-webpaste
+             emacs-ement
+             emacs-telega
+             emacs-password-store
+             emacs-dashboard
+             emacs-hexrgb))
+      (home-page "https://git.sr.ht/~mt08gh/elibs")
+      (synopsis "Various Emacs Lisp libraries.")
+      (description "A set of Emacs Lisp libraries to enhance the functionality
+ of some Emacs packages and built-in features.")
+      (license license:gpl3+))))
 
 (define-public emacs-fdroid
   (let ((commit "2b1b198644241d4fb3fa")
