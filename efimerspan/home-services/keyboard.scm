@@ -70,25 +70,12 @@
       ((? number? e) (number->string e))
       (e e)))
 
-  (define (serialize-field entry)
-    (match entry
+  (define serialize-field
+    (match-lambda
       ((key . value)
        (format #f "~a = ~a"
                (serialize-term key)
                (serialize-term value)))
-      (((? list? key) . (? list? value))
-       (format #f "~a = ~a"
-               (string-join (maybe-object->string key))
-               (string-join (maybe-object->string value))))
-      (((? list? key) . value)
-       (format #f "~a = ~a"
-               (string-join (maybe-object->string key))
-               (serialize-term value)))
-      ((key . (? list? value))
-       (format #f "~a = ~a"
-               (serialize-term key)
-               (string-join (maybe-object->string value))))
-      ((? list? key) (string-join (maybe-object->string key)))
       (key (string-append (serialize-term key)))))
 
   #~(string-append

@@ -45,7 +45,7 @@ The list of expressions will be interposed with \n and everything will end up in
    "List of expressions to add to @file{init-lisp}. See
 home-nyxt-service-type for more information."))
 
-(define (get-nyxt-configuration-files config files)
+(define (get-nyxt-configuration-files config)
   (define (filter-fields field)
     (filter-configuration-fields home-nyxt-configuration-fields
                                  (list field)))
@@ -55,29 +55,16 @@ home-nyxt-service-type for more information."))
      config
      (filter-fields field)))
 
-  (define (file-if-not-empty field)
-    (let ((filename (string-append
-                     "nyxt/"
-                     (string-drop-right (symbol->string field) 5)
-                     ".lisp"))
-          (field-obj (car (filter-fields field))))
-      (when (not (null? ((configuration-field-getter field-obj) config)))
-        `(,filename
-          ,(mixed-text-file
-            filename
-            (serialize-field field))))))
-
   (filter
    (compose not null?)
-   (map (lambda (file)
-          (file-if-not-empty file))
-        files)))
-
-(define (add-nyxt-init-configuration config)
-  (get-nyxt-configuration-files config (list 'init-lisp)))
-
-(define (add-nyxt-data-configuration config)
-  (get-nyxt-configuration-files config (list 'auto-mode-rules-lisp)))
+   `((".config/nyxt/init.lisp"
+      ,(mixed-text-file
+        "init.lisp"
+        (serialize-field 'init-lisp)))
+     (".local/share/auto-mode-rules.lisp"
+      ,(mixed-text-file
+        "auto-mode-rules.lisp"
+        (serialize-field 'auto-mode-rules-lisp))))))
 
 (define (home-nyxt-extensions original-config extension-configs)
   (home-nyxt-configuration
@@ -89,7 +76,7 @@ home-nyxt-service-type for more information."))
    (init-lisp
     (append (home-nyxt-configuration-init-lisp original-config)
             (append-map
-             home-nyxt-extension-lisp-packages extension-configs)))))
+             home-nyxt-extension-init-lisp extension-configs)))))
 
 (define (nyxt-profile-service config)
   (list (home-nyxt-configuration-package config)))
@@ -103,11 +90,8 @@ home-nyxt-service-type for more information."))
       home-profile-service-type
       nyxt-profile-service)
      (service-extension
-      home-xdg-configuration-files-service-type
-      add-nyxt-init-configuration)
-     (service-extension
-      home-xdg-data-files-service-type
-      add-nyxt-data-configuration)))
+      home-files-service-type
+      add-nyxt-configuration-files)))
    (compose identity)
    (extend home-nyxt-extensions)
    (default-value (home-nyxt-configuration))
