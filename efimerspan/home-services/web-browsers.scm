@@ -57,10 +57,14 @@ home-nyxt-service-type for more information."))
 
   (filter
    (compose not null?)
-   `(("nyxt/init.lisp"
+   `((".config/nyxt/init.lisp"
       ,(mixed-text-file
-        "init-lisp"
-        (serialize-field 'init-lisp))))))
+        "init.lisp"
+        (serialize-field 'init-lisp)))
+     (".local/share/nyxt/auto-mode-rules.lisp"
+      ,(mixed-text-file
+        "auto-mode-rules.lisp"
+        (serialize-field 'auto-mode-rules-lisp))))))
 
 (define (home-nyxt-extensions original-config extension-configs)
   (home-nyxt-configuration
@@ -86,7 +90,7 @@ home-nyxt-service-type for more information."))
       home-profile-service-type
       nyxt-profile-service)
      (service-extension
-      home-xdg-configuration-files-service-type
+      home-files-service-type
       add-nyxt-configuration-files)))
    (compose identity)
    (extend home-nyxt-extensions)
