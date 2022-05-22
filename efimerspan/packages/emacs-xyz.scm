@@ -36,6 +36,7 @@
              emacs-modus-themes
              emacs-dashboard
              emacs-pdf-tools
+             emacs-erc-status-sidebar
              emacs-emms
              emacs-ytdl
              emacs-mpv-next
