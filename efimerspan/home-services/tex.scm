@@ -1,9 +1,11 @@
 (define-module (efimerspan home-services tex)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home services utils)
   #:use-module (gnu services configuration)
   #:use-module (gnu packages tex)
   #:use-module (guix packages)
+  #:use-module (ice-9 match)
   #:export (home-tex-service-type
             home-tex-configuration))
 
