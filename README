@@ -9,7 +9,7 @@ This is my personal [[https://guix.gnu.org/][GNU Guix]] channel. You can add it 
   (url "https://github.com/efimerspan/guix-channel")
   (introduction
    (make-channel-introduction
-    "45254186195e07ae78bdb5e02cc2aa0d8a469d9f"
+    "64db479cafedfaca57776f6e089c7d022edf675d"
     (openpgp-fingerprint
      "0E5C 5D11 59DF D6CF F6BC  1FA9 C1E4 192C 0B23 87D0"))))
  %default-channels)
