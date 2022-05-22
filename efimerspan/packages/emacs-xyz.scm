@@ -120,7 +120,7 @@ IPC interface.")
 
 (define-public emacs-mpv-next
   (let ((branch "feature-listing-commands")
-        (commit "03ca4a6700f5ffb729a0e6f4e636e1ef5f670238"))
+        (commit "331aeb6e266447e9bc4195e2858123ac76d3fd89"))
     (package
       (inherit emacs-mpv)
       (name "emacs-mpv-next")
@@ -134,7 +134,7 @@ IPC interface.")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "11xvkjna8ysir8h3pv4ayhb07qwxiz22p9v387abh8l7pa0wrm5y"))))
+          (base32 "0m8408xpbbbvs3isbws548yxdykz8qgc73hbna0yan694zx4a30s"))))
       (propagated-inputs
        (modify-inputs (package-inputs emacs-mpv)
          (append emacs-consult))))))
