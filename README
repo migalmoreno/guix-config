@@ -6,7 +6,7 @@ This is my personal [[https://guix.gnu.org/][GNU Guix]] channel. You can add it 
 (cons*
  (channel
   (name 'efimerspan)
-  (url "https://github.com/efimerspan/guix-channel.git")
+  (url "https://github.com/efimerspan/guix-channel")
   (introduction
    (make-channel-introduction
     "45254186195e07ae78bdb5e02cc2aa0d8a469d9f"
