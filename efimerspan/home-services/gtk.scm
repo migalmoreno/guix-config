@@ -11,7 +11,9 @@
             gtk-theme-light-p))
 
 (define (gtk-theme-light-p)
-  (string= (getenv "GTK_THEME") ":light"))
+  (if (getenv "GTK_THEME")
+      (string= (getenv "GTK_THEME") ":light")
+      #t))
 
 (define-configuration/no-serialization home-gtk-configuration
   (settings
