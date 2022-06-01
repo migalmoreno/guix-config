@@ -15,12 +15,21 @@
             home-guile-configuration))
 
 (define serialize-alist empty-serializer)
+(define (serialize-list field-name val)
+  #~(string-append
+     #$@(interpose
+         (map maybe-object->string val)
+         "\n" 'suffix)))
 
 (define-configuration home-guix-configuration
   (channels
    (lisp-config '())
    "List of expressions as per @{lisp-config} that will place Guix's channel file
 in @file{channels.scm}.")
+  (shell-authorized-directories
+   (list '())
+   "List of directory entries where a guix shell command can load a @file{guix.scm} or
+@file{manifest.scm}.")
   (envs
    (alist '())
    "Association list of environment variables to set for Guix. The key of the pair will
@@ -55,7 +64,11 @@ in ``@code{GUIX_PROFILE}''."))
    `(("guix/channels.scm"
       ,(mixed-text-file
         "channels.scm"
-        (serialize-field 'channels))))))
+        (serialize-field 'channels)))
+     ("guix/shell-authorized-directories"
+      ,(mixed-text-file
+        "shell-authorized-directories"
+        (serialize-field 'shell-authorized-directories))))))
 
 (define home-guix-service-type
   (service-type
