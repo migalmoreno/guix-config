@@ -7,6 +7,30 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module ((guix licenses) #:prefix license:))
 
+(define-public emacs-with-nyxt
+  (let ((commit "7e5d14bbfedebc72af5ffdc41912cbc339de59e6")
+        (revision "0"))
+    (package
+      (name "emacs-with-nyxt")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://github.com/ag91/emacs-with-nyxt")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256 (base32 "1bkaz7jqlj4w9qx379picyq3di64x66gwwywq7i81yx7x1z9m34z"))))
+      (build-system emacs-build-system)
+      (propagated-inputs
+       (list emacs-s))
+      (home-page "https://github.com/ag91/emacs-with-nyxt")
+      (synopsis "Some code to make Emacs interact with Nyxt.")
+      (description "This is some little hack to make Emacs command Nyxt. In particular
+this provides a function to browser URLs via Nyxt run via Slime.")
+      (license license:bsd-3))))
+
 (define-public emacs-bufler
   (package
     (name "emacs-bufler")
