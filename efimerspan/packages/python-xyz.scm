@@ -12,8 +12,12 @@
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-crypto)
+  #:use-module (gnu packages python-build)
   #:use-module (gnu packages image)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages libffi)
+  #:use-module (gnu packages xml)
+  #:use-module (gnu packages time)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages gnupg)
   #:use-module (guix gexp)
@@ -126,6 +130,65 @@ install postmarketOS.")
 provides, this package includes an interface to the BSDIFF4-format, command line interfaces via bsdiff4
 and bspatch4 and tests.")
     (license license:bsd-4)))
+
+(define-public python-whoogle-search
+  (package
+    (name "python-whoogle-search")
+    (version "0.7.2")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "whoogle-search" version))
+       (sha256
+        (base32 "1b8hx0pjvzkilrhsr6i2dn6nccxk55vhc2jq6h3bc7ll8jiqgna4"))))
+    (build-system python-build-system)
+    (arguments
+     (list
+      #:phases
+      #~(modify-phases %standard-phases
+          (delete 'check))))
+    (propagated-inputs
+     (list
+      python-attrs
+      python-beautifulsoup4
+      python-cachelib
+      python-certifi
+      python-cffi
+      python-chardet
+      python-click
+      python-cryptography
+      python-cssutils
+      python-defusedxml
+      python-flask
+      python-flask-session
+      python-idna
+      python-itsdangerous
+      python-jinja2
+      python-markupsafe
+      python-more-itertools
+      python-packaging
+      python-pluggy
+      python-py
+      python-pycodestyle
+      python-pycparser
+      python-pyopenssl
+      python-pyparsing
+      python-pysocks
+      python-pytest
+      python-dateutil
+      python-requests
+      python-soupsieve
+      python-stem
+      python-urllib3
+      python-waitress
+      python-wcwidth
+      python-werkzeug
+      python-dotenv))
+    (home-page "https://github.com/benbusby/whoogle-search")
+    (synopsis "A self-hosted, ad-free, privacy-respecting metasearch engine.")
+    (description "Get Google results, but without any ads, javascript, AMP links,
+cookies, or IP address tracking.")
+    (license license:expat)))
 
 (define-public python-payload-dumper
   (let ((commit "60224410cbe9e937cc158d5eb376b56d8b40e12b")
