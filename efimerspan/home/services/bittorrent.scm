@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services bittorrent)
+(define-module (efimerspan home services bittorrent)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (guix packages)

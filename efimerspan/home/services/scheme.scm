@@ -1,4 +1,5 @@
-(define-module (efimerspan home-services scheme)
+(define-module (efimerspan home services scheme)
+  #:use-module (efimerspan serializers lisp)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home-services-utils)
@@ -8,7 +9,6 @@
   #:use-module (gnu home services)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:use-module (efimerspan serializers lisp)
   #:export (home-guix-service-type
             home-guix-configuration
             home-guile-service-type

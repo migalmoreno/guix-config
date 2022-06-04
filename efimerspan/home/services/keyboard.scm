@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services keyboard)
+(define-module (efimerspan home services keyboard)
   #:use-module (gnu services)
   #:use-module (gnu packages)
   #:use-module (gnu packages xorg)

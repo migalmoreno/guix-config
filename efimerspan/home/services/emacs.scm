@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services emacs)
+(define-module (efimerspan home services emacs)
   #:use-module (gnu services)
   #:use-module (gnu home-services emacs)
   #:export (elisp-configuration-service))

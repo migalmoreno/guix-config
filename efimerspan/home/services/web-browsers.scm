@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services web-browsers)
+(define-module (efimerspan home services web-browsers)
   #:use-module (efimerspan serializers lisp)
   #:use-module (gnu packages web-browsers)
   #:use-module (gnu services)

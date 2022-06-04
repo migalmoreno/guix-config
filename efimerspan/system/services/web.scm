@@ -1,4 +1,4 @@
-(define-module (efimerspan system-services web)
+(define-module (efimerspan system services web)
   #:use-module (efimerspan packages python-xyz)
   #:use-module (guix gexp)
   #:use-module (guix packages)

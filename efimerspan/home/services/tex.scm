@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services tex)
+(define-module (efimerspan home services tex)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services utils)

@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services gtk)
+(define-module (efimerspan home services gtk)
   #:use-module (rde serializers css)
   #:use-module (gnu services)
   #:use-module (gnu home services)

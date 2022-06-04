@@ -1,5 +1,5 @@
-(define-module (efimerspan home-services linux)
-  #:use-module (efimerspan home-services glib)
+(define-module (efimerspan home services linux)
+  #:use-module (efimerspan home services glib)
   #:use-module (efimerspan packages linux)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)

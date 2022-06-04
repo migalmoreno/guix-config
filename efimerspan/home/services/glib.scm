@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services glib)
+(define-module (efimerspan home services glib)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu services shepherd)
@@ -13,13 +13,14 @@
    (shepherd-service
     (provision '(home-dbus))
     (stop #~(make-kill-destructor))
-    (start #~(make-forkexec-constructor (list
-                                         #$(file-append dbus "/bin/dbus-daemon")
-                                         "--nofork"
-                                         "--session"
-                                         (string-append
-                                          "--address=" "unix:path="
-                                          (getenv "XDG_RUNTIME_DIR") "/bus")))))))
+    (start #~(make-forkexec-constructor
+              (list
+               #$(file-append dbus "/bin/dbus-daemon")
+               "--nofork"
+               "--session"
+               (string-append
+                "--address=" "unix:path="
+                (getenv "XDG_RUNTIME_DIR") "/bus")))))))
 
 (define (dbus-environment-variables-service config)
   `(("DBUS_SESSION_BUS_ADDRESS" . "unix:path=$XDG_RUNTIME_DIR/bus")))

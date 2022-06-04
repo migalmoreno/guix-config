@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services lisp)
+(define-module (efimerspan home services lisp)
   #:use-module (gnu services configuration)
   #:use-module (gnu services)
   #:use-module (guix packages)

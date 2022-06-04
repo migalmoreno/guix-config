@@ -1,4 +1,4 @@
-(define-module (efimerspan home-services matrix)
+(define-module (efimerspan home services matrix)
   #:use-module (gnu services)
   #:use-module (gnu packages)
   #:use-module (gnu home services)
