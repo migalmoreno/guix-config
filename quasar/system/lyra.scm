@@ -132,7 +132,6 @@ EndSection
                                              ,%ddcci-config)))
                      (bluetooth-service #:auto-enable? #t)
                      (service virtlog-service-type)
-                     (service whoogle-service-type)
                      (service libvirt-service-type
                               (libvirt-configuration
                                (unix-sock-group "libvirt")
