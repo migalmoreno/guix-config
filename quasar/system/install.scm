@@ -30,7 +30,7 @@
         (simple-service 'channels
                         etc-service-type
                         `(("channels.scm"
-                           ,(local-file "../../channels.scm")))))
+                           ,(local-file "../../channels")))))
        (operating-system-user-services installation-os)))))
 
 installation-os-nonfree
