@@ -1,6 +1,7 @@
 (define-module (quasar system cygnus)
   #:use-module (quasar home)
   #:use-module (efimerspan packages web)
+  #:use-module (efimerspan system services web)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system)
@@ -65,14 +66,26 @@
                              "client_body_temp_path /srv/client_temp;"
                              "dav_methods PUT DELETE MKCOL COPY MOVE;"
                              "create_full_put_path on;"
-                             "dav_access group:rw all:r;"))))))))))
+                             "dav_access group:rw all:r;"))))))
+                  (nginx-server-configuration
+                   (listen '("80"))
+                   (server-name (list (string-append "whoogle." (getenv "DOMAIN"))))
+                   (locations
+                    (list
+                     (nginx-location-configuration
+                      (uri "/")
+                      (body
+                       (list "proxy_pass http://localhost:5000/;"
+                             "proxy_set_header X-Forwarded-For $remote_addr;"
+                             "proxy_set_header HOST $http_host;"))))))))))
       (service openssh-service-type
                (openssh-configuration
                 (openssh openssh-sans-x)
                 (password-authentication? #f)
                 (permit-root-login 'prohibit-password)
                 (authorized-keys
-                 `(("root" ,(local-file "../../keys/ssh/lyra.pub")))))))
+                 `(("root" ,(local-file "../../keys/ssh/lyra.pub"))))))
+      (service whoogle-service-type))
      (modify-services %base-services
                       (guix-service-type config =>
                                          (guix-configuration
