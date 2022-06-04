@@ -1,0 +1,86 @@
+(define-module (quasar system cygnus)
+  #:use-module (quasar home)
+  #:use-module (efimerspan packages web)
+  #:use-module (gnu bootloader)
+  #:use-module (gnu bootloader grub)
+  #:use-module (gnu system)
+  #:use-module (gnu system file-systems)
+  #:use-module (gnu system keyboard)
+  #:use-module (gnu services)
+  #:use-module (gnu services base)
+  #:use-module (gnu services ssh)
+  #:use-module (gnu services networking)
+  #:use-module (gnu services web)
+  #:use-module (gnu packages ssh)
+  #:use-module (gnu packages version-control)
+  #:use-module (gnu packages certs)
+  #:use-module (guix gexp)
+  #:export (%system/cygnus))
+
+(define %system/cygnus
+  (operating-system
+   (host-name "cygnus")
+   (timezone (getenv "CYGNUS_TIMEZONE"))
+   (keyboard-layout (keyboard-layout "us"))
+   (bootloader (bootloader-configuration
+                (bootloader grub-bootloader)
+                (targets '("/dev/vda"))
+                (terminal-outputs '(console))
+                (keyboard-layout keyboard-layout)))
+   (swap-devices
+    (list
+     (swap-space
+      (target (file-system-label "swap")))))
+   (file-systems
+    (cons*
+     (file-system
+      (mount-point "/")
+      (device (file-system-label "root"))
+      (type "ext4"))
+     %base-file-systems))
+   (packages
+    (append
+     (list
+      nss-certs)
+     %base-packages))
+   (services
+    (append
+     (list
+      (service dhcp-client-service-type)
+      (service nginx-service-type
+               (nginx-configuration
+                (nginx nginx-with-dav)
+                (server-blocks
+                 (list
+                  (nginx-server-configuration
+                   (listen '("80"))
+                   (server-name (list (getenv "DOMAIN") (string-append "www." (getenv "DOMAIN"))))
+                   (root (string-append "/srv/http/" (getenv "DOMAIN")))
+                   (locations
+                    (list
+                     (nginx-location-configuration
+                      (uri "/webdav")
+                      (body
+                       (list "root /srv/http/dav;"
+                             "client_body_temp_path /srv/client_temp;"
+                             "dav_methods PUT DELETE MKCOL COPY MOVE;"
+                             "create_full_put_path on;"
+                             "dav_access group:rw all:r;"))))))))))
+      (service openssh-service-type
+               (openssh-configuration
+                (openssh openssh-sans-x)
+                (password-authentication? #f)
+                (permit-root-login 'prohibit-password)
+                (authorized-keys
+                 `(("root" ,(local-file "../../keys/ssh/lyra.pub")))))))
+     (modify-services %base-services
+                      (guix-service-type config =>
+                                         (guix-configuration
+                                          (inherit config)
+                                          (authorized-keys
+                                           (append
+                                            (list
+                                             (local-file "../../keys/signatures/lyra.pub"))
+                                            %default-authorized-guix-keys)))))))))
+
+%system/cygnus
