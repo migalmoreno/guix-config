@@ -19,10 +19,10 @@
    (shepherd-service
     (provision '(whoogle-search))
     (start #~(make-forkexec-constructor
-              (list (string-append #$python-whoogle-search "/bin/whoogle-search")
-                    #:environment-variables
-                    (append (list "CONFIG_VOLUME=/var/cache/whoogle")
-                            (default-environment-variables)))))
+              (list (string-append #$python-whoogle-search "/bin/whoogle-search"))
+              #:environment-variables
+              (append (list "CONFIG_VOLUME=/var/cache/whoogle-search")
+                      (default-environment-variables))))
     (stop #~(make-kill-destructor))
     (documentation "Run a whoogle-search instance."))))
 
