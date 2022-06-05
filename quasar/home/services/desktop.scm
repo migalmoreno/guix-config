@@ -3,11 +3,14 @@
   #:use-module (efimerspan home services linux)
   #:use-module (efimerspan home services glib)
   #:use-module (efimerspan home services emacs)
+  #:use-module (efimerspan home services xorg)
   #:use-module (efimerspan packages emacs-xyz)
   #:use-module (guix gexp)
   #:use-module (gnu services)
+  #:use-module (gnu home-services shells)
   #:use-module (gnu home-services state)
   #:use-module (gnu home-services base)
+  #:use-module (gnu system keyboard)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages xdisorg)
@@ -15,6 +18,7 @@
   #:use-module (gnu packages hardware)
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages emacs-xyz)
+  #:use-module (flat packages emacs)
   #:export (pulseaudio-service
             exwm-service
             desktop-service))
@@ -31,13 +35,43 @@
          '(pulseaudio-control-use-default-sink t))))
     #:elisp-packages (list emacs-pulseaudio-control))))
 
+(define %xorg-libinput-configuration
+  "Section \"InputClass\"
+  Identifier \"Touchpads\"
+  Driver \"libinput\"
+  MatchDevicePath \"/dev/input/event*\"
+  MatchIsTouchpad \"on\"
+
+  Option \"Tapping\" \"on\"
+  Option \"TappingDrag\" \"on\"
+  Option \"DisableWhileTyping\" \"on\"
+  Option \"MiddleEmulation\" \"on\"
+  Option \"ScrollMethdod\" \"twofinger\"
+EndSection
+Section \"InputClass\"
+  Identifier \"Keyboards\"
+  Driver \"libinput\"
+  MatchDevicePath \"/dev/input/event*\"
+  MatchIsKeyboard \"on\"
+EndSection
+")
+
 (define (exwm-service)
   (list
-   ;; (home-generic-service 'home-exwm-files
-   ;;                       #:files `((".xsession"
-   ;;                                  ,(mixed-text-file
-   ;;                                    "xsession"
-   ;;                                    "dbus-run-session -- emacs -mm --debug-init"))))
+   (simple-service
+    'home-bash-autostart-exwm
+    home-bash-service-type
+    (home-bash-extension
+     (bash-profile (list #~(string-append
+                            "[ $(tty) = /dev/tty1 ] && exec "
+                            #$(program-file
+                               "exwm-start"
+                               (xorg-start-command (xinitrc #:wm emacs-native-comp)
+                                                   (xorg-configuration
+                                                    (keyboard-layout (keyboard-layout "us"))
+                                                    (extra-config
+                                                     (list
+                                                      %xorg-libinput-configuration))))))))))
    (elisp-configuration-service
     `((custom-set-variables
        '(exwm-workspace-show-all-buffers nil)
@@ -69,6 +103,7 @@
            (,(kbd "s-C-r") . (lambda () (interactive) (exwm-reset)))
            (,(kbd "s-W") . (lambda () (interactive) (exwm-workspace-switch)))
            (,(kbd "s-t") . (lambda () (interactive) (exwm-floating-toggle-floating)))
+           (,(kbd "s-l") . (lambda () (interactive) (call-process (executable-find "slock"))))
            (,(kbd "s-F") . (lambda () (interactive) (exwm-layout-toggle-fullscreen)))
            (,(kbd "C-q") . (lambda () (interactive) (call-interactively 'exwm-input-send-next-key)))
            (,(kbd "s-q") . (lambda() (interactive) (kill-buffer)))
@@ -83,6 +118,9 @@
       (add-hook 'exwm-init-hook 'eb-exwm-set-workspaces)
       (add-hook 'exwm-init-hook 'eb-look-automatic-theme-mode)
       (add-hook 'exwm-init-hook 'eb-exwm-apply-initial-settings)
+      (add-hook 'exwm-init-hook (lambda ()
+                                  (call-process "xmodmap" nil nil nil (concat (getenv "HOME") "/.config/xmodmap/config"))
+                                  (call-process "xset" nil nil nil  "-dpms" "s" "off")))
       (add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
       (add-hook 'exwm-manage-finish-hook 'eb-exwm-configure-window-by-class)
       (eb-to-hooks 'eb-exwm-shorten-buffer-name 'exwm-update-class 'exwm-update-title)
