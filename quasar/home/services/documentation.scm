@@ -3,12 +3,16 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages scheme)
   #:use-module (gnu services)
+  #:use-module (gnu home services)
   #:use-module (gnu home-services base)
   #:use-module (guix gexp)
   #:export (documentation-service))
 
 (define (documentation-service)
   (list
+   (simple-service 'add-documentation-envs
+                   home-environment-variables-service-type
+                   '(("PAGER" . "")))
    (home-generic-service 'home-documentation-packages
                          #:packages (list sicp))
    (elisp-configuration-service
