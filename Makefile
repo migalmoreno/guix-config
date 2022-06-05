@@ -18,17 +18,15 @@ update:
 init/%:
 	$(channels-lock) init -L . quasar/system/$*.scm /mnt
 
-home:
-	home/${HOSTNAME}
+home: home/${HOSTNAME}
 
 home/%:
 	$(channels-lock) home --allow-downgrades -L . reconfigure quasar/home/$*.scm
 
-system:
-	system/${HOSTNAME}
+system: system/${HOSTNAME}
 
 system/%:
-	sudo $(channels-lock) system -L . reconfigure quasar/system/$*.scm
+	sudo -E $(channels-lock) system -L . reconfigure quasar/system/$*.scm
 
 build/system/%:
 	$(channels-lock) system build -L . quasar/system/$*.scm
