@@ -669,7 +669,7 @@
   (list
    (nyxt-configuration-service
     `((define-command save-as-emacs-bookmark ()
-d        "Save current page in Nyxt as a bookmark record in Emacs."
+        "Save current page in Nyxt as a bookmark record in Emacs."
         (eval-in-emacs
          `(let ((bookmark-make-record-function
                  (lambda ()
@@ -694,9 +694,11 @@ d        "Save current page in Nyxt as a bookmark record in Emacs."
        (custom-set-variables
         '(eb-look-light-theme "modus-operandi")
         '(eb-look-dark-theme "modus-vivendi")
+        '(eb-look-dark-theme-threshold "21:30")
         '(eb-look-fixed-font "Iosevka")
         '(eb-look-variable-font "IBM Plex Sans")
-        '(eb-look-headless-font-size 105)))
+        '(eb-look-headless-font-size 105)
+        '(eb-look-docked-font-size 105)))
      (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
      (set-fontset-font "fontset-default" nil (font-spec :name "Noto Color Emoji"))
      (set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)
