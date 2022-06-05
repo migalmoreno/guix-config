@@ -4,59 +4,50 @@
   #:use-module (guix build-system)
   #:use-module (guix build-system emacs)
   #:use-module (guix download)
+  #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module (gnu packages ocaml)
   #:use-module (gnu packages emacs-xyz)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-elibs
-  (let ((commit "cdc5c8e637ddb14c0a75a344c6d4ff671ae11aff")
-        (revision "0"))
-    (package
-      (name "emacs-elibs")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://git.sr.ht/~mt08gh/elibs")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256
-          (base32 "0bg7d23xam74650rx3j92hq61cddmpipby5h73ik86gq78c6f51a"))))
-      (build-system emacs-build-system)
-      (propagated-inputs
-       (list emacs-consult
-             emacs-org
-             emacs-org-roam
-             emacs-org-superstar
-             emacs-geiser
-             emacs-geiser-guile
-             emacs-all-the-icons
-             emacs-sly
-             emacs-modus-themes
-             emacs-dashboard
-             emacs-pdf-tools
-             emacs-erc-status-sidebar
-             emacs-emms
-             emacs-ytdl
-             emacs-mpv-next
-             emacs-tuareg
-             ocaml-merlin
-             emacs-ednc
-             emacs-exwm
-             emacs-webpaste
-             emacs-ement
-             emacs-telega
-             emacs-password-store
-             emacs-dashboard
-             emacs-hexrgb))
-      (home-page "https://git.sr.ht/~mt08gh/elibs")
-      (synopsis "Various Emacs Lisp libraries.")
-      (description "A set of Emacs Lisp libraries to enhance the functionality
+  (package
+    (name "emacs-elibs")
+    (version "0.1.0")
+    (source
+     (local-file "../../../etc/elibs" #:recursive? #t))
+    (build-system emacs-build-system)
+    (propagated-inputs
+     (list emacs-consult
+           emacs-org
+           emacs-org-roam
+           emacs-org-superstar
+           emacs-geiser
+           emacs-geiser-guile
+           emacs-all-the-icons
+           emacs-sly
+           emacs-modus-themes
+           emacs-dashboard
+           emacs-pdf-tools
+           emacs-erc-status-sidebar
+           emacs-emms
+           emacs-ytdl
+           emacs-mpv-next
+           emacs-tuareg
+           ocaml-merlin
+           emacs-ednc
+           emacs-exwm
+           emacs-webpaste
+           emacs-ement
+           emacs-telega
+           emacs-password-store
+           emacs-dashboard
+           emacs-hexrgb))
+    (home-page "https://git.sr.ht/~mt08gh/quasar")
+    (synopsis "Various Emacs Lisp libraries.")
+    (description "A set of Emacs Lisp libraries to enhance the functionality
  of some Emacs packages and built-in features.")
-      (license license:gpl3+))))
+    (license license:gpl3+)))
 
 (define-public emacs-fdroid
   (let ((commit "2b1b198644241d4fb3fa")
