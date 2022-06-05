@@ -64,7 +64,9 @@
       (with-eval-after-load 'sly
         (custom-set-variables
          '(sly-command-switch-to-existing-lisp 'always)
-         '(sly-mrepl-history-file-name (locate-user-emacs-file "sly-mrepl-history"))
+         '(sly-mrepl-history-file-name (let ((history-file (locate-user-emacs-file "sly-mrepl-history")))
+                                         (unless (file-exists-p history-file)
+                                           (make-empty-file history-file))))
          '(sly-description-autofocus t)
          '(sly-net-coding-system 'utf-8-unix)
          '(sly-connection-poll-interval 0.1)
