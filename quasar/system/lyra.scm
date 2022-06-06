@@ -56,7 +56,7 @@
     "\n"
     "SUBSYSTEM==\"usb_device\", GROUP=\"spice\", MODE=\"0660\"")))
 
-(define lyra-users
+(define %lyra-users
   (cons*
    (user-account
     (name "vega")
@@ -74,7 +74,7 @@
        "video")))
    %base-user-accounts))
 
-(define lyra-packages
+(define %lyra-packages
   (append
     (list
      emacs-no-x
@@ -85,7 +85,7 @@
      gnu-make)
     %base-packages))
 
-(define lyra-services
+(define %lyra-services
   (cons* (screen-locker-service slock #:allow-empty-passwords? #f)
          (service kernel-module-loader-service-type
                   '("ddcci" "ddcci_backlight"))
@@ -136,7 +136,7 @@
      (mount-point "/")
      (device "/dev/mapper/system-root")
      (type "ext4")
-     (dependencies lyra-mapped-devices))
+     (dependencies %lyra-mapped-devices))
    (file-system
      (device "/dev/nvme0n1p1")
      (mount-point "/boot/efi")
@@ -158,15 +158,15 @@
        (name "spice")
        (system? #t))
       %base-groups))
-    (users lyra-users)
-    (packages lyra-packages)
-    (services lyra-services)
+    (users %lyra-users)
+    (packages %lyra-packages)
+    (services %lyra-services)
     (bootloader
      (bootloader-configuration
       (bootloader grub-efi-bootloader)
       (targets (list "/boot/efi"))
       (keyboard-layout keyboard-layout)))
-    (mapped-devices lyra-mapped-devices)
-    (file-systems lyra-file-systems)))
+    (mapped-devices %lyra-mapped-devices)
+    (file-systems %lyra-file-systems)))
 
 %system/lyra
