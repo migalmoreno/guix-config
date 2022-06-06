@@ -52,12 +52,13 @@
     #:elisp-packages (list emacs-eshell-syntax-highlighting
                            emacs-eshell-prompt-extras
                            emacs-envrc))
+   (simple-service 'add-bash-envs
+                   home-environment-variables-service-type
+                   `(("QT_XCB_GL_INTEGRATION" . "none")
+                     ("LESSHISTFILE" . "-")
+                     ("HISTFILE" . "$XDG_STATE_HOME/bash/history")))
    (service home-bash-service-type
             (home-bash-configuration
              (guix-defaults? #t)
-             (environment-variables
-              `(("QT_XCB_GL_INTEGRATION" . "none")
-                ("LESSHISTFILE" . "-")
-                ("HISTFILE" . "$XDG_DATA_HOME/bash/history")))
              (bashrc
               (list "eval \"$(opam env)\""))))))
