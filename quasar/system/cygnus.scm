@@ -11,12 +11,21 @@
   #:use-module (gnu services base)
   #:use-module (gnu services ssh)
   #:use-module (gnu services networking)
+  #:use-module (gnu services certbot)
   #:use-module (gnu services web)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages certs)
   #:use-module (guix gexp)
   #:export (%system/cygnus))
+
+(define %letsencrypt-dir "/etc/letsencrypt/live")
+
+(define %nginx-deploy-hook
+  (program-file
+   "nginx-deploy-hook"
+   #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
+       (kill pid SIGHUP))))
 
 (define %system/cygnus
   (operating-system
@@ -48,15 +57,30 @@
     (append
      (list
       (service dhcp-client-service-type)
+      (service certbot-service-type
+               (let ((domain (getenv "DOMAIN")))
+                 (certbot-configuration
+                  (email (string-append "contact@" domain))
+                  (webroot "/srv/http")
+                  (certificates
+                   (list
+                    (certificate-configuration
+                     (name domain)
+                     (domains (list domain
+                                    (string-append "wwww." domain)
+                                    (string-append "whoogle." domain)))
+                     (deploy-hook %nginx-deploy-hook)))))))
       (service nginx-service-type
                (nginx-configuration
                 (nginx nginx-with-dav)
                 (server-blocks
                  (list
                   (nginx-server-configuration
-                   (listen '("80"))
+                   (listen '("443 ssl http2"))
                    (server-name (list (getenv "DOMAIN") (string-append "www." (getenv "DOMAIN"))))
                    (root (string-append "/srv/http/" (getenv "DOMAIN")))
+                   (ssl-certificate (string-append %letsencrypt-dir "/" (getenv "DOMAIN") "/fullchain.pem"))
+                   (ssl-certificate-key (string-append %letsencrypt-dir "/" (getenv "DOMAIN") "/privkey.pem"))
                    (locations
                     (list
                      (nginx-location-configuration
@@ -68,8 +92,10 @@
                              "create_full_put_path on;"
                              "dav_access group:rw all:r;"))))))
                   (nginx-server-configuration
-                   (listen '("80"))
+                   (listen '("443 ssl http2"))
                    (server-name (list (string-append "whoogle." (getenv "DOMAIN"))))
+                   (ssl-certificate (string-append %letsencrypt-dir "/" (getenv "DOMAIN") "/fullchain.pem"))
+                   (ssl-certificate-key (string-append %letsencrypt-dir "/" (getenv "DOMAIN") "/privkey.pem"))
                    (locations
                     (list
                      (nginx-location-configuration
