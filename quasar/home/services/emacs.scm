@@ -26,7 +26,7 @@
 
 (define dired-service
   (list
-   (home-generic-service 'home-dired-packages #:packages (list unzip zip rsync))
+   (home-generic-service 'home-dired-packages #:packages (list zip rsync))
    (elisp-configuration-service
     `((define-key global-map (kbd "s-d") 'dired-jump)
       (with-eval-after-load 'dired
@@ -130,13 +130,15 @@
          '(org-ellipsis " ⤵")
          '(org-hide-emphasis-markers t)
          '(org-fontify-done-headline t))
-        (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
         ;; TODO: tweak the regexp to not apply this within source blocks
         (font-lock-add-keywords 'org-mode
                                 '(("^ *\\([-]\\)[[:space:]][^[]+?"
                                    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))
                                   ("^ *\\([+]\\)[[:space:]][^[]+?"
                                    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "‣")))))))
+      ,#~""
+      (with-eval-after-load 'ob-core
+          (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
       ,#~""
       (advice-add 'org-refile :after 'org-save-all-org-buffers)
       (with-eval-after-load 'org-refile
@@ -310,7 +312,7 @@
 |Breakfast|Appetizer|Dessert}\n:END:\n#+title: ${title}\n#+filetags: :cooking:")
               :unnarrowed t)
              ("b" "Book" plain
-              "* %?"
+              "* Chapters\n%?"
               :if-new (file+head "%<%Y%M%d%H%M%S>-${slug}.org"
                                  ":PROPERTIES:\n:AUTHOR: ${Author}\n:DATE: ${Date}\n\
 :PUBLISHER: ${Publisher}\n:EDITION: ${Edition}\n:END:\n#+title: ${title}\n#+filetags: :${Topic}:")
@@ -336,11 +338,13 @@
               org-superstar-prettify-item-bullets nil))
       ,#~""
       (with-eval-after-load 'embark
-        (embark-define-keymap eb-org-embark-node-refs
+        (embark-define-keymap embark-roam-ref-map
                               "Keymap for actions to be triggered on Org Roam node `ROAM-REFS'."
                               :parent embark-url-map
-                              ("v" eb-media-mpv-start))
-        (add-to-list 'embark-keymap-alist '(roam-refs . eb-org-embark-node-refs)))
+                              ("RET" browse-url-generic)
+                              ("v" eb-media-mpv-start)
+                              ("c" browse-url-chromium))
+        (add-to-list 'embark-keymap-alist '(org-roam-ref . embark-roam-ref-map)))
       ,#~""
       (with-eval-after-load 'ol
         (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file))
@@ -574,9 +578,9 @@
    `((with-eval-after-load 'files
        (custom-set-variables
         '(backup-directory-alist
-          '((".*" . "/tmp")))
+          `((".*" . "/tmp")))
         '(auto-save-file-name-transforms
-          '((".*" "/tmp" t)))
+          `((".*" "/tmp" t)))
         '(auto-save-no-message t)
         '(create-lockfiles nil)
         '(delete-old-versions t)
