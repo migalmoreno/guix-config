@@ -126,12 +126,13 @@ run again for tomorrow."
   "Lists all ROAM_REFS in current buffer and lets you open them."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (let ((ref (completing-read
-                "Refs: "
+    (let ((ref (consult--read
                 (mapcar
                  (lambda (x)
                    (org-unbracket-string "[[" "]]" x))
-                 (split-string (car (org-property-values "ROAM_REFS")) " ")))))
+                 (split-string (car (org-property-values "ROAM_REFS")) " "))
+                :prompt "Refs: "
+                :category 'org-roam-ref)))
       ref)))
 
 ;;;###autoload
