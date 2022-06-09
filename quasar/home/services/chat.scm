@@ -8,7 +8,8 @@
   #:use-module (guix gexp)
   #:export (matrix-service
             irc-service
-            telegram-service))
+            telegram-service
+            slack-service))
 
 (define (matrix-service)
   (list
@@ -150,3 +151,16 @@
         (custom-set-variables
          '(telega-completing-read-function 'completing-read))))
     #:elisp-packages (list emacs-telega))))
+
+(define (slack-service)
+  (list
+   (elisp-configuration-service
+    '((with-eval-after-load 'slack
+        (custom-set-variables
+         '(slack-buffer-emojify t)
+         '(slack-prefer-current-team))
+        (slack-register-team
+         :name (password-store-get-field "chat/slack" "workspace")
+         :token (password-store-get-field "chat/slack" "token")
+         :cookie (password-store-get-field "chat/slack" "cookie"))))
+    #:elisp-packages (list emacs-slack))))

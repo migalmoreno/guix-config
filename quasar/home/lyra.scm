@@ -39,6 +39,7 @@
      (matrix-service)
      (irc-service)
      (telegram-service)
+     (slack-service)
      (clojure-service)
      (pulseaudio-service)
      (exwm-service)
