@@ -19,7 +19,9 @@
 
 (define (cursor-service)
   (list
-   (service home-unclutter-service-type)
+   (service home-unclutter-service-type
+            (home-unclutter-configuration
+             (seconds 2)))
    (elisp-configuration-service
     `((with-eval-after-load 'mwheel
         (custom-set-variables
@@ -56,6 +58,7 @@
             (home-xresources-configuration
              (config
               '((Xcursor.theme . "Bibata Classic")
+                (Emacs.font . "IBM Plex Sans")
                 (Xcursor.size . 16)
                 (Xft.autohint . #t)
                 (Xft.antialias . #t)
