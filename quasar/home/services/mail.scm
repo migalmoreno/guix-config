@@ -16,7 +16,7 @@
              (config
               `((IMAPAccount personal)
                 (Host mail.gandi.net)
-                ;; (User ,(password-store-get "mail/personal/username"))
+                (User ,(password-store-get "mail/personal/username"))
                 (PassCmd pass mail/mail.gandi.net)
                 (SSLType IMAPS)
                 (CertificateFile "/etc/ssl/certs/ca-certificates.crt")
@@ -95,6 +95,12 @@
                                "nnimap+personal:Sent"
                                "nnimap+personal:Junk"
                                "nnimap+personal:Deleted")
+                              ("emacs"
+                               "nntp+gwene:gmane.emacs.devel"
+                               "nntp+gwene:gmane.emacs.erc.general")
+                              ("guix"
+                               "nntp+gwene:gmane.comp.gnu.guix.bugs"
+                               "nntp+gwene:gmane.comp.gnu.guix.patches")
                               ("misc"
                                "nnfolder+archive:sent.2022"
                                "nndraft:drafts")
