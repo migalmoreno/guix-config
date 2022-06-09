@@ -134,13 +134,13 @@ and bspatch4 and tests.")
 (define-public python-whoogle-search
   (package
     (name "python-whoogle-search")
-    (version "0.7.2")
+    (version "0.7.3")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "whoogle-search" version))
        (sha256
-        (base32 "1b8hx0pjvzkilrhsr6i2dn6nccxk55vhc2jq6h3bc7ll8jiqgna4"))))
+        (base32 "04bvxwsjqqjn2w3q6zgsh8an45jqx077pdkkvq2y3lq5w56rxkc7"))))
     (build-system python-build-system)
     (arguments
      (list
