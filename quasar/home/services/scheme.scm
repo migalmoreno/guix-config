@@ -47,6 +47,9 @@ for a colorful Guile experience.\n\n"))))))
                                         "$GUILE_LOAD_COMPILED_PATH"))))))
    (elisp-configuration-service
     `((add-hook 'geiser-mode-hook 'eb-lisp-geiser-autoconnect)
+      (add-to-list 'display-buffer-alist '("\\*Geiser.*\\*.*"
+                                           (display-buffer-no-window)
+                                           (allow-no-window . t)))
       (with-eval-after-load 'geiser-impl
         (custom-set-variables
          '(geiser-default-implementation 'guile)))
