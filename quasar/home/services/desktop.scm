@@ -101,6 +101,8 @@ EndSection
                                        (eb-desktop-audio-change-volume :step current-prefix-arg)
                                        (eb-desktop-audio-change-volume))))
            (,(kbd "s-C-r") . (lambda () (interactive) (exwm-reset)))
+           (,(kbd "<XF86AudioPause>") . (lambda () (interactive) (ignore)))
+           (,(kbd "<XF86AudioPlay>") . (lambda () (interactive) (ignore)))
            (,(kbd "s-W") . (lambda () (interactive) (exwm-workspace-switch)))
            (,(kbd "s-t") . (lambda () (interactive) (exwm-floating-toggle-floating)))
            (,(kbd "s-l") . (lambda () (interactive) (call-process (executable-find "slock"))))
