@@ -233,11 +233,11 @@
             :shortcut "lg"
             :covers t
             :results 100
-            :object :files)
+            :object :files
+            :fallback-url (quri:uri "http://libgen.gs")
+            :base-search-url "https://libgen.gs/index.php?req=~a")
            (engines:google
             :shortcut "go"
-            :fallback-url (quri:uri "https://google.es")
-            :base-search-url "https://google.es/search?q=~a"
             :completion-function nil
             :safe-search nil
             :results-number 50
@@ -249,7 +249,11 @@
            (engines:lemmy
             :shortcut "le")
            (engines:discourse
-            :shortcut "di")
+            :shortcut "ae")
+           (engines:discourse
+            :shortcut "cv"
+            :fallback-url (quri:uri "https://clojureverse.org")
+            :base-search-url "https://clojureverse.org/search?q=~a")
            (engines:meetup
             :shortcut "me")
            (engines:gitea
@@ -466,8 +470,7 @@
          '(eww-search-prefix "https://search.sethforprivacy.com/search?q=")))
       ,#~""
       (with-eval-after-load 'embark
-        (define-key embark-bookmark-map "c" 'eb-web--jump-to-bookmark-alt)
-        (define-key embark-url-map "c" 'eb-web--jump-to-bookmark-alt))
+        (define-key embark-bookmark-map "c" 'eb-web--jump-to-bookmark-alt))
       ,#~""
       (with-eval-after-load 'browse-url
         (custom-set-variables
