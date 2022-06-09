@@ -67,7 +67,7 @@
       (sly-interactive-eval string))))
 
 (defun eb-web-open-with-cookies (cookies &optional url)
-  "Fetches and opens URL with corresponding external application and cookies."
+  "Fetches and opens URL with corresponding external application and COOKIES."
   (interactive "\nsURL: ")
   (let ((url-request-extra-headers
          `(("Cookie"
