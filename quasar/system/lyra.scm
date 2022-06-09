@@ -19,6 +19,7 @@
   #:use-module (gnu packages cryptsetup)
   #:use-module (gnu packages display-managers)
   #:use-module (gnu packages package-management)
+  #:use-module (gnu packages password-utils)
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages version-control)
@@ -82,7 +83,8 @@
      cryptsetup
      git
      curl
-     gnu-make)
+     gnu-make
+     password-store)
     %base-packages))
 
 (define %lyra-services
@@ -123,14 +125,14 @@
                                   %default-authorized-guix-keys))))
            (delete gdm-service-type))))
 
-(define lyra-mapped-devices
+(define %lyra-mapped-devices
   (list (mapped-device
          (source
           (uuid "0f74821b-da48-4f0c-9f94-f39e646da1bf"))
          (target "system-root")
          (type luks-device-mapping))))
 
-(define lyra-file-systems
+(define %lyra-file-systems
   (cons*
    (file-system
      (mount-point "/")
