@@ -90,6 +90,9 @@
          '(mpv-seek-step 3)))
       ,#~""
       (with-eval-after-load 'embark
+        (let ((map embark-url-map))
+          (define-key map "v" 'eb-media-mpv-start)
+          (define-key map "c" 'browse-url-chromium))
         (embark-define-keymap embark-mpv-chapter-actions
                               "Keymap for actions on mpv chapters."
                               ("r" mpv-set-chapter-ab-loop))
