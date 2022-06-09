@@ -8,6 +8,7 @@
   #:use-module (gnu packages clojure)
   #:use-module (gnu packages java)
   #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu packages compression)
   #:use-module (guix profiles)
   #:use-module (guix gexp)
   #:export (clojure-service))
@@ -15,8 +16,11 @@
 (define (clojure-service)
   (list
    (home-generic-service 'home-clojure-service
-                         #:packages (list clojure openjdk14
-                                          (specification->package+output "openjdk@14:jdk")))
+                         #:packages (list clojure
+                                          leiningen
+                                          unzip
+                                          ;; clojure-tools
+                                          (list openjdk17 "jdk")))
    (simple-service
     'add-clojure-envs
     home-environment-variables-service-type
@@ -26,22 +30,23 @@
       (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
       (with-eval-after-load 'cider
         (custom-set-variables
+         '(cider-preferred-build-tool 'clojure-cli)
          '(cider-repl-pop-to-buffer-on-connect nil)
          '(cider-allow-jack-in-without-project t)))
       ,#~""
       (with-eval-after-load 'consult-imenu
         (add-to-list 'consult-imenu-config
                      '(clojure-mode
-                       :toplevel "Variables"
-                       :types ((?f "Functions" font-lock-function-name-face)
-                               (?m "Macros" font-lock-function-name-face)
-                               (?M "Method" font-lock-function-name-face)
-                               (?e "Events" font-lock-function-name-face)
-                               (?n "Namespaces" font-lock-constant-face)
-                               (?k "Keywords" font-lock-keyword-face)
-                               (?c "Classes" font-lock-type-face)
-                               (?t "Types" font-lock-type-face)
-                               (?v "Variables" font-lock-variable-name-face)))))
+                       :toplevel "Variable"
+                       :types ((?f "Function" font-lock-function-name-face)
+                               (?m "Macro" font-lock-function-name-face)
+                               (?M "Metho" font-lock-function-name-face)
+                               (?e "Event" font-lock-function-name-face)
+                               (?n "Namespace" font-lock-constant-face)
+                               (?k "Keyword" font-lock-keyword-face)
+                               (?c "Classe" font-lock-type-face)
+                               (?t "Type" font-lock-type-face)
+                               (?v "Variable" font-lock-variable-name-face)))))
       ,#~""
       (add-to-list 'org-structure-template-alist '("clj" . "src clojure"))
       (add-to-list 'org-babel-load-languages '(clojure . t))
