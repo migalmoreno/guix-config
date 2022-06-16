@@ -73,7 +73,44 @@ EndSection
                                                      (list
                                                       %xorg-libinput-configuration))))))))))
    (elisp-configuration-service
-    `((custom-set-variables
+    `(,#~"
+(custom-set-variables
+  '(exwm-input-global-keys
+    `((,(kbd \"s-s\") . (lambda () (interactive) (exwm-layout-shrink-window-horizontally 40)))
+      (,(kbd \"s-e\") . (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 40)))
+      (,(kbd \"s-C-e\") . (lambda () (interactive) (exwm-layout-enlarge-window 40)))
+      (,(kbd \"s-C-s\") . (lambda () (interactive) (exwm-layout-shrink-window 40)))
+      (,(kbd \"s-m\") . #'exwm-workspace-move-window)
+      (,(kbd \"s-SPC\") . #'app-launcher-run-app)
+      (,(kbd \"s-<next>\") . (lambda ()
+                             (interactive)
+                             (if current-prefix-arg
+                                 (eb-desktop-audio-change-volume
+                                  :step current-prefix-arg :decrease t)
+                                 (eb-desktop-audio-change-volume :decrease t))))
+      (,(kbd \"s-<prior>\") . (lambda ()
+                              (interactive)
+                              (if current-prefix-arg
+                                  (eb-desktop-audio-change-volume :step current-prefix-arg)
+                                  (eb-desktop-audio-change-volume))))
+      (,(kbd \"s-C-r\") . (exwm-reset))
+      (,(kbd \"<XF86AudioPause>\") . #'ignore)
+      (,(kbd \"<XF86AudioPlay>\") . #'ignore)
+      (,(kbd \"s-W\") . #'exwm-workspace-switch)
+      (,(kbd \"s-t\") . #'exwm-floating-toggle-floating)
+      (,(kbd \"s-l\") . (lambda () (interactive) (call-process (executable-find \"slock\"))))
+      (,(kbd \"s-F\") . #'exwm-layout-toggle-fullscreen)
+      (,(kbd \"C-q\") . (lambda () (interactive) (call-interactively 'exwm-input-send-next-key)))
+      (,(kbd \"s-q\") . #'kill-buffer)
+      ,@(mapcar (lambda (i)
+                  `(,(kbd (format \"s-%d\" i)) .
+                    (lambda ()
+                      (interactive)
+                      (exwm-workspace-switch ,i))))
+                (number-sequence 0 exwm-workspace-number))
+      (,(kbd \"s-`\") . (lambda () (interactive) (exwm-workspace-switch 0))))))
+"
+      (custom-set-variables
        '(exwm-workspace-show-all-buffers nil)
        '(exwm-layout-show-all-buffers nil)
        '(exwm-workspace-minibuffer-position nil)
@@ -81,41 +118,7 @@ EndSection
        '(exwm-floating-border-color "#f0f0f0")
        '(exwm-floating-border-width 2)
        '(exwm-workspace-switch-create-limit 5)
-       '(exwm-workspace-number 5)
-       '(exwm-input-global-keys
-         `((,(kbd "s-s") . (lambda () (interactive) (exwm-layout-shrink-window-horizontally 40)))
-           (,(kbd "s-e") . (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 40)))
-           (,(kbd "s-C-e") . (lambda () (interactive) (exwm-layout-enlarge-window 40)))
-           (,(kbd "s-C-s") . (lambda () (interactive) (exwm-layout-shrink-window 40)))
-           (,(kbd "s-m") . (lambda () (interactive) (exwm-workspace-move-window)))
-           (,(kbd "s-SPC") . (lambda () (interactive) (app-launcher-run-app)))
-           (,(kbd "s-<next>") . (lambda ()
-                                  (interactive)
-                                  (if current-prefix-arg
-                                      (eb-desktop-audio-change-volume
-                                       :step current-prefix-arg :decrease t)
-                                      (eb-desktop-audio-change-volume :decrease t))))
-           (,(kbd "s-<prior>") . (lambda ()
-                                   (interactive)
-                                   (if current-prefix-arg
-                                       (eb-desktop-audio-change-volume :step current-prefix-arg)
-                                       (eb-desktop-audio-change-volume))))
-           (,(kbd "s-C-r") . (lambda () (interactive) (exwm-reset)))
-           (,(kbd "<XF86AudioPause>") . (lambda () (interactive) (ignore)))
-           (,(kbd "<XF86AudioPlay>") . (lambda () (interactive) (ignore)))
-           (,(kbd "s-W") . (lambda () (interactive) (exwm-workspace-switch)))
-           (,(kbd "s-t") . (lambda () (interactive) (exwm-floating-toggle-floating)))
-           (,(kbd "s-l") . (lambda () (interactive) (call-process (executable-find "slock"))))
-           (,(kbd "s-F") . (lambda () (interactive) (exwm-layout-toggle-fullscreen)))
-           (,(kbd "C-q") . (lambda () (interactive) (call-interactively 'exwm-input-send-next-key)))
-           (,(kbd "s-q") . (lambda() (interactive) (kill-buffer)))
-           ,@(mapcar (lambda (i)
-                       `(,(kbd (format "s-%d" i)) .
-                         (lambda ()
-                           (interactive)
-                           (exwm-workspace-switch ,i))))
-                     (number-sequence 0 exwm-workspace-number))
-           (,(kbd "s-`") . (lambda () (interactive) (exwm-workspace-switch 0))))))
+       '(exwm-workspace-number 5))
       ,#~""
       (add-hook 'exwm-init-hook 'eb-exwm-set-workspaces)
       (add-hook 'exwm-init-hook 'eb-look-automatic-theme-mode)
