@@ -23,7 +23,7 @@
   (lisp-packages
    (packages '())
    "List of Lisp packages to install.")
-  (init-lisp
+  (config-lisp
    (lisp-config '())
    "List of expressions, where each expression can be Sexp or a Gexp. Sexp is a Lisp form.
 Strings don't require any conversion, but booleans do.
@@ -31,18 +31,18 @@ Sexps can contain file-like objects, a string with path to a corresponding file 
 Gexps should be strings and their value will be appended to the resulting Lisp file.
 
 The list of expressions will be interposed with \n and everything will end up in the
-@file{init.lisp}.")
+@file{config.lisp}.")
   (auto-mode-rules-lisp
    (lisp-config '())
-   "List of @code{auto-mode} rules. See @code{init-lisp} for information on the format."))
+   "List of @code{auto-mode} rules. See @code{config-lisp} for information on the format."))
 
 (define-configuration home-nyxt-extension
   (lisp-packages
    (packages '())
    "List of additional Lisp packages.")
-  (init-lisp
+  (config-lisp
    (lisp-config '())
-   "List of expressions to add to @file{init-lisp}. See
+   "List of expressions to add to @file{config-lisp}. See
 home-nyxt-service-type for more information."))
 
 (define (add-nyxt-configuration-files config)
@@ -57,10 +57,10 @@ home-nyxt-service-type for more information."))
 
   (filter
    (compose not null?)
-   `((".config/nyxt/init.lisp"
+   `((".config/nyxt/config.lisp"
       ,(mixed-text-file
         "init.lisp"
-        (serialize-field 'init-lisp)))
+        (serialize-field 'config-lisp)))
      (".local/share/nyxt/auto-mode-rules.lisp"
       ,(mixed-text-file
         "auto-mode-rules.lisp"
@@ -73,10 +73,10 @@ home-nyxt-service-type for more information."))
     (append (home-nyxt-configuration-lisp-packages original-config)
             (append-map
              home-nyxt-extension-lisp-packages extension-configs)))
-   (init-lisp
-    (append (home-nyxt-configuration-init-lisp original-config)
+   (config-lisp
+    (append (home-nyxt-configuration-config-lisp original-config)
             (append-map
-             home-nyxt-extension-init-lisp extension-configs)))))
+             home-nyxt-extension-config-lisp extension-configs)))))
 
 (define (nyxt-profile-service config)
   (list (home-nyxt-configuration-package config)))
@@ -109,5 +109,5 @@ home-nyxt-service-type for more information."))
    (gensym "nyxt-configuration-service")
    home-nyxt-service-type
    (home-nyxt-extension
-    (init-lisp `(,@lisp-expressions))
+    (config-lisp `(,@lisp-expressions))
     (lisp-packages lisp-packages))))
