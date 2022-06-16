@@ -18,11 +18,11 @@
 
 ;;;###autoload
 (defun eb-shell--list-buffers ()
-  "List all currently-opened `comint-mode' buffers."
+  "List all currently-opened `comint-mode' or REPL-like buffers."
   (cl-remove-if-not
    (lambda (buffer)
      (with-current-buffer buffer
-       (derived-mode-p 'comint-mode)))
+       (some #'derived-mode-p '(comint-mode cider-repl-mode))))
    (buffer-list)))
 
 (defun eb-shell--bookmark-make-record ()
