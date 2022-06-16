@@ -95,12 +95,20 @@
                                "nnimap+personal:Sent"
                                "nnimap+personal:Junk"
                                "nnimap+personal:Deleted")
+                              ("clojure"
+                               "nntp+gwene:gwene.clojure.planet")
+                              ("lisp"
+                               "nntp+gwene:gwene.org.lisp.planet"
+                               "nntp+gwene:gwene.engineer.atlas.nyxt")
+                              ("technology"
+                               "nntp+gwene:gwene.org.fsf.news")
                               ("emacs"
                                "nntp+gwene:gmane.emacs.devel"
                                "nntp+gwene:gmane.emacs.erc.general")
                               ("guix"
                                "nntp+gwene:gmane.comp.gnu.guix.bugs"
-                               "nntp+gwene:gmane.comp.gnu.guix.patches")
+                               "nntp+gwene:gmane.comp.gnu.guix.patches"
+                               "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
                               ("misc"
                                "nnfolder+archive:sent.2022"
                                "nndraft:drafts")
@@ -119,11 +127,21 @@
                                 (nnfolder-directory "~/.local/share/mail/archive")
                                 (nnfolder-get-new-mail nil)
                                 (nnfolder-inhibit-expiry t))))
-         '(gnus-topic-topology '(("Gnus" visible)
-                                 (("personal" visible))
-                                 (("misc" visible)))))
+         '(gnus-topic-topology (("Gnus" visible)
+                                (("personal" visible))
+                                (("misc" visible))
+                                (("clojure" visible))
+                                (("lisp" visible))
+                                (("technology" visible))
+                                (("emacs" visible))
+                                (("guix" visible)))))
         (setq gnus-message-archive-method
               `(nnimap ,(password-store-get-field "mail/mail.gandi.net" "host"))))
+      ,#~"
+(with-eval-after-load 'gnus-art
+  (define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
+  (define-key gnus-article-mode-map [remap shr-browse-url] #'eb-web-shr-browse-url-new-window))
+"
       ,#~""
       (let ((map mode-specific-map))
         (define-key map "ba" 'ebdb-display-all-records)
