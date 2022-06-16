@@ -464,24 +464,34 @@
         (define-key isearch-mode-map (kbd "M-s e") 'consult-isearch-history))
     (define-key minibuffer-mode-map (kbd "C-c C-r") 'consult-history)
     (add-hook 'minibuffer-setup-hook 'eb-completion-consult-initial-narrow)
-      (with-eval-after-load 'consult
-        (setq consult-buffer-sources
-              (append
-                consult-buffer-sources
-                '(eb-org-buffer-source
-                  eb-chat-telega-buffer-source
-                  eb-chat-erc-buffer-source
-                  eb-exwm-buffer-source
-                  eb-shell-buffer-source)))
-        (custom-set-variables
-         '(consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
-         '(consult-narrow-key (kbd "C-="))
-         '(consult-widen-key (kbd "C--")))
-        (consult-customize
-         consult--source-buffer consult-ripgrep consult-buffer
-         consult-bookmark consult--source-bookmark
-         consult-recent-file consult--source-recent-file
-         :preview-key (kbd "M-.")))
+    (with-eval-after-load 'consult
+      (setq consult-buffer-sources
+            (append
+             consult-buffer-sources
+             '(eb-org-buffer-source
+               eb-chat-telega-buffer-source
+               eb-chat-erc-buffer-source
+               eb-exwm-buffer-source
+               eb-shell-buffer-source)))
+      (custom-set-variables
+       '(consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
+       '(consult-narrow-key (kbd "C-="))
+       '(consult-widen-key (kbd "C--")))
+      (consult-customize
+       consult--source-buffer consult-ripgrep consult-buffer
+       consult-bookmark consult--source-bookmark
+       consult-recent-file consult--source-recent-file
+       :preview-key (kbd "M-.")))
+    (with-eval-after-load 'eb-completion
+      (custom-set-variables
+       '(eb-completion-initial-narrow-alist
+         `((erc-mode . ?e)
+           (org-mode . ?o)
+           (exwm-mode . ?x)
+           (telega-root-mode . ?t)
+           (telega-chat-mode . ?t)
+           (comint-mode . ?c)
+           (cider-repl-mode . ?c)))))
       ,#~""
       (marginalia-mode)
       ,#~""
@@ -497,7 +507,9 @@
          '(corfu-quit-at-boundary t)
          '(corfu-preselect-first nil))
         (let ((map corfu-map))
-          (define-key map "TAB" 'corfu-next)
+          (define-key map "\t" 'corfu-next)
+          (define-key map (kbd "<tab>") 'corfu-next)
+          (define-key map (kbd "<backtab>") 'corfu-previous)
           (define-key map (kbd "S-TAB") 'corfu-previous))
         (require 'kind-icon)
         (custom-set-variables

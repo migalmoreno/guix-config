@@ -9,6 +9,11 @@
   "Tweaks to the built-in Emacs completion framework."
   :group 'eb)
 
+(defcustom eb-completion-initial-narrow-alist '()
+  "Alist of MODE . KEY to present an initial completion narrowing via `consult'."
+  :group 'eb-completion
+  :type 'list)
+
 ;;;###autoload
 (defun eb-completion-crm-indicator (args)
   "Display a discernible indicator for `completing-read-multiple'."
@@ -16,14 +21,8 @@
 
 ;;;###autoload
 (defun eb-completion-consult-initial-narrow ()
-  "Sets buffer initial narrowing for commands which are invoked
-under a specific mode."
-  (when-let* ((buffer-mode-assoc '((erc-mode . ?e)
-                                   (org-mode . ?o)
-                                   (exwm-mode . ?x)
-                                   (telega-root-mode . ?t)
-                                   (telega-chat-mode . ?t)
-                                   (comint-mode . ?c)))
+  "Sets buffer initial narrowing for buffers under a specific mode."
+  (when-let* ((buffer-mode-assoc eb-completion-initial-narrow-alist)
               (key (and (eq this-command #'consult-buffer)
                         (or (alist-get (buffer-local-value
                                         'major-mode (window-buffer (minibuffer-selected-window)))
