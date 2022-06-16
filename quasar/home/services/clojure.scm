@@ -29,6 +29,7 @@
     `((define-key mode-specific-map "rc" 'cider-jack-in)
       (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
       (with-eval-after-load 'cider
+        (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
         (custom-set-variables
          '(cider-preferred-build-tool 'clojure-cli)
          '(cider-repl-pop-to-buffer-on-connect nil)
