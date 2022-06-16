@@ -1,13 +1,15 @@
 (define-module (efimerspan packages web-browsers)
+  #:use-module (gnu packages aspell)
   #:use-module (gnu packages gstreamer)
   #:use-module (gnu packages lisp-xyz)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages web-browsers)
   #:use-module (guix git-download)
   #:use-module (guix packages))
 
 (define-public nyxt-next
-  (let ((commit "b6020ef4c06d0dd40097c9dd530303ade334a00a")
+  (let ((commit "c7eaaa35cf5b1c2b776c0f7859fd4a9200d2fa23")
         (revision "2"))
     (package
       (inherit nyxt)
@@ -21,7 +23,24 @@
          (file-name (git-file-name "nyxt" version))
          (sha256
           (base32
-           "0yinrzj2wjpf6yd5x5prm0yhx3d5rqk0lj08m7r5i65xrnnqyh64"))))
+           "1mci0v3fxdgs5yk1619y27iy1kzm5rg2svabwva60dnid8hrl13b"))))
+      (native-inputs
+       (modify-inputs (package-native-inputs nyxt)
+         (prepend pkg-config)))
+      (propagated-inputs
+       (list
+        gst-libav
+        gst-plugins-bad
+        gst-plugins-base
+        gst-plugins-good
+        gst-plugins-ugly
+        aspell
+        aspell-dict-en))
       (inputs
        (modify-inputs (package-inputs nyxt)
-         (prepend sbcl-cl-gopher sbcl-nhooks sbcl-phos sbcl-cl-tld sbcl-nfiles))))))
+         (prepend sbcl-cl-gopher
+                  sbcl-nhooks
+                  sbcl-phos
+                  sbcl-cl-tld
+                  sbcl-nfiles
+                  sbcl-cl-webkit))))))
