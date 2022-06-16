@@ -25,6 +25,11 @@
   :type 'string
   :group 'eb-web)
 
+(defcustom eb-web-nyxt-workspace 2
+  "The EXWM workspace to assign Nyxt windows to."
+  :type 'integer
+  :group 'eb-web)
+
 (defvar eb-web-nyxt-process nil
   "Holds the current Nyxt process.")
 
@@ -86,6 +91,11 @@
         (write-region (point-min) (point-max) filename)))
     (consult-file-externally filename)))
 
+(defun eb-web-shr-browse-url-new-window ()
+  "Opens links in a new window."
+  (interactive)
+  (shr-browse-url nil nil t))
+
 ;;;###autoload
 (cl-defun eb-web-nyxt-set-up-window (&key (focus nil))
   "Handles Nyxt's window, focusing on Nyxt's Emacs buffer if FOCUS,
@@ -99,11 +109,16 @@ and if EXWM is enabled, it switches to the corresponding workspace."
                                        (buffer-list))))
          (exwm-workspace (when (require 'exwm nil t)
                            (exwm-workspace--position
-                            (window-frame (get-buffer-window nyxt-buffer t))))))
+                            (window-frame (or (get-buffer-window nyxt-buffer t)
+                                              (when focus
+                                                (frame-first-window
+                                                 (exwm-workspace--workspace-from-frame-or-index
+                                                  eb-web-nyxt-workspace)))))))))
+    (pp exwm-workspace)
     (when focus
       (when (require 'exwm nil t)
         (exwm-workspace-switch exwm-workspace))
-      (switch-to-buffer nyxt-buffer nil t))))
+      (switch-to-buffer nyxt-buffer))))
 
 (cl-defmacro eb-web--with-nyxt ((&key (focus t)) &body body)
   "Evaluates BODY in the context of the current Nyxt connection and if FOCUS,
@@ -176,6 +191,32 @@ changes focus to the Nyxt frame."
   (eb-web--with-nyxt
    (:focus nil)
    `(copy-url)))
+
+;;;###autoload
+(defun eb-web-scroll-other-window ()
+  "Scrolls the Nyxt window."
+  (interactive)
+  (eb-web--with-nyxt
+   (:focus nil)
+   `(nyxt/document-mode::scroll-down)))
+
+;;;###autoload
+(defun eb-web-scroll-other-window-down ()
+  "Scrolls the Nyxt window upward."
+  (interactive)
+  (eb-web--with-nyxt
+   (:focus nil)
+   `(nyxt/document-mode::scroll-up)))
+
+(defun eb-web-set-nyxt-transient-map ()
+  "Sets a transient map for Nyxt transient `eb-web' commands."
+  (interactive)
+  (set-transient-map
+   (let ((map (make-sparse-keymap)))
+     (define-key map "v" 'eb-web-scroll-other-window)
+     (define-key map "V" 'eb-web-scroll-other-window-down)
+     map)
+   t))
 
 ;;;###autoload
 (defun eb-web-webpaste-text (text)
