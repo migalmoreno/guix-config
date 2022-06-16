@@ -8,6 +8,8 @@
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages web-browsers)
+  #:use-module (gnu packages chromium)
+  #:use-module (gnu packages browser-extensions)
   #:use-module (gnu packages gstreamer)
   #:use-module (guix gexp)
   #:use-module (ice-9 ftw)
@@ -16,28 +18,30 @@
 
 (define appearance-service
   (nyxt-configuration-service
-   `((define-configuration tailor:cut
+   `((import 'tailor:make-important)
+     ,#~""
+     (define-configuration tailor:cut
        ((tailor:name "Minimal")
         (tailor:prompt
          '((* :font-family theme:font-family)
            ("#prompt-modes"
             :display "none")
            ("#prompt-area"
-            :background-color theme:tertiary
-            :color theme:quaternary
+            :background-color theme:secondary
+            :color theme:on-secondary
             :border "1px solid"
             :border-color (if (theme:dark-p theme:theme)
-                              theme:quaternary
-                              theme:text))
+                              theme:on-secondary
+                              theme:on-background))
            ("#input"
-            :background-color theme:tertiary
-            :color theme:text)
+            :background-color theme:secondary
+            :color theme:on-background)
            (".source-content"
             :border "none"
             :border-collapse collapse)
            (".source-name"
             :background-color theme:background
-            :color theme:text
+            :color theme:on-background
             :font-style "italic")
            (".source-content th"
             :padding-left "0"
@@ -48,35 +52,35 @@
            ("#selection"
             :font-weight "bold"
             :background-color theme:secondary
-            :color theme:text)))
+            :color theme:on-background)))
         (tailor:user-buffer
          '(("*, body, div, section, input"
             :font-family theme:font-family
             :background-color theme:background
-            :color theme:text)
+            :color theme:on-background)
            ("h1,h2,h3,h4,h5,h6"
             :font-family "IBM Plex Sans"
-            :color theme:primary)
+            :color (make-important theme:primary))
            ("p,pre,td,dt"
             :font-family "IBM Plex Sans"
-            :color theme:text)
+            :color theme:on-background)
            (pre
             :font-family "Iosevka"
-            :background-color (format nil "~a !important" theme:tertiary))
+            :background-color (make-important theme:background))
            ("button, a, a:link"
-            :color theme:text
+            :color theme:on-background
             :font-family "IBM Plex Sans")
            (".button, .button:hover , .button:visited, .button:active"
             :background-color theme:secondary
             :border "1px solid"
             :border-color (if (theme:dark-p theme:theme)
-                              theme:quaternary
-                              theme:text)
-            :color theme:text)
+                              theme:on-secondary
+                              theme:on-background)
+            :color theme:on-background)
            (code
             :font-family "Iosevka"
-            :color (format nil "~a !important" theme:text)
-            :background-color (format nil "~a !important" theme:tertiary))))
+            :color (make-important theme:on-background)
+            :background-color (make-important theme:secondary))))
         (tailor:status
          '((body
             :font-family theme:font-family
@@ -84,13 +88,13 @@
             :width "100%"
             :border "1px solid"
             :border-color (if (theme:dark-p theme:theme)
-                              theme:quaternary
-                              theme:text)
+                              theme:on-secondary
+                              theme:on-background)
             :box-sizing "border-box"
             :line-height "20px"
             :display "flex"
             :flex-direction "column"
-            :background theme:tertiary
+            :background theme:secondary
             :flex-wrap "wrap")
            ("#container"
             :display "flex"
@@ -111,34 +115,30 @@
             :padding-right "0"
             :padding-left "5px"
             :text-overflow "ellipsis"
-            :background-color theme:tertiary
-            :color theme:text
+            :background-color theme:secondary
+            :color theme:on-background
             :box-sizing "border-box"
             :z-index "auto")
            ("#tabs, #controls" :display "none")
            ("#modes"
             :padding-right "2px"
-            :background-color theme:tertiary
+            :background-color theme:secondary
             :box-sizing "border-box"
-            :color theme:text
+            :color theme:on-background
             :display "flex"
             :justify-contents "flex-end"
             :z-index "auto")
            (.button
-            :color theme:text)))
+            :color theme:on-background)))
         (tailor:message
          '((body
-            :color theme:text
+            :color theme:on-background
             :background-color theme:background
             :font-family theme:font-family)))
         (tailor:hint
-         '((".nyxt-hint"
-            :background-color theme:primary
-            :color theme:background
-            :font-weight "bold"
-            :padding "0px 3px"
-            :opacity 1
-            :border-radius "2px")))))
+         `(;; (".nyxt-hint.nyxt-highlight-hint"
+           ;;  :color theme:on-background)
+           ))))
      ,#~""
      (define-configuration tailor:tailor-mode
        ((tailor:auto-p t)
@@ -146,64 +146,65 @@
          (list
           (make-theme "modus-operandi"
                       :background-color "white"
-                      :text-color "black"
+                      :on-background-color "black"
                       :primary-color "#093060"
-                      :secondary-color "#f0f0f0"
-                      :tertiary-color "#dfdfdf"
-                      :quaternary-color "#005a5f"
+                      :secondary-color "#dfdfdf"
+                      :on-secondary-color "black"
                       :accent-color "#8f0075"
+                      :on-accent-color "#005a5f"
                       :font-family "Iosevka"
                       :cut (make-instance 'tailor:cut))
           (make-theme "modus-vivendi"
                       :dark-p t
                       :background-color "black"
-                      :text-color "white"
+                      :on-background-color "white"
                       :primary-color "#c6eaff"
                       :secondary-color "#323232"
-                      :tertiary-color "#323232"
-                      :quaternary-color "#a8a8a8"
+                      :on-secondary-color "#e0e6f0"
                       :accent-color "#afafef"
+                      :on-accent-color "#a8a8a8"
                       :font-family "Iosevka"
                       :cut (make-instance 'tailor:cut))))))
-     ,#~""
-     (asdf:load-system :nx-dark-reader)
      ,#~""
      (define-configuration nxdr:dark-reader-mode
        ((nxdr:brightness 80)
         (nxdr:text-color "white")
         (nyxt:glyph "nxdr")))
      ,#~""
-     (defun custom-format-buttons (_window)
+     (defmethod custom-format-buttons ((status status-buffer))
        "Buttons used for custom status formatter."
+       (declare (ignorable status))
        (spinneret:with-html-string
         (:div :id "buttons"
          (:button :type "button"
           :title "Close Buffer"
-          :onclick (ps:ps (nyxt/ps:lisp-eval '(nyxt:delete-current-buffer)))
+          :onclick (ps:ps (nyxt/ps:lisp-eval
+                           (:title "close current buffer")
+                           (nyxt:delete-current-buffer)))
           "🞫"))))
      ,#~""
-     (defun custom-formatter (window)
-       (let ((buffer (current-buffer window)))
+     (defmethod custom-formatter ((status status-buffer))
+       (let ((buffer (current-buffer (window status))))
          (spinneret:with-html-string
           (:div :id "container"
            (:div :id "url"
             (:raw (format-status-load-status buffer)
              (format-status-url buffer)))
            (:div :id "modes"
-            :title (nyxt::list-modes buffer)
-            (:raw (format-status-modes buffer window)))))))
+            :title (nyxt::modes-string buffer)
+            (:raw (format-status-modes buffer (window status))))))))
      ,#~""
      (define-mode explicit-ui-mode ()
        "Applies explicit buttons and interfaces to the status bar.")
      ,#~""
      (defmethod enable ((mode explicit-ui-mode) &key)
-       (setf (nyxt::status-formatter (current-window))
-             (lambda (window)
-               (str:concat (funcall #'custom-format-buttons window)
-                           (funcall #'custom-formatter window)))))
+       (setf (format-status (current-window))
+             (lambda (status)
+               (str:concat (custom-format-buttons status)
+                           (custom-formatter status)))))
      ,#~""
      (defmethod disable ((mode explicit-ui-mode) &key)
-       (setf (nyxt::status-formatter (current-window)) #'custom-formatter))
+       (setf (format-status (current-window)) 'custom-formatter))
      ,#~""
      (define-configuration status-buffer
        ((glyph-mode-presentation-p t))))))
@@ -379,7 +380,7 @@
    (service home-nyxt-service-type
             (home-nyxt-configuration
              (package nyxt-next)
-             (init-lisp
+             (config-lisp
               `((let ((sbcl-init (merge-pathnames ".sbclrc" (user-homedir-pathname))))
                   (when (probe-file sbcl-init)
                     (load sbcl-init)))
@@ -390,6 +391,7 @@
                 (import 'router:make-route)
                 (asdf:load-system :nx-tailor)
                 (import 'tailor:make-theme)
+                (asdf:load-system :nx-dark-reader)
                 ,#~""
                 (in-package #:nyxt-user)
                 (use-nyxt-package-nicknames)
@@ -426,8 +428,8 @@
                                     custom-keymap-mode
                                     tailor:tailor-mode
                                     router:router-mode
-                                    ;; nxdr:dark-reader-mode
-                                    ,@%slot-default%))))
+                                    nxdr:dark-reader-mode
+                                    ,@(delete 'nyxt/help-mode:help-mode %slot-default%)))))
                 ,#~""
                 (define-configuration browser
                   ((default-cookie-policy :no-third-party)
