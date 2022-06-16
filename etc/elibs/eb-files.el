@@ -5,6 +5,15 @@
   "File editing tools."
   :group 'eb)
 
+;;;###autoload
+(defun eb-files--list-pdf-buffers ()
+  "List all currently-opened `pdf-view-mode' buffers."
+  (cl-remove-if-not
+   (lambda (buffer)
+     (with-current-buffer buffer
+       (derived-mode-p 'pdf-view-mode)))
+   (buffer-list)))
+
 (defun eb-files--parse-sconfig-hosts ()
   "Parses SSH configuration file and returns a list of its host defebions."
   (when-let ((file (expand-file-name "~/.ssh/config")))

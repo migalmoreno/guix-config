@@ -5,6 +5,7 @@
 (require 'modus-themes)
 (require 'all-the-icons)
 (require 'eb-exwm)
+(require 'eb-files)
 (require 'eb-util)
 (require 'eb-web )
 (require 'eb-media)
@@ -102,7 +103,8 @@
 
 ;;;###autoload
 (defun eb-look-change-theme ()
-  "Changes current theme."
+  "Changes the theme on the fly and applies corresponding changes to currently-running
+ applications."
   (interactive)
   (if (eb-look--theme-dark-p)
       (progn
@@ -112,16 +114,19 @@
         (eb-media-mpv-set-colors "#000000" "#ffffff")
         (setenv "GTK_THEME" ":dark")
         (eb-web-change-theme eb-look-dark-theme)
-        (setq pdf-view-midnight-colors '("#ffffff" . "#000000")))
+        (cl-loop for buffer in (eb-files--list-pdf-buffers)
+                 do (with-current-buffer buffer
+                      (pdf-view-themed-minor-mode 1))))
     (progn
       (eb-faces
        '((tab-bar nil :box (:line-width 1 :color "#505050" :style unspecified))
          (vertical-border nil :foreground "#ffffff")))
-      (message "I was invoked!")
       (eb-media-mpv-set-colors "#ffffff" "#323232")
       (setenv "GTK_THEME" ":light")
       (eb-web-change-theme eb-look-light-theme)
-      (setq pdf-view-midnight-colors '("#000000" . "#ffffff"))))
+      (cl-loop for buffer in (eb-files--list-pdf-buffers)
+               do (with-current-buffer buffer
+                    (pdf-view-themed-minor-mode -1)))))
   (eb-faces
    `((default nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
      (fixed-pitch nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
