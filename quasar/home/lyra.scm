@@ -64,7 +64,7 @@
      (mpv-service)
      (youtube-dl-service)
      (virtualization-service)
-     (web-service)
+     (web-service #:alt-browser-p #t)
      (nyxt-service)
      (cursor-service)
      (xorg-service)))))

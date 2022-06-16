@@ -450,14 +450,15 @@
         (define-key map "rn" 'eb-web-connect-to-slynk)
         (define-key map "ws" 'eb-web-search)
         (define-key map "wb" 'eb-web-nyxt-set-up-window)
-        (define-key map "ww" 'eb-web-copy-url))
+        (define-key map "ww" 'eb-web-copy-url)
+        (define-key map "wv" 'eb-web-set-nyxt-transient-map))
       ,#~""
       (with-eval-after-load 'eb-web
         (custom-set-variables
          '(eb-web-nyxt-development-p nil)
          '(eb-web-nyxt-startup-threshold 5)))))))
 
-(define (web-service)
+(define* (web-service #:key alt-browser-p)
   (list
    (simple-service
     'web-environment-variables
@@ -497,5 +498,10 @@
         (custom-set-variables
          '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
          '(webpaste-paste-confirmation t))))
-    #:elisp-packages (list emacs-webpaste
-                           emacs-nginx-mode))))
+    #:elisp-packages (append
+                      (when alt-browser-p
+                        (list
+                         ungoogled-chromium
+                         ublock-origin/chromium))
+                      (list emacs-webpaste
+                            emacs-nginx-mode)))))
