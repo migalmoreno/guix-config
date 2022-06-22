@@ -482,35 +482,38 @@
        consult-bookmark consult--source-bookmark
        consult-recent-file consult--source-recent-file
        :preview-key (kbd "M-.")))
-    (with-eval-after-load 'eb-completion
-      (custom-set-variables
-       '(eb-completion-initial-narrow-alist
-         `((erc-mode . ?e)
-           (org-mode . ?o)
-           (exwm-mode . ?x)
-           (telega-root-mode . ?t)
-           (telega-chat-mode . ?t)
-           (comint-mode . ?c)
-           (cider-repl-mode . ?c)))))
+    (custom-set-variables
+     '(eb-completion-initial-narrow-alist
+       `((erc-mode . ?e)
+         (org-mode . ?o)
+         (exwm-mode . ?x)
+         (telega-root-mode . ?t)
+         (telega-chat-mode . ?t)
+         (comint-mode . ?c)
+         (cider-repl-mode . ?c))))
       ,#~""
       (marginalia-mode)
       ,#~""
-      (add-hook 'eshell-mode-hook 'corfu-mode)
-      (add-hook 'comint-mode-hook 'corfu-mode)
       (add-hook 'prog-mode-hook 'corfu-mode)
       (add-hook 'message-mode-hook 'corfu-mode)
+      (add-hook 'corfu-mode-hook 'corfu-doc-mode)
       (with-eval-after-load 'corfu
         (custom-set-variables
          '(corfu-auto t)
          '(corfu-cycle t)
          '(corfu-auto-prefix 2)
+         '(corfu-auto-delay 0.2)
+         '(corfu-echo-documentation '(1.0 . 0.2))
          '(corfu-quit-at-boundary t)
          '(corfu-preselect-first nil))
         (let ((map corfu-map))
           (define-key map "\t" 'corfu-next)
           (define-key map (kbd "<tab>") 'corfu-next)
           (define-key map (kbd "<backtab>") 'corfu-previous)
-          (define-key map (kbd "S-TAB") 'corfu-previous))
+          (define-key map (kbd "S-TAB") 'corfu-previous)
+          (define-key map (kbd "M-p") 'corfu-doc-scroll-down)
+          (define-key map (kbd "M-n") 'corfu-doc-scroll-up)
+          (define-key map (kbd "M-d") 'corfu-doc-toggle))
         (require 'kind-icon)
         (custom-set-variables
          '(kind-icon-default-face 'corfu-default))
@@ -524,7 +527,8 @@
                            emacs-all-the-icons-completion
                            emacs-kind-icon
                            emacs-capf-autosuggest
-                           emacs-corfu))))
+                           emacs-corfu
+                           emacs-corfu-doc))))
 
 (define editing-service
   (elisp-configuration-service
@@ -577,6 +581,7 @@
 (define pdf-service
   (elisp-configuration-service
    `((pdf-loader-install)
+     (add-hook 'pdf-view-mode-hook 'pdf-view-themed-minor-mode)
      (with-eval-after-load 'pdf-tools
        (custom-set-variables
         '(pdf-view-display-size 'fit-page)
