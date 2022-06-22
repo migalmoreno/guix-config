@@ -160,7 +160,7 @@
                       :on-background-color "white"
                       :primary-color "#c6eaff"
                       :secondary-color "#323232"
-                      :on-secondary-color "#e0e6f0"
+                      :on-secondary-color "#a8a8a8"
                       :accent-color "#afafef"
                       :on-accent-color "#a8a8a8"
                       :font-family "Iosevka"
@@ -269,7 +269,7 @@
             :search-type :all)
            (engines:whoogle
             :shortcut "who"
-            :base-search-url "https://search.sethforprivacy.com/search?q=~a"
+            :base-search-url "http://localhost:5000/search?q=~a"
             :completion-function nil
             :theme :system
             :alternatives nil
@@ -311,7 +311,7 @@
                 (json:decode-json-from-string (dex:get "https://teddit.net/instances.json")))))
      ,#~""
      (define-configuration router:router-mode
-       ((router:enforce-p t)
+       ((router:enforce-p nil)
         (router:media-enabled-p t)
         (router:banner-p t)
         (router:routes
@@ -330,7 +330,7 @@
                       :blocklist '(:path (:contains (not "item"))))
           (make-route (match-regex "https://whoogle.*"
                                    "https://.*google.com/search.*")
-                      :redirect "gowogle.voring.me")
+                      :redirect "localhost:5000")
           (make-route '((match-regex ".*/watch\\?v=.*")
                         (match-file-extension "mp3"))
                       :redirect "youtube.com"
