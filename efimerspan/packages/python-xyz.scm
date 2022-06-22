@@ -1,25 +1,21 @@
 (define-module (efimerspan packages python-xyz)
   #:use-module (guix packages)
   #:use-module (guix build-system)
-  #:use-module (guix build-system trivial)
   #:use-module (guix build-system python)
   #:use-module (guix git-download)
   #:use-module (guix download)
-  #:use-module (gnu packages mail)
-  #:use-module (gnu packages check)
-  #:use-module (gnu packages protobuf)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
-  #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-crypto)
+  #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-build)
+  #:use-module (gnu packages rust)
   #:use-module (gnu packages image)
   #:use-module (gnu packages xorg)
-  #:use-module (gnu packages libffi)
-  #:use-module (gnu packages xml)
-  #:use-module (gnu packages time)
+  #:use-module (gnu packages matrix)
+  #:use-module (gnu packages tls)
+  #:use-module (gnu packages check)
   #:use-module (gnu packages freedesktop)
-  #:use-module (gnu packages gnupg)
   #:use-module (guix gexp)
   #:use-module ((guix licenses) #:prefix license:))
 
@@ -66,51 +62,6 @@ Microsoft Azure Active Directory accounts (AAD) and Microsoft Accounts (MSA)
 using industry standard OAuth2 and OpenID Connect.")
     (license license:expat)))
 
-(define-public python-oauth2ms
-  (let ((commit "a1ef0cabfdea57e9309095954b90134604e21c08")
-        (revision "0"))
-    (package
-      (name "python-oauth2ms")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/harishkrupo/oauth2ms")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256
-          (base32 "09fhhr6yhnrdp2jx14dryk8g9krn1dn13y1ycylc5qvvvrvfd5la"))))
-      (propagated-inputs
-       (list isync python-pyxdg python-gnupg python-msal))
-      (build-system trivial-build-system)
-      (synopsis "XOauth2 compatible O365 token fetcher.")
-      (description "This tool can be used to fetch oauth2 tokens from the Microsoft
-identity endpoint. Additionally, it can encode the token in the XOAUTH2 format to be
-used as authentication in IMAP mail servers.")
-      (license license:asl2.0)
-      (home-page "https://github.com/harishkrupo/oauth2ms"))))
-
-(define-public python-pmbootstrap
-  (package
-    (name "python-pmbootstrap")
-    (version "1.40.0")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (pypi-uri "pmbootstrap" version))
-       (sha256
-        (base32 "1cxycx0wcgs5lhsfisdrvbvhd46i2baz0r7iixzngqv98h8lvzvg"))))
-    (build-system python-build-system)
-    (home-page "https://gitlab.com/postmarketOS/pmbootstrap")
-    (synopsis
-     "A sophisticated chroot / build / flash tool to develop and install postmarketOS.")
-    (description
-     "This package provides a sophisticated chroot / build / flash tool to develop and
-install postmarketOS.")
-    (license license:asl2.0)))
-
 (define-public python-bsdiff4
   (package
     (name "python-bsdiff4")
@@ -123,7 +74,7 @@ install postmarketOS.")
         (base32 "0jsxf2var03gfxjkwv6ia2pw0y92ml9b4r0mzl1xmzgg49szrkw7"))))
     (build-system python-build-system)
     (home-page "https://github.com/ilanschnell/bsdiff4")
-    (synopsis "binary diff and patch using the BSDIFF4-format")
+    (synopsis "Binary diff and patch using the BSDIFF4-format")
     (description "This code is mostly derived from cx_bsdiff @url{http://cx-bsdiff.sourceforge.net/},
  which in turn was derived from bsdiff, the standalone utility produced for BSD which can be found at
 @url{http://www.daemonology.net/bsdiff}. In addition to the two functions (diff and patch) cx_bsdiff
@@ -131,107 +82,160 @@ provides, this package includes an interface to the BSDIFF4-format, command line
 and bspatch4 and tests.")
     (license license:bsd-4)))
 
-(define-public python-whoogle-search
+(define-public python-matrix-common
   (package
-    (name "python-whoogle-search")
-    (version "0.7.3")
+    (name"python-matrix-common")
+    (version "1.2.0")
     (source
      (origin
        (method url-fetch)
-       (uri (pypi-uri "whoogle-search" version))
+       (uri (pypi-uri "matrix_common" version))
        (sha256
-        (base32 "04bvxwsjqqjn2w3q6zgsh8an45jqx077pdkkvq2y3lq5w56rxkc7"))))
+        (base32 "1bgdhzvqs51z079zjszhd5xqb100mbr5w8gpxs9z31r5xmi5nw7a"))))
     (build-system python-build-system)
     (arguments
+     (list #:phases
+           #~(modify-phases %standard-phases
+               (replace 'build
+                 (lambda _
+                   (setenv "SOURCE_DATE_EPOCH"
+                           (number->string (* 10 366 24 60 60)))
+                   (invoke "python" "-m" "build" "--wheel" "--no-isolation" ".")))
+               (replace 'install
+                 (lambda _
+                   (let ((whl (car (find-files "dist" "\\.whl$"))))
+                     (invoke "pip" "--no-cache-dir" "--no-input"
+                             "install" "--no-deps" "--prefix" #$output whl))))
+               (replace 'check
+                 (lambda* (#:key tests? #:allow-other-keys)
+                   (when tests?
+                     (invoke "pytest" "-vv" "tests")))))))
+    (native-inputs
      (list
-      #:phases
-      #~(modify-phases %standard-phases
-          (delete 'check))))
-    (propagated-inputs
-     (list
-      python-attrs
-      python-beautifulsoup4
-      python-cachelib
-      python-certifi
-      python-cffi
-      python-chardet
-      python-click
-      python-cryptography
-      python-cssutils
-      python-defusedxml
-      python-flask
-      python-flask-session
-      python-idna
-      python-itsdangerous
-      python-jinja2
-      python-markupsafe
-      python-more-itertools
-      python-packaging
-      python-pluggy
-      python-py
-      python-pycodestyle
-      python-pycparser
-      python-pyopenssl
-      python-pyparsing
-      python-pysocks
+      python-pypa-build
+      python-setuptools-scm
       python-pytest
-      python-dateutil
-      python-requests
-      python-soupsieve
-      python-stem
-      python-urllib3
-      python-waitress
-      python-wcwidth
-      python-werkzeug
-      python-dotenv))
-    (home-page "https://github.com/benbusby/whoogle-search")
-    (synopsis "A self-hosted, ad-free, privacy-respecting metasearch engine.")
-    (description "Get Google results, but without any ads, javascript, AMP links,
-cookies, or IP address tracking.")
-    (license license:expat)))
+      python-wheel))
+    (home-page "https://github.com/matrix-org/matrix-python-common")
+    (synopsis "Common code for Synapse, Sydent and Sygnal.")
+    (description #f)
+    (license license:asl2.0)))
 
-(define-public python-payload-dumper
-  (let ((commit "60224410cbe9e937cc158d5eb376b56d8b40e12b")
-        (revision "0"))
-    (package
-     (name "python-payload-dumper")
-     (version (git-version "0" revision commit))
-     (source
-      (origin
-       (method git-fetch)
-       (uri
-        (git-reference
-         (url "https://github.com/vm03/payload_dumper")
-         (commit commit)))
-       (file-name (git-file-name name version))
-       (sha256
-        (base32 "1lhl4qxqi7lnwaxh494s71sn1dldshapcbim9y13gqb96y0am43v"))))
-     (inputs
-      (list python-3 python-protobuf python-six python-bsdiff4))
-     (build-system python-build-system)
-     (arguments
-      (list #:use-setuptools? #f
-            #:tests? #f
-            #:phases
-            #~(modify-phases %standard-phases
-                (delete 'build)
-                (replace 'install
-                  (lambda* (#:key outputs #:allow-other-keys)
-                    (begin
-                      (use-modules (guix build utils))
-                      (let* ((python (string-append #$python-3 "/bin"))
-                             (bin (string-append #$output "/bin"))
-                             (target (string-append bin "/payload_dumper"))
-                             (version (python-version #$python-3))
-                             (pydir (string-append #$output "/lib/python" version "/site-packages")))
-                        (mkdir-p bin)
-                        (copy-file (string-append #$source "/payload_dumper.py") target)
-                        (install-file "update_metadata_pb2.py" pydir)
-                        ;; Can't use patch-shebang possibly due to a Unicode BOM
-                        (substitute* target
-                          (("/usr/bin/env python") (which "python3")))
-                        (chmod target #o555))))))))
-     (synopsis "Android OTA payload dumper.")
-     (description "Script to extract the payload of incremental and full OTA's.")
-     (home-page "https://github.com/vm03/payload_dumper")
-     (license license:unlicense))))
+(define-public python-pyopenssl-next
+  (package
+    (inherit python-pyopenssl)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-pyopenssl)
+       (replace "python-cryptography" python-cryptography-next)))))
+
+(define-public python-service-identity-next
+  (package
+    (inherit python-service-identity)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-service-identity)
+       (replace "python-pyopenssl" python-pyopenssl-next)))))
+
+(define-public python-urllib3-next
+  (package
+    (inherit python-urllib3)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-urllib3)
+       (replace "python-cryptography" python-cryptography-next)
+       (replace "python-pyopenssl" python-pyopenssl-next)))))
+
+(define-public python-txsni-next
+  (package
+    (inherit python-txsni)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-txsni)
+       (replace "python-service-identity" python-service-identity-next)
+       (replace "python-pyopenssl" python-pyopenssl-next)))))
+
+(define-public python-josepy-next
+  (package
+    (inherit python-josepy)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-josepy)
+       (replace "python-cryptography" python-cryptography-next)
+       (replace "python-pyopenssl" python-pyopenssl-next)))))
+
+(define-public python-acme-next
+  (package
+    (inherit python-acme)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-acme)
+       (replace "python-josepy" python-josepy-next)
+       (replace "python-requests" python-requests-next)
+       (replace "python-requests-toolbelt" python-requests-toolbelt-next)
+       (replace "python-pyopenssl" python-pyopenssl-next)
+       (replace "python-cryptography" python-cryptography-next)))))
+
+(define-public python-requests-toolbelt-next
+  (package
+    (inherit python-requests-toolbelt)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-requests-toolbelt)
+       (replace "python-requests" python-requests-next)))))
+
+(define-public python-txacme-next
+  (package
+    (inherit python-txacme)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-txacme)
+       (replace "python-josepy" python-josepy-next)
+       (replace "python-acme" python-acme-next)
+       (replace "python-txsni" python-txsni-next)
+       (replace "python-treq" python-treq-next)
+       (replace "python-acme" python-acme-next)))))
+
+(define-public python-requests-next
+  (package
+    (inherit python-requests)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-requests)
+       (replace "python-urllib3" python-urllib3-next)))))
+
+(define-public python-treq-next
+  (package
+    (inherit python-treq)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-treq)
+       (replace "python-requests" python-requests-next)
+       (replace "python-service-identity" python-service-identity-next)))))
+
+(define-public python-matrix-synapse-ldap3-next
+  (package
+    (inherit python-matrix-synapse-ldap3)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-matrix-synapse-ldap3)
+       (replace "python-service-identity" python-service-identity-next)))))
+
+(define-public python-pysaml2-next
+  (package
+    (inherit python-pysaml2)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-pysaml2)
+       (replace "python-cryptography" python-cryptography-next)
+       (replace "python-pyopenssl" python-pyopenssl-next)
+       (replace "python-requests" python-requests-next)))))
+
+(define-public python-werkzeug-next
+  (package
+    (inherit python-werkzeug)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-werkzeug)
+       (replace "python-requests" python-requests-next)))))
+
+(define-public python-flask-next
+  (package
+    (inherit python-flask)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-flask)
+       (replace "python-werkzeug" python-werkzeug-next)))))
+
+(define-public python-flask-session-next
+  (package
+    (inherit python-flask-session)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-flask-session)
+       (replace "python-flask" python-flask-next)))))
