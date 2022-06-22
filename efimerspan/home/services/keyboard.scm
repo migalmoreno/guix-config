@@ -9,6 +9,8 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (ice-9 match)
+  #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-43)
   #:export (home-xmodmap-service-type
             home-xmodmap-configuration
             home-qmk-service-type
@@ -66,12 +68,27 @@
 (define (get-xmodmap-configuration field-name val)
   (define serialize-term
     (match-lambda
+      ((? vector? e)
+       (string-join
+        (vector-fold
+         (lambda (i acc e)
+           (append
+             acc
+             (list (serialize-term e))))
+         '() e) " "))
       ((? symbol? e) (symbol->string e))
       ((? number? e) (number->string e))
       (e e)))
 
   (define serialize-field
     (match-lambda
+      ((? list? e)
+       (string-join
+        (map
+         (lambda (x)
+           (serialize-term x))
+         e)
+        " "))
       ((key . value)
        (format #f "~a = ~a"
                (serialize-term key)
@@ -112,3 +129,9 @@
       add-xmodmap-configuration)))
    (description "Configure xmodmap bindings and rules.")
    (default-value (home-xmodmap-configuration))))
+
+(define (generate-home-xmodmap-documentation)
+  (generate-documentation
+   `((home-xmodmap-configuration
+      ,home-xmodmap-configuration-fields))
+   'home-xmodmap-configuration))
