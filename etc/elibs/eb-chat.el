@@ -90,9 +90,13 @@
     (when (eq major-mode 'erc-mode)
       (not action))))
 
+(defun eb-chat-erc-status-add-padding (fun channame &optional num-messages erc-face)
+  "Adds left padding on the sidebar formatted channels list."
+  (concat " " (funcall fun channame num-messages erc-face)))
+
 ;;;###autoload
 (defun eb-chat-erc-bouncer-connect-oftc ()
-  "Connects to OFTC via an IRC bouncer."
+  "Connects to the OFTC network via an IRC bouncer."
   (interactive)
   (setq erc-email-userid (format "%s/irc.oftc.net"
                                  (password-store-get-field "chat/irc/oftc" "username")))
