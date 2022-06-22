@@ -4,6 +4,7 @@
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (gnu home services)
+  #:use-module (gnu home-services-utils)
   #:use-module (gnu packages lisp)
   #:use-module (efimerspan serializers lisp)
   #:export (home-lisp-configuration
@@ -41,11 +42,11 @@ The list of expressions will be interposed with \n and everything will end up in
                      (string-drop-right (symbol->string field) 5)
                      ".lisp"))
           (field-obj (car (filter-fields field))))
-      (when (not (null? ((configuration-field-getter field-obj) config)))
-        `(,filename
-          ,(mixed-text-file
-            filename
-            (serialize-field field))))))
+      (optional (not (null? ((configuration-field-getter field-obj) config)))
+                `(,filename
+                  ,(mixed-text-file
+                    filename
+                    (serialize-field field))))))
 
   (filter
    (compose not null?)
