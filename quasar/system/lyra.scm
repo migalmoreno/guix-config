@@ -2,6 +2,7 @@
   #:use-module (quasar home)
   #:use-module (efimerspan serializers lisp)
   #:use-module (efimerspan system services web)
+  #:use-module (efimerspan system services matrix)
   #:use-module (guix packages)
   #:use-module (nongnu packages linux)
   #:use-module (flat packages emacs)
@@ -12,6 +13,7 @@
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages curl)
+  #:use-module (gnu packages databases)
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages linux)
@@ -33,6 +35,7 @@
   #:use-module (gnu services spice)
   #:use-module (gnu services file-sharing)
   #:use-module (gnu services ssh)
+  #:use-module (gnu services databases)
   #:export (%system/lyra))
 
 (define %ddcci-config
@@ -57,6 +60,13 @@
     "\n"
     "SUBSYSTEM==\"usb_device\", GROUP=\"spice\", MODE=\"0660\"")))
 
+(define %lyra-groups
+  (cons
+   (user-group
+    (name "spice")
+    (system? #t))
+   %base-groups))
+
 (define %lyra-users
   (cons*
    (user-account
@@ -65,14 +75,9 @@
     (group "users")
     (home-directory "/home/vega")
     (supplementary-groups
-     '("wheel"
-       "netdev"
-       "lp"
-       "audio"
-       "kvm"
-       "spice"
-       "libvirt"
-       "video")))
+     (append
+      (map user-group-name %lyra-groups)
+      '("libvirt"))))
    %base-user-accounts))
 
 (define %lyra-packages
@@ -104,6 +109,15 @@
                              (file-append coreutils "/bin/env"))
          (extra-special-file "/bin/bash"
                              (file-append bash "/bin/bash"))
+         (service whoogle-service-type)
+         (service postgresql-service-type)
+         (service postgresql-role-service-type
+                  (postgresql-role-configuration
+                   (roles
+                    (list
+                     (postgresql-role
+                      (name "vega")
+                      (create-database? #t))))))
          (modify-services %desktop-services
            (udev-service-type config =>
                               (udev-configuration
@@ -154,12 +168,7 @@
     (timezone (getenv "LYRA_TIMEZONE"))
     (keyboard-layout (keyboard-layout "us"))
     (host-name "lyra")
-    (groups
-     (cons
-      (user-group
-       (name "spice")
-       (system? #t))
-      %base-groups))
+    (groups %lyra-groups)
     (users %lyra-users)
     (packages %lyra-packages)
     (services %lyra-services)
