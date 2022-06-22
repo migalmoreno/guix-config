@@ -10,7 +10,7 @@ all: pull update init home system build iso deploy
 pull:
 	guix pull --allow-downgrades -C channels-lock
 
-update:
+upgrade:
 	guix time-machine -C channels -- describe -f channels > channels-lock.2
 	mv channels-lock.2 channels-lock
 	$(channels-lock) upgrade
