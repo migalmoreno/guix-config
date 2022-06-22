@@ -167,12 +167,9 @@
   :global t :group 'eb-look
   (if eb-look-automatic-theme-mode
       (progn
-        (add-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
-        (add-hook 'modus-themes-after-load-theme-hook #'eb-org-tweak-faces)
         (when (and (display-graphic-p)
                    (not (find-font (font-spec :name "all-the-icons"))))
           (all-the-icons-install-fonts t))
-        (modus-themes-load-themes)
         (let ((current-timestamp (decode-time (current-time))))
           (if (> (+ (decoded-time-second current-timestamp)
                     (* 60 (decoded-time-minute current-timestamp))
@@ -180,20 +177,22 @@
                  (* 60 (appt-convert-time eb-look-dark-theme-threshold)))
               (progn
                 (setenv "GTK_THEME" ":light")
+                (modus-themes-load-themes)
                 (modus-themes-load-operandi))
-            (progn
-              (setenv "GTK_THEME" ":dark")
-              (modus-themes-load-vivendi))))
+            (setenv "GTK_THEME" ":dark")
+            (modus-themes-load-themes)
+            (modus-themes-load-vivendi)))
+        (add-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
+        (add-hook 'modus-themes-after-load-theme-hook #'eb-org-tweak-faces)
         (setq eb-look-light-theme-timer (run-at-time eb-look-light-theme-threshold
                                                        (* 60 60 24) #'modus-themes-load-operandi)
               eb-look-dark-theme-timer (run-at-time eb-look-dark-theme-threshold
                                                     (* 60 60 24) #'modus-themes-load-vivendi)))
-    (progn
-      (mapc (lambda (timer)
-              (when timer
-                (cancel-timer timer)))
-            '(eb-look-light-theme-timer eb-look-dark-theme-timer))
-      (remove-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
-      (remove-hook 'modus-themes-after-load-theme-hook #'eb-org-tweak-faces))))
+    (mapc (lambda (timer)
+            (when timer
+              (cancel-timer timer)))
+          '(eb-look-light-theme-timer eb-look-dark-theme-timer))
+    (remove-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
+    (remove-hook 'modus-themes-after-load-theme-hook #'eb-org-tweak-faces)))
 
 (provide 'eb-look)
