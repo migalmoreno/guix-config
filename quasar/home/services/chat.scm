@@ -17,10 +17,10 @@
             (home-pantalaimon-configuration
              (package pantalaimon-rrr)
              (config
-              '((Default
+              `((Default
                   ((log-level . debug)))
                 (local-matrix
-                 ((homeserver . https://matrix.org)
+                 ((homeserver . ,(string-append "https://matrix." (getenv "DOMAIN")))
                   (listen-address . localhost)
                   (listen-port . 8010)
                   (ignore-verification . #t)
@@ -90,6 +90,7 @@
                       (inhibit-switch-frame . t)
                       (mode . erc-mode))))
       (with-eval-after-load 'erc-status-sidebar
+        (advice-add 'erc-status-sidebar-default-chan-format :around 'eb-chat-erc-status-add-padding)
         (setq erc-status-sidebar-header-line-format
               (concat " " erc-status-sidebar-mode-line-format))
         (custom-set-variables
