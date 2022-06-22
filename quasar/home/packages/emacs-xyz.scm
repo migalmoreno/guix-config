@@ -10,6 +10,55 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module ((guix licenses) #:prefix license:))
 
+(define-public emacs-al-file
+  (package
+    (name "emacs-al-file")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-file.el")
+       (sha256
+        (base32 "01gj6z2d92li9l77h25ag7njgvalrdj2184fhjhxpbn7xg8z68h4"))))
+    (build-system emacs-build-system)
+    (home-page "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-file.el")
+    (synopsis "Additional functionality for working with files")
+    (description #f)
+    (license license:gpl3+)))
+
+(define-public emacs-al-autoload
+  (package
+    (name "emacs-al-autoload")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-autoload.el")
+       (sha256
+        (base32 "0f2r9g4k4fx9i55msd1d5fnnrhbjllx2nj2bg996yz9gc5vxs94w"))))
+    (build-system emacs-build-system)
+    (home-page "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-autoload.el")
+    (synopsis "Additional functionality to autoload Emacs packages")
+    (description #f)
+    (license license:gpl3+)))
+
+(define-public emacs-al-guix-autoload
+  (package
+    (name "emacs-al-guix-autoload")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-guix-autoload.el")
+       (sha256
+        (base32 "1qwhciqzybdd8acsvpi2b5ypqhn3l15nbnd1q04liqwainxhkyzf"))))
+    (build-system emacs-build-system)
+    (propagated-inputs (list emacs-al-autoload emacs-al-file))
+    (home-page "https://github.com/alezost/emacs-config/blob/master/utils/al-guix-autoload.el")
+    (synopsis "Additional functionality to autoload Guix packages")
+    (description #f)
+    (license license:gpl3+)))
+
 (define-public emacs-elibs
   (package
     (name "emacs-elibs")
