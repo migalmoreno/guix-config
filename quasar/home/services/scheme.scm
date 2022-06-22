@@ -1,7 +1,9 @@
 (define-module (quasar home services scheme)
   #:use-module (quasar home)
+  #:use-module (quasar home packages emacs-xyz)
   #:use-module (efimerspan home services emacs)
   #:use-module (efimerspan home services scheme)
+  #:use-module (rrr packages emacs-xyz)
   #:use-module (gnu home-services base)
   #:use-module (gnu home services)
   #:use-module (gnu packages scheme)
@@ -17,25 +19,7 @@
             (home-guile-configuration
              (config
               `(;; (use-modules (guix))
-                ,#~""
-                (cond ((false-if-exception (resolve-interface '(ice-9 readline)))
-                       =>
-                       (lambda (module)
-                         ;; Enable completion and input history at the REPL.
-                         ((module-ref module 'activate-readline))))
-                      (else
-                       (display "Consider installing the 'guile-readline' package for
-convenient interactive line editing and input history.\n\n")))
-                ,#~""
-                (unless (getenv "INSIDE_EMACS")
-                  (cond ((false-if-exception (resolve-interface '(ice-9 colorized)))
-                         =>
-                         (lambda (module)
-                           ;; Enable completion and input history at the REPL.
-                           ((module-ref module 'activate-colorized))))
-                        (else
-                         (display "Consider installing the 'guile-colorized' package
-for a colorful Guile experience.\n\n"))))))
+                ))
              (envs
               `((load-path . ,(string-append
                                "$XDG_CONFIG_HOME/guix/current/share/guile/site/3.0:"
@@ -46,10 +30,33 @@ for a colorful Guile experience.\n\n"))))))
                                         "$XDG_CONFIG_HOME/guix/current/lib/guile/3.0/site-ccache:"
                                         "$GUILE_LOAD_COMPILED_PATH"))))))
    (elisp-configuration-service
-    `((add-hook 'geiser-mode-hook 'eb-lisp-geiser-autoconnect)
+    `((require 'al-scheme nil t)
+      (setq scheme-imenu-generic-expression al/scheme-imenu-generic-expression)
+      (advice-add 'scheme-indent-function :override 'al/scheme-indent-function)
+      (add-hook 'scheme-mode-hook 'al/scheme-fix-docstring-font-lock)
+      (with-eval-after-load 'consult-imenu
+        (add-to-list
+         'consult-imenu-config
+         '(scheme-mode
+           :toplevel "Variable" :types
+           ((?f "Functions" font-lock-function-name-face)
+            (?q "Macros" font-lock-type-face)
+            (?m "Methods" font-lock-function-name-face)
+            (?M "Modules" font-lock-constant-face)
+            (?C "Conditions" font-lock-keyword-face)
+            (?c "Classes" font-lock-type-face)
+            (?r "Records" font-lock-type-face)
+            (?v "Variable" font-lock-variable-name-face)))))
+      ,#~""
+      (add-hook 'geiser-mode-hook 'eb-lisp-geiser-autoconnect)
       (add-to-list 'display-buffer-alist '("\\*Geiser.*\\*.*"
                                            (display-buffer-no-window)
                                            (allow-no-window . t)))
+      ,#~""
+      (with-eval-after-load 'geiser-mode
+        (custom-set-variables
+         '(geiser-mode-company-p nil)))
+      ,#~""
       (with-eval-after-load 'geiser-impl
         (custom-set-variables
          '(geiser-default-implementation 'guile)))
@@ -57,10 +64,10 @@ for a colorful Guile experience.\n\n"))))))
       (with-eval-after-load 'geiser-repl
         (define-key geiser-repl-mode-map (kbd "C-M-q") 'indent-sexp)
         (custom-set-variables
-         '(geiser-repl-startup-time 20000)
+         '(geiser-repl-startup-time 5000)
          '(geiser-repl-history-filename (locate-user-emacs-file "geiser_history"))
          '(geiser-repl-query-on-kill-p nil)
-         '(geiser-repl-use-other-window nil)
+         '(geiser-repl-use-other-window t)
          '(geiser-repl-per-project-p t)))
       ,#~""
       (define-key mode-specific-map "rg" 'run-guile)
@@ -75,7 +82,9 @@ for a colorful Guile experience.\n\n"))))))
       (with-eval-after-load 'ob-core
         (setq org-babel-default-header-args:scheme
               '((:results . "scalar")))))
-    #:elisp-packages (list emacs-geiser emacs-geiser-guile))))
+    #:elisp-packages (list emacs-geiser
+                           emacs-geiser-guile
+                           emacs-rrr-al-scheme))))
 
 (define (guix-service)
   (list
@@ -100,6 +109,7 @@ for a colorful Guile experience.\n\n"))))))
       ;;   (define-key map "GS" 'guix-find-service-definition))
       ,#~""
       (define-key mode-specific-map "di" 'daemons)
+      (define-key mode-specific-map "dI" 'eb-lisp-daemons-root)
       (with-eval-after-load 'daemons
                             (custom-set-variables
                              '(daemons-init-system-submodules '(daemons-shepherd))
