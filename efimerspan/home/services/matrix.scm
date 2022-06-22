@@ -16,7 +16,7 @@
 (define-configuration/no-serialization home-pantalaimon-configuration
   (package
     (package pantalaimon)
-    "pantalaimon package to use.")
+    "The @code{pantalaimon} package to use.")
   (config
    (ini-config '())
    "Alist of pairs to define the daemon configuration."))
