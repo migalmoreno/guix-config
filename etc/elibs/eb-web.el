@@ -114,11 +114,12 @@ and if EXWM is enabled, it switches to the corresponding workspace."
                                                 (frame-first-window
                                                  (exwm-workspace--workspace-from-frame-or-index
                                                   eb-web-nyxt-workspace)))))))))
-    (pp exwm-workspace)
-    (when focus
-      (when (require 'exwm nil t)
-        (exwm-workspace-switch exwm-workspace))
-      (switch-to-buffer nyxt-buffer))))
+    (when (require 'exwm nil t)
+      (when (equal (current-buffer) nyxt-buffer)
+        (exwm-input-set-local-simulation-keys nil))
+      (when focus
+        (exwm-workspace-switch exwm-workspace)
+        (switch-to-buffer nyxt-buffer)))))
 
 (cl-defmacro eb-web--with-nyxt ((&key (focus t)) &body body)
   "Evaluates BODY in the context of the current Nyxt connection and if FOCUS,
