@@ -61,11 +61,14 @@ in ``@code{GUIX_PROFILE}''."))
 
   (filter
    (compose not null?)
-   `(("guix/channels.scm"
-      ,(mixed-text-file
-        "channels.scm"
-        (serialize-field 'channels)))
-     ("guix/shell-authorized-directories"
+   (list
+    (optional (not (null? ((configuration-field-getter
+                            (car (filter-fields 'channels))) config)))
+              `("guix/channels.scm"
+                ,(mixed-text-file
+                  "channels.scm"
+                  (serialize-field 'channels))))
+    `("guix/shell-authorized-directories"
       ,(mixed-text-file
         "shell-authorized-directories"
         (serialize-field 'shell-authorized-directories))))))
