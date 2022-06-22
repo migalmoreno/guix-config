@@ -47,4 +47,11 @@
 for `sly-mrepl-mode' buffers."
   (add-hook 'comint-preoutput-filter-functions #'ansi-color-apply nil t))
 
+;;;###autoload
+(defun eb-lisp-daemons-root ()
+  "Invokes the `daemons' command as `root' to get the list of system daemons."
+  (interactive)
+  (let ((default-directory (format "/sudo::%s" (make-temp-file nil t))))
+    (daemons)))
+
 (provide 'eb-lisp)
