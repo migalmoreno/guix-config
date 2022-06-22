@@ -1,7 +1,7 @@
 (define-module (quasar home services android)
   #:use-module (quasar home packages emacs-xyz)
   #:use-module (efimerspan home services emacs)
-  #:use-module (efimerspan packages python-xyz)
+  #:use-module (efimerspan packages android)
   #:use-module (gnu home services)
   #:use-module (gnu home-services base)
   #:use-module (gnu packages android)
@@ -24,7 +24,7 @@
   (list
    (home-generic-service
     'home-android-packages
-    #:packages (list adb fastboot python-payload-dumper))
+    #:packages (list adb fastboot payload-dumper))
    (simple-service 'add-android-envs
                    home-environment-variables-service-type
                    `(("ANDROID_EMULATOR_HOME"
