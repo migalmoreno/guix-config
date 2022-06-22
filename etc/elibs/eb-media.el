@@ -203,7 +203,6 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
 (defun eb-media-mpv-mode-line-update (&optional result)
   "Updates the mode line information with current mpv playback information."
   (interactive)
-  (require 'mpv)
   (if (mpv-live-p)
       (cl-flet ((playlist-p ()
                             (let ((playlist (ignore-errors (mpv--with-json
@@ -216,40 +215,47 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
                                 (setq eb-media-mpv-prev-button nil
                                       eb-media-mpv-next-button nil))))
                 (paused-p ()
-                          (setq eb-media-mpv-toggle-button
-                                (if (equal (mpv--with-json (mpv-get-property "pause")) 'false)
-                                    ""
-                                  ""))))
+                          (mpv-get-property "pause")
+                          (prog1
+                              (if (equal (mpv--with-json (mpv-get-property "pause"))
+                                         'false)
+                                  (setq eb-media-mpv-toggle-button "")
+                                (setq eb-media-mpv-toggle-button ""))))
+                (compute-title ()
+                               (let* ((title (ignore-errors
+                                               (mpv-get-property "media-title")))
+                                      (embellished-title
+                                       (if (stringp title)
+                                           (if (<= (length title) 30)
+                                               (concat title " ")
+                                             (let ((shortened-title (substring title 0 29)))
+                                               (if (= (aref shortened-title (- (length shortened-title) 1))
+                                                      ?.)
+                                                   (concat shortened-title ".. ")
+                                                 (concat shortened-title "... "))))
+                                         (mpv-get-property "path"))))
+                                 (prog1
+                                     (setq eb-media-mpv-mode-line-string embellished-title)))))
         (prog1
-            (if-let* ((title (ignore-errors
-                               (mpv-get-property "media-title")))
-                      (embellished-title (if (stringp title)
-                                             (if (<= (length title) 30)
-                                                 (concat title " ")
-                                               (let ((shortened-title (substring title 0 29)))
-                                                 (if (= (aref shortened-title (- (length shortened-title) 1))
-                                                        ?.)
-                                                     (concat shortened-title ".. ")
-                                                   (concat shortened-title "... "))))
-                                           (mpv-get-property "path"))))
-                (progn
-                  (pcase (alist-get 'event result)
-                    ("file-loaded"
-                     (paused-p)
-                     (playlist-p)
-                     (setq eb-media-mpv-mode-line-string embellished-title))
-                    ((or "pause" "unpause" "tracks-changed")
-                     (paused-p))
-                    ((or "end-file" "shutdown")
-                     (eb-media-mpv-mode-line-clear)))
-                  (playlist-p)
-                  (unless result
-                    (paused-p)
-                    (concat
-                     embellished-title
-                     eb-media-mpv-prev-button
-                     eb-media-mpv-next-button)))
-              (eb-media-mpv-mode-line-clear))
+            (progn
+              (pcase (alist-get 'event result)
+                ("file-loaded"
+                 (playlist-p)
+                 (run-at-time 2 nil (lambda ()
+                                      (compute-title)
+                                      (paused-p)
+                                      (force-mode-line-update t))))
+                ((or "pause" "unpause" "tracks-changed")
+                 (paused-p))
+                ((or "end-file" "shutdown")
+                 (eb-media-mpv-mode-line-clear)))
+              (playlist-p)
+              (unless result
+                (paused-p)
+                (concat
+                 (compute-title)
+                 eb-media-mpv-prev-button
+                 eb-media-mpv-next-button)))
           (force-mode-line-update t)))
     (eb-media-mpv-mode-line-clear)))
 
@@ -412,13 +418,12 @@ DL-TYPE is the download type, see `ytdl-download-types'."
   (if eb-media-mpv-mode-line-mode
       (progn
         (setq eb-media-mpv-mode-line-string
-              (eb-media-mpv-mode-line-update))
+              (run-at-time 2 nil #'eb-media-mpv-mode-line-update))
         (add-hook 'mpv-on-event-hook #'eb-media-mpv-mode-line-update))
-    (progn
-      (setq eb-media-mpv-mode-line-string nil
-            eb-media-mpv-prev-button nil
-            eb-media-mpv-toggle-button nil
-            eb-media-mpv-next-button nil)
-      (remove-hook 'mpv-on-event-hook #'eb-media-mpv-mode-line-update))))
+    (setq eb-media-mpv-mode-line-string nil
+          eb-media-mpv-prev-button nil
+          eb-media-mpv-toggle-button nil
+          eb-media-mpv-next-button nil)
+    (remove-hook 'mpv-on-event-hook #'eb-media-mpv-mode-line-update)))
 
 (provide 'eb-media)
