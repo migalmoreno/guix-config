@@ -41,11 +41,11 @@
                        :toplevel "Variable"
                        :types ((?f "Function" font-lock-function-name-face)
                                (?m "Macro" font-lock-function-name-face)
-                               (?M "Metho" font-lock-function-name-face)
+                               (?M "Method" font-lock-function-name-face)
                                (?e "Event" font-lock-function-name-face)
                                (?n "Namespace" font-lock-constant-face)
                                (?k "Keyword" font-lock-keyword-face)
-                               (?c "Classe" font-lock-type-face)
+                               (?c "Class" font-lock-type-face)
                                (?t "Type" font-lock-type-face)
                                (?v "Variable" font-lock-variable-name-face)))))
       ,#~""
@@ -59,5 +59,7 @@
       ,#~""
       (with-eval-after-load 'ob-clojure
         (custom-set-variables
-         '(org-babel-clojure-backend 'cider))))
+         '(org-babel-clojure-backend 'cider)))
+      ,#~""
+      (add-hook 'cider-repl-mode-hook 'corfu-mode))
     #:elisp-packages (list emacs-clojure-mode emacs-cider))))
