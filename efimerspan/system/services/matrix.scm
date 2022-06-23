@@ -50,7 +50,7 @@ in plain sight, so always prefer to set this manually.")
    "The largest allowed upload size in bytes.")
   (data-directory
    (string "/var/lib/matrix-synapse")
-   "Indicates the path where data such as the media store and database file should be
+   "Indicates the path where data such as the media store and database files should be
 stored.")
   (config-directory
    (string "/var/lib/matrix-synapse")
@@ -84,11 +84,18 @@ configuration to be placed under @file{homeserver.yaml}."))
                     #$(synapse-configuration-config-directory config)
                     "--data-directory"
                     #$(synapse-configuration-data-directory config))
-              #:log-file "/var/log/matrix-synapse"))
+              #:log-file "/var/log/matrix-synapse"
+              #:environment-variables
+              (append (list "SSL_CERT_DIR=/etc/ssl/certs"
+                            "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt")
+                      (remove (lambda (str)
+                                (or (string-prefix? "SSL_CERT_DIR=" str)
+                                    (string-prefix? "SSL_CERT_FILE=" str)))
+                              (environ)))))
     (stop #~(make-kill-destructor)))))
 
 (define (synapse-fill-defaults config)
-  "Returns a list of  configuration strings from the fields that need to be filled in
+  "Returns a list of configuration strings from the fields that need to be filled in
 @code{synapse-configuration}. Useful for later serialization."
   (let ((data-directory (synapse-configuration-data-directory config))
         (config-directory (synapse-configuration-config-directory config))
@@ -175,9 +182,10 @@ configuration to be placed under @file{homeserver.yaml}."))
       (define signing-key-path #$(string-append (synapse-configuration-config-directory config)
                                                 "/homeserver.signing.key"))
       (define (generate-signing-key)
-        (system* #$(file-append synapse-next "/bin/generate_signing_key")
-                 "-o"
-                 signing-key-path))
+        (unless (stat signing-key-path #f)
+          (system* #$(file-append (synapse-configuration-package config) "/bin/generate_signing_key")
+                   "-o"
+                   signing-key-path)))
 
       (mkdir-p data-dir)
       (chown data-dir (passwd:uid %user) (passwd:gid %user))
