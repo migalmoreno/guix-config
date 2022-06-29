@@ -42,14 +42,24 @@
     (start #~(make-forkexec-constructor
               (list
                #$(file-append (home-unclutter-configuration-package config) "/bin/unclutter")
-               "-idle"
-               #$(number->string (home-unclutter-configuration-seconds config))))))))
+               "-display" ":0" "-idle"
+               (number->string #$(home-unclutter-configuration-seconds config)))
+              #:log-file (string-append
+                          (or (getenv "XDG_LOG_HOME")
+                              (format #f "~a/.local/var/log"
+                                      (getenv "HOME")))
+                          "/unclutter.log"))))))
+
+(define (unclutter-profile-service config)
+  (list (home-unclutter-configuration-package config)))
 
 (define home-unclutter-service-type
   (service-type
    (name 'home-unclutter)
    (extensions
     (list
+     (service-extension home-profile-service-type
+                        unclutter-profile-service)
      (service-extension home-shepherd-service-type
                         unclutter-shepherd-service)))
    (default-value (home-unclutter-configuration))
