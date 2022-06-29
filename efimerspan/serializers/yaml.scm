@@ -126,7 +126,7 @@
 (define* (yaml-serialize yaml #:key (pretty? #t))
   "Returns a list of YAML strings which have to be concatenated. It supports gexps,
 file-likes, vectors -> arrays, alists -> dictionaries, etc."
-  (yaml-s-yaml yaml 0 pretty?))
+  `(,@(yaml-s-yaml yaml 0 pretty?) "\n"))
 
 (define serialize-yaml-config yaml-serialize)
 
