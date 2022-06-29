@@ -110,6 +110,14 @@
               (shared-secret (getenv "CYGNUS_SYNAPSE_SHARED_SECRET"))
               (postgresql-db? #t)
               (postgresql-db-password (getenv "CYGNUS_SYNAPSE_DB_PASSWORD"))))
+    (service mautrix-whatsapp-service-type
+             (mautrix-whatsapp-configuration
+              (domain %domain)
+              (postgresql-db? #t)
+              (postgresql-db-password (getenv "CYGNUS_MAUTRIX_WHATSAPP_DB_PASSWORD"))
+              (encryption? #t)
+              (permissions `((,%domain . user)
+                             (,(string-append "@admin:" %domain) . admin)))))
     (service dhcp-client-service-type)
     (service certbot-service-type
              (certbot-configuration
