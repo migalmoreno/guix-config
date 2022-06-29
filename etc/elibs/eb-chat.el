@@ -84,6 +84,12 @@
         (kill-buffer erc-status-sidebar-buffer-name))
     (erc-status-sidebar-open)))
 
+(defun eb-chat-erc-toggle-timestamps ()
+  "Refreshes the current ERC buffer after toggling the timestamps."
+  (interactive)
+  (erc-toggle-timestamps)
+  (force-window-update (selected-window)))
+
 (defun eb-chat-erc-window-reuse-condition (buf-name action)
   "Sets up a condition for ERC buffers to be reused."
   (with-current-buffer buf-name

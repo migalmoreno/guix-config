@@ -52,7 +52,7 @@
       (with-eval-after-load 'erc
         (let ((map erc-mode-map))
           (define-key map (kbd "C-c C-q") 'eb-chat-erc-close-buffers)
-          (define-key map (kbd "C-c C-t") 'erc-toggle-timestamps)
+          (define-key map (kbd "C-c C-t") 'eb-chat-erc-toggle-timestamps)
           (define-key map (kbd "C-c C-s") 'eb-chat-erc-status-sidebar-toggle))
         (dolist (module '(keep-place services notifications hl-nicks image spelling log))
                 (add-to-list 'erc-modules module))
@@ -71,6 +71,7 @@
          '(erc-hide-list '("NICK" "JOIN" "PART" "QUIT" "MODE" "AWAY"))
          '(erc-hide-prompt t)
          '(erc-hide-timestamps t)
+         '(erc-echo-timestamps nil)
          '(erc-kill-buffer-on-part t)
          '(erc-kill-server-buffer-on-quit t)
          '(erc-kill-queries-on-quit t)
@@ -93,7 +94,7 @@
         (setq erc-status-sidebar-header-line-format
               (concat " " erc-status-sidebar-mode-line-format))
         (custom-set-variables
-         '(erc-status-sidebar-width 18)
+         '(erc-status-sidebar-width 20)
          '(erc-status-sidebar-mode-line-format nil)))
       ,#~""
       (with-eval-after-load 'erc-log
