@@ -26,8 +26,14 @@
    (shepherd-service
     (documentation "Pantalaimon user service for non-E2EE Matrix clients.")
     (provision '(home-pantalaimon))
+    (requirement '(home-dbus))
     (start #~(make-forkexec-constructor
-              (list #$(file-append (home-pantalaimon-configuration-package config) "/bin/pantalaimon"))))
+              (list #$(file-append (home-pantalaimon-configuration-package config) "/bin/pantalaimon"))
+              #:log-file (string-append
+                          (or (getenv "XDG_LOG_HOME")
+                              (format #f "~a/.local/var/log"
+                                      (getenv "HOME")))
+                          "/pantalaimon.log")))
     (stop #~(make-kill-destructor)))))
 
 (define (add-pantalaimon-configuration config)
