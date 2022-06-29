@@ -57,6 +57,12 @@ read remote directory/file depending on READ."
   (eb-files--with-tramp nil #'shell arg))
 
 ;;;###autoload
+(defun eb-files-eshell (&optional arg)
+  "Opens a eshell buffer inside a TRAMP host."
+  (interactive "P")
+  (eb-files--with-tramp nil #'eshell arg))
+
+;;;###autoload
 (defun eb-files-dired ()
   "Quickly opens a Dired buffer in a TRAMP host."
   (interactive)
