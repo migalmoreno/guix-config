@@ -10,8 +10,12 @@
   #:use-module (gnu system shadow)
   #:use-module (guix packages)
   #:use-module (guix gexp)
+  #:use-module (srfi srfi-1)
   #:export (synapse-configuration
-            synapse-service-type))
+            synapse-service-type
+            synapse-extension
+            mautrix-whatsapp-configuration
+            mautrix-whatsapp-service-type))
 
 (define (maybe-string? x)
   (or (string? x) (not x)))
@@ -246,5 +250,208 @@ configuration to be placed under @file{homeserver.yaml}. See more settings in
      (service-extension
       shepherd-root-service-type
       synapse-shepherd-service)))
+   (compose identity)
+   (extend synapse-extension-service)
    (default-value (synapse-configuration))
    (description "System service for Synapse, the Matrix flagship implementation.")))
+
+(define-configuration/no-serialization mautrix-whatsapp-configuration
+  (package
+    (package mautrix-whatsapp)
+    "The @code{mautrix-whatsapp} package to use.")
+  (address
+   (string "http://localhost:8008")
+   "The address that this appservice can use to connect to the homeserver.")
+  (domain
+   (string "")
+   "The domain of the homeserver (for MXIDs, etc).")
+  (postgresql-db?
+   (boolean #f)
+   "Whether to use PostgreSQL as the database type.")
+  (postgresql-db-password
+   (maybe-string "")
+   "The password for the PostgreSQL database user. Do note this will be exposed in a file under /gnu/store
+in plain sight.")
+  (encryption?
+   (boolean #f)
+   "Whether to add end-to-bridge encryption support.")
+  (data-directory
+   (string "/var/lib/mautrix-whatsapp")
+   "Indicates the path where data such as the registration and database files should be stored.")
+  (log-directory
+   (string "/var/log/mautrix-whatsapp")
+   "The directory for @code{mautrix-whatsapp} log files.")
+  (permissions
+   (alist '())
+   "The permissions for using the bridge. Permitted values include:
+@itemize
+@item relay - Talk through the relaybot (if enabled), no access otherwise
+@item user - Access to use the bridge to chat with a WhatsApp account
+@item admin - User level and some additional administration tools
+@end itemize
+Permitted keys include:
+@itemize
+@item * - All Matrix users
+@item domain - All users on that homeserver
+@item mxid - Specific user
+@end itemize")
+  (extra-config
+   (yaml-config '())
+   "Alist, vector, gexp, or file-like objects to write to a @code{mautrix-whatsapp} bridge
+configuration to be placed under @file{config.yaml}. See more settings in
+@url{https://github.com/mautrix/whatsapp/blob/master/example-config.yaml}."))
+
+(define %mautrix-whatsapp-accounts
+  (list
+   (user-group
+    (name "mautrix-whatsapp")
+    (system? #t))
+   (user-account
+    (name "mautrix-whatsapp")
+    (group "mautrix-whatsapp")
+    (system? #t)
+    (home-directory "/var/empty")
+    (shell (file-append shadow "/sbin/nologin")))))
+
+(define (mautrix-whatsapp-postgresql-service config)
+  (if (mautrix-whatsapp-configuration-postgresql-db? config)
+    (list
+     (postgresql-role
+      (name "mautrix-whatsapp")
+      (create-database? #t)
+      (password (mautrix-whatsapp-configuration-postgresql-db-password config))
+      (collation "C")
+      (ctype "C")))
+    '()))
+
+(define (mautrix-whatsapp-fill-defaults config)
+  "Returns a list of configuration strings from the fields that need to be filled in
+@code{mautrix-whatsapp-configuration}. Useful for later serialization."
+  (serialize-yaml-config
+   `((homeserver . ((address . ,(mautrix-whatsapp-configuration-address config))
+                    (domain . ,(mautrix-whatsapp-configuration-domain config))))
+     (appservice . ((address . "http://localhost:29318")
+                    (hostname . "0.0.0.0")
+                    (port . 29318)
+                    (database . ,(if (mautrix-whatsapp-configuration-postgresql-db? config)
+                                     `((type . postgres)
+                                       (uri . ,(string-append "postgres://mautrix-whatsapp:"
+                                                              (mautrix-whatsapp-configuration-postgresql-db-password config)
+                                                              "@localhost/mautrix-whatsapp?sslmode=disable")))
+                                     `((type . sqlite3)
+                                       (uri . ,(string-append (mautrix-whatsapp-configuration-data-directory config)
+                                                              "/mautrix-whatsapp.db")))))
+                    (id . whatsapp)
+                    (bot . ((username . whatsappbot)
+                            (displayname . "WhatsApp bridge bot")))
+                    (as-token . "")
+                    (hs-token . "")))
+     (bridge . ((username-template . "whatsapp_{{.}}")
+                (displayname-template . ,(string-append "{{if .BusinessName}}{{.BusinessName}}"
+                                                        "{{else if .PushName}}{{.PushName}}{{else}}{{.JID}}{{end}} (WA)"))
+                (command-prefix . "!wa")
+                (permissions . (("*" . relay)
+                                ,@(mautrix-whatsapp-configuration-permissions config)))
+                (relay . ((enabled . #t)
+                          (admin-only . #t)))
+                (encryption . ((allow . ,(mautrix-whatsapp-configuration-encryption? config))
+                               (default . ,(mautrix-whatsapp-configuration-encryption? config))))))
+     (logging . ((directory . ,(string-append (mautrix-whatsapp-configuration-log-directory config)
+                                              "/logs"))
+                 (file-name-format . "{{.Date}}-{{.Index}}.log")
+                 (file-date-format . "2006-01-02")
+                 (file-mode . 0384)
+                 (timestamp-format . "Jan _2, 2006 15:04:05")
+                 (print-level . debug))))))
+
+(define (mautrix-whatsapp-file config)
+  (mixed-text-file
+   "config.yaml"
+   #~(string-append
+      #$@(mautrix-whatsapp-fill-defaults config)
+      #$@(serialize-yaml-config (mautrix-whatsapp-configuration-extra-config config)))))
+
+(define (mautrix-whatsapp-synapse-service config)
+  (synapse-extension
+   (extra-config
+    `((app-service-config-files . #(,(string-append (mautrix-whatsapp-configuration-data-directory config)
+                                                    "/registration.yaml")))))))
+
+(define (mautrix-whatsapp-activation-service config)
+  #~(begin
+      (use-modules (guix build utils))
+
+      (define %user (getpw "mautrix-whatsapp"))
+      (define data-dir #$(mautrix-whatsapp-configuration-data-directory config))
+      (define log-dir #$(mautrix-whatsapp-configuration-log-directory config))
+      (define registration-file (string-append data-dir "/registration.yaml"))
+      (define config-file (string-append data-dir "/config.yaml"))
+      (define (generate-registration-file)
+        (unless (stat registration-file #f)
+          (copy-file #$(mautrix-whatsapp-file config) config-file)
+          (system* #$(file-append (mautrix-whatsapp-configuration-package config) "/bin/mautrix-whatsapp")
+                   "--generate-registration"
+                   "--config=" config-file
+                   "--registration=" registration-file)))
+
+      (mkdir-p data-dir)
+      (chown data-dir (passwd:uid %user) (passwd:gid %user))
+      (chmod data-dir #o700)
+      (mkdir-p log-dir)
+      (chown log-dir (passwd:uid %user) (passwd:gid %user))
+      (chmod log-dir #o700)
+      (generate-registration-file)
+      (chmod registration-file #o640)
+      (chown config-file (passwd:uid %user) (passwd:gid %user))))
+
+(define (mautrix-whatsapp-shepherd-service config)
+  (list
+   (shepherd-service
+    (provision '(mautrix-whatsapp))
+    (requirement '(synapse))
+    (start #~(make-forkexec-constructor
+              (list
+               (string-append #$(mautrix-whatsapp-configuration-package config)
+                              "/bin/mautrix-whatsapp")
+               "--config="
+               (string-append #$(mautrix-whatsapp-configuration-data-directory config)
+                              "/config.yaml")
+               "--registration="
+               (string-append #$(mautrix-whatsapp-configuration-data-directory config)
+                              "/registration.yaml"))
+              #:user "mautrix-whatsapp"
+              #:group "mautrix-whatsapp"
+              #:log-file "/var/log/mautrix-whatsapp/mautrix-whatsapp.log"))
+    (stop #~(make-kill-destructor)))))
+
+(define (mautrix-whatsapp-profile-service config)
+  (list (mautrix-whatsapp-configuration-package config)))
+
+(define mautrix-whatsapp-service-type
+  (service-type
+   (name 'mautrix-whatsapp)
+   (extensions
+    (list
+     (service-extension
+      account-service-type
+      (const %mautrix-whatsapp-accounts))
+     (service-extension
+      postgresql-role-service-type
+      mautrix-whatsapp-postgresql-service)
+     (service-extension
+      profile-service-type
+      mautrix-whatsapp-profile-service)
+     (service-extension
+      synapse-service-type
+      mautrix-whatsapp-synapse-service)
+     (service-extension
+      activation-service-type
+      mautrix-whatsapp-activation-service)
+     (service-extension
+      shepherd-root-service-type
+      mautrix-whatsapp-shepherd-service)))
+   (default-value (mautrix-whatsapp-configuration))
+   (description "System service for the Matrix-WhatsApp puppetting bridge. Do note that
+changing any of the values in @code{mautrix-whatsapp-configuration} requires regeneration
+of the registration, which you may do by removing @file{/var/lib/mautrix-whatsapp/registration.yaml}
+and restarting the service.")))
