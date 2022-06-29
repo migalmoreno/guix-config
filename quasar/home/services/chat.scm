@@ -1,7 +1,7 @@
 (define-module (quasar home services chat)
   #:use-module (efimerspan home services emacs)
   #:use-module (efimerspan home services matrix)
-  #:use-module (rrr packages matrix)
+  #:use-module (efimerspan packages emacs-xyz)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
@@ -15,14 +15,14 @@
   (list
    (service home-pantalaimon-service-type
             (home-pantalaimon-configuration
-             (package pantalaimon-rrr)
              (config
               `((Default
                   ((log-level . debug)))
                 (local-matrix
                  ((homeserver . ,(string-append "https://matrix." (getenv "DOMAIN")))
                   (listen-address . localhost)
-                  (listen-port . 8010)
+                  (listen-port . 8009)
+                  (ssl . #f)
                   (ignore-verification . #t)
                   (use-keyring . #f)))))))
    (elisp-configuration-service
@@ -32,8 +32,7 @@
       (with-eval-after-load 'ement
         (let ((map ement-room-mode-map))
           (define-key map "c" 'ement-room-compose-message)
-          (define-key map "E" 'ement-room-edit-message)
-          (define-key map "R" 'ement-room-send-reply))
+          (define-key map "E" 'ement-room-edit-message))
         (custom-set-variables
          '(ement-room-send-message-filter 'ement-room-send-org-filter)
          '(ement-save-session t)
@@ -41,7 +40,7 @@
          '(warning-suppress-log-types
            '((ement-room-send-event-callback)
              (ement-room-send-event-callback))))))
-    #:elisp-packages (list emacs-ement))))
+    #:elisp-packages (list emacs-ement-next))))
 
 (define (irc-service)
   (list

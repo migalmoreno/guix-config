@@ -40,7 +40,7 @@
   (ement-connect
    :user-id (password-store-get-field "chat/matrix" "username")
    :password (password-store-get "chat/matrix")
-   :uri-prefix "http://localhost:8010"))
+   :uri-prefix "http://localhost:8009"))
 
 (defun eb-media-ement-org-compose-message ()
   "Splits current ement window and invokes `ement-room-compose-message'."
