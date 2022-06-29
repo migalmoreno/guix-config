@@ -87,7 +87,7 @@
            emacs-ednc
            emacs-exwm
            emacs-webpaste
-           emacs-ement
+           emacs-ement-next
            emacs-telega
            emacs-password-store
            emacs-dashboard

@@ -1,10 +1,11 @@
 (define-module (efimerspan packages emacs-xyz)
+  #:use-module (gnu packages emacs)
+  #:use-module (gnu packages emacs-xyz)
   #:use-module (guix packages)
   #:use-module (guix build-system emacs)
   #:use-module (guix download)
   #:use-module (guix build-system)
   #:use-module (guix git-download)
-  #:use-module (gnu packages emacs-xyz)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-with-nyxt
@@ -30,6 +31,35 @@
       (description "This is some little hack to make Emacs command Nyxt. In particular
 this provides a function to browser URLs via Nyxt run via Slime.")
       (license license:bsd-3))))
+
+(define-public emacs-ement-next
+  (let ((commit "d216e049920ccb2839b274b202254842fe762c26")
+        (revision "1"))
+    (package
+      (name "emacs-ement")
+      (version (git-version "0.1-pre" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/alphapapa/ement.el")
+               (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32
+           "06simqrz32rsf1jiq6dmq7l198iwf9f4rjh46p6jsghlmphzyh2m"))))
+      (build-system emacs-build-system)
+      (arguments
+       `(#:emacs ,emacs))
+      (propagated-inputs
+       (list emacs-plz
+             emacs-taxy
+             emacs-svg-lib
+             emacs-ts))
+      (home-page "https://github.com/alphapapa/ement.el")
+      (synopsis "Matrix client for Emacs")
+      (description "Ement.el is a Matrix client for Emacs.")
+      (license license:gpl3+))))
 
 (define-public emacs-bufler
   (package
@@ -196,23 +226,6 @@ completion to select an application in your machine and open it.")
 the first completion candidate for in-buffer completion as an overlay. Instead of using the default
  hook completion-at-point-functions, this package uses its own hook capf-autosuggest-capf-functions.")
     (license license:gpl3+)))
-
-(define-public emacs-svg-lib
-  (package
-    (name "emacs-svg-lib")
-    (version "0.2")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://elpa.gnu.org/packages/svg-lib-" version ".tar"))
-       (sha256 (base32 "0361w1paqrgqlv8wj5vf9ifssddrk2bwlarp2c2wzlxks3ahdf2x"))))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/rougier/svg-lib")
-    (synopsis "Emacs SVG libraries for creating tags, icons and bars.")
-    (description "A small Emacs library to create and display various SVG objects, namely tags, progress bars,
- progress pies and icons. Each object is guaranteed to fit nicely in a text buffer ensuring width is an integer
-multiple of character width.")
-    (license license:gpl3)))
 
 (define-public emacs-nm
   (let ((commit "0aee81296420a84004b27b99d90f831393b55ed0")
