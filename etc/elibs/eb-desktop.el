@@ -49,7 +49,7 @@
                                     (mapconcat #'number-to-string
                                                (hexrgb-hex-to-rgb "#51afef") ",")
                                     (expand-file-name file-name pictures-dir))
-                            (list pictures-dir file-name))))
+                            (list (expand-file-name file-name pictures-dir)))))
     (make-process
      :name maim-bin
      :buffer nil
@@ -58,9 +58,7 @@
                  (when (= (process-exit-status p) 0)
                    (run-at-time
                     2 nil (lambda ()
-                            (notifications-notify :title "maim"
-                                                  :body "Screenshot taken"
-                                                  :timeout 2000))))))))
+                            (message "Screenshot taken"))))))))
 
 ;; TODO: fix
 (defun eb-desktop-record-screencast (&optional region)

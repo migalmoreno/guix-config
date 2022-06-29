@@ -182,7 +182,8 @@ EndSection
       (let ((map mode-specific-map))
         (define-key map "dc" 'eb-desktop-close-last-notification)
         (define-key map "dd" 'eb-desktop-close-all-notifications)
-        (define-key map "dl" 'eb-desktop-show-notification-log))
+        (define-key map "dl" 'eb-desktop-show-notification-log)
+        (define-key map "ss" 'eb-desktop-take-screenshot))
       ,#~""
       (add-hook 'after-init-hook 'eb-desktop-display-weather-mode)
       (eb-desktop-display-volume-mode)
