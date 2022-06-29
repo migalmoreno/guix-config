@@ -38,20 +38,23 @@ you start Synapse. It should be all lowercase and may contain an explicit port."
    (string "")
    "If set, it allows registration of standard or admin accounts by anyone who has the shared secret,
 even if registration is otherwise disabled.")
+  (secret-key
+   (maybe-string #f)
+   "A secret which is used to sign access tokens. If none is specified, the @code{registration_shared_secret}
+is used, if one is given; otherwise, a secret key is derived from the signing key.")
   (postgresql-db?
    (boolean #f)
    "Whether to use a PostgreSQL database for storage.")
   (postgresql-db-password
    (maybe-string "")
    "The password for the PostgreSQL database user. Do note this will be exposed in a file under /gnu/store
-in plain sight, so always prefer to set this manually.")
+in plain sight.")
   (max-upload-size
    (string "50M")
    "The largest allowed upload size in bytes.")
   (data-directory
    (string "/var/lib/matrix-synapse")
-   "Indicates the path where data such as the media store and database files should be
-stored.")
+   "Indicates the path where data such as the media store and database files should be stored.")
   (config-directory
    (string "/var/lib/matrix-synapse")
    "Specifies where additional configuration files such as signing keys and log
@@ -65,7 +68,8 @@ configuration should be stored.")
   (extra-config
    (yaml-config '())
    "Alist, vector, gexp, or file-like objects to write to a Synapse homeserver
-configuration to be placed under @file{homeserver.yaml}."))
+configuration to be placed under @file{homeserver.yaml}. See more settings in
+@url{https://matrix-org.github.io/synapse/latest/usage/configuration/homeserver_sample_config.html}."))
 
 (define (synapse-shepherd-service config)
   "Returns a Shepherd service for Synapse."
@@ -84,7 +88,7 @@ configuration to be placed under @file{homeserver.yaml}."))
                     #$(synapse-configuration-config-directory config)
                     "--data-directory"
                     #$(synapse-configuration-data-directory config))
-              #:log-file "/var/log/matrix-synapse"
+              #:log-file "/var/log/matrix-synapse.log"
               #:environment-variables
               (append (list "SSL_CERT_DIR=/etc/ssl/certs"
                             "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt")
@@ -107,6 +111,9 @@ configuration to be placed under @file{homeserver.yaml}."))
        (media-store-path . ,(string-append data-directory "/media_store"))
        (max-upload-size . ,(synapse-configuration-max-upload-size config))
        (registration-shared-secret . ,(synapse-configuration-shared-secret config))
+       (macaroon-secret-key . ,(if (synapse-configuration-secret-key config)
+                                   (synapse-configuration-secret-key config)
+                                   (synapse-configuration-shared-secret config)))
        (signing-key-path . ,(string-append config-directory "/homeserver.signing.key"))
        (enable-registration . ,(synapse-configuration-enable-registration? config))
        (report-stats . ,(synapse-configuration-report-stats? config))
@@ -163,14 +170,15 @@ configuration to be placed under @file{homeserver.yaml}."))
   (list (synapse-configuration-package config)))
 
 (define (synapse-postgresql-service config)
-  (when (synapse-configuration-postgresql-db? config)
+  (if (synapse-configuration-postgresql-db? config)
     (list
      (postgresql-role
       (name "matrix-synapse")
       (create-database? #t)
       (password (synapse-configuration-postgresql-db-password config))
       (collation "C")
-      (ctype "C")))))
+      (ctype "C")))
+    '()))
 
 (define (synapse-activation-service config)
   #~(begin
@@ -196,6 +204,18 @@ configuration to be placed under @file{homeserver.yaml}."))
       (generate-signing-key)
       (chown signing-key-path (passwd:uid %user) (passwd:gid %user))
       (chmod signing-key-path #o600)))
+
+(define-configuration/no-serialization synapse-extension
+  (extra-config
+   (yaml-config '())
+   "See @code{synapse-service-type} for more information."))
+
+(define (synapse-extension-service original-config extension-configs)
+  (synapse-configuration
+   (inherit original-config)
+   (extra-config
+    (append (synapse-configuration-extra-config original-config)
+            (append-map synapse-extension-extra-config extension-configs)))))
 
 (define (generate-synapse-documentation)
   (generate-documentation
