@@ -1,5 +1,6 @@
 (define-module (quasar home services clojure)
   #:use-module (efimerspan home services emacs)
+  #:use-module (efimerspan packages emacs-xyz)
   #:use-module (nongnu packages clojure)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)
@@ -61,5 +62,8 @@
         (custom-set-variables
          '(org-babel-clojure-backend 'cider)))
       ,#~""
-      (add-hook 'cider-repl-mode-hook 'corfu-mode))
-    #:elisp-packages (list emacs-clojure-mode emacs-cider))))
+      (require 'clj-deps-new)
+      (define-key mode-specific-map "jn" 'clj-deps-new))
+    #:elisp-packages (list emacs-clojure-mode
+                           emacs-cider
+                           emacs-clj-deps-new))))
