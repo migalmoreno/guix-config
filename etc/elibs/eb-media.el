@@ -153,7 +153,7 @@ Optionally, provide a LENGTH for the mode line and whether to PLAY the track."
 
 ;;;###autoload
 (cl-defun eb-media-mpv-start (url &key (private nil) (audio-only nil) (repeat nil))
-  "Prompts for video quality before calling `empv--play-or-enqueue' on URL.
+  "Prompts for video quality before calling `mpv-start' on URL.
 If PRIVATE, use a privacy-friendly alternative of URL as defined per
 `eb-media-privacy-alts'. Also, one can specify whether to play the file
  as AUDIO-ONLY and if to REPEAT it by default."
