@@ -165,6 +165,7 @@ run again for tomorrow."
   :global t :group 'eb-org
   (if eb-org-minimal-ui-mode
       (progn
+        (corfu-mode -1)
         (org-indent-mode)
         (org-superstar-mode)
         (visual-line-mode)
@@ -176,16 +177,16 @@ run again for tomorrow."
         (org-make-toc-mode)
         (setq-local fill-prefix "")
         (eb-org-tweak-faces))
-    (progn
-        (org-indent-mode -1)
-        (org-superstar-mode -1)
-        (visual-line-mode -1)
-        (variable-pitch-mode -1)
-        (prettify-symbols-mode -1)
-        (flyspell-mode -1)
-        (display-line-numbers-mode 1)
-        (org-appear-mode -1)
-        (org-make-toc-mode -1)
-        (setq-local fill-prefix nil))))
+    (corfu-mode -1)
+    (org-indent-mode -1)
+    (org-superstar-mode -1)
+    (visual-line-mode -1)
+    (variable-pitch-mode -1)
+    (prettify-symbols-mode -1)
+    (flyspell-mode -1)
+    (display-line-numbers-mode 1)
+    (org-appear-mode -1)
+    (org-make-toc-mode -1)
+    (setq-local fill-prefix nil)))
 
 (provide 'eb-org)

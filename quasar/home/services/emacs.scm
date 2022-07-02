@@ -494,8 +494,7 @@
       ,#~""
       (marginalia-mode)
       ,#~""
-      (add-hook 'prog-mode-hook 'corfu-mode)
-      (add-hook 'message-mode-hook 'corfu-mode)
+      (global-corfu-mode)
       (add-hook 'corfu-mode-hook 'corfu-doc-mode)
       (with-eval-after-load 'corfu
         (custom-set-variables

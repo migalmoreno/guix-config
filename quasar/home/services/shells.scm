@@ -48,10 +48,7 @@
       ,#~""
       (add-hook 'after-init-hook 'envrc-global-mode)
       (with-eval-after-load 'envrc
-        (define-key envrc-mode-map (kbd "C-c E") 'envrc-command-map))
-      ,#~""
-      (add-hook 'eshell-mode-hook 'corfu-mode)
-      (add-hook 'comint-mode-hook 'corfu-mode))
+        (define-key envrc-mode-map (kbd "C-c E") 'envrc-command-map)))
     #:elisp-packages (list emacs-eshell-syntax-highlighting
                            emacs-eshell-prompt-extras
                            emacs-envrc))
