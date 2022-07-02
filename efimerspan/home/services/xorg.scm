@@ -316,10 +316,11 @@ in @var{config}, are available.  The result should be used in place of
 (define* (xinitrc #:key wm)
   "Returns a xinitrc script that starts X with the specified WM."
   (define builder
-    (let ((name (package-name wm)))
-      #~(system* #$(file-append wm "/bin/" (match name
-                                             ("emacs-native-comp" "emacs")
-                                             (_ name)))
-                 "-mm" "--debug-init")))
+    (let* ((name (package-name wm))
+           (args (match name
+                   ((or "emacs-native-comp" "emacs")
+                    (list (file-append wm "/bin/emacs") "-mm" "--debug-init"))
+                   (_ (list name)))))
+      #~(system* #$@args)))
 
   (program-file "xinitrc" builder))
