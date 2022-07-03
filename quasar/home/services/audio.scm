@@ -79,10 +79,10 @@
     `((define-command emms-source-track ()
         "Sources the current site as an EMMS track."
         (let ((url (quri:render-uri (url (current-buffer)))))
-          (echo "Starting to play ~a in EMMS" (quri:render-uri (url (current-buffer))))
+          (echo "Starting to play ~a in EMMS" url)
           (eval-in-emacs
            `(eb-media-emms-source-track
-             ,(quri:render-uri (url (current-buffer)))
+             ,url
              ,(title (current-buffer))
              t))))
       (define-key *custom-keymap*
