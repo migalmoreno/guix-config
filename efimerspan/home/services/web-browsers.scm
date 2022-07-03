@@ -59,7 +59,7 @@ home-nyxt-service-type for more information."))
    (compose not null?)
    `((".config/nyxt/config.lisp"
       ,(mixed-text-file
-        "init.lisp"
+        "config.lisp"
         (serialize-field 'config-lisp)))
      (".local/share/nyxt/auto-mode-rules.lisp"
       ,(mixed-text-file
