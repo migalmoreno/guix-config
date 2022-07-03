@@ -4,11 +4,11 @@
   #:use-module (efimerspan home services emacs)
   #:use-module (efimerspan home services gtk)
   #:use-module (efimerspan packages emacs-xyz)
-  #:use-module (srfi srfi-28)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home-services video)
   #:use-module (gnu home-services base)
+  #:use-module (gnu home services xdg)
   #:use-module (gnu packages video)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages kodi)
@@ -17,11 +17,10 @@
   #:export (mpv-service
             youtube-dl-service))
 
-(define (run-with-emacs command)
-  "Invokes an `emacsclient' sub-process for COMMAND in current MPV process."
-  (format "run \"/bin/sh\" \"-c\" \"emacsclient ~a\"" command))
-
 (define (mpv-service)
+  (define (run-with-emacs command)
+    (format #f "run \"/bin/sh\" \"-c\" \"emacsclient ~a\"" command))
+
   (list
    (home-generic-service
     'home-mpv-packages
@@ -62,8 +61,7 @@
                 ("s" . "screenshot video")
                 ("Q" . "quit-watch-later")
                 ("D" . ,(run-with-emacs "-e '(eb-media-mpv-download)'"))
-                ("Alt+c" . ,(run-with-emacs
-                             "\\\"org-protocol://capture?template=tv&url=${path}&title=${media-title}\\\""))
+                ("Alt+c" . ,(run-with-emacs "-e '(eb-media-mpv-capture-link)'"))
                 ("O" . "no-osd cycle-values osd-level 3 0")
                 ("o" . "osd-bar show-progress")
                 ("v" . "cycle sub-visibility")

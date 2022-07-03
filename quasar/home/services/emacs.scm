@@ -158,7 +158,7 @@
               "* %a %^G"
               :immediate-finish 1)
              ("tv" "Watch It Later" entry (file+headline "~/documents/tasks.org" "Watch It Later")
-              "* %:annotation %^G"
+              "* %a %^G"
               :immediate-finish 1)
              ("th" "Habit Entry" entry (file+headline "~/documents/tasks.org" "Habits")
               "* TODO %? %^G\nSCHEDULED:%^t\n:PROPERTIES:\n:STYLE: habit\n:END:"

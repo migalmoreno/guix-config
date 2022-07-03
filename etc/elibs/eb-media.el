@@ -2,6 +2,7 @@
 (require 'emms)
 (require 'ytdl)
 (require 'mpv)
+(require 'ol)
 (require 'notifications)
 
 (defgroup eb-media nil
@@ -135,7 +136,6 @@ Optionally, provide a LENGTH for the mode line and whether to PLAY the track."
 (defun eb-media-mpv-download ()
   "Downloads current mpv playback via `ytdl'."
   (interactive)
-  (require 'ytdl)
   (if-let ((download-type (completing-read "Download type: " '("Music" "Video")))
            (track (mpv-get-property "path"))
            (title (mpv-get-property "media-title")))
@@ -149,7 +149,21 @@ Optionally, provide a LENGTH for the mode line and whether to PLAY the track."
          ytdl-video-extra-args)
        #'ignore
        download-type)
-    (error "`mpv' is not currently active.")))
+    (error "`mpv' is not currently active")))
+
+;;;###autoload
+(defun eb-media-mpv-capture-link ()
+  "Stores the current mpv playback link and captures it."
+  (let ((url (mpv-get-property "path"))
+        (title (mpv-get-property "media-title")))
+    (org-link-set-parameters
+     "mpv"
+     :store (lambda ()
+              (org-store-link-props
+               :type "mpv"
+               :link url
+               :description title)))
+    (org-capture nil "tv")))
 
 ;;;###autoload
 (cl-defun eb-media-mpv-start (url &key (private nil) (audio-only nil) (repeat nil))
