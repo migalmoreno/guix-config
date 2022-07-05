@@ -248,6 +248,10 @@
          '(org-crypt-key nil)))
       ,#~""
       (add-hook 'org-timer-stop-hook 'eb-org-timer-reset)
+      (advice-add 'org-timer-update-mode-line :override 'eb-org-timer-update-mode-line)
+      (with-eval-after-load 'org-timer
+        (custom-set-variables
+         '(org-timer-format (concat (eb-look--position-item "") " %s  "))))
       ,#~""
       (setq org-roam-v2-ack t)
       (custom-set-variables
@@ -372,7 +376,7 @@
          `(org-link-set-parameters
            "nyxt"
            :store (lambda ()
-                    (org-store-link-props
+                    (org-link-store-props
                      :type "nyxt"
                      :link ,(quri:render-uri (url (current-buffer)))
                      :description ,(title (current-buffer)))))
@@ -385,7 +389,7 @@
          `(org-link-set-parameters
            "nyxt"
            :store (lambda ()
-                    (org-store-link-props
+                    (org-link-store-props
                      :type "nyxt"
                      :link ,(quri:render-uri (url (current-buffer)))
                      :description ,(title (current-buffer)))))

@@ -44,6 +44,13 @@ run again for tomorrow."
   (interactive)
   (setq org-timer-mode-line-string nil))
 
+(defun eb-org-timer-update-mode-line ()
+  "Update the timer in the mode line without adding surrounding angle brackets."
+  (if org-timer-pause-time
+      nil
+    (setq org-timer-mode-line-string (substring (org-timer-value-string) 0 -1))
+    (force-mode-line-update)))
+
 ;;;###autoload
 (defun eb-org-tweak-faces ()
   "Tweaks Org-mode's various faces."
@@ -177,7 +184,7 @@ run again for tomorrow."
         (org-make-toc-mode)
         (setq-local fill-prefix "")
         (eb-org-tweak-faces))
-    (corfu-mode -1)
+    (corfu-mode 1)
     (org-indent-mode -1)
     (org-superstar-mode -1)
     (visual-line-mode -1)
