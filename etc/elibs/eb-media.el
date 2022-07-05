@@ -2,6 +2,7 @@
 (require 'emms)
 (require 'ytdl)
 (require 'mpv)
+(require 'tq)
 (require 'ol)
 (require 'notifications)
 
@@ -159,7 +160,7 @@ Optionally, provide a LENGTH for the mode line and whether to PLAY the track."
     (org-link-set-parameters
      "mpv"
      :store (lambda ()
-              (org-store-link-props
+              (org-link-store-props
                :type "mpv"
                :link url
                :description title)))
@@ -209,10 +210,11 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
 (defun eb-media-mpv-mode-line-clear ()
   "Clears the mode line after the mpv process exits."
   (interactive)
-  (setq eb-media-mpv-mode-line-string nil
-        eb-media-mpv-toggle-button nil
-        eb-media-mpv-prev-button nil
-        eb-media-mpv-next-button nil))
+  (setq eb-media-mpv-mode-line-string nil)
+  (setq eb-media-mpv-toggle-button nil)
+  (setq eb-media-mpv-prev-button nil)
+  (setq eb-media-mpv-next-button nil)
+  (force-mode-line-update t))
 
 (defun eb-media-mpv-mode-line-update (&optional result)
   "Updates the mode line information with current mpv playback information."
@@ -247,7 +249,7 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
                                                       ?.)
                                                    (concat shortened-title ".. ")
                                                  (concat shortened-title "... "))))
-                                         (mpv-get-property "path"))))
+                                         (concat (mpv-get-property "path") " "))))
                                  (prog1
                                      (setq eb-media-mpv-mode-line-string embellished-title)))))
         (prog1
@@ -278,6 +280,62 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
   "Seek to the start of the current MPV stream."
   (interactive)
   (mpv-seek 0))
+
+(defun eb-media-mpv-kill ()
+  "Kills the mpv process unless this is not currently `emms-player-mpv-proc'."
+  (interactive)
+  (when (equal mpv--process
+               emms-player-mpv-proc)
+    (emms-stop))
+  (when mpv--queue
+    (tq-close mpv--queue))
+  (when (and (mpv-live-p)
+             (not (equal mpv--process
+                         emms-player-mpv-proc)))
+    (kill-process mpv--process))
+  (setq mpv--process nil)
+  (setq mpv--queue nil))
+
+(advice-add #'mpv-kill :override #'eb-media-mpv-kill)
+
+(defun eb-media-mpv-connect-to-emms-on-startup (data)
+  (interactive)
+  (when (and (string= (alist-get 'event data) "start-file")
+             (= (alist-get 'playlist_entry_id data) 1))
+    (eb-media-mpv-connect-to-emms-proc)))
+
+(add-hook 'emms-player-mpv-event-functions #'eb-media-mpv-connect-to-emms-on-startup)
+
+;;;###autoload
+(defun eb-media-mpv-connect-to-emms-proc ()
+  "Connect to a running EMMS MPV process."
+  (interactive)
+  (mpv-kill)
+  (setq mpv--process emms-player-mpv-proc)
+  (set-process-query-on-exit-flag mpv--process nil)
+  (set-process-sentinel
+   mpv--process
+   (lambda (p _e)
+     (when (memq (process-status p) '(exit signal))
+       (mpv-kill)
+       (run-hooks 'mpv-on-exit-hook))))
+  (setq mpv--queue (tq-create (make-network-process
+                               :name "mpv-socket"
+                               :family 'local
+                               :service emms-player-mpv-ipc-socket)))
+  (set-process-filter
+   (tq-process mpv--queue)
+   (lambda (_proc string)
+     (mpv--tq-filter mpv--queue string)))
+  (run-hooks 'mpv-on-start-hook)
+  (eb-media-mpv-mode-line-update)
+  t)
+
+(defun eb-media-mpv--filter-processes ()
+  "Filter processes to those that have a currently-running MPV process."
+  (cl-remove-if-not (lambda (proc)
+                      (string-match (rx (: (* anything) "mpv" (* anything))) (process-name proc)))
+                    (process-list)))
 
 (defun eb-media-mpv-playlist-shuffle ()
   "Toggles the shuffle state for the current playlist."
