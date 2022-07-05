@@ -183,7 +183,6 @@
             (modus-themes-load-themes)
             (modus-themes-load-vivendi)))
         (add-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
-        (add-hook 'modus-themes-after-load-theme-hook #'eb-org-tweak-faces)
         (setq eb-look-light-theme-timer (run-at-time eb-look-light-theme-threshold
                                                        (* 60 60 24) #'modus-themes-load-operandi)
               eb-look-dark-theme-timer (run-at-time eb-look-dark-theme-threshold
@@ -192,7 +191,6 @@
             (when timer
               (cancel-timer timer)))
           '(eb-look-light-theme-timer eb-look-dark-theme-timer))
-    (remove-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
-    (remove-hook 'modus-themes-after-load-theme-hook #'eb-org-tweak-faces)))
+    (remove-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)))
 
 (provide 'eb-look)
