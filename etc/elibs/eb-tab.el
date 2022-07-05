@@ -27,20 +27,7 @@
                 mpv-pause :help "Toggle playback")
     (mpv-prev menu-item ,(eb-look--position-item eb-media-mpv-next-button)
               mpv-playlist-next :help "Next playlist entry")
-    ,eb-tab-format-separator
-    (emms-string menu-item ,(when (boundp 'emms-mode-line-string)
-                              emms-mode-line-string)
-                 nil)
-    (emms-playing-time menu-item ,(when (boundp 'emms-playing-time-string)
-                                    emms-playing-time-string)
-                       nil)
-    (org-timer menu-item ,(when (boundp 'org-timer-mode-line-string)
-                            org-timer-mode-line-string)
-               nil)
-    (notifications menu-item ,(string-trim-right (format-mode-line eb-tab-notifications)) nil)
-    (appointments menu-item ,(when (boundp 'appt-mode-string)
-                               appt-mode-string)
-                  nil)))
+    (notifications menu-item ,(string-trim-right (format-mode-line eb-tab-notifications)) nil)))
 
 ;;;###autoload
 (defun eb-tab-format-center ()
@@ -67,7 +54,13 @@
 ;;;###autoload
 (defun eb-tab-format-right ()
   "Produces menu items corresponding to the right side of the tab bar."
-  `((weather menu-item ,eb-desktop-display-weather-string nil)
+  `((org-timer menu-item ,(when (boundp 'org-timer-mode-line-string)
+                            org-timer-mode-line-string)
+               nil)
+    (appointments menu-item ,(when (boundp 'appt-mode-string)
+                               appt-mode-string)
+                  nil)
+    (weather menu-item ,eb-desktop-display-weather-string nil)
     (volume menu-item ,eb-desktop-display-volume-string nil)
     (battery menu-item ,(when (boundp 'battery-mode-line-string)
                           battery-mode-line-string)
