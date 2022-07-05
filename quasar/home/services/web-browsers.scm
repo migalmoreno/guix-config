@@ -464,7 +464,17 @@
                 ,#~""
                 (define-configuration (nyxt/certificate-exception-mode:certificate-exception-mode
                                        nyxt/auto-mode:auto-mode)
-                  ((visible-in-status-p nil)))))
+                  ((visible-in-status-p nil)))
+                ,#~""
+                (sera:export-always 'eval-in-emacs)
+                (defun eval-in-emacs (&rest s-exps)
+                       "Evaluate S-EXPS with `emacsclient'."
+                       (let ((s-exps-string (str:replace-all
+                                             "nyxt::" "" (write-to-string
+                                                          `(progn ,@s-exps) :case :downcase))))
+                         (format *error-output* "Sending to Emacs:~%~a~%" s-exps-string)
+                         (uiop:run-program
+                          (list "emacsclient" "-e" s-exps-string))))))
              (auto-mode-rules-lisp
               '((((match-host "wikipedia.org") :included (nyxt/style-mode:dark-mode)))))))
    (elisp-configuration-service

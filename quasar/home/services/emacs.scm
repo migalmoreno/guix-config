@@ -938,16 +938,6 @@
     ,tab-service
     ,project-service
     ,structures-service
-    ,(nyxt-configuration-service
-      `((sera:export-always 'eval-in-emacs)
-        (defun eval-in-emacs (&rest s-exps)
-          "Evaluate S-EXPS with `emacsclient'."
-          (let ((s-exps-string (str:replace-all
-                                "nyxt::" "" (write-to-string
-                                             `(progn ,@s-exps) :case :downcase))))
-            (format *error-output* "Sending to Emacs:~%~a~%" s-exps-string)
-            (uiop:run-program
-             (list "emacsclient" "-e" s-exps-string))))))
     ,(service home-emacs-service-type
              (home-emacs-configuration
               (package
