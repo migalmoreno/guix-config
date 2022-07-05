@@ -28,6 +28,13 @@
    (simple-service 'add-kodi-envs
                    home-environment-variables-service-type
                    '(("KODI_DATA" . "$XDG_DATA_HOME/kodi")))
+   (simple-service 'home-mpv-xdg
+                   home-xdg-mime-applications-service-type
+                   (home-xdg-mime-applications-configuration
+                    (default
+                     '((video/mp4 . mpv.desktop)
+                       (video/mkv . mpv.desktop)
+                       (audio/mp3 . mpv.desktop)))))
    (service home-mpv-service-type
             (home-mpv-configuration
              (default-options
@@ -83,6 +90,7 @@
         (define-key map "Mw" 'eb-media-mpv-kill-url))
        (define-key mode-specific-map "m" 'eb-media-mpv-set-transient-map)
       (eb-media-mpv-mode-line-mode)
+      (add-hook 'mpv-on-exit-hook 'eb-media-mpv-mode-line-clear)
       (with-eval-after-load 'mpv
         (custom-set-variables
          '(mpv-seek-step 3)))

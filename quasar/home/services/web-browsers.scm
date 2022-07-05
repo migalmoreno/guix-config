@@ -5,6 +5,7 @@
   #:use-module (efimerspan packages web-browsers)
   #:use-module (gnu home-services base)
   #:use-module (gnu home services)
+  #:use-module (gnu home services xdg)
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages web-browsers)
@@ -374,6 +375,26 @@
 
 (define (nyxt-service)
   (list
+   (simple-service
+    'home-nyxt-xdg
+    home-xdg-mime-applications-service-type
+    (home-xdg-mime-applications-configuration
+     (default
+      '((x-scheme-handler/http . nyxt.desktop)
+        (x-scheme-handler/https . nyxt.desktop)
+        (x-scheme-handler/about . nyxt.desktop)))
+     (desktop-entries
+      (let ((nyxt-file (format #f "~a/src/nyxt/build-scripts/nyxt.scm" (getenv "HOME"))))
+        (if (file-exists? nyxt-file)
+            (list
+             (xdg-desktop-entry
+              (file "nyxt-dev")
+              (name "Nyxt Development")
+              (type 'application)
+              (config
+               `((exec . ,(format #f "guix shell -D -f ~a -- ~a" nyxt-file
+                                  (string-append ((compose dirname dirname) nyxt-file) "/nyxt")))))))
+            '())))))
    routing-service
    appearance-service
    engines-service
@@ -458,52 +479,73 @@
       (with-eval-after-load 'eb-web
         (custom-set-variables
          '(eb-web-nyxt-development-p nil)
-         '(eb-web-nyxt-startup-threshold 5)))))))
+         '(eb-web-nyxt-startup-threshold 8)))))))
 
 (define* (web-service #:key alt-browser-p)
-  (list
-   (simple-service
-    'web-environment-variables
-    home-environment-variables-service-type
-    `(("BROWSER" . #t)))
-   (elisp-configuration-service
-    `((add-hook 'eww-mode-hook 'eb-web-eww-mode)
-      (with-eval-after-load 'eww
-        (custom-set-variables
-         '(eww-search-prefix "https://search.sethforprivacy.com/search?q=")))
-      ,#~""
-      (with-eval-after-load 'embark
-        (define-key embark-bookmark-map "c" 'eb-web--jump-to-bookmark-alt))
-      ,#~""
-      (with-eval-after-load 'browse-url
-        (custom-set-variables
-         '(browse-url-generic-program (if-let ((file (expand-file-name
-                                                      "nyxt-dev.desktop"
-                                                      (concat (xdg-data-home)
-                                                              "/applications/")))
-                                               (browser (not (getenv "BROWSER"))))
-                                              (and (file-exists-p file)
-                                                   (gethash "Exec" (xdg-desktop-read-file file)))
-                                              (getenv "BROWSER")))
-         '(browse-url-browser-function 'browse-url-xdg-open)
-         '(browse-url-chromium-arguments '("--remove-tabsearch-button"
-                                           ;; "--incognito"
-                                           ;; "--blink-settings=imagesEnabled=false"
-                                           "--show-avatar-button=never"))))
-      ,#~""
-      (let ((map mode-specific-map))
-        (define-key map "Wb" 'webpaste-paste-buffer)
-        (define-key map "Wr" 'webpaste-paste-region)
-        (define-key map "Wp" 'webpaste-paste-buffer-or-region)
-        (define-key map "Wt" 'eb-web-webpaste-text))
-      (with-eval-after-load 'webpaste
-        (custom-set-variables
-         '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
-         '(webpaste-paste-confirmation t))))
-    #:elisp-packages (append
-                      (when alt-browser-p
-                        (list
-                         ungoogled-chromium
-                         ublock-origin/chromium))
-                      (list emacs-webpaste
-                            emacs-nginx-mode)))))
+  (let ((chromium-flags (list "--remove-tabsearch-button"
+                              "--incognito"
+                              "--blink-settings=imagesEnabled=false"
+                              "--show-avatar-button=never")))
+    (list
+     (simple-service
+      'web-environment-variables
+      home-environment-variables-service-type
+      `(("BROWSER" . #t)))
+     (if alt-browser-p
+         (simple-service
+          'home-chromium-xdg
+          home-xdg-mime-applications-service-type
+          (home-xdg-mime-applications-configuration
+           (desktop-entries
+            (list
+             (xdg-desktop-entry
+              (file "chromium")
+              (name "Chromium")
+              (type 'application)
+              (config
+               `((exec . ,#~(string-append
+                             #$(file-append ungoogled-chromium "/bin/chromium")
+                             " "
+                             #$(string-join chromium-flags)
+                             " %U"))
+                 (terminal . #f)
+                 (comment . "Access the Internet"))))))))
+         '())
+     (elisp-configuration-service
+      `((add-hook 'eww-mode-hook 'eb-web-eww-mode)
+        (with-eval-after-load 'eww
+                              (custom-set-variables
+                               '(eww-search-prefix "https://search.sethforprivacy.com/search?q=")))
+        ,#~""
+        (with-eval-after-load 'embark
+                              (define-key embark-bookmark-map "c" 'eb-web--jump-to-bookmark-alt))
+        ,#~""
+        (with-eval-after-load 'browse-url
+                              (custom-set-variables
+                               '(browse-url-generic-program (if-let ((file (expand-file-name
+                                                                            "nyxt-dev.desktop"
+                                                                            (concat (xdg-data-home)
+                                                                                    "/applications/")))
+                                                                     (browser (not (getenv "BROWSER"))))
+                                                                    (and (file-exists-p file)
+                                                                         (gethash "Exec" (xdg-desktop-read-file file)))
+                                                                    (getenv "BROWSER")))
+                               '(browse-url-browser-function 'browse-url-xdg-open)
+                               '(browse-url-chromium-arguments ',chromium-flags)))
+        ,#~""
+        (let ((map mode-specific-map))
+          (define-key map "Wb" 'webpaste-paste-buffer)
+          (define-key map "Wr" 'webpaste-paste-region)
+          (define-key map "Wp" 'webpaste-paste-buffer-or-region)
+          (define-key map "Wt" 'eb-web-webpaste-text))
+        (with-eval-after-load 'webpaste
+                              (custom-set-variables
+                               '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
+                               '(webpaste-paste-confirmation t))))
+      #:elisp-packages (append
+                        (when alt-browser-p
+                          (list
+                           ungoogled-chromium
+                           ublock-origin/chromium))
+                        (list emacs-webpaste
+                              emacs-nginx-mode))))))

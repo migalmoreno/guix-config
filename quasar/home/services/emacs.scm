@@ -15,8 +15,9 @@
   #:use-module (gnu packages imagemagick)
   #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages aspell)
-  #:use-module (gnu home-services base)
   #:use-module (gnu home services)
+  #:use-module (gnu home services xdg)
+  #:use-module (gnu home-services base)
   #:use-module (gnu home-services emacs)
   #:use-module (gnu home-services-utils)
   #:use-module (flat packages emacs)
@@ -985,4 +986,18 @@
     ,(simple-service 'add-emacs-envs
                      home-environment-variables-service-type
                      `(("VISUAL" . ,(file-append emacs-native-comp "/bin/emacsclient"))
-                       ("EDITOR" . ,(file-append emacs-native-comp "/bin/emacsclient"))))))
+                       ("EDITOR" . ,(file-append emacs-native-comp "/bin/emacsclient"))))
+    ,(simple-service 'home-emacs-xdg
+                     home-xdg-mime-applications-service-type
+                     (home-xdg-mime-applications-configuration
+                      (default
+                       '((x-scheme-handler/unknown . emacsclient.desktop)
+                         (image/png . emacsclient.desktop)
+                         (image/jpg . emacsclient.desktop)
+                         (image/jpeg . emacsclient.desktop)
+                         (application/pdf . emacsclient.desktop)
+                         (application/desktop . emacsclient.desktop)
+                         (application/json . emacsclient.desktop)
+                         (text/javascript . emacsclient.desktop)
+                         (text/html . emacsclient.desktop)
+                         (text/css . emacsclient.desktop)))))))

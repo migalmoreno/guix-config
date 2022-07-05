@@ -1,5 +1,6 @@
 (define-module (quasar home services virtualization)
   #:use-module (gnu home-services base)
+  #:use-module (gnu home services xdg)
   #:use-module (gnu packages virtualization)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages disk)
@@ -13,4 +14,15 @@
                                           bridge-utils
                                           parted
                                           dosfstools
-                                          wireguard-tools))))
+                                          wireguard-tools))
+   (simple-service 'home-virtualization-xdg
+                   home-xdg-mime-applications-service-type
+                   (home-xdg-mime-applications-configuration
+                    (desktop-entries
+                     (list
+                      (xdg-desktop-entry
+                       (file "virt-manager")
+                       (name "Virtual Machine Manager")
+                       (type 'application)
+                       (config
+                        '((exec . "virt-manager --connect qemu:///session"))))))))))
