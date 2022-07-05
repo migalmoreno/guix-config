@@ -195,16 +195,16 @@
             :title (nyxt::modes-string buffer)
             (:raw (format-status-modes buffer (window status))))))))
      ,#~""
-     (define-mode explicit-ui-mode ()
-       "Applies explicit buttons and interfaces to the status bar.")
+     (define-mode graphical-status-mode ()
+       "Applies graphical buttons and interfaces to the status bar.")
      ,#~""
-     (defmethod enable ((mode explicit-ui-mode) &key)
+     (defmethod enable ((mode graphical-status-mode) &key)
        (setf (format-status (current-window))
              (lambda (status)
                (str:concat (custom-format-buttons status)
                            (custom-formatter status)))))
      ,#~""
-     (defmethod disable ((mode explicit-ui-mode) &key)
+     (defmethod disable ((mode graphical-status-mode) &key)
        (setf (format-status (current-window)) 'custom-formatter))
      ,#~""
      (define-configuration status-buffer
@@ -325,7 +325,6 @@
                       :blocklist '(:path (:contains (not "video"))))
           (make-route '(match-domain "reddit.com")
                       :redirect "teddit.namazso.eu"
-                      :instances 'make-teddit-instances
                       :blocklist '(:path (:contains (not "/comments"))))
           (make-route (match-host "news.ycombinator.com")
                       :blocklist '(:path (:contains (not "item"))))
@@ -352,7 +351,6 @@
                                    `(transmission-add ,(quri:render-uri (url data))))))
           (make-route '(match-domain "youtube.com" "youtu.be")
                       :redirect "invidious.namazso.eu"
-                      :instances 'make-invidious-instances
                       :blocklist '(:path (:starts ("/c/"))))
           (make-route (match-domain "medium.com")
                       :redirect "scribe.rip")
@@ -435,6 +433,10 @@
                   "M-h f" 'describe-function
                   "M-h c" 'describe-class
                   "M-h k" 'describe-key)
+                (defmethod files:resolve ((profile nyxt-profile) (file nyxt:history-file))
+                  "Store history in a temporary directory."
+                  (sera:path-join (nfiles:expand (make-instance 'nyxt-temporary-directory))
+                                  (uiop:relativize-pathname-directory (call-next-method))))
                 (define-mode custom-keymap-mode ()
                   "Dummy mode for the custom key bindings in `*custom-keymap*.'"
                   ((keymap-scheme (keymap:make-scheme
