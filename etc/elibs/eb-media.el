@@ -263,8 +263,8 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
                               (format-time-string "%T" time t))
                              (time
                               (format-time-string "%M:%S" time)))))
-    (if-let* ((playing-time (mpv-get-property "playback-time"))
-              (total (mpv-get-property "duration"))
+    (if-let* ((playing-time (ignore-errors (mpv-get-property "playback-time")))
+              (total (ignore-errors (mpv-get-property "duration")))
               (formatted-playing-time (transform-time playing-time))
               (formatted-total (transform-time total)))
         (setq eb-media-mpv-playing-time-string
@@ -304,9 +304,9 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
                                          'false)
                                   (progn
                                     (setq eb-media-mpv-toggle-button "")
-                                    (setq eb-media-mpv-paused-p t))
+                                    (setq eb-media-mpv-paused-p nil))
                                 (setq eb-media-mpv-toggle-button "")
-                                (setq eb-media-mpv-paused-p nil))))
+                                (setq eb-media-mpv-paused-p t))))
                 (compute-title ()
                                (let* ((title (ignore-errors
                                                (mpv-get-property "media-title")))
