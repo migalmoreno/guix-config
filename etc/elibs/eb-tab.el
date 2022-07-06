@@ -25,7 +25,7 @@
               mpv-playlist-prev :help "Previous playlist entry")
     (mpv-toggle menu-item ,(eb-look--position-item eb-media-mpv-toggle-button)
                 mpv-pause :help "Toggle playback")
-    (mpv-prev menu-item ,(eb-look--position-item eb-media-mpv-next-button)
+    (mpv-next menu-item ,(eb-look--position-item eb-media-mpv-next-button)
               mpv-playlist-next :help "Next playlist entry")
     (mpv-playing-time menu-item ,eb-media-mpv-playing-time-string nil)
     (notifications menu-item ,(string-trim-right (format-mode-line eb-tab-notifications)) nil)))
