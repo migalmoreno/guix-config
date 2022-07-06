@@ -17,22 +17,44 @@ from which to play content."
   :type 'list
   :group 'eb-media)
 
-;;;###autoload
 (defcustom eb-media-music-dir (expand-file-name "~/music")
   "Specifies the preferred music directory file system path."
   :type 'directory
   :group 'eb-media)
 
-;;;###autoload
 (defcustom eb-media-video-dir (expand-file-name "~/videos")
   "Specifies the preferred videos directory file system path."
   :type 'directory
   :group 'eb-media)
 
+(defcustom eb-media-mpv-started-hook nil
+  "Hook run when an MPV process starts."
+  :group 'eb-media
+  :type 'hook)
+
+(defcustom eb-media-mpv-paused-hook nil
+  "Hook run when an MPV process is paused or resumed."
+  :group 'eb-media
+  :type 'hook)
+
+(defcustom eb-media-mpv-finished-hook nil
+  "Hook run when an MPV process is stopped by the user."
+  :group 'eb-media
+  :type 'hook)
+
 (defvar eb-media-mpv-mode-line-string nil)
 (defvar eb-media-mpv-toggle-button nil)
 (defvar eb-media-mpv-prev-button nil)
 (defvar eb-media-mpv-next-button nil)
+
+(defvar eb-media-mpv-playing-time-string "")
+(defvar eb-media-mpv-playing-time 0
+  "Time elapsed for the current MPV playback.")
+(defvar eb-media-mpv-playing-time-display-timer nil)
+(defvar eb-media-mpv-paused-p nil
+  "Whether the current MPV playback is paused or not.")
+(defvar eb-media-mpv-stopped-p nil
+  "Whether the current MPV playback was stopped by the user.")
 
 (cl-defun eb-media--transform-url (url &key (original nil))
   "Transform URL to its currently set proxy in `eb-media-privacy-alts'.
@@ -207,17 +229,62 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
           ("Enqueue" (apply #'mpv-enqueue url extra-args)))
       (apply #'mpv-start url extra-args))))
 
+(defun eb-media-mpv-playing-time-start ()
+  "Sets up the display of mpv playback time."
+  (unless eb-media-mpv-playing-time-display-timer
+    (run-at-time 1 nil (lambda ()
+                         (setq eb-media-mpv-playing-time-display-timer
+                               (run-at-time t 1 #'eb-media-mpv-playing-time-display))))))
+
+(defun eb-media-mpv-playing-time-pause ()
+  "Pause displaying the current mpv playback time."
+  (if eb-media-mpv-paused-p
+      (eb-media-mpv-playing-time-stop)
+    (unless eb-media-mpv-playing-time-display-timer
+      (setq eb-media-mpv-playing-time-display-timer
+            (run-at-time t 1 #'eb-media-mpv-playing-time-display)))))
+
+(defun eb-media-mpv-playing-time-stop ()
+  "Removes the playing time of mpv playback."
+  (if (or (not eb-media-mpv-paused-p)
+          eb-media-mpv-stopped-p)
+      (progn
+        (setq eb-media-mpv-playing-time-string "")
+        (force-mode-line-update t)))
+  (when eb-media-mpv-playing-time-display-timer
+    (cancel-timer eb-media-mpv-playing-time-display-timer)
+    (setq eb-media-mpv-playing-time-display-timer nil)))
+
+(defun eb-media-mpv-playing-time-display ()
+  "Displays the current MPV playing time."
+  (cl-flet ((transform-time (time)
+                            (cond
+                             ((and time (> time 3600))
+                              (format-time-string "%T" time t))
+                             (time
+                              (format-time-string "%M:%S" time)))))
+    (if-let* ((playing-time (mpv-get-property "playback-time"))
+              (total (mpv-get-property "duration"))
+              (formatted-playing-time (transform-time playing-time))
+              (formatted-total (transform-time total)))
+        (setq eb-media-mpv-playing-time-string
+              (format " %s/%s " formatted-playing-time formatted-total))
+      (setq eb-media-mpv-playing-time-string ""))
+    (force-mode-line-update t)))
+
 (defun eb-media-mpv-mode-line-clear ()
   "Clears the mode line after the mpv process exits."
   (interactive)
+  (setq eb-media-mpv-stopped-p t)
   (setq eb-media-mpv-mode-line-string nil)
   (setq eb-media-mpv-toggle-button nil)
   (setq eb-media-mpv-prev-button nil)
   (setq eb-media-mpv-next-button nil)
+  (run-hooks 'eb-media-mpv-finished-hook)
   (force-mode-line-update t))
 
-(defun eb-media-mpv-mode-line-update (&optional result)
-  "Updates the mode line information with current mpv playback information."
+(defun eb-media-mpv-event-handler (&optional result)
+  "Handles the mpv events from RESULT and sets the mode line appropriately."
   (interactive)
   (if (mpv-live-p)
       (cl-flet ((playlist-p ()
@@ -235,8 +302,11 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
                           (prog1
                               (if (equal (mpv--with-json (mpv-get-property "pause"))
                                          'false)
-                                  (setq eb-media-mpv-toggle-button "")
-                                (setq eb-media-mpv-toggle-button ""))))
+                                  (progn
+                                    (setq eb-media-mpv-toggle-button "")
+                                    (setq eb-media-mpv-paused-p t))
+                                (setq eb-media-mpv-toggle-button "")
+                                (setq eb-media-mpv-paused-p nil))))
                 (compute-title ()
                                (let* ((title (ignore-errors
                                                (mpv-get-property "media-title")))
@@ -257,10 +327,12 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
               (pcase (alist-get 'event result)
                 ("file-loaded"
                  (playlist-p)
-                 (run-at-time 2 nil (lambda ()
+                 (setq eb-media-mpv-stopped-p nil)
+                 (run-at-time 1 nil (lambda ()
                                       (compute-title)
                                       (paused-p)
-                                      (force-mode-line-update t))))
+                                      (force-mode-line-update t)))
+                 (run-hooks 'eb-media-mpv-started-hook))
                 ((or "pause" "unpause" "tracks-changed")
                  (paused-p))
                 ((or "end-file" "shutdown")
@@ -293,6 +365,12 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
              (not (equal mpv--process
                          emms-player-mpv-proc)))
     (kill-process mpv--process))
+  (with-timeout
+      (0.5 (error "Failed to kill mpv"))
+    (while (and (mpv-live-p)
+                (not (equal mpv--process
+                            emms-player-mpv-proc)))
+      (sleep-for 0.05)))
   (setq mpv--process nil)
   (setq mpv--queue nil))
 
@@ -328,7 +406,7 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
    (lambda (_proc string)
      (mpv--tq-filter mpv--queue string)))
   (run-hooks 'mpv-on-start-hook)
-  (eb-media-mpv-mode-line-update)
+  (eb-media-mpv-event-handler)
   t)
 
 (defun eb-media-mpv--filter-processes ()
@@ -347,20 +425,6 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
   "Sets BACKGROUND and FOREGROUND colors in current mpv process."
   (mpv-set-property "background" background)
   (mpv-set-property "osd-color" foreground))
-
-(defun eb-media-mpv-current-time ()
-  (interactive)
-  (cl-flet ((transform-time (time)
-                            (cond
-                             ((and time (> time 3600))
-                              (format-time-string "%T" time t))
-                             (time
-                              (format-time-string "%M:%S" time)))))
-    (let* ((time (mpv-get-property "playback-time"))
-           (duration (mpv-get-property "duration"))
-           (formatted-time (transform-time time))
-           (formatted-duration (transform-time duration)))
-      (message "%s/%s" formatted-time formatted-duration))))
 
 ;;;###autoload
 (defun eb-media-mpv-kill-url (original)
@@ -482,6 +546,19 @@ DL-TYPE is the download type, see `ytdl-download-types'."
   (ytdl--refresh-list)
   (ytdl-show-list))
 
+(define-minor-mode eb-media-mpv-playing-time-mode
+  "Displays the current MPV playing time."
+  :global t :group 'eb-media
+  (if eb-media-mpv-playing-time-mode
+      (progn
+        (add-hook 'eb-media-mpv-started-hook #'eb-media-mpv-playing-time-start)
+        (add-hook 'eb-media-mpv-paused-hook #'eb-media-mpv-playing-time-pause)
+        (add-hook 'eb-media-mpv-finished-hook #'eb-media-mpv-playing-time-stop))
+    (eb-media-mpv-playing-time-stop)
+    (remove-hook 'eb-media-mpv-started-hook #'eb-media-mpv-playing-time-start)
+    (remove-hook 'eb-media-mpv-paused-hook #'eb-media-mpv-playing-time-pause)
+    (remove-hook 'eb-media-mpv-finished-hook #'eb-media-mpv-playing-time-stop)))
+
 ;;;###autoload
 (define-minor-mode eb-media-mpv-mode-line-mode
   "Displays the current mpv playback information in the mode line."
@@ -490,12 +567,12 @@ DL-TYPE is the download type, see `ytdl-download-types'."
   (if eb-media-mpv-mode-line-mode
       (progn
         (setq eb-media-mpv-mode-line-string
-              (run-at-time 2 nil #'eb-media-mpv-mode-line-update))
-        (add-hook 'mpv-on-event-hook #'eb-media-mpv-mode-line-update))
+              (run-at-time 2 nil #'eb-media-mpv-event-handler))
+        (add-hook 'mpv-on-event-hook #'eb-media-mpv-event-handler))
     (setq eb-media-mpv-mode-line-string nil
           eb-media-mpv-prev-button nil
           eb-media-mpv-toggle-button nil
           eb-media-mpv-next-button nil)
-    (remove-hook 'mpv-on-event-hook #'eb-media-mpv-mode-line-update)))
+    (remove-hook 'mpv-on-event-hook #'eb-media-mpv-event-handler)))
 
 (provide 'eb-media)
