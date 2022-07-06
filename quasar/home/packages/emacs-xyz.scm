@@ -1,5 +1,5 @@
 (define-module (quasar home packages emacs-xyz)
-  #:use-module (efimerspan packages emacs-xyz)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (guix packages)
   #:use-module (guix build-system)
   #:use-module (guix build-system emacs)

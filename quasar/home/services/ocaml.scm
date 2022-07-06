@@ -1,6 +1,6 @@
 (define-module (quasar home services ocaml)
   #:use-module (quasar home)
-  #:use-module (efimerspan home services emacs)
+  #:use-module (conses home services emacs)
   #:use-module (gnu packages ocaml)
   #:use-module (gnu packages base)
   #:use-module (gnu packages commencement)

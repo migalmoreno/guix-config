@@ -1,6 +1,6 @@
 (define-module (quasar home services clojure)
-  #:use-module (efimerspan home services emacs)
-  #:use-module (efimerspan packages emacs-xyz)
+  #:use-module (conses home services emacs)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (nongnu packages clojure)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)

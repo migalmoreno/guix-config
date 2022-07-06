@@ -1,6 +1,6 @@
 (define-module (quasar home services tex)
-  #:use-module (efimerspan home services emacs)
-  #:use-module (efimerspan home services tex)
+  #:use-module (conses home services emacs)
+  #:use-module (conses home services tex)
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages tex)

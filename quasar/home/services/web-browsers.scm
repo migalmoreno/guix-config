@@ -1,8 +1,8 @@
 (define-module (quasar home services web-browsers)
   #:use-module (quasar home)
-  #:use-module (efimerspan home services web-browsers)
-  #:use-module (efimerspan home services emacs)
-  #:use-module (efimerspan packages web-browsers)
+  #:use-module (conses home services web-browsers)
+  #:use-module (conses home services emacs)
+  #:use-module (conses packages web-browsers)
   #:use-module (gnu home-services base)
   #:use-module (gnu home services)
   #:use-module (gnu home services xdg)
@@ -230,6 +230,7 @@
            (engines:startpage
             :shortcut "sp")
            (engines:sourcehut
+            :fallback-url (quri:uri "https://git.sr.ht")
             :shortcut "sh")
            (engines:libgen
             :shortcut "lg"

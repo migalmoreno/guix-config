@@ -1,5 +1,5 @@
 (define-module (quasar home services shells)
-  #:use-module (efimerspan home services emacs)
+  #:use-module (conses home services emacs)
   #:use-module (gnu home-services shells)
   #:use-module (gnu home-services base)
   #:use-module (gnu home)

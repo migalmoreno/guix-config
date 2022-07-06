@@ -1,5 +1,5 @@
 (define-module (quasar home services gtk)
-  #:use-module (efimerspan home services gtk)
+  #:use-module (conses home services gtk)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)
   #:use-module (gnu packages gtk)

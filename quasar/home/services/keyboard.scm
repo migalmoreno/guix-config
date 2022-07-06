@@ -1,6 +1,6 @@
 (define-module (quasar home services keyboard)
-  #:use-module (efimerspan home services keyboard)
-  #:use-module (efimerspan home services emacs)
+  #:use-module (conses home services keyboard)
+  #:use-module (conses home services emacs)
   #:use-module (gnu services)
   #:use-module (gnu system keyboard)
   #:use-module (gnu home-services keyboard)

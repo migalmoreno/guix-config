@@ -1,6 +1,6 @@
 (define-module (quasar home services mail)
   #:use-module (quasar home)
-  #:use-module (efimerspan home services emacs)
+  #:use-module (conses home services emacs)
   #:use-module (gnu services)
   #:use-module (gnu home-services mail)
   #:use-module (gnu packages mail)
@@ -194,4 +194,5 @@
          '(smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail"))
         (setq smtpmail-smtp-server (password-store-get-field "mail/mail.gandi.net" "host")
               smtpmail-default-smtp-server (password-store-get-field "mail/mail.gandi.net" "host"))))
-    #:elisp-packages (list emacs-ebdb))))
+    #:elisp-packages (list emacs-ebdb
+                           emacs-debbugs))))

@@ -1,6 +1,6 @@
 (define-module (quasar home services bittorrent)
-  #:use-module (efimerspan home services emacs)
-  #:use-module (efimerspan home services bittorrent)
+  #:use-module (conses home services emacs)
+  #:use-module (conses home services bittorrent)
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
   #:export (transmission-service))

@@ -1,6 +1,6 @@
 (define-module (quasar home services security)
   #:use-module (quasar home)
-  #:use-module (efimerspan home services emacs)
+  #:use-module (conses home services emacs)
   #:use-module (gnu home-services gnupg)
   #:use-module (gnu home-services password-utils)
   #:use-module (gnu home-services base)
@@ -17,9 +17,6 @@
 
 (define (ssh-service)
   (list
-   (simple-service 'add-ssh-envs
-                   home-environment-variables-service-type
-                   '(("SSH_AUTHSOCK" . "$(gpgconf --list-dirs agent-ssh-socket)")))
    (service home-ssh-service-type
             (home-ssh-configuration
              (default-host "*")
@@ -49,6 +46,8 @@
              (gpg-agent-config
               (home-gpg-agent-configuration
                (ssh-agent? #t)
+               (ssh-keys
+                '(("A23B61B2897F524D3D3410E1180423144F1DDB4E")))
                (pinentry-flavor 'emacs)
                (extra-config
                 '((allow-preset-passphrase . #t)

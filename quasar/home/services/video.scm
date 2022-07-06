@@ -1,9 +1,9 @@
 (define-module (quasar home services video)
   #:use-module (quasar home packages emacs-xyz)
-  #:use-module (efimerspan home services web-browsers)
-  #:use-module (efimerspan home services emacs)
-  #:use-module (efimerspan home services gtk)
-  #:use-module (efimerspan packages emacs-xyz)
+  #:use-module (conses home services web-browsers)
+  #:use-module (conses home services emacs)
+  #:use-module (conses home services gtk)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home-services video)
@@ -89,7 +89,8 @@
         (define-key map "Ma" 'eb-media-mpv-seek-start)
         (define-key map "Mw" 'eb-media-mpv-kill-url))
        (define-key mode-specific-map "m" 'eb-media-mpv-set-transient-map)
-      (eb-media-mpv-mode-line-mode)
+       (eb-media-mpv-mode-line-mode)
+       (eb-media-mpv-playing-time-mode)
       (add-hook 'mpv-on-exit-hook 'eb-media-mpv-mode-line-clear)
       (with-eval-after-load 'mpv
         (custom-set-variables
