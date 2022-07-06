@@ -2,13 +2,13 @@
 #+title: Quasar
 The nucleus of my computing, consisting of a set of configuration files centered around [[https://guix.gnu.org/][GNU Guix]], [[https://www.gnu.org/software/emacs/][GNU Emacs]], and the [[https://nyxt.atlas.engineer/][Nyxt browser]], all of which are structured as per [[https://guix.gnu.org/en/manual/devel/en/guix.html#Home-Configuration][Home Configuration]] and [[https://guix.gnu.org/manual/en/html_node/System-Configuration.html][System Configuration]] to ensure a high level of reproducibility.
 
-I also provide some custom services and packages under =efimerspan/= which you might find useful. To use them, make sure to add this channel to your Guix channels list at =~/.config/guix/channels.scm=.
+I also provide some custom services and packages under =conses/= which you might find useful. To use them, make sure to add this channel to your Guix channels list at =~/.config/guix/channels.scm=.
 
 #+begin_src scheme
 (cons*
  (channel
   (name 'quasar)
-  (url "https://github.com/efimerspan/quasar")
+  (url "https://git.sr.ht/~conses/quasar")
   (introduction
    (make-channel-introduction
     "d985f851bebae48eaee848e0ff117e254dcf7736"
