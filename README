@@ -11,9 +11,9 @@ I also provide some custom services and packages under =conses/= which you might
   (url "https://git.sr.ht/~conses/quasar")
   (introduction
    (make-channel-introduction
-    "d985f851bebae48eaee848e0ff117e254dcf7736"
+    "526cb82eda897f98deab783880eea23f510947b9"
     (openpgp-fingerprint
-     "0E5C 5D11 59DF D6CF F6BC  1FA9 C1E4 192C 0B23 87D0"))))
+     "4956 DAC8 B077 15EA 9F14  E13A EF1F 69BF 5F23 F458"))))
  %default-channels)
 #+end_src
 
