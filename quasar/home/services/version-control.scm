@@ -21,7 +21,7 @@
               `((user
                  ((name . ,(password-store-get "vc/sourcehut/username"))
                   (email . ,(password-store-get "vc/sourcehut/email"))
-                  (signing-key . "E89CFD95")))
+                  (signing-key . "5F23F458")))
                 (core
                  ((editor . emacsclient)
                   (excludesfile . "~/.config/git/gitignore")))
