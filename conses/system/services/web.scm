@@ -19,7 +19,8 @@
    (shepherd-service
     (provision '(whoogle-search))
     (start #~(make-forkexec-constructor
-              (list (string-append #$whoogle-search "/bin/whoogle-search"))
+              (list (string-append #$(whoogle-configuration-package config)
+                                   "/bin/whoogle-search"))
               #:environment-variables
               (append (list "CONFIG_VOLUME=/var/cache/whoogle-search")
                       (default-environment-variables))))
