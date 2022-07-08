@@ -131,8 +131,8 @@
       (with-eval-after-load 'ytdl
         (custom-set-variables
          '(ytdl-download-folder (xdg-user-dir "DOWNLOAD"))
-         '(ytdl-music-folder eb-media-music-dir)
-         '(ytdl-video-folder eb-media-video-dir)
+         '(ytdl-music-folder (expand-file-name "~/music"))
+         '(ytdl-video-folder (expand-file-name "~/videos"))
          '(ytdl-mode-line nil)
          '(ytdl-music-extra-args '("-q" "-x" "--add-metadata" "--audio-format" "mp3"))
          '(ytdl-video-extra-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
