@@ -49,9 +49,7 @@
          '(gnus-thread-sort-functions
            '(gnus-thread-sort-by-most-recent-date
              (not gnus-thread-sort-by-number)))
-         ;; '(gnus-parameters
-         ;;   '((".*"
-         ;;      (gcc-self . "Sent"))))
+         '(gnus-parameters '())
          '(gnus-directory "~/.cache/gnus/News")
          '(gnus-home-directory (locate-user-emacs-file "gnus"))
          '(gnus-cache-directory "~/.cache/gnus/News/cache/")
@@ -153,7 +151,7 @@
         (custom-set-variables
          '(ebdb-sources `(,(expand-file-name "contacts" (xdg-user-dir "DOCUMENTS"))))
          '(ebdb-default-country nil)
-         '(ebdb-default-window-size)
+         '(ebdb-default-window-size 0.2)
          '(ebdb-dedicated-window 'ebdb)
          '(ebdb-mail-avoid-redundancy t)
          '(ebdb-complete-mail 'capf)
