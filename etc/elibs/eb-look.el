@@ -190,7 +190,7 @@
     (mapc (lambda (timer)
             (when timer
               (cancel-timer timer)))
-          '(eb-look-light-theme-timer eb-look-dark-theme-timer))
+          (list eb-look-light-theme-timer eb-look-dark-theme-timer))
     (remove-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)))
 
 (provide 'eb-look)
