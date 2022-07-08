@@ -17,8 +17,8 @@
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages hardware)
   #:use-module (gnu packages rust-apps)
+  #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
-  #:use-module (flat packages emacs)
   #:export (pulseaudio-service
             exwm-service
             desktop-service))
@@ -66,7 +66,7 @@ EndSection
                             "[ $(tty) = /dev/tty1 ] && exec "
                             #$(program-file
                                "exwm-start"
-                               (xorg-start-command (xinitrc #:wm emacs-native-comp)
+                               (xorg-start-command (xinitrc #:wm emacs)
                                                    (xorg-configuration
                                                     (keyboard-layout (keyboard-layout "us"))
                                                     (extra-config
