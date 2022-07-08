@@ -92,7 +92,7 @@
            emacs-password-store
            emacs-dashboard
            emacs-hexrgb))
-    (home-page "https://git.sr.ht/~mt08gh/quasar")
+    (home-page "https://git.sr.ht/~conses/quasar")
     (synopsis "Various Emacs Lisp libraries.")
     (description "A set of Emacs Lisp libraries to enhance the functionality
  of some Emacs packages and built-in features.")
@@ -109,7 +109,7 @@
          (method git-fetch)
          (uri
           (git-reference
-           (url "https://git.sr.ht/~mt08gh/fdroid.el")
+           (url "https://git.sr.ht/~conses/fdroid.el")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
@@ -117,7 +117,7 @@
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-consult emacs-embark))
-      (home-page "https://git.sr.ht/~mt08gh/fdroid.el")
+      (home-page "https://git.sr.ht/~conses/fdroid.el")
       (synopsis "An Emacs interface to manage F-Droid repositories.")
       (description "fdroid.el is an Emacs interface to fdroidcl. Its purpose is to aid the
  management of F-Droid repository packages to be installed in an Android device from the comfort of Emacs.")
