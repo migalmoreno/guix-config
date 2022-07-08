@@ -230,7 +230,6 @@
            (engines:startpage
             :shortcut "sp")
            (engines:sourcehut
-            :fallback-url (quri:uri "https://git.sr.ht")
             :shortcut "sh")
            (engines:libgen
             :shortcut "lg"
@@ -269,6 +268,8 @@
            (engines:hacker-news
             :shortcut "hn"
             :search-type :all)
+           (engines:lobsters
+            :shortcut "lo")
            (engines:whoogle
             :shortcut "who"
             :base-search-url "http://localhost:5000/search?q=~a"
