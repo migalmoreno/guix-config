@@ -415,6 +415,7 @@
         (custom-set-variables
          '(history-length 1000)))
       ,#~""
+      (require 'orderless)
       (add-hook 'minibuffer-setup-hook 'cursor-intangible-mode)
       (with-eval-after-load 'minibuffer
         (setq minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt)
@@ -430,7 +431,7 @@
          '(read-buffer-completion-ignore-case t)
          '(read-extended-command-predicate 'command-completion-default-include-p)
          '(completion-cycle-threshold t)
-         '(completion-styles '(orderless))
+         '(completion-styles '(orderless basic))
          '(completion-category-overrides '((file (styles partial-completion))))))
       ,#~""
       (all-the-icons-completion-mode)
