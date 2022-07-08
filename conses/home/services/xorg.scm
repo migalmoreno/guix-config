@@ -318,7 +318,7 @@ in @var{config}, are available.  The result should be used in place of
   (define builder
     (let* ((name (package-name wm))
            (args (match name
-                   ((or "emacs-native-comp" "emacs")
+                   ((or "emacs-native-comp" "emacs" "emacs-next")
                     (list (file-append wm "/bin/emacs") "-mm" "--debug-init"))
                    (_ (list name)))))
       #~(system* #$@args)))
