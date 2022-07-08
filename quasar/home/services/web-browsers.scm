@@ -528,24 +528,24 @@
      (elisp-configuration-service
       `((add-hook 'eww-mode-hook 'eb-web-eww-mode)
         (with-eval-after-load 'eww
-                              (custom-set-variables
-                               '(eww-search-prefix "https://search.sethforprivacy.com/search?q=")))
+          (custom-set-variables
+           '(eww-search-prefix "https://search.sethforprivacy.com/search?q=")))
         ,#~""
         (with-eval-after-load 'embark
-                              (define-key embark-bookmark-map "c" 'eb-web--jump-to-bookmark-alt))
+          (define-key embark-bookmark-map "c" 'eb-web--jump-to-bookmark-alt))
         ,#~""
         (with-eval-after-load 'browse-url
-                              (custom-set-variables
-                               '(browse-url-generic-program (if-let ((file (expand-file-name
-                                                                            "nyxt-dev.desktop"
-                                                                            (concat (xdg-data-home)
-                                                                                    "/applications/")))
-                                                                     (browser (not (getenv "BROWSER"))))
-                                                                    (and (file-exists-p file)
-                                                                         (gethash "Exec" (xdg-desktop-read-file file)))
-                                                                    (getenv "BROWSER")))
-                               '(browse-url-browser-function 'browse-url-xdg-open)
-                               '(browse-url-chromium-arguments ',chromium-flags)))
+          (custom-set-variables
+           '(browse-url-generic-program (if-let ((file (expand-file-name
+                                                        "nyxt-dev.desktop"
+                                                        (concat (xdg-data-home)
+                                                                "/applications/")))
+                                                 (browser (not (getenv "BROWSER"))))
+                                                (and (file-exists-p file)
+                                                     (gethash "Exec" (xdg-desktop-read-file file)))
+                                                (getenv "BROWSER")))
+           '(browse-url-browser-function 'browse-url-xdg-open)
+           '(browse-url-chromium-arguments ',chromium-flags)))
         ,#~""
         (let ((map mode-specific-map))
           (define-key map "Wb" 'webpaste-paste-buffer)
@@ -553,9 +553,9 @@
           (define-key map "Wp" 'webpaste-paste-buffer-or-region)
           (define-key map "Wt" 'eb-web-webpaste-text))
         (with-eval-after-load 'webpaste
-                              (custom-set-variables
-                               '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
-                               '(webpaste-paste-confirmation t))))
+          (custom-set-variables
+           '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
+           '(webpaste-paste-confirmation t))))
       #:elisp-packages (append
                         (when alt-browser-p
                           (list
