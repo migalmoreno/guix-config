@@ -42,12 +42,19 @@ from which to play content."
   :group 'eb-media
   :type 'hook)
 
+(defcustom eb-media-mpv-seeked-hook nil
+  "Hook run when an MPV process is seeked forward or backward."
+  :group 'eb-media
+  :type 'hook)
+
 (defvar eb-media-mpv-mode-line-string nil)
 (defvar eb-media-mpv-toggle-button nil)
 (defvar eb-media-mpv-prev-button nil)
 (defvar eb-media-mpv-next-button nil)
 
 (defvar eb-media-mpv-playing-time-string "")
+(defvar eb-media-mpv-total-duration nil
+  "The current mpv playback total duration.")
 (defvar eb-media-mpv-playing-time 0
   "Time elapsed for the current MPV playback.")
 (defvar eb-media-mpv-playing-time-display-timer nil)
@@ -231,10 +238,11 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
 
 (defun eb-media-mpv-playing-time-start ()
   "Sets up the display of mpv playback time."
+  (setq eb-media-mpv-total-duration nil)
+  (setq eb-media-mpv-playing-time 0)
   (unless eb-media-mpv-playing-time-display-timer
-    (run-at-time 1 nil (lambda ()
-                         (setq eb-media-mpv-playing-time-display-timer
-                               (run-at-time t 1 #'eb-media-mpv-playing-time-display))))))
+    (setq eb-media-mpv-playing-time-display-timer
+          (run-at-time t 1 #'eb-media-mpv-playing-time-display))))
 
 (defun eb-media-mpv-playing-time-pause ()
   "Pause displaying the current mpv playback time."
@@ -251,101 +259,123 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
       (progn
         (setq eb-media-mpv-playing-time-string "")
         (force-mode-line-update t)))
-  (when eb-media-mpv-playing-time-display-timer
-    (cancel-timer eb-media-mpv-playing-time-display-timer)
-    (setq eb-media-mpv-playing-time-display-timer nil)))
+  (emms-cancel-timer eb-media-mpv-playing-time-display-timer)
+  (setq eb-media-mpv-playing-time-display-timer nil)
+  (setq eb-media-mpv-total-duration nil))
+
+(defun eb-media-mpv-playing-time-seek ()
+  "Seeks forward or backward in the displayed playing time."
+  (setq eb-media-mpv-playing-time (mpv-get-property "playback-time"))
+  (when (< eb-media-mpv-playing-time 0)
+    (setq eb-media-mpv-playing-time 0)))
 
 (defun eb-media-mpv-playing-time-display ()
   "Displays the current MPV playing time."
+  (setq eb-media-mpv-playing-time (round (1+ eb-media-mpv-playing-time)))
+  (unless eb-media-mpv-total-duration
+    (setq eb-media-mpv-total-duration (or (ignore-errors (mpv-get-property "duration")) 0)))
   (cl-flet ((transform-time (time)
                             (cond
-                             ((and time (> time 3600))
+                             ((and time (numberp time) (> time 3600))
                               (format-time-string "%T" time t))
-                             (time
-                              (format-time-string "%M:%S" time)))))
-    (if-let* ((playing-time (ignore-errors (mpv-get-property "playback-time")))
-              (total (ignore-errors (mpv-get-property "duration")))
-              (formatted-playing-time (transform-time playing-time))
-              (formatted-total (transform-time total)))
+                             ((and (numberp time) time)
+                              (format-time-string "%M:%S" time))
+                             (t 0))))
+    (if-let* ((formatted-playing-time (transform-time eb-media-mpv-playing-time))
+              (formatted-total (transform-time eb-media-mpv-total-duration)))
         (setq eb-media-mpv-playing-time-string
-              (format " %s/%s " formatted-playing-time formatted-total))
+              (if (null eb-media-mpv-playing-time-mode)
+                  ""
+                (format " %s/%s " formatted-playing-time formatted-total)))
       (setq eb-media-mpv-playing-time-string ""))
     (force-mode-line-update t)))
 
 (defun eb-media-mpv-mode-line-clear ()
   "Clears the mode line after the mpv process exits."
   (interactive)
-  (setq eb-media-mpv-stopped-p t)
   (setq eb-media-mpv-mode-line-string nil)
   (setq eb-media-mpv-toggle-button nil)
   (setq eb-media-mpv-prev-button nil)
   (setq eb-media-mpv-next-button nil)
-  (run-hooks 'eb-media-mpv-finished-hook)
   (force-mode-line-update t))
 
-(defun eb-media-mpv-event-handler (&optional result)
-  "Handles the mpv events from RESULT and sets the mode line appropriately."
+(defun eb-media-mpv-set-playlist ()
+  "Sets appropriate information if current MPV process involves a playlist."
+  (let ((playlist (ignore-errors (mpv--with-json
+                                  (mpv-get-property "playlist")))))
+    (if (and (not (equal playlist 'false))
+             (consp playlist)
+             (> (length playlist) 1))
+        (setq eb-media-mpv-prev-button ""
+              eb-media-mpv-next-button "")
+      (setq eb-media-mpv-prev-button nil
+            eb-media-mpv-next-button nil))))
+
+(defun eb-media-mpv-set-paused ()
+  "Sets appropriate information if the current MPV process is stopped."
+  (mpv-get-property "pause")
+  (prog1
+      (if (equal (mpv--with-json (mpv-get-property "pause"))
+                 'false)
+          (setq eb-media-mpv-toggle-button "")
+        (setq eb-media-mpv-toggle-button ""))))
+
+(defun eb-media-mpv-compute-title ()
+  "Computes and sets the current MPV process media title."
+  (let* ((title (ignore-errors
+                  (mpv--with-json (mpv-get-property "media-title"))))
+         (embellished-title
+          (and (not (equal title 'false))
+               (if (stringp title)
+                   (if (<= (length title) 30)
+                       (concat title " ")
+                     (let ((shortened-title (substring title 0 29)))
+                       (if (= (aref shortened-title (- (length shortened-title) 1))
+                              ?.)
+                           (concat shortened-title ".. ")
+                         (concat shortened-title "... "))))
+                 (concat (ignore-errors (mpv-get-property "path")) " ")))))
+    (setq eb-media-mpv-mode-line-string embellished-title)))
+
+(defun eb-media-mpv-event-handler (result)
+  "Handles the MPV events from RESULT."
+  (pcase (alist-get 'event result)
+    ((or "file-loaded" "start-file")
+     (run-hooks 'eb-media-mpv-started-hook)
+     (setq eb-media-mpv-stopped-p nil)
+     (eb-media-mpv-set-playlist)
+     (run-at-time 1 nil (lambda ()
+                          (eb-media-mpv-compute-title)
+                          (eb-media-mpv-set-paused)
+                          (force-mode-line-update t))))
+    ("pause"
+     (eb-media-mpv-set-paused)
+     (unless eb-media-mpv-paused-p
+       (setq eb-media-mpv-paused-p t)
+       (run-hooks 'eb-media-mpv-paused-hook)))
+    ("unpause"
+     (eb-media-mpv-set-paused)
+     (when eb-media-mpv-paused-p
+       (setq eb-media-mpv-paused-p nil)
+       (run-hooks 'eb-media-mpv-paused-hook)))
+    ("seek"
+     (run-hooks 'eb-media-mpv-seeked-hook))
+    ((or "end-file" "shutdown")
+     (setq eb-media-mpv-stopped-p t)
+     (run-hooks 'eb-media-mpv-finished-hook)
+     (eb-media-mpv-mode-line-clear))))
+
+(defun eb-media-mpv-display-mode-line (&optional result)
+  "Updates and displays the necessary MPV metadata in the modeline."
   (interactive)
   (if (mpv-live-p)
-      (cl-flet ((playlist-p ()
-                            (let ((playlist (ignore-errors (mpv--with-json
-                                                            (mpv-get-property "playlist")))))
-                              (if (and (not (equal playlist 'false))
-                                       (consp playlist)
-                                       (> (length playlist) 1))
-                                  (setq eb-media-mpv-prev-button ""
-                                        eb-media-mpv-next-button "")
-                                (setq eb-media-mpv-prev-button nil
-                                      eb-media-mpv-next-button nil))))
-                (paused-p ()
-                          (mpv-get-property "pause")
-                          (prog1
-                              (if (equal (mpv--with-json (mpv-get-property "pause"))
-                                         'false)
-                                  (progn
-                                    (setq eb-media-mpv-toggle-button "")
-                                    (setq eb-media-mpv-paused-p nil))
-                                (setq eb-media-mpv-toggle-button "")
-                                (setq eb-media-mpv-paused-p t))))
-                (compute-title ()
-                               (let* ((title (ignore-errors
-                                               (mpv-get-property "media-title")))
-                                      (embellished-title
-                                       (if (stringp title)
-                                           (if (<= (length title) 30)
-                                               (concat title " ")
-                                             (let ((shortened-title (substring title 0 29)))
-                                               (if (= (aref shortened-title (- (length shortened-title) 1))
-                                                      ?.)
-                                                   (concat shortened-title ".. ")
-                                                 (concat shortened-title "... "))))
-                                         (concat (mpv-get-property "path") " "))))
-                                 (prog1
-                                     (setq eb-media-mpv-mode-line-string embellished-title)))))
-        (prog1
-            (progn
-              (pcase (alist-get 'event result)
-                ("file-loaded"
-                 (playlist-p)
-                 (setq eb-media-mpv-stopped-p nil)
-                 (run-at-time 1 nil (lambda ()
-                                      (compute-title)
-                                      (paused-p)
-                                      (force-mode-line-update t)))
-                 (run-hooks 'eb-media-mpv-started-hook))
-                ((or "pause" "unpause" "tracks-changed")
-                 (paused-p))
-                ((or "end-file" "shutdown")
-                 (eb-media-mpv-mode-line-clear)))
-              (playlist-p)
-              (unless result
-                (paused-p)
-                (concat
-                 (compute-title)
-                 eb-media-mpv-prev-button
-                 eb-media-mpv-next-button)))
-          (force-mode-line-update t)))
-    (eb-media-mpv-mode-line-clear)))
+      (if result
+          (eb-media-mpv-event-handler result)
+        (eb-media-mpv-set-paused)
+        (eb-media-mpv-compute-title)
+        (eb-media-mpv-set-playlist))
+    (eb-media-mpv-mode-line-clear))
+  (force-mode-line-update t))
 
 ;;;###autoload
 (defun eb-media-mpv-seek-start ()
@@ -369,17 +399,17 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
       (0.5 (error "Failed to kill mpv"))
     (while (and (mpv-live-p)
                 (not (equal mpv--process
-                            emms-player-mpv-proc)))
+                        emms-player-mpv-proc)))
       (sleep-for 0.05)))
   (setq mpv--process nil)
-  (setq mpv--queue nil))
+  (setq mpv--queue nil)
+  (run-hooks 'eb-media-mpv-finished-hook))
 
 (advice-add #'mpv-kill :override #'eb-media-mpv-kill)
 
 (defun eb-media-mpv-connect-to-emms-on-startup (data)
   (interactive)
-  (when (and (string= (alist-get 'event data) "start-file")
-             (= (alist-get 'playlist_entry_id data) 1))
+  (when (string= (alist-get 'event data) "start-file")
     (eb-media-mpv-connect-to-emms-proc)))
 
 (add-hook 'emms-player-mpv-event-functions #'eb-media-mpv-connect-to-emms-on-startup)
@@ -388,25 +418,36 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
 (defun eb-media-mpv-connect-to-emms-proc ()
   "Connect to a running EMMS MPV process."
   (interactive)
-  (mpv-kill)
+  (setq eb-media-mpv-playing-time-string "")
+  (when (not (equal mpv--process
+                    emms-player-mpv-proc))
+    (mpv-kill))
   (setq mpv--process emms-player-mpv-proc)
   (set-process-query-on-exit-flag mpv--process nil)
   (set-process-sentinel
    mpv--process
    (lambda (p _e)
      (when (memq (process-status p) '(exit signal))
-       (mpv-kill)
+       (when (not (equal mpv--process
+                         emms-player-mpv-proc))
+         (mpv-kill))
        (run-hooks 'mpv-on-exit-hook))))
-  (setq mpv--queue (tq-create (make-network-process
-                               :name "mpv-socket"
-                               :family 'local
-                               :service emms-player-mpv-ipc-socket)))
-  (set-process-filter
-   (tq-process mpv--queue)
-   (lambda (_proc string)
-     (mpv--tq-filter mpv--queue string)))
+  (unless mpv--queue
+    (setq mpv--queue (tq-create (make-network-process
+                                 :name "emms-mpv-socket"
+                                 :family 'local
+                                 :service emms-player-mpv-ipc-socket
+                                 :coding '(utf-8 . utf-8)
+                                 :noquery t
+                                 :filter #'emms-player-mpv-ipc-filter
+                                 :sentinel #'emms-player-mpv-ipc-sentinel)))
+    (set-process-filter
+     (tq-process mpv--queue)
+     (lambda (_proc string)
+       (ignore-errors
+         (mpv--tq-filter mpv--queue string)))))
   (run-hooks 'mpv-on-start-hook)
-  (eb-media-mpv-event-handler)
+  (eb-media-mpv-display-mode-line)
   t)
 
 (defun eb-media-mpv--filter-processes ()
@@ -553,11 +594,13 @@ DL-TYPE is the download type, see `ytdl-download-types'."
       (progn
         (add-hook 'eb-media-mpv-started-hook #'eb-media-mpv-playing-time-start)
         (add-hook 'eb-media-mpv-paused-hook #'eb-media-mpv-playing-time-pause)
-        (add-hook 'eb-media-mpv-finished-hook #'eb-media-mpv-playing-time-stop))
+        (add-hook 'eb-media-mpv-finished-hook #'eb-media-mpv-playing-time-stop)
+        (add-hook 'eb-media-mpv-seeked-hook #'eb-media-mpv-playing-time-seek))
     (eb-media-mpv-playing-time-stop)
     (remove-hook 'eb-media-mpv-started-hook #'eb-media-mpv-playing-time-start)
     (remove-hook 'eb-media-mpv-paused-hook #'eb-media-mpv-playing-time-pause)
-    (remove-hook 'eb-media-mpv-finished-hook #'eb-media-mpv-playing-time-stop)))
+    (remove-hook 'eb-media-mpv-finished-hook #'eb-media-mpv-playing-time-stop)
+    (remove-hook 'eb-media-mpv-seeked-hook #'eb-media-mpv-playing-time-seek)))
 
 ;;;###autoload
 (define-minor-mode eb-media-mpv-mode-line-mode
@@ -566,13 +609,12 @@ DL-TYPE is the download type, see `ytdl-download-types'."
   (setq eb-media-mpv-mode-line-string nil)
   (if eb-media-mpv-mode-line-mode
       (progn
-        (setq eb-media-mpv-mode-line-string
-              (run-at-time 2 nil #'eb-media-mpv-event-handler))
-        (add-hook 'mpv-on-event-hook #'eb-media-mpv-event-handler))
+        (eb-media-mpv-display-mode-line)
+        (add-hook 'mpv-on-event-hook #'eb-media-mpv-display-mode-line))
     (setq eb-media-mpv-mode-line-string nil
           eb-media-mpv-prev-button nil
           eb-media-mpv-toggle-button nil
           eb-media-mpv-next-button nil)
-    (remove-hook 'mpv-on-event-hook #'eb-media-mpv-event-handler)))
+    (remove-hook 'mpv-on-event-hook #'eb-media-mpv-display-mode-line)))
 
 (provide 'eb-media)
