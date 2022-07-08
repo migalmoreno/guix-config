@@ -924,7 +924,7 @@
        (blink-cursor-mode 0)))
    #:elisp-packages (list emacs-ace-window)))
 
-(define (emacs-service)
+(define* (emacs-service #:key (package emacs))
   `(,@dired-service
     ,@org-service
     ,editing-service
@@ -947,7 +947,7 @@
               (package
                 (if (or (string= (getenv "XDG_SESSION_TYPE") "x11")
                         (string= (getenv "XDG_SESSION_TYPE") "tty"))
-                    emacs-native-comp
+                    package
                     emacs-next-pgtk))
               (elisp-packages (list emacs-elibs))
               (early-init-el
@@ -979,8 +979,8 @@
                  (server-start)))))
     ,(simple-service 'add-emacs-envs
                      home-environment-variables-service-type
-                     `(("VISUAL" . ,(file-append emacs-native-comp "/bin/emacsclient"))
-                       ("EDITOR" . ,(file-append emacs-native-comp "/bin/emacsclient"))))
+                     `(("VISUAL" . ,(file-append package "/bin/emacsclient"))
+                       ("EDITOR" . ,(file-append package "/bin/emacsclient"))))
     ,(simple-service 'home-emacs-xdg
                      home-xdg-mime-applications-service-type
                      (home-xdg-mime-applications-configuration
