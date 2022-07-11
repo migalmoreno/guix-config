@@ -172,6 +172,25 @@
         (nxdr:text-color "white")
         (nyxt:glyph "nxdr")))
      ,#~""
+     (define-configuration nyxt/user-script-mode:user-script-mode
+       ((nyxt/user-script-mode:user-styles
+         (list
+          (make-instance 'nyxt/user-script-mode:user-style
+                         :include '("https://github.com/*")
+                         :code (cl-css:css
+                                `((,(str:join "," '("#dashboard .body"
+                                                    ".js-inline-dashboard-render"
+                                                    ".js-feed-item-component"
+                                                    ".js-yearly-contributions"
+                                                    ".js-form-toggle-container"
+                                                    ".js-contribution-activity"
+                                                    ".starring-container"
+                                                    "a[href$=watchers]"
+                                                    "a[href$=stargazers]"
+                                                    "a[href$=followers]"
+                                                    "a[href$=following]"))
+                                   :display "none !important"))))))))
+     ,#~""
      (defmethod custom-format-buttons ((status status-buffer))
        "Buttons used for custom status formatter."
        (declare (ignorable status))
