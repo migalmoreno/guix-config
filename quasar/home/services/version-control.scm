@@ -2,7 +2,7 @@
   #:use-module (quasar home)
   #:use-module (conses home services emacs)
   #:use-module (conses home services web-browsers)
-  #:use-module (rrr packages emacs-xyz)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages version-control)
@@ -19,12 +19,11 @@
             (home-git-configuration
              (config
               `((user
-                 ((name . ,(password-store-get "vc/sourcehut/username"))
-                  (email . ,(password-store-get "vc/sourcehut/email"))
-                  (signing-key . "5F23F458")))
-                (core
-                 ((editor . emacsclient)
-                  (excludesfile . "~/.config/git/gitignore")))
+                 ((name . ,(getenv "SOURCEHUT_USERNAME"))
+                  (email . ,(getenv "SOURCEHUT_EMAIL"))
+                  (signing-key . ,(getenv "GPG_PUBLIC_KEY"))))
+                (sendemail
+                 ((annotate . "yes")))
                 (commit
                  ((gpg-sign . #t)))
                 (github
@@ -55,12 +54,12 @@
       ,#~""
       (with-eval-after-load 'srht
         (custom-set-variables
-         '(srht-username (password-store-get-field "vc/sr.ht" "username"))
-         '(srht-token (password-store-get-field "vc/sr.ht" "token")))))
+         '(srht-username (password-store-get-field "vc/sourcehut" "username")))))
     #:elisp-packages (list
                       emacs-magit
                       emacs-forge
-                      emacs-rrr-srht))
+                      emacs-srht
+                      emacs-git-email))
    (nyxt-configuration-service
     `((define-command-global magit-clone ()
         "Clones the current repository with Magit."
