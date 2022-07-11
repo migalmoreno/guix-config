@@ -98,6 +98,7 @@
       ,#~""
       (sp-use-paredit-bindings)
       (with-eval-after-load 'smartparens
+        (define-key smartparens-mode-map (kbd "M-s") nil)
         (custom-set-variables
          '(sp-highlight-pair-overlay nil))
         (setq sp-lisp-modes (nconc
