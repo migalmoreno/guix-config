@@ -364,17 +364,16 @@
           (make-route (match-regex "https://whoogle.*"
                                    "https://.*google.com/search.*")
                       :redirect "localhost:5000")
-          (make-route '((match-regex ".*/watch\\?v=.*")
-                        (match-file-extension "mp3"))
+          (make-route '(match-regex ".*/watch\\?v=.*")
                       :redirect "youtube.com"
                       :external (lambda (data)
                                   (eval-in-emacs
                                    `(eb-media-mpv-start ,(quri:render-uri (url data))
                                                              :audio-only t :repeat t))))
-          (make-route '((match-regex "https://gfycat.com/.*"
-                                     "https://streamable.com/.*"
-                                     ".*/w/.*")
-                        (match-file-extension "mp4" "m3u8"))
+          (make-route '(match-regex "https://gfycat.com/.*"
+                                    "https://streamable.com/.*"
+                                    ".*/w/.*"
+                                    ".*master.m3u8")
                       :external (lambda (data)
                                   (eval-in-emacs
                                    `(eb-media-mpv-start ,(quri:render-uri (url data))))))
