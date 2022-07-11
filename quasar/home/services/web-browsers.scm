@@ -54,7 +54,7 @@
             :font-weight "bold"
             :background-color theme:secondary
             :color theme:on-background)))
-        (tailor:user-buffer
+        (tailor:buffer
          '(("*, body, div, section, input"
             :font-family theme:font-family
             :background-color theme:background
@@ -135,14 +135,15 @@
          '((body
             :color theme:on-background
             :background-color theme:background
-            :font-family theme:font-family)))
-        (tailor:hint
-         `(;; (".nyxt-hint.nyxt-highlight-hint"
-           ;;  :color theme:on-background)
-           ))))
+            :font-family theme:font-family)))))
      ,#~""
+     (local-time:reread-timezone-repository)
+     (setf local-time:*default-timezone* (local-time:find-timezone-by-location-name ,(getenv "LYRA_TIMEZONE")))
      (define-configuration tailor:tailor-mode
-       ((tailor:auto-p t)
+       ((tailor:auto-p :time)
+        (tailor:light-theme-threshold (* 6 60 60))
+        (tailor:dark-theme-threshold (* 21.5 60 60))
+        (tailor:main '("modus-operandi" . "modus-vivendi"))
         (tailor:themes
          (list
           (make-theme "modus-operandi"
@@ -164,6 +165,17 @@
                       :on-secondary-color "#a8a8a8"
                       :accent-color "#afafef"
                       :on-accent-color "#a8a8a8"
+                      :font-family "Iosevka"
+                      :cut (make-instance 'tailor:cut))
+          (make-theme "Dracula"
+                      :dark-p t
+                      :background-color "#282a36"
+                      :on-background-color "#f8f8f2"
+                      :primary-color "#bd93f9"
+                      :secondary-color "#6272a4"
+                      :on-secondary-color "#f8f8f2"
+                      :accent-color "#8be9fd"
+                      :on-accent-color "#282a36"
                       :font-family "Iosevka"
                       :cut (make-instance 'tailor:cut))))))
      ,#~""
