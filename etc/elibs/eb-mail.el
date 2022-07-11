@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 (require 'org)
+(require 'org-mime)
 
 (defgroup eb-mail nil
   "MUA and other email-related settings."
