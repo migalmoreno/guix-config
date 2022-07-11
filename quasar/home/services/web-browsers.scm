@@ -531,6 +531,12 @@
                               "--blink-settings=imagesEnabled=false"
                               "--show-avatar-button=never")))
     (list
+     (if alt-browser-p
+         (home-generic-service 'home-browser-packages
+                               #:packages (list
+                                           ungoogled-chromium
+                                           ublock-origin/chromium))
+         '())
      (simple-service
       'web-environment-variables
       home-environment-variables-service-type
@@ -585,11 +591,8 @@
         (with-eval-after-load 'webpaste
           (custom-set-variables
            '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
-           '(webpaste-paste-confirmation t))))
-      #:elisp-packages (append
-                        (when alt-browser-p
-                          (list
-                           ungoogled-chromium
-                           ublock-origin/chromium))
-                        (list emacs-webpaste
-                              emacs-nginx-mode))))))
+           '(webpaste-paste-confirmation t)))
+        ,#~""
+        (advice-add 'browse-url-xdg-open :around 'eb-web-add-url-scheme))
+      #:elisp-packages (list emacs-webpaste
+                             emacs-nginx-mode)))))
