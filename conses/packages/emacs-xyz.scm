@@ -7,6 +7,8 @@
   #:use-module (guix download)
   #:use-module (guix build-system)
   #:use-module (guix git-download)
+  #:use-module (guix gexp)
+  #:use-module (guix utils)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-with-nyxt
@@ -300,3 +302,10 @@ set up WiFi interfaces via nmcli.")
  floating-point components (0.0 through 1.0), Emacs color strings (such as \"blue\"),
 and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
+
+(define-public emacs-srht
+  (package
+    (inherit emacs-rrr-srht)
+    (arguments
+     (substitute-keyword-arguments (package-arguments emacs-rrr-srht)
+       ((#:emacs _) emacs)))))
