@@ -162,6 +162,21 @@
     (dashboard-refresh-buffer)))
 
 ;;;###autoload
+(defun eb-look-set-automatic-theme ()
+  "Sets the theme automatically based on the time of the day."
+  (interactive)
+  (let ((current-timestamp (decode-time (current-time))))
+    (if (> (+ (decoded-time-second current-timestamp)
+              (* 60 (decoded-time-minute current-timestamp))
+              (* 3600 (decoded-time-hour current-timestamp)))
+           (* 60 (appt-convert-time eb-look-dark-theme-threshold)))
+        (progn
+          (setenv "GTK_THEME" ":light")
+          (modus-themes-load-operandi))
+      (setenv "GTK_THEME" ":dark")
+      (modus-themes-load-vivendi))))
+
+;;;###autoload
 (define-minor-mode eb-look-automatic-theme-mode
   "Configures the appropriate appearance settings."
   :global t :group 'eb-look
@@ -170,22 +185,12 @@
         (when (and (display-graphic-p)
                    (not (find-font (font-spec :name "all-the-icons"))))
           (all-the-icons-install-fonts t))
-        (let ((current-timestamp (decode-time (current-time))))
-          (if (> (+ (decoded-time-second current-timestamp)
-                    (* 60 (decoded-time-minute current-timestamp))
-                    (* 3600 (decoded-time-hour current-timestamp)))
-                 (* 60 (appt-convert-time eb-look-dark-theme-threshold)))
-              (progn
-                (setenv "GTK_THEME" ":light")
-                (modus-themes-load-themes)
-                (modus-themes-load-operandi))
-            (setenv "GTK_THEME" ":dark")
-            (modus-themes-load-themes)
-            (modus-themes-load-vivendi)))
+        (modus-themes-load-themes)
+        (eb-look-set-automatic-theme)
         (add-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
         (setq eb-look-light-theme-timer (run-at-time eb-look-light-theme-threshold
-                                                       (* 60 60 24) #'modus-themes-load-operandi)
-              eb-look-dark-theme-timer (run-at-time eb-look-dark-theme-threshold
+                                                     (* 60 60 24) #'modus-themes-load-operandi))
+        (setq eb-look-dark-theme-timer (run-at-time eb-look-dark-theme-threshold
                                                     (* 60 60 24) #'modus-themes-load-vivendi)))
     (mapc (lambda (timer)
             (when timer
