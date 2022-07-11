@@ -70,6 +70,10 @@
         (define-key map "l" 'org-store-link)
         (define-key map "c" 'org-capture))
       (with-eval-after-load 'org
+        (add-to-list 'display-buffer-alist
+                     '(("\\*Org Links\\*"
+                        display-buffer-no-window
+                        (allow-no-window . t))))
         (let ((map org-mode-map))
           (define-key map (kbd "M-n") 'org-metaright)
           (define-key map (kbd "M-p") 'org-metaleft)
@@ -343,7 +347,7 @@
       ,#~""
       (with-eval-after-load 'embark
         (embark-define-keymap embark-roam-ref-map
-                              "Keymap for actions to be triggered on Org Roam node `ROAM-REFS'."
+                              "Keymap for actions to be triggered on org-roam refs."
                               :parent embark-url-map
                               ("RET" browse-url-generic)
                               ("v" eb-media-mpv-start)
@@ -356,12 +360,13 @@
       (with-eval-after-load 'ox
         (custom-set-variables
          '(org-export-with-date nil)
-         '(org-export-preserve-breaks t))))
+         '(org-export-with-author nil)
+         '(org-export-preserve-breaks t)
+         '(org-html-postamble nil))))
       (eb-org-agenda-appt-mode)
       (advice-add 'org-redo :after 'eb-org-agenda-to-appt)
       (add-hook 'org-capture-after-finalize-hook 'eb-org-agenda-to-appt))
-    #:elisp-packages (list emacs-org
-                           emacs-org-contrib
+    #:elisp-packages (list emacs-org-contrib
                            emacs-org-mime
                            emacs-org-make-toc
                            emacs-org-roam
@@ -476,6 +481,7 @@
              '(eb-org-buffer-source
                eb-chat-telega-buffer-source
                eb-chat-erc-buffer-source
+               eb-chat-ement-buffer-source
                eb-exwm-buffer-source
                eb-shell-buffer-source)))
       (custom-set-variables
@@ -495,7 +501,9 @@
          (telega-root-mode . ?t)
          (telega-chat-mode . ?t)
          (comint-mode . ?c)
-         (cider-repl-mode . ?c))))
+         (cider-repl-mode . ?c)
+         (ement-room-mode . ?n)
+         (ement-room-list-mode . ?n))))
       ,#~""
       (marginalia-mode)
       ,#~""
