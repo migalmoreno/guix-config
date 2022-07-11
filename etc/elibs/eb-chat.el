@@ -5,6 +5,7 @@
 (require 'password-store)
 (require 'erc)
 (require 'erc-status-sidebar)
+(require 'eb-util)
 
 (defgroup eb-chat nil
   "Chat-oriented applications and customizations."
@@ -17,6 +18,7 @@
   `(:name "ERC"
           :narrow ?e
           :category buffer
+          :preview-key ,(kbd "M-.")
           :state ,#'consult--buffer-state
           :items ,(lambda () (mapcar #'buffer-name (erc-buffer-list))))
   "Source for ERC buffers to be set in `consult-buffer-sources'.")
@@ -28,10 +30,22 @@
   `(:name "Telega"
           :narrow ?t
           :category buffer
+          :preview-key ,(kbd "M-.")
           :state ,#'consult--buffer-state
           :items ,(lambda () (mapcar #'buffer-name
                                      (append (list (telega-root--buffer)) (telega-chat-buffers)))))
   "Source for Telega buffers to be set in `consult-buffer-sources'.")
+
+;;;###autoload
+;; TODO: `ement-session-rooms' with `ement-sessions' is too slow and blocks Emacs
+(defvar eb-chat-ement-buffer-source
+  `(:name "Ement"
+          :narrow ?n
+          :category buffer
+          :preview-key ,(kbd "M-.")
+          :state ,#'consult--buffer-state
+          :items ,(lambda ()
+                    (mapcar #'buffer-name (eb-util--mode-buffers 'ement-room-mode 'ement-room-list-mode)))))
 
 ;;;###autoload
 (defun eb-chat-ement-connect ()
@@ -41,13 +55,6 @@
    :user-id (password-store-get-field "chat/matrix" "username")
    :password (password-store-get "chat/matrix")
    :uri-prefix "http://localhost:8009"))
-
-(defun eb-media-ement-org-compose-message ()
-  "Splits current ement window and invokes `ement-room-compose-message'."
-  (interactive)
-  (when ement-room
-    (select-window (split-window nil 200 t))
-    (funcall-interactively #'ement-room-compose-message ement-room ement-session)))
 
 ;;;###autoload
 (defun eb-chat-erc-connect ()
