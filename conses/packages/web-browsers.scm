@@ -9,7 +9,7 @@
   #:use-module (guix packages))
 
 (define-public nyxt-next
-  (let ((commit "8e6e2b4ad8b825e431e6ecb882000aa4fc04f7e4")
+  (let ((commit "fb58a43b8ae7251db76823713aef6f1583544283")
         (revision "2"))
     (package
       (inherit nyxt)
@@ -23,7 +23,7 @@
          (file-name (git-file-name "nyxt" version))
          (sha256
           (base32
-           "1r1w097a4f2x1yc3p5kf5rv7zzbclr7id4zdhm3v4zpf9zc9h6gr"))))
+           "1254kshv2zkchdz7kinmwjvykhdvigjrddgxs21i4sfni3xw23p6"))))
       (native-inputs
        (modify-inputs (package-native-inputs nyxt)
          (prepend pkg-config)))
@@ -40,6 +40,7 @@
        (modify-inputs (package-inputs nyxt)
          (prepend sbcl-cl-gopher
                   sbcl-nhooks
+                  sbcl-nkeymaps
                   sbcl-phos
                   sbcl-cl-tld
                   sbcl-nfiles
