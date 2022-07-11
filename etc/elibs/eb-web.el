@@ -33,6 +33,69 @@
 (defvar eb-web-nyxt-process nil
   "Holds the current Nyxt process.")
 
+(defun eb-web-srht-repo-id (name)
+  "Return the ID associated with the sourcehut repository NAME."
+    (interactive "sRepo name: ")
+    (let* ((srht-token (password-store-get-field "vc/sourcehut" "token"))
+           (oauth2-token (concat "Bearer " srht-token))
+           (id (assoc-default
+                'id
+                (assoc-default
+                 'repository
+                 (assoc-default
+                  'me
+                  (assoc-default
+                   'data
+                   (request-response-data
+                    (request
+                      "https://git.sr.ht/query"
+                      :params `(("query" . ,(concat "query { me { repository(name:\"" name "\") { id } } }")))
+                      :type "GET"
+                      :headers `(("Authorization" . ,oauth2-token))
+                      :parser 'json-read
+                      :sync t
+                      :timeout 2
+                      :error (cl-function
+                              (lambda (&key error-thrown &allow-other-keys) (message "Error %S" error-thrown)))))))))))
+      id))
+
+(defun eb-web-srht-set-readme (id)
+  "Export the current file to html and set the result as readme for the
+  sourcehut repo identified by ID."
+  (interactive
+   (list (if-let* ((project (project-current t))
+                   (dir (project-root project))
+                   (name (string-match (rx (: "/" (group (+ (not "/"))) "/" eol)) dir)))
+             (eb-web-srht-repo-id (match-string 1 dir))
+             (call-interactively #'eb-web-srht-repo-id))))
+  (let* ((srht-token (password-store-get-field "vc/sourcehut" "token"))
+         (oauth2-token (concat "Bearer " srht-token))
+         (readme (if (derived-mode-p 'html-mode)
+                     (buffer-substring-no-properties (point-min) (point-max))
+                     (org-export-as (org-export-get-backend 'html) nil nil t)))
+         (json-object-type 'hash-table)
+         (json-array-type 'list)
+         (json-key-type 'string)
+         (query (make-hash-table))
+         (variables (make-hash-table)))
+    (puthash "id" id variables)
+    (puthash "readme" readme variables)
+    (puthash
+     "query"
+     "mutation UpdateRepo($id: Int!, $readme: String!) {
+      updateRepository(id: $id, input: { readme: $readme }) { id }
+    }"
+     query)
+    (puthash "variables" variables query)
+    (request
+      "https://git.sr.ht/query"
+      :type "POST"
+      :data (json-serialize query)
+      :headers `(("Content-Type" . "application/json") ("Authorization" . ,oauth2-token))
+      :parser 'json-read
+      :complete (cl-function (lambda (&key symbol-status &allow-other-keys)
+                               (message "Set: %S" symbol-status))))))
+
 ;;;###autoload
 (defun eb-web--bookmark-make-record (url title)
   "Create a bookmark record from a Nyxt web buffer."
@@ -116,7 +179,8 @@ and if EXWM is enabled, it switches to the corresponding workspace."
                                                   eb-web-nyxt-workspace)))))))))
     (when (require 'exwm nil t)
       (when (equal (current-buffer) nyxt-buffer)
-        (exwm-input-set-local-simulation-keys nil))
+        ;; (exwm-input-set-local-simulation-keys nil)
+        )
       (when focus
         (exwm-workspace-switch exwm-workspace)
         (switch-to-buffer nyxt-buffer)))))
@@ -146,7 +210,7 @@ changes focus to the Nyxt frame."
                (cdr)))))
      (cond
       ((and (not eb-web-nyxt-process) (not (eb-web--slynk-connected-p)))
-       (setq eb-web-nyxt-process (apply #'start-process nyxt-executable
+       (setq eb-web-nyxt-process (apply #'start-process "nyxt"
                                         nil nyxt-executable nyxt-development-flags))
        (set-process-sentinel eb-web-nyxt-process
                              (lambda (p _e)
@@ -230,5 +294,12 @@ changes focus to the Nyxt frame."
   "Custom mode for EWW buffers."
   :global t :group 'eb-web
   (setq-local shr-inhibit-images t))
+
+(defun eb-web-add-url-scheme (fun url &rest args)
+  "Adds an HTTPS scheme to URL if it's missing and invoke FUN and ARGS with it."
+  (let ((link (if (string-match (rx (: bol (+ (in (?A . ?Z))) ":")) url)
+                  url
+                (concat "https:" url))))
+    (apply fun link args)))
 
 (provide 'eb-web)
