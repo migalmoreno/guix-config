@@ -1,6 +1,7 @@
 (define-module (quasar home services clojure)
   #:use-module (conses home services emacs)
   #:use-module (conses packages emacs-xyz)
+  #:use-module (conses packages clojure)
   #:use-module (nongnu packages clojure)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)
@@ -20,7 +21,7 @@
                          #:packages (list clojure
                                           leiningen
                                           unzip
-                                          ;; clojure-tools
+                                          clojure-tools-next
                                           (list openjdk17 "jdk")))
    (simple-service
     'add-clojure-envs
@@ -50,9 +51,10 @@
                                (?t "Type" font-lock-type-face)
                                (?v "Variable" font-lock-variable-name-face)))))
       ,#~""
-      (add-to-list 'org-structure-template-alist '("clj" . "src clojure"))
-      (add-to-list 'org-babel-load-languages '(clojure . t))
-      (add-to-list 'org-babel-load-languages '(java . t))
+      (with-eval-after-load 'org
+        (add-to-list 'org-structure-template-alist '("clj" . "src clojure"))
+        (add-to-list 'org-babel-load-languages '(clojure . t))
+        (add-to-list 'org-babel-load-languages '(java . t)))
       (with-eval-after-load 'ob-core
         (setq org-babel-default-header-args:clojure
               '((:results . "scalar")
