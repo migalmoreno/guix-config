@@ -80,6 +80,8 @@
     `((let ((map mode-specific-map))
         (define-key map "Mc" 'mpv-jump-to-chapter)
         (define-key map "Ml" 'mpv-jump-to-file)
+        (define-key map "MN" 'mpv-chapter-next)
+        (define-key map "MP" 'mpv-chapter-prev)
         (define-key map "Mq" 'mpv-quit)
         (define-key map "MR" 'mpv-set-ab-loop)
         (define-key map "Mr" 'mpv-toggle-loop)
