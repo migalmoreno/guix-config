@@ -1,6 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 (require 'cl-lib)
 
+(defun eb-util--mode-buffers (&rest modes)
+  "Returns a list of buffers that are derived from MODES
+in `buffer-list'."
+  (cl-remove-if-not
+   (lambda (buffer)
+     (with-current-buffer buffer
+       (some #'derived-mode-p modes)))
+   (buffer-list)))
+
 ;;;###autoload
 (defun eb-to-hook (hook &rest funs)
   "Adds functions FUNS to hook HOOK."
