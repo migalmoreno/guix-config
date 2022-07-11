@@ -93,10 +93,11 @@
        (define-key mode-specific-map "m" 'eb-media-mpv-set-transient-map)
        (eb-media-mpv-mode-line-mode)
        (eb-media-mpv-playing-time-mode)
-      (add-hook 'mpv-on-exit-hook 'eb-media-mpv-mode-line-clear)
-      (with-eval-after-load 'mpv
-        (custom-set-variables
-         '(mpv-seek-step 3)))
+       (add-hook 'mpv-on-exit-hook 'eb-media-mpv-mode-line-clear)
+       (advice-add 'mpv-start :around 'eb-web-add-url-scheme)
+       (with-eval-after-load 'mpv
+         (custom-set-variables
+          '(mpv-seek-step 3)))
       ,#~""
       (with-eval-after-load 'embark
         (let ((map embark-url-map))
