@@ -1,6 +1,5 @@
 ;; -*- lexical-binding: t; -*-
 (require 'cl-lib)
-(require 'eb-look)
 (require 'org)
 (require 'org-roam)
 (require 'consult)
@@ -19,6 +18,7 @@
   `(:name "Org"
           :narrow ?o
           :category buffer
+          :preview-key ,(kbd "M-.")
           :state ,#'consult--buffer-state
           :items ,(lambda () (mapcar #'buffer-name (org-buffer-list)))))
 

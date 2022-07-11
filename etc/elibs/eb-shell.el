@@ -2,6 +2,7 @@
 (require 'cl-lib)
 (require 'eshell)
 (require 'esh-mode)
+(require 'eb-util)
 
 (defgroup eb-shell nil
   "Shell customizations for Emacs."
@@ -12,18 +13,12 @@
   `(:name "Comint"
           :narrow ?c
           :category buffer
+          :preview-key ,(kbd "M-.")
           :state ,#'consult--buffer-state
-          :items ,(lambda () (mapcar #'buffer-name (eb-shell--list-buffers))))
+          :items ,(lambda ()
+                    (mapcar #'buffer-name (eb-util--mode-buffers
+                                           'comint-mode 'cider-repl-mode))))
   "Source for `comint-mode' buffers to be set in `consult-buffer-sources'.")
-
-;;;###autoload
-(defun eb-shell--list-buffers ()
-  "List all currently-opened `comint-mode' or REPL-like buffers."
-  (cl-remove-if-not
-   (lambda (buffer)
-     (with-current-buffer buffer
-       (some #'derived-mode-p '(comint-mode cider-repl-mode))))
-   (buffer-list)))
 
 (defun eb-shell--bookmark-make-record ()
   "Create a bookmark in an `eshell-mode' buffer."

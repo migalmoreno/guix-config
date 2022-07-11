@@ -492,6 +492,8 @@
        consult--source-buffer consult-ripgrep consult-buffer
        consult-bookmark consult--source-bookmark
        consult-recent-file consult--source-recent-file
+       consult--source-project-buffer
+       consult--source-hidden-buffer
        :preview-key (kbd "M-.")))
     (custom-set-variables
      '(eb-completion-initial-narrow-alist
