@@ -79,6 +79,7 @@
            emacs-dashboard
            emacs-pdf-tools
            emacs-erc-status-sidebar
+           emacs-org-mime
            emacs-emms
            emacs-ytdl
            emacs-mpv-next
@@ -99,7 +100,7 @@
     (license license:gpl3+)))
 
 (define-public emacs-fdroid
-  (let ((commit "2b1b198644241d4fb3fa")
+  (let ((commit "598549ffbbea4a015dca80fc2d061e6e01d77e40")
         (revision "0"))
     (package
       (name "emacs-fdroid")
@@ -113,7 +114,7 @@
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0r27pxyaz10v98hskfwfyjvdzfh77n9g667cdsv6cx3vql692w5s"))))
+          (base32 "0hpbi5nh0bkrb2l422kn60giin73fmsq7gsai9qc9aifa7k1anwv"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-consult emacs-embark))
