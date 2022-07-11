@@ -37,8 +37,8 @@
                 (SyncState *)))))
    (elisp-configuration-service
     `((define-key mode-specific-map "g" 'gnus)
-      (setq user-full-name (password-store-get-field "mail/mail.gandi.net" "full-name")
-            user-mail-address (password-store-get-field "mail/mail.gandi.net" "username"))
+      (setq user-full-name (password-store-get-field "mail/mail.gandi.net" "username")
+            user-mail-address (password-store-get-field "mail/mail.gandi.net" "email"))
       (with-eval-after-load 'gnus
         (with-eval-after-load 'ebdb
           (require 'ebdb-gnus))
@@ -50,6 +50,8 @@
            '(gnus-thread-sort-by-most-recent-date
              (not gnus-thread-sort-by-number)))
          '(gnus-parameters '())
+         '(gnus-posting-styles `(("personal"
+                                  (name ,(password-store-get-field "mail/mail.gandi.net" "full-name")))))
          '(gnus-directory "~/.cache/gnus/News")
          '(gnus-home-directory (locate-user-emacs-file "gnus"))
          '(gnus-cache-directory "~/.cache/gnus/News/cache/")
