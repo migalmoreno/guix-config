@@ -224,19 +224,21 @@
              (format-status-url buffer)))
            (:div :id "modes"
             :title (nyxt::modes-string buffer)
-            (:raw (format-status-modes buffer (window status))))))))
+            (:raw (format-status-modes status)))))))
      ,#~""
      (define-mode graphical-status-mode ()
        "Applies graphical buttons and interfaces to the status bar.")
      ,#~""
      (defmethod enable ((mode graphical-status-mode) &key)
-       (setf (format-status (current-window))
-             (lambda (status)
-               (str:concat (custom-format-buttons status)
-                           (custom-formatter status)))))
+       ;; (setf (format-status (current-window))
+       ;;       (lambda (status)
+       ;;         (str:concat (custom-format-buttons status)
+       ;;                     (custom-formatter status))))
+       )
      ,#~""
      (defmethod disable ((mode graphical-status-mode) &key)
-       (setf (format-status (current-window)) 'custom-formatter))
+       ;; (setf (format-status (current-window)) 'custom-formatter)
+       )
      ,#~""
      (define-configuration status-buffer
        ((glyph-mode-presentation-p t))))))
@@ -471,8 +473,8 @@
                                   (uiop:relativize-pathname-directory (call-next-method))))
                 (define-mode custom-keymap-mode ()
                   "Dummy mode for the custom key bindings in `*custom-keymap*.'"
-                  ((keymap-scheme (keymap:make-scheme
-                                   scheme:emacs *custom-keymap*))
+                  ((keyscheme-map (keymaps:make-keyscheme-map
+                                   keyscheme:emacs *custom-keymap*))
                    (visible-in-status-p nil)))
                 ,#~""
                 (define-configuration buffer
@@ -480,11 +482,12 @@
                    (scroll-distance 150)
                    (default-modes `(nyxt/emacs-mode:emacs-mode
                                     nyxt/blocker-mode:blocker-mode
+                                    nyxt/user-script-mode:user-script-mode
                                     custom-keymap-mode
                                     tailor:tailor-mode
                                     router:router-mode
                                     nxdr:dark-reader-mode
-                                    ,@(delete 'nyxt/help-mode:help-mode %slot-default%)))))
+                                    ,@%slot-default%))))
                 ,#~""
                 (define-configuration browser
                   ((default-cookie-policy :no-third-party)
