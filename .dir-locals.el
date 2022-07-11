@@ -9,5 +9,4 @@
                            (unless (member project-root geiser-guile-load-path)
                              (setq-local geiser-guile-load-path (cons project-root geiser-guile-load-path))))))
                (eval . (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share/guile/site/3.0"))
-               (eval . (add-to-list 'geiser-guile-load-path "~/src/guix/"))
-               (eval . (add-to-list 'geiser-guile-load-path "~/src/guix-channel/")))))
+               (eval . (add-to-list 'geiser-guile-load-path "~/src/guix/")))))
