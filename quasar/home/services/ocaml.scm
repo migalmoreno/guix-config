@@ -33,8 +33,8 @@
      gcc-toolchain
      binutils
      ocaml
-     ocaml4.07-core
-     ocaml4.07-dune
+     ocaml-core
+     dune
      ocaml-ocp-indent
      ocaml-findlib
      ocaml-merlin
