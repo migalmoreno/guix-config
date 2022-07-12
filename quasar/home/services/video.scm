@@ -19,7 +19,7 @@
 
 (define (mpv-service)
   (define (run-with-emacs command)
-    (format #f "run \"/bin/sh\" \"-c\" \"emacsclient ~a\"" command))
+    (format #f "run \"/bin/sh\" \"-c\" \"emacsclient -e '~s'\"" command))
 
   (list
    (home-generic-service
@@ -67,8 +67,8 @@
                 (":" . "script-binding console/enable")
                 ("s" . "screenshot video")
                 ("Q" . "quit-watch-later")
-                ("D" . ,(run-with-emacs "-e '(eb-media-mpv-download)'"))
-                ("Alt+c" . ,(run-with-emacs "-e '(eb-media-mpv-capture-link)'"))
+                ("D" . ,(run-with-emacs '(eb-media-mpv-download)))
+                ("Alt+c" . ,(run-with-emacs '(eb-media-mpv-capture-link)))
                 ("O" . "no-osd cycle-values osd-level 3 0")
                 ("o" . "osd-bar show-progress")
                 ("v" . "cycle sub-visibility")
