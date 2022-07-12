@@ -462,6 +462,7 @@
       ,#~""
       (let ((map global-map))
         (define-key map (kbd "M-y") 'consult-yank-pop)
+        (define-key map (kbd "C-s") 'consult-line)
         (define-key ctl-x-4-map "b" 'consult-buffer-other-window)
         (define-key goto-map "a" 'consult-org-agenda)
         (define-key goto-map "i"  'consult-imenu)
