@@ -105,11 +105,6 @@
        "config"
        (get-xmodmap-configuration #f (home-xmodmap-configuration-config config))))
 
-(define (add-xmodmap-configuration config)
-  (filter (compose not null?)
-          `(("xmodmap/config"
-             ,(home-xmodmap-file config)))))
-
 (define (xmodmap-profile-service config)
   (list (home-xmodmap-configuration-package config)))
 
@@ -123,11 +118,8 @@
       xmodmap-profile-service)
      (service-extension
       home-shepherd-service-type
-      xmodmap-shepherd-service)
-     (service-extension
-      home-xdg-configuration-files-service-type
-      add-xmodmap-configuration)))
-   (description "Configure xmodmap bindings and rules.")
+      xmodmap-shepherd-service)))
+   (description "Configure @code{xmodmap} bindings and rules.")
    (default-value (home-xmodmap-configuration))))
 
 (define (generate-home-xmodmap-documentation)
