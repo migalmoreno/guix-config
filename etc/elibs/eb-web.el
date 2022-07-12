@@ -159,10 +159,17 @@
   (interactive)
   (shr-browse-url nil nil t))
 
+(defun eb-web--system-nyxt-p ()
+  "Returns non-`nil' if the Nyxt system process is currently running."
+  (cl-some (lambda (pid)
+             (string-match (rx (: (* any) "nyxt" (* any)))
+                           (assoc-default 'comm (process-attributes pid))))
+           (list-system-processes)))
+
 ;;;###autoload
 (cl-defun eb-web-nyxt-set-up-window (&key (focus nil))
   "Handles Nyxt's window, focusing on Nyxt's Emacs buffer if FOCUS,
-and if EXWM is enabled, it switches to the corresponding workspace."
+and if exwm is enabled, it switches to the corresponding workspace."
   (interactive
    (when current-prefix-arg
      (list :focus t)))
