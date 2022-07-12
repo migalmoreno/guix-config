@@ -195,7 +195,7 @@
                                                     ".js-feed-item-component"
                                                     ".js-yearly-contributions"
                                                     ".js-form-toggle-container"
-                                                    ".js-contribution-activity"
+                                                    "#js-contribution-activity"
                                                     ".starring-container"
                                                     "a[href$=watchers]"
                                                     "a[href$=stargazers]"
