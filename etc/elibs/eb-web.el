@@ -30,6 +30,28 @@
   :type 'integer
   :group 'eb-web)
 
+(defvar eb-web-nyxt-development-flags
+  (when (and (file-exists-p
+              (expand-file-name
+               "nyxt-dev.desktop"
+               (concat (xdg-data-home) "/applications/")))
+             eb-web-nyxt-development-p)
+    (thread-last
+      (xdg-data-home)
+      (format "%s/applications/nyxt-dev.desktop")
+      (xdg-desktop-read-file)
+      (gethash "Exec")
+      (split-string)
+      (cdr)))
+  "Nyxt flags to use to start the Nyxt process when
+`eb-web-nyxt-development-p' is non-`nil'.")
+
+(defvar eb-web-nyxt-executable
+  (if eb-web-nyxt-development-p
+      (executable-find "guix")
+    (executable-find "nyxt"))
+  "The Nyxt executable to launch the Nyxt process with.")
+
 (defvar eb-web-nyxt-process nil
   "Holds the current Nyxt process.")
 
@@ -192,46 +214,38 @@ and if exwm is enabled, it switches to the corresponding workspace."
         (exwm-workspace-switch exwm-workspace)
         (switch-to-buffer nyxt-buffer)))))
 
-(cl-defmacro eb-web--with-nyxt ((&key (focus t)) &body body)
-  "Evaluates BODY in the context of the current Nyxt connection and if FOCUS,
-changes focus to the Nyxt frame."
-  `(let* ((sly-log-events nil)
-          (sly-default-connection (or (eb-web--slynk-connected-p)
-                                      (when eb-web-nyxt-process
-                                        (eb-web-connect-to-slynk))))
-          (nyxt-executable (if eb-web-nyxt-development-p
-                               (executable-find "guix")
-                             (executable-find "nyxt")))
-          (nyxt-development-flags
-           (when (and (file-exists-p
-                       (expand-file-name
-                        "nyxt-dev.desktop"
-                        (concat (xdg-data-home) "/applications/")))
-                      eb-web-nyxt-development-p)
-             (thread-last
-               (xdg-data-home)
-               (format "%s/applications/nyxt-dev.desktop")
-               (xdg-desktop-read-file)
-               (gethash "Exec")
-               (split-string)
-               (cdr)))))
-     (cond
-      ((and (not eb-web-nyxt-process) (not (eb-web--slynk-connected-p)))
-       (setq eb-web-nyxt-process (apply #'start-process "nyxt"
-                                        nil nyxt-executable nyxt-development-flags))
-       (set-process-sentinel eb-web-nyxt-process
-                             (lambda (p _e)
-                               (when (= (process-exit-status p) 0)
-                                 (setq eb-web-nyxt-process nil))))
-       (run-at-time
-        eb-web-nyxt-startup-threshold nil
-        (lambda ()
-          (let ((sly-default-connection (eb-web-connect-to-slynk)))
-            (eb-web-nyxt-set-up-window :focus ,focus)
-            (eb-web--slynk-eval-sexps ,@body)))))
-      (t
-       (eb-web-nyxt-set-up-window :focus ,focus)
-       (eb-web--slynk-eval-sexps ,@body)))))
+(cl-defun eb-web-run-with-nyxt (sexps &key (focus t) (autostart nil))
+  "Evaluates SEXPS in the context of the current Nyxt connection and if FOCUS,
+changes focus to the Nyxt frame. If AUTOSTART is non-`nil' and a Nyxt system
+process is not found, it will automatically create one and connect Slynk to it."
+  (let* ((sly-log-events nil)
+         (sly-default-connection (or (eb-web--slynk-connected-p)
+                                     (when (or eb-web-nyxt-process
+                                               (eb-web--system-nyxt-p))
+                                       (eb-web-connect-to-slynk)))))
+    (cond
+     ((and (not (eb-web--system-nyxt-p))
+           (not eb-web-nyxt-process)
+           (not (eb-web--slynk-connected-p))
+           autostart)
+      (message "Launching Nyxt...")
+      (setq eb-web-nyxt-process (apply #'start-process "nyxt"
+                                       nil eb-web-nyxt-executable
+                                       eb-web-nyxt-development-flags))
+      (set-process-sentinel eb-web-nyxt-process
+                            (lambda (p _e)
+                              (when (= (process-exit-status p) 0)
+                                (setq eb-web-nyxt-process nil))))
+      (run-at-time
+       eb-web-nyxt-startup-threshold nil
+       (lambda ()
+         (let ((sly-default-connection (eb-web-connect-to-slynk)))
+           (eb-web-nyxt-set-up-window :focus focus)
+           (eb-web--slynk-eval-sexps sexps)))))
+     ((or (eb-web--system-nyxt-p)
+          eb-web-nyxt-process)
+      (eb-web-nyxt-set-up-window :focus focus)
+      (eb-web--slynk-eval-sexps sexps)))))
 
 ;;;###autoload
 (defun eb-web-connect-to-slynk ()
@@ -240,20 +254,19 @@ changes focus to the Nyxt frame."
   (sly-connect "localhost" eb-web-nyxt-port))
 
 ;;;###autoload
-(defun eb-web-search (query)
+(defun eb-web-nyxt-search (query)
   "Searches for QUERY in Nyxt."
   (interactive "sSearch for: ")
-  (eb-web--with-nyxt
-   (:focus t)
-   `(simple-search ,query)))
+  (eb-web-run-with-nyxt
+   `(simple-search ,query)
+   :focus t :autostart t))
 
 ;;;###autoload
-(defun eb-web-change-theme (theme)
+(defun eb-web-nyxt-change-theme (theme)
   "Switches current browser THEME in Nyxt."
   (interactive
    (list (completing-read "Theme: " custom-known-themes)))
-  (eb-web--with-nyxt
-   (:focus nil)
+  (eb-web-run-with-nyxt
    `(nx-tailor:select-theme ,theme)))
 
 ;;;###autoload
