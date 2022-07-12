@@ -2,6 +2,7 @@
   #:use-module (quasar home)
   #:use-module (conses home services emacs)
   #:use-module (gnu services)
+  #:use-module (gnu home services mcron)
   #:use-module (gnu home-services mail)
   #:use-module (gnu packages mail)
   #:use-module (guix gexp)
@@ -17,7 +18,7 @@
               `((IMAPAccount personal)
                 (Host mail.gandi.net)
                 (User ,(password-store-get "mail/personal/username"))
-                (PassCmd pass mail/mail.gandi.net)
+                (PassCmd "pass mail/mail.gandi.net")
                 (SSLType IMAPS)
                 (CertificateFile "/etc/ssl/certs/ca-certificates.crt")
                 ,#~""
@@ -26,15 +27,20 @@
                 ,#~""
                 (MaildirStore personal-local)
                 (Subfolders Verbatim)
-                (Path "~/.local/share/mail/personal")
+                (Path "~/.local/share/mail/personal/")
                 (Inbox "~/.local/share/mail/personal/Inbox")
                 ,#~""
                 (Channel personal)
-                (Far "personal-remote")
-                (Near ":personal-local")
+                (Far :personal-remote:)
+                (Near :personal-local:)
                 (Patterns *)
                 (Create Both)
                 (SyncState *)))))
+   (simple-service 'isync-mcron-job
+                   home-mcron-service-type
+                   (list #~(job '(next-minute (range 0 60 5))
+                                (lambda ()
+                                  (system* "mbsync" "--all")))))
    (elisp-configuration-service
     `((define-key mode-specific-map "g" 'gnus)
       (setq user-full-name (password-store-get-field "mail/mail.gandi.net" "username")
@@ -45,6 +51,7 @@
         (custom-set-variables
          '(gnus-use-full-window nil)
          '(gnus-use-cache t)
+         '(gnus-novice-user nil)
          '(gnus-select-method '(nnnil))
          '(gnus-thread-sort-functions
            '(gnus-thread-sort-by-most-recent-date
@@ -61,11 +68,8 @@
         (setq gnus-secondary-select-methods
               `((nntp "gwene"
                       (nntp-address "news.gwene.org"))
-                (nnimap "personal"
-                        (nnimap-address ,(password-store-get-field "mail/mail.gandi.net" "host"))
-                        (nnimap-server-port 993)
-                        (nnir-search-engine imap)
-                        (nnimap-stream ssl))
+                (nnmaildir "personal"
+                           (directory "~/.local/share/mail/personal"))
                 (nnfolder "archive"
                           (nnfolder-directory "~/.local/share/mail/archive")
                           (nnfolder-active-file "~/.local/share/mail/archive/active")
@@ -90,11 +94,11 @@
         (define-key gnus-group-mode-map "o" 'eb-mail-group-list-subscribed-groups)
         (custom-set-variables
          '(gnus-topic-alist '(("personal"
-                               "nnimap+personal:INBOX"
-                               "nnimap+personal:Drafts"
-                               "nnimap+personal:Sent"
-                               "nnimap+personal:Junk"
-                               "nnimap+personal:Deleted")
+                               "nnmaildir+personal:Inbox"
+                               "nnmaildir+personal:Drafts"
+                               "nnmaildir+personal:Sent"
+                               "nnmaildir+personal:Junk"
+                               "nnmaildir+personal:Deleted")
                               ("clojure"
                                "nntp+gwene:gwene.clojure.planet")
                               ("lisp"
@@ -129,12 +133,12 @@
                                 (nnfolder-inhibit-expiry t))))
          '(gnus-topic-topology '(("Gnus" visible)
                                  (("personal" visible))
-                                 (("misc" visible))
                                  (("clojure" visible))
                                  (("lisp" visible))
                                  (("technology" visible))
                                  (("emacs" visible))
-                                 (("guix" visible)))))
+                                 (("guix" visible))
+                                 (("misc" visible)))))
         (setq gnus-message-archive-method
               `(nnimap ,(password-store-get-field "mail/mail.gandi.net" "host"))))
       ,#~"
