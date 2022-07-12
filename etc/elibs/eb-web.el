@@ -270,7 +270,7 @@ process is not found, it will automatically create one and connect Slynk to it."
    `(nx-tailor:select-theme ,theme)))
 
 ;;;###autoload
-(defun eb-web-copy-url ()
+(defun eb-web-nyxt--copy-url ()
   "Kills current page URL in Nyxt."
   (interactive)
   (eb-web--with-nyxt
@@ -278,7 +278,7 @@ process is not found, it will automatically create one and connect Slynk to it."
    `(copy-url)))
 
 ;;;###autoload
-(defun eb-web-scroll-other-window ()
+(defun eb-web-nyxt-scroll-other-window ()
   "Scrolls the Nyxt window."
   (interactive)
   (eb-web--with-nyxt
@@ -286,14 +286,14 @@ process is not found, it will automatically create one and connect Slynk to it."
    `(nyxt/document-mode::scroll-down)))
 
 ;;;###autoload
-(defun eb-web-scroll-other-window-down ()
+(defun eb-web-nyxt-scroll-other-window-down ()
   "Scrolls the Nyxt window upward."
   (interactive)
   (eb-web--with-nyxt
    (:focus nil)
    `(nyxt/document-mode::scroll-up)))
 
-(defun eb-web-set-nyxt-transient-map ()
+(defun eb-web-nyxt-set-transient-map ()
   "Sets a transient map for Nyxt transient `eb-web' commands."
   (interactive)
   (set-transient-map
@@ -316,7 +316,7 @@ process is not found, it will automatically create one and connect Slynk to it."
   (setq-local shr-inhibit-images t))
 
 (defun eb-web-add-url-scheme (fun url &rest args)
-  "Adds an HTTPS scheme to URL if it's missing and invoke FUN and ARGS with it."
+  "Adds an HTTPS scheme to URL if it's missing and invokes FUN and ARGS with it."
   (let ((link (if (string-match (rx (: bol (+ (in (?A . ?Z))) ":")) url)
                   url
                 (concat "https:" url))))
