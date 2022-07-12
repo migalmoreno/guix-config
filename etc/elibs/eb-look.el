@@ -112,8 +112,7 @@ currently-running applications."
          '((tab-bar nil :box (:line-width 1 :color "#a8a8a8" :style unspecified))
            (vertical-border nil :foreground "#000000")))
         (setenv "GTK_THEME" ":dark")
-        (when (get-process "nyxt")
-          (eb-web-change-theme eb-look-dark-theme))
+        (eb-web-nyxt-change-theme eb-look-dark-theme)
         (cl-loop for buffer in (eb-files--list-pdf-buffers)
                  do (with-current-buffer buffer
                       (pdf-view-themed-minor-mode 1))))
@@ -121,8 +120,7 @@ currently-running applications."
      '((tab-bar nil :box (:line-width 1 :color "#505050" :style unspecified))
        (vertical-border nil :foreground "#ffffff")))
     (setenv "GTK_THEME" ":light")
-    (when (get-process "nyxt")
-      (eb-web-change-theme eb-look-light-theme))
+    (eb-web-nyxt-change-theme eb-look-light-theme)
     (cl-loop for buffer in (eb-files--list-pdf-buffers)
              do (with-current-buffer buffer
                   (pdf-view-themed-minor-mode -1))))
