@@ -361,8 +361,6 @@
           (make-route '(match-domain "reddit.com")
                       :redirect "teddit.namazso.eu"
                       :blocklist '(:path (:contains (not "/comments"))))
-          (make-route (match-host "news.ycombinator.com")
-                      :blocklist '(:path (:contains (not "item"))))
           (make-route (match-regex "https://whoogle.*"
                                    "https://.*google.com/search.*")
                       :redirect "localhost:5000")
@@ -375,7 +373,7 @@
           (make-route '(match-regex "https://gfycat.com/.*"
                                     "https://streamable.com/.*"
                                     ".*/w/.*"
-                                    ".*master.m3u8")
+                                    ".*cloudfront.*master.m3u8")
                       :external (lambda (data)
                                   (eval-in-emacs
                                    `(eb-media-mpv-start ,(quri:render-uri (url data))))))
@@ -401,9 +399,7 @@
                                      `(("MoodleSession" ,(password-store-get "education/moodle/session"))
                                        ("SimpleSAMLSessionID" ,(password-store-get "education/moodle/id"))
                                        ("SimpleSAMLAuthToken" ,(password-store-get "education/moodle/token")))
-                                     ,(quri:render-uri (url data))))))
-          (make-route (match-file-extension "pdf" "pptx" "docx")
-                      :external "xdg-open ~a"))))))))
+                                     ,(quri:render-uri (url data)))))))))))))
 
 (define (nyxt-service)
   (list
