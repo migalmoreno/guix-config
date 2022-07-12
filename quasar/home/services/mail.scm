@@ -1,6 +1,7 @@
 (define-module (quasar home services mail)
   #:use-module (quasar home)
   #:use-module (conses home services emacs)
+  #:use-module (conses home services mail)
   #:use-module (gnu services)
   #:use-module (gnu home services mcron)
   #:use-module (gnu home-services mail)
@@ -17,7 +18,7 @@
              (config
               `((IMAPAccount personal)
                 (Host mail.gandi.net)
-                (User ,(password-store-get "mail/personal/username"))
+                (User ,(getenv "MAIL_PERSONAL_USERNAME"))
                 (PassCmd "pass mail/mail.gandi.net")
                 (SSLType IMAPS)
                 (CertificateFile "/etc/ssl/certs/ca-certificates.crt")
@@ -41,6 +42,23 @@
                    (list #~(job '(next-minute (range 0 60 5))
                                 (lambda ()
                                   (system* "mbsync" "--all")))))
+   (service home-goimapnotify-service-type
+            (home-goimapnotify-configuration
+             (config
+              `((host . ,(getenv "MAIL_PERSONAL_HOST"))
+                (port . 143)
+                (tls . #f)
+                (tlsOptions . ((rejectUnauthorized . #t)))
+                (username . ,(getenv "MAIL_PERSONAL_USERNAME"))
+                (password . ,(getenv "MAIL_PERSONAL_PASSWORD"))
+                (xoauth2 . #f)
+                (onNewMail . "mbsync --all")
+                (onNewMailPost . ,(format #f "emacsclient -e '~s'"
+                                          '(notifications-notify :app-name "goimapnotify"
+                                                                 :title "New email received"
+                                                                 :timeout 0)))
+                (trigger . 20)
+                (boxes . #("Inbox"))))))
    (elisp-configuration-service
     `((define-key mode-specific-map "g" 'gnus)
       (setq user-full-name (password-store-get-field "mail/mail.gandi.net" "username")
