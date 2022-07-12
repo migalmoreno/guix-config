@@ -97,8 +97,8 @@
           (file-name (format-time-string "%Y%m%e-%H%M%S.mp4"))
           (frame-width (x-display-pixel-width))
           (frame-height (x-display-pixel-height)))
-      (notifications-notify :title "ffmpeg"
-                            :body "Started recording screen"
+      (notifications-notify :app-name "ffmpeg"
+                            :title "Started recording screen"
                             :timeout 3000)
       (run-at-time
        2 nil
