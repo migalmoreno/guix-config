@@ -854,15 +854,18 @@
      (add-hook 'prog-mode-hook 'display-line-numbers-mode)
      (with-eval-after-load 'display-line-numbers
        (custom-set-variables
-        '(display-line-numbers-type 'relative))))
+        '(display-line-numbers-type 'relative)))
+     ,#~""
+     (tooltip-mode -1))
    #:elisp-packages (list emacs-minions
                           emacs-modus-themes
                           emacs-all-the-icons
                           emacs-all-the-icons-dired
                           emacs-dashboard)
    #:early-init `((setq inhibit-splash-screen t
-                        inhibit-startup-message t
-                        initial-scratch-message nil)
+                        inhibit-startup-message t)
+                  (setq initial-scratch-message nil)
+                  (setq x-gtk-use-system-tooltips nil)
                   (push '(menu-bar-lines . 0) default-frame-alist)
                   (push '(tool-bar-lines . 0) default-frame-alist)
                   (push '(vertical-scroll-bars) default-frame-alist))))
