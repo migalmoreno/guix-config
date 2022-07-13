@@ -53,7 +53,12 @@
                      (provision '(home-screensaver))
                      (requirement '(home-dbus))
                      (one-shot? #t)
-                     (start #~(make-system-constructor "xset -dpms s off")))))
+                     (start #~(make-system-constructor "xset -dpms s off")))
+                    (shepherd-service
+                     (provision '(home-xsetroot))
+                     (requirement '(home-dbus))
+                     (one-shot? #t)
+                     (start #~(make-forkexec-constructor (list "xsetroot" "-cursor_name" "left_ptr"))))))
    (service home-xresources-service-type
             (home-xresources-configuration
              (config

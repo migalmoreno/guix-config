@@ -70,11 +70,17 @@
          '(gnus-use-full-window nil)
          '(gnus-use-cache t)
          '(gnus-novice-user nil)
+         '(gnus-interactive-exit)
          '(gnus-select-method '(nnnil))
          '(gnus-thread-sort-functions
            '(gnus-thread-sort-by-most-recent-date
              (not gnus-thread-sort-by-number)))
-         '(gnus-parameters '())
+         '(gnus-permanently-visible-groups "^nnmaildir")
+         '(gnus-parameters '(("^nnmaildir"
+                              (display . 100)
+                              (gcc-self . "nnmaildir+personal:Sent"))
+                             ("^nntp"
+                              (display . 1000))))
          '(gnus-posting-styles `(("personal"
                                   (name ,(password-store-get-field "mail/mail.gandi.net" "full-name")))))
          '(gnus-directory "~/.cache/gnus/News")
@@ -104,61 +110,59 @@
          '(gnus-dribble-directory (locate-user-emacs-file "gnus"))
          '(gnus-startup-file (locate-user-emacs-file "gnus/.newsrc"))
          '(gnus-check-new-newsgroups nil)
-         '(gnus-subscribe-newsgroup-method 'gnus-subscribe-interactively)
+         '(gnus-subscribe-newsgroup-method 'gnus-subscribe-hierarchically)
          '(gnus-save-killed-list nil)))
       ,#~""
       (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
-      (with-eval-after-load 'gnus-group
-        (define-key gnus-group-mode-map "o" 'eb-mail-group-list-subscribed-groups)
-        (custom-set-variables
-         '(gnus-topic-alist '(("personal"
-                               "nnmaildir+personal:Inbox"
-                               "nnmaildir+personal:Drafts"
-                               "nnmaildir+personal:Sent"
-                               "nnmaildir+personal:Junk"
-                               "nnmaildir+personal:Deleted")
-                              ("clojure"
-                               "nntp+gwene:gwene.clojure.planet")
-                              ("lisp"
-                               "nntp+gwene:gwene.org.lisp.planet"
-                               "nntp+gwene:gwene.engineer.atlas.nyxt")
-                              ("technology"
-                               "nntp+gwene:gwene.org.fsf.news")
-                              ("emacs"
-                               "nntp+gwene:gmane.emacs.devel"
-                               "nntp+gwene:gmane.emacs.erc.general")
-                              ("guix"
-                               "nntp+gwene:gmane.comp.gnu.guix.bugs"
-                               "nntp+gwene:gmane.comp.gnu.guix.patches"
-                               "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
-                              ("misc"
-                               "nnfolder+archive:sent.2022"
-                               "nndraft:drafts")
-                              ("Gnus")))))
+      (add-hook 'gnus-group-mode-hook 'hl-line-mode)
       ,#~""
       (with-eval-after-load 'gnus-sum
         (custom-set-variables
          '(gnus-thread-hide-subtree t)))
       ,#~""
+      (require 'eb-mail)
+      (custom-set-variables
+       '(eb-mail-gnus-topic-alist '(("personal"
+                                     "nnmaildir+personal:Inbox"
+                                     "nnmaildir+personal:Drafts"
+                                     "nnmaildir+personal:Sent"
+                                     "nnmaildir+personal:Junk"
+                                     "nnmaildir+personal:Trash")
+                                    ("clojure"
+                                     "nntp+gwene:gwene.clojure.planet")
+                                    ("lisp"
+                                     "nntp+gwene:gwene.org.lisp.planet"
+                                     "nntp+gwene:gwene.engineer.atlas.nyxt")
+                                    ("technology"
+                                     "nntp+gwene:gwene.org.fsf.news")
+                                    ("emacs"
+                                     "nntp+gwene:gmane.emacs.devel"
+                                     "nntp+gwene:gmane.emacs.erc.general")
+                                    ("guix"
+                                     "nntp+gwene:gmane.comp.gnu.guix.bugs"
+                                     "nntp+gwene:gmane.comp.gnu.guix.patches"
+                                     "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
+                                    ("Gnus")))
+       '(eb-mail-gnus-topic-topology '(("Gnus" visible)
+                                       (("personal" visible nil))
+                                       (("clojure" visible nil))
+                                       (("lisp" visible nil))
+                                       (("technology" visible nil))
+                                       (("emacs" visible nil))
+                                       (("guix" visible nil)))))
+      (add-hook 'gnus-topic-mode-hook 'eb-mail-gnus-topic-mode)
       (with-eval-after-load 'gnus-topic
         (custom-set-variables
-         '(gnus-message-archive-group
-           '((".*" "Sent")))
+         ;; '(gnus-message-archive-group
+         ;;   '((".*" "Sent")))
          '(gnus-gcc-mark-as-read t)
          '(gnus-server-alist '(("archive" nnfolder "archive"
                                 (nnfolder-directory "~/.local/share/mail/archive")
                                 (nnfolder-get-new-mail nil)
-                                (nnfolder-inhibit-expiry t))))
-         '(gnus-topic-topology '(("Gnus" visible)
-                                 (("personal" visible))
-                                 (("clojure" visible))
-                                 (("lisp" visible))
-                                 (("technology" visible))
-                                 (("emacs" visible))
-                                 (("guix" visible))
-                                 (("misc" visible)))))
+                                (nnfolder-inhibit-expiry t)))))
         (setq gnus-message-archive-method
-              `(nnimap ,(password-store-get-field "mail/mail.gandi.net" "host"))))
+              '(nnmaildir "personal"))
+        (setq gnus-update-message-archive-method t))
       ,#~"
 (with-eval-after-load 'gnus-art
   (define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
@@ -213,7 +217,8 @@
         (custom-set-variables
          '(smtpmail-smtp-service 587)
          '(smtpmail-stream-type 'starttls)
-         '(smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail"))
+         '(smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail")
+         '(smtpmail-debug-info t))
         (setq smtpmail-smtp-server (password-store-get-field "mail/mail.gandi.net" "host")
               smtpmail-default-smtp-server (password-store-get-field "mail/mail.gandi.net" "host"))))
     #:elisp-packages (list emacs-ebdb
