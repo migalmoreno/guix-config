@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 (require 'emms)
+(require 'emms-player-mpv)
 (require 'ytdl)
 (require 'mpv)
 (require 'tq)
@@ -99,8 +100,8 @@ currently-proxied URL."
          ytdl-music-extra-args
          (lambda (_res)
            (notifications-notify
-            :title "emms"
-            :body (format "Successfully downloaded \"%s\"." title)
+            :app-name "emms"
+            :title (format "Successfully downloaded \"%s\"." title)
             :timeout 2000))
          "Music")
         (error "Track `%s' is not a remote track to download." title)))))
@@ -318,36 +319,60 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
       (if (equal (mpv--with-json (mpv-get-property "pause"))
                  'false)
           (setq eb-media-mpv-toggle-button "")
-        (setq eb-media-mpv-toggle-button ""))))
+        (setq eb-media-mpv-toggle-button ""))
+    (force-mode-line-update t)))
+
+(defun eb-media-mpv-run-command (command &rest arguments)
+  "Send a COMMAND to mpv, passing the remaining ARGUMENTS.
+Block while waiting for the response."
+  (when (mpv-live-p)
+    (let* ((response
+            (cl-block mpv-run-command-wait-for-response
+              (mpv--enqueue
+               (cons command arguments)
+               (lambda (response)
+                 (cl-return-from mpv-run-command-wait-for-response
+                   response)))
+              (while (mpv-live-p)
+                (sleep-for 0.05))))
+           (status (alist-get 'error response))
+           (data (alist-get 'data response)))
+    (unless (string-equal status "success")
+      (error "`%s' failed: %s" command status))
+    data)))
+
+(advice-add #'mpv-run-command :override #'eb-media-mpv-run-command)
 
 (defun eb-media-mpv-compute-title ()
   "Computes and sets the current MPV process media title."
-  (let* ((title (ignore-errors
-                  (mpv--with-json (mpv-get-property "media-title"))))
-         (embellished-title
-          (and (not (equal title 'false))
-               (if (stringp title)
-                   (if (<= (length title) 30)
-                       (concat title " ")
-                     (let ((shortened-title (substring title 0 29)))
-                       (if (= (aref shortened-title (- (length shortened-title) 1))
-                              ?.)
-                           (concat shortened-title ".. ")
-                         (concat shortened-title "... "))))
-                 (concat (ignore-errors (mpv-get-property "path")) " ")))))
+  (when-let* ((title (mpv--with-json (mpv-get-property "media-title")))
+              (embellished-title
+               (and (not (equal title 'false))
+                    (if (stringp title)
+                        (if (<= (length title) 30)
+                            (concat title " ")
+                          (let ((shortened-title (substring title 0 29)))
+                            (if (= (aref shortened-title (- (length shortened-title) 1))
+                                   ?.)
+                                (concat shortened-title ".. ")
+                              (concat shortened-title "... "))))
+                      (concat (mpv-get-property "path") " ")))))
     (setq eb-media-mpv-mode-line-string embellished-title)))
 
 (defun eb-media-mpv-event-handler (result)
   "Handles the MPV events from RESULT."
   (pcase (alist-get 'event result)
     ((or "file-loaded" "start-file")
-     (run-hooks 'eb-media-mpv-started-hook)
-     (setq eb-media-mpv-stopped-p nil)
      (eb-media-mpv-set-playlist)
-     (run-at-time 1 nil (lambda ()
-                          (eb-media-mpv-compute-title)
-                          (eb-media-mpv-set-paused)
-                          (force-mode-line-update t))))
+     (eb-media-mpv-change-theme)
+     (unless eb-media-mpv-paused-p
+       (setq eb-media-mpv-stopped-p nil)
+       (run-hooks 'eb-media-mpv-started-hook)
+       (eb-media-mpv-set-paused)
+       (if (equal emms-player-mpv-proc
+                  mpv--process)
+           (eb-media-mpv-compute-title)
+         (run-at-time 2 nil #'eb-media-mpv-compute-title))))
     ("pause"
      (eb-media-mpv-set-paused)
      (unless eb-media-mpv-paused-p
@@ -370,12 +395,10 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
   (interactive)
   (if (mpv-live-p)
       (if result
-          (eb-media-mpv-event-handler result)
-        (eb-media-mpv-set-paused)
-        (eb-media-mpv-compute-title)
-        (eb-media-mpv-set-playlist))
+          (eb-media-mpv-event-handler result))
     (eb-media-mpv-mode-line-clear))
-  (force-mode-line-update t))
+  (unless eb-media-mpv-playing-time-mode
+    (force-mode-line-update t)))
 
 ;;;###autoload
 (defun eb-media-mpv-seek-start ()
@@ -399,7 +422,7 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
       (0.5 (error "Failed to kill mpv"))
     (while (and (mpv-live-p)
                 (not (equal mpv--process
-                        emms-player-mpv-proc)))
+                            emms-player-mpv-proc)))
       (sleep-for 0.05)))
   (setq mpv--process nil)
   (setq mpv--queue nil)
@@ -447,7 +470,7 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
        (ignore-errors
          (mpv--tq-filter mpv--queue string)))))
   (run-hooks 'mpv-on-start-hook)
-  (eb-media-mpv-display-mode-line)
+  (run-hooks 'eb-media-mpv-started-hook)
   t)
 
 (defun eb-media-mpv--filter-processes ()
@@ -462,10 +485,15 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
   (mpv-run-command "playlist-shuffle"))
 
 ;;;###autoload
-(defun eb-media-mpv-set-colors (background foreground)
-  "Sets BACKGROUND and FOREGROUND colors in current mpv process."
-  (mpv-set-property "background" background)
-  (mpv-set-property "osd-color" foreground))
+(defun eb-media-mpv-change-theme ()
+  "Sets theme in current mpv process according to current system theme."
+  (interactive)
+  (if (string-match (getenv "GTK_THEME") ":dark")
+      (progn
+        (mpv-set-property "background" "#000000")
+        (mpv-set-property "osd-color" "#ffffff"))
+    (mpv-set-property "background" "#ffffff")
+    (mpv-set-property "osd-color" "#323232")))
 
 ;;;###autoload
 (defun eb-media-mpv-kill-url (original)
@@ -489,12 +517,7 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
    (let ((map (make-sparse-keymap)))
      (define-key map "b" 'mpv-seek-backward)
      (define-key map "f" 'mpv-seek-forward)
-     (define-key map "P" 'mpv-playlist-prev)
-     (define-key map "N" 'mpv-playlist-next)
-     (define-key map "t" 'eb-media-mpv-current-time)
      (define-key map "p" 'mpv-pause)
-     (define-key map "C" 'mpv-chapter-prev)
-     (define-key map "c" 'mpv-chapter-next)
      map)
    t))
 
@@ -608,13 +631,11 @@ DL-TYPE is the download type, see `ytdl-download-types'."
   :global t :group 'eb-media
   (setq eb-media-mpv-mode-line-string nil)
   (if eb-media-mpv-mode-line-mode
-      (progn
-        (eb-media-mpv-display-mode-line)
-        (add-hook 'mpv-on-event-hook #'eb-media-mpv-display-mode-line))
-    (setq eb-media-mpv-mode-line-string nil
-          eb-media-mpv-prev-button nil
-          eb-media-mpv-toggle-button nil
-          eb-media-mpv-next-button nil)
+      (add-hook 'mpv-on-event-hook #'eb-media-mpv-display-mode-line)
+    (setq eb-media-mpv-mode-line-string nil)
+    (setq eb-media-mpv-toggle-button nil)
+    (setq eb-media-mpv-next-button nil)
+    (setq eb-media-mpv-prev-button nil)
     (remove-hook 'mpv-on-event-hook #'eb-media-mpv-display-mode-line)))
 
 (provide 'eb-media)
