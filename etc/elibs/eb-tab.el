@@ -48,7 +48,7 @@
   (let* ((rest (cdr (memq 'eb-tab-format-align-right tab-bar-format)))
          (rest (tab-bar-format-list rest))
          (rest (mapconcat (lambda (item) (nth 2 item)) rest ""))
-         (hpos (+ 4 (length rest)))
+         (hpos (+ 5 (length rest)))
          (str (propertize " " 'display `(space :align-to (- right ,hpos) :height 1.3))))
     `((align-right menu-item ,str nil))))
 
