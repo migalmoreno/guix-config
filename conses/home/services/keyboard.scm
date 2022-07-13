@@ -100,6 +100,11 @@
          (map serialize-field val)
          "\n" 'suffix)))
 
+(define (add-xmodmap-configuration config)
+  (filter (compose not null?)
+          `(("xmodmap/config"
+             ,(home-xmodmap-file config)))))
+
 (define (home-xmodmap-file config)
   (mixed-text-file
        "config"
@@ -116,6 +121,9 @@
      (service-extension
       home-profile-service-type
       xmodmap-profile-service)
+     (service-extension
+      home-xdg-configuration-files-service-type
+      add-xmodmap-configuration)
      (service-extension
       home-shepherd-service-type
       xmodmap-shepherd-service)))
