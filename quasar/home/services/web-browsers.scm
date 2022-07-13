@@ -492,6 +492,9 @@
                   ((default-cookie-policy :no-third-party)
                    (session-restore-prompt :never-restore)))
                 ,#~""
+                (define-configuration prompt-buffer
+                  ((mouse-support-p nil)))
+                ,#~""
                 (define-configuration nyxt/hint-mode:hint-mode
                   ((nyxt/hint-mode:hints-alphabet "asdfghjklqwertyuiop")
                    (visible-in-status-p nil)))
