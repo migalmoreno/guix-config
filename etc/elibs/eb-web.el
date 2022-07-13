@@ -46,19 +46,13 @@
   "Nyxt flags to use to start the Nyxt process when
 `eb-web-nyxt-development-p' is non-`nil'.")
 
-(defvar eb-web-nyxt-executable
-  (if eb-web-nyxt-development-p
-      (executable-find "guix")
-    (executable-find "nyxt"))
-  "The Nyxt executable to launch the Nyxt process with.")
-
 (defvar eb-web-nyxt-process nil
   "Holds the current Nyxt process.")
 
 (defun eb-web-srht-repo-id (name)
   "Return the ID associated with the sourcehut repository NAME."
     (interactive "sRepo name: ")
-    (let* ((srht-token (password-store-get-field "vc/sourcehut" "token"))
+    (let* ((srht-token (password-store-get-field "vc/sourcehut" "oauth2-token"))
            (oauth2-token (concat "Bearer " srht-token))
            (id (assoc-default
                 'id
@@ -90,7 +84,7 @@
                    (name (string-match (rx (: "/" (group (+ (not "/"))) "/" eol)) dir)))
              (eb-web-srht-repo-id (match-string 1 dir))
              (call-interactively #'eb-web-srht-repo-id))))
-  (let* ((srht-token (password-store-get-field "vc/sourcehut" "token"))
+  (let* ((srht-token (password-store-get-field "vc/sourcehut" "oauth2-token"))
          (oauth2-token (concat "Bearer " srht-token))
          (readme (if (derived-mode-p 'html-mode)
                      (buffer-substring-no-properties (point-min) (point-max))
@@ -214,7 +208,7 @@ and if exwm is enabled, it switches to the corresponding workspace."
         (exwm-workspace-switch exwm-workspace)
         (switch-to-buffer nyxt-buffer)))))
 
-(cl-defun eb-web-run-with-nyxt (sexps &key (focus t) (autostart nil))
+(cl-defun eb-web-run-with-nyxt (sexps &key (focus nil) (autostart nil))
   "Evaluates SEXPS in the context of the current Nyxt connection and if FOCUS,
 changes focus to the Nyxt frame. If AUTOSTART is non-`nil' and a Nyxt system
 process is not found, it will automatically create one and connect Slynk to it."
@@ -229,9 +223,12 @@ process is not found, it will automatically create one and connect Slynk to it."
            (not (eb-web--slynk-connected-p))
            autostart)
       (message "Launching Nyxt...")
-      (setq eb-web-nyxt-process (apply #'start-process "nyxt"
-                                       nil eb-web-nyxt-executable
-                                       eb-web-nyxt-development-flags))
+      (setq eb-web-nyxt-process
+            (if eb-web-nyxt-development-p
+                (apply #'start-process "nyxt"
+                       nil (executable-find "guix")
+                       eb-web-nyxt-development-flags)
+              (start-process "nyxt" nil (executable-find "nyxt"))))
       (set-process-sentinel eb-web-nyxt-process
                             (lambda (p _e)
                               (when (= (process-exit-status p) 0)
@@ -270,28 +267,24 @@ process is not found, it will automatically create one and connect Slynk to it."
    `(nx-tailor:select-theme ,theme)))
 
 ;;;###autoload
-(defun eb-web-nyxt--copy-url ()
+(defun eb-web-nyxt-copy-url ()
   "Kills current page URL in Nyxt."
   (interactive)
-  (eb-web--with-nyxt
-   (:focus nil)
-   `(copy-url)))
+  (eb-web-run-with-nyxt '(copy-url)))
 
 ;;;###autoload
 (defun eb-web-nyxt-scroll-other-window ()
   "Scrolls the Nyxt window."
   (interactive)
-  (eb-web--with-nyxt
-   (:focus nil)
-   `(nyxt/document-mode::scroll-down)))
+  (eb-web-run-with-nyxt
+   '(nyxt/document-mode::scroll-down)))
 
 ;;;###autoload
 (defun eb-web-nyxt-scroll-other-window-down ()
   "Scrolls the Nyxt window upward."
   (interactive)
-  (eb-web--with-nyxt
-   (:focus nil)
-   `(nyxt/document-mode::scroll-up)))
+  (eb-web-run-with-nyxt
+   '(nyxt/document-mode::scroll-up)))
 
 (defun eb-web-nyxt-set-transient-map ()
   "Sets a transient map for Nyxt transient `eb-web' commands."
