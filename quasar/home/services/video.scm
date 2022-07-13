@@ -95,6 +95,7 @@
        (eb-media-mpv-playing-time-mode)
        (add-hook 'mpv-on-exit-hook 'eb-media-mpv-mode-line-clear)
        (advice-add 'mpv-start :around 'eb-web-add-url-scheme)
+       (advice-add 'mpv-enqueue :after 'eb-media-mpv-update-playlist)
        (with-eval-after-load 'mpv
          (custom-set-variables
           '(mpv-seek-step 3)))

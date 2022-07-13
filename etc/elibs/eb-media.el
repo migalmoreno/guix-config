@@ -390,15 +390,18 @@ Block while waiting for the response."
      (run-hooks 'eb-media-mpv-finished-hook)
      (eb-media-mpv-mode-line-clear))))
 
+(defun eb-media-mpv-update-playlist (&rest _args)
+  "Invokes `eb-media-mpv-set-playlist' after calling `mpv-enque'."
+  (eb-media-mpv-set-playlist))
+
 (defun eb-media-mpv-display-mode-line (&optional result)
   "Updates and displays the necessary MPV metadata in the modeline."
   (interactive)
-  (if (mpv-live-p)
       (if result
-          (eb-media-mpv-event-handler result))
-    (eb-media-mpv-mode-line-clear))
-  (unless eb-media-mpv-playing-time-mode
-    (force-mode-line-update t)))
+          (eb-media-mpv-event-handler result)
+        (eb-media-mpv-set-paused)
+        (eb-media-mpv-set-playlist)
+        (eb-media-mpv-compute-title)))
 
 ;;;###autoload
 (defun eb-media-mpv-seek-start ()
