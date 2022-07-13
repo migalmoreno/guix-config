@@ -27,7 +27,7 @@
                 (commit
                  ((gpg-sign . #t)))
                 (github
-                 ((user . ,(password-store-get "vc/github/nickname"))))))
+                 ((user . ,(getenv "GITHUB_USERNAME"))))))
              (ignore
               '("**/.direnv"
                 "node_modules"
@@ -39,7 +39,8 @@
       (with-eval-after-load 'magit
         (define-key magit-mode-map "q" 'magit-kill-this-buffer)
         (custom-set-variables
-         '(magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1))
+         '(magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
+         '(magit-pull-or-fetch t))
         (magit-define-popup-switch 'magit-branch-popup ?o "Create an orphan branch" "--orphan")
         (require 'forge))
       ,#~""
