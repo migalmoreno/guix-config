@@ -188,19 +188,22 @@
        ((nyxt/user-script-mode:user-styles
          (list
           (make-instance 'nyxt/user-script-mode:user-style
-                         :include '("https://github.com/*")
+                         :include '("https://github.com/*"
+                                    "https://gist.github.com/*")
                          :code (cl-css:css
                                 `((,(str:join "," '("#dashboard .body"
                                                     ".js-inline-dashboard-render"
                                                     ".js-feed-item-component"
                                                     ".js-yearly-contributions"
-                                                    ".js-form-toggle-container"
+                                                    ".js-profile-editable-area"
                                                     "#js-contribution-activity"
                                                     ".starring-container"
                                                     "a[href$=watchers]"
                                                     "a[href$=stargazers]"
                                                     "a[href$=followers]"
-                                                    "a[href$=following]"))
+                                                    "a[href$=following]"
+                                                    "a[href$=achievements]"
+                                                    "[action*=follow]"))
                                    :display "none !important"))))))))
      ,#~""
      (defmethod custom-format-buttons ((status status-buffer))
@@ -499,13 +502,13 @@
                 ,#~""
                 (sera:export-always 'eval-in-emacs)
                 (defun eval-in-emacs (&rest s-exps)
-                       "Evaluate S-EXPS with `emacsclient'."
-                       (let ((s-exps-string (str:replace-all
-                                             "nyxt::" "" (write-to-string
-                                                          `(progn ,@s-exps) :case :downcase))))
-                         (format *error-output* "Sending to Emacs:~%~a~%" s-exps-string)
-                         (uiop:run-program
-                          (list "emacsclient" "-e" s-exps-string))))))
+                  "Evaluate S-EXPS with `emacsclient'."
+                  (let ((s-exps-string (str:replace-all
+                                        "nyxt::" "" (write-to-string
+                                                     `(progn ,@s-exps) :case :downcase))))
+                    (format *error-output* "Sending to Emacs:~%~a~%" s-exps-string)
+                    (uiop:run-program
+                     (list "emacsclient" "-e" s-exps-string))))))
              (auto-mode-rules-lisp
               '((((match-host "wikipedia.org") :included (nyxt/style-mode:dark-mode)))))))
    (elisp-configuration-service
