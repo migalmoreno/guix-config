@@ -297,8 +297,7 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
   (setq eb-media-mpv-mode-line-string nil)
   (setq eb-media-mpv-toggle-button nil)
   (setq eb-media-mpv-prev-button nil)
-  (setq eb-media-mpv-next-button nil)
-  (force-mode-line-update t))
+  (setq eb-media-mpv-next-button nil))
 
 (defun eb-media-mpv-set-playlist ()
   "Sets appropriate information if current MPV process involves a playlist."
@@ -474,6 +473,7 @@ Block while waiting for the response."
          (mpv--tq-filter mpv--queue string)))))
   (run-hooks 'mpv-on-start-hook)
   (run-hooks 'eb-media-mpv-started-hook)
+  (eb-media-mpv-display-mode-line)
   t)
 
 (defun eb-media-mpv--filter-processes ()
