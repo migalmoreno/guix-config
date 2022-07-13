@@ -62,7 +62,7 @@
         (custom-set-variables
          '(emms-playlist-buffer-name "*Music*")
          '(emms-seek-seconds 15)
-         '(emms-source-file-default-directory eb-media-music-dir)
+         '(emms-source-file-default-directory (expand-file-name "~/music"))
          '(emms-playlist-mode-center-when-go t)
          '(emms-repeat-playlist t)
          '(emms-info-functions '(emms-info-libtag))
