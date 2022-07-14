@@ -30,9 +30,18 @@
        (sha256
         (base32 "17abhldc30ya7kag7rpb1399wlajcavmpssl34wf8icaq3iblrr5"))))
     (build-system python-build-system)
-    (propagated-inputs (list python-pillow))
+    (propagated-inputs
+     (list
+      python-pillow
+      python-toml))
     (inputs
-     (list libx11 libpng libxcursor))
+     (list libx11
+           libpng
+           libxcursor))
+    (native-inputs
+     (list
+      python-setuptools
+      python-wheel))
     (home-page "https://github.com/ful1e5/clickgen")
     (synopsis "The hassle-free cursor building toolbox.")
     (description "clickgen is an API for building X11 and Windows cursors from .png files.
