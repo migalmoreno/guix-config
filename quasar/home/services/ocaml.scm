@@ -38,8 +38,7 @@
      ocaml-ocp-indent
      ocaml-findlib
      ocaml-merlin
-     ocamlbuild
-     opam))
+     ocamlbuild))
    (elisp-configuration-service
     `((add-to-list 'auto-mode-alist '("\\.ml[ily]?\\'" . tuareg-mode))
       (add-hook 'tuareg-mode-hook 'eb-prog-ocaml-mode)
@@ -62,8 +61,9 @@
          '(merlin-error-in-fringe nil)
          '(merlin-error-check-then-move nil)))
       ,#~""
-      (add-to-list 'org-structure-template-alist '("ml" . "src ocaml"))
-      (add-to-list 'org-babel-load-languages '(ocaml . t))
+      (with-eval-after-load 'org
+        (add-to-list 'org-structure-template-alist '("ml" . "src ocaml"))
+        (add-to-list 'org-babel-load-languages '(ocaml . t)))
       (with-eval-after-load 'ob-core
         (setq org-babel-default-header-args:ocaml
               '((:results . "scalar"))))
@@ -71,8 +71,10 @@
       (with-eval-after-load 'ob-ocaml
         (custom-set-variables
          '(org-babel-ocaml-command
-           (expand-file-name
-            "ocaml"
-            (ignore-errors
-             (car (process-lines "opam" "var" "bin"))))))))
+           (if (executable-find "opam")
+               (expand-file-name
+                "ocaml"
+                (ignore-errors
+                 (car (process-lines "opam" "var" "bin"))))
+               ,(file-append ocaml "/bin/ocaml"))))))
     #:elisp-packages (list emacs-tuareg))))
