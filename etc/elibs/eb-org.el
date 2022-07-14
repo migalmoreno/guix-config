@@ -2,6 +2,7 @@
 (require 'cl-lib)
 (require 'org)
 (require 'org-roam)
+(require 'org-indent)
 (require 'consult)
 
 (defgroup eb-org nil
@@ -53,7 +54,7 @@ run again for tomorrow."
 
 ;;;###autoload
 (defun eb-org-tweak-faces ()
-  "Tweaks Org-mode's various faces."
+  "Tweaks Org mode's various faces."
   (interactive)
   (eb-faces
    `((org-block nil :inherit modus-themes-fixed-pitch :weight normal)
@@ -67,18 +68,25 @@ run again for tomorrow."
      (org-meta-line nil :inherit (font-lock-comment-face fixed-pitch))
      (org-headline-done nil :strike-through t)
      (org-special-keyword nil :inherit (font-lock-comment-face))
-     (org-table nil :inherit fixed-pitch)))
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.1)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.0)
-                  (org-level-6 . 1.0)
-                  (org-level-7 . 0.9)
-                  (org-level-8 . 0.9)))
-    (set-face-attribute (car face) nil :height (cdr face)))
-  (with-eval-after-load 'org-indent
-    (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
+     (org-table nil :inherit fixed-pitch)
+     (org-indent nil :inherit '(org-hide fixed-pitch))))
+  (cl-loop for (face . height) in '((org-level-1 . 1.2)
+                                    (org-level-2 . 1.1)
+                                    (org-level-3 . 1.1)
+                                    (org-level-4 . 1.0)
+                                    (org-level-5 . 1.0)
+                                    (org-level-6 . 1.0)
+                                    (org-level-7 . 0.9)
+                                    (org-level-8 . 0.9))
+           do (set-face-attribute face nil :height height)))
+
+;;;###autoload
+(defun eb-org-update-buffers-faces ()
+  "Goes through the current buffer list and applies the appropriate faces
+to Org mode buffers."
+  (cl-loop for buffer in (org-buffer-list)
+           do (with-current-buffer buffer
+                (eb-org-tweak-faces))))
 
 (defun eb-org-set-poly-block-faces ()
   "Correctly sets a fixed pitch face for polymode source blocks."
