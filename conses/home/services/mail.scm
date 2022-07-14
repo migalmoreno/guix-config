@@ -17,7 +17,7 @@
     "The @code{goimapnotify} package to use.")
   (config
    (json-config '())
-   "@code{goimapnotify} configuration."))
+   "Alist of pairs that make up the @code{goimapnotify} configuration."))
 
 (define (home-goimapnotify-file config)
   (apply mixed-text-file "imapnotify.conf"
@@ -38,7 +38,8 @@
                           (or (getenv "XDG_LOG_HOME")
                               (format #f "~a/.local/var/log"
                                       (getenv "HOME")))
-                          "/goimapnotify.log"))))))
+                          "/goimapnotify.log")))
+    (stop #~(make-kill-destructor)))))
 
 (define (home-goimapnotify-profile-service config)
   (list (home-goimapnotify-configuration-package config)))
