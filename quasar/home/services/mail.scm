@@ -17,9 +17,9 @@
              (xdg-flavor? #t)
              (config
               `((IMAPAccount personal)
-                (Host mail.gandi.net)
+                (Host ,(getenv "MAIL_PERSONAL_HOST"))
                 (User ,(getenv "MAIL_PERSONAL_USERNAME"))
-                (PassCmd "pass mail/gandi")
+                (PassCmd "pass mail/personal")
                 (SSLType IMAPS)
                 (CertificateFile "/etc/ssl/certs/ca-certificates.crt")
                 ,#~""
@@ -61,8 +61,8 @@
                 (boxes . #("Inbox"))))))
    (elisp-configuration-service
     `((define-key mode-specific-map "g" 'gnus)
-      (setq user-full-name (password-store-get-field "mail/gandi" "username")
-            user-mail-address (password-store-get-field "mail/gandi" "email"))
+      (setq user-full-name (password-store-get-field "mail/personal" "username")
+            user-mail-address (password-store-get-field "mail/personal" "email"))
       (with-eval-after-load 'gnus
         (with-eval-after-load 'ebdb
           (require 'ebdb-gnus))
@@ -70,7 +70,7 @@
          '(gnus-use-full-window nil)
          '(gnus-use-cache t)
          '(gnus-novice-user nil)
-         '(gnus-interactive-exit)
+         '(gnus-interactive-exit nil)
          '(gnus-select-method '(nnnil))
          '(gnus-thread-sort-functions
            '(gnus-thread-sort-by-most-recent-date
@@ -82,7 +82,7 @@
                              ("^nntp"
                               (display . 1000))))
          '(gnus-posting-styles `(("personal"
-                                  (name ,(password-store-get-field "mail/gandi" "full-name")))))
+                                  (name ,(password-store-get-field "mail/personal" "full-name")))))
          '(gnus-directory "~/.cache/gnus/News")
          '(gnus-home-directory (locate-user-emacs-file "gnus"))
          '(gnus-cache-directory "~/.cache/gnus/News/cache/")
@@ -161,7 +161,7 @@
                                 (nnfolder-get-new-mail nil)
                                 (nnfolder-inhibit-expiry t)))))
         (setq gnus-message-archive-method
-              `(nnmaildir ,(password-store-get-field "mail/gandi" "host")))
+              `(nnmaildir ,(password-store-get-field "mail/personal" "host")))
         (setq gnus-update-message-archive-method t))
       ,#~"
 (with-eval-after-load 'gnus-art
@@ -215,11 +215,12 @@
       ,#~""
       (with-eval-after-load 'smtpmail
         (custom-set-variables
+         '(smptmail-smtp-user (password-store-get-field "mail/personal" "email"))
          '(smtpmail-smtp-service 587)
          '(smtpmail-stream-type 'starttls)
          '(smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail")
          '(smtpmail-debug-info t))
-        (setq smtpmail-smtp-server (password-store-get-field "mail/gandi" "host")
-              smtpmail-default-smtp-server (password-store-get-field "mail/gandi" "host"))))
+        (setq smtpmail-smtp-server (password-store-get-field "mail/personal" "host")
+              smtpmail-default-smtp-server (password-store-get-field "mail/personal" "host"))))
     #:elisp-packages (list emacs-ebdb
                            emacs-debbugs))))
