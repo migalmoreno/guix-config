@@ -597,7 +597,7 @@
 (define pdf-service
   (elisp-configuration-service
    `((pdf-loader-install)
-     (add-hook 'pdf-view-mode-hook 'pdf-view-themed-minor-mode)
+     (add-hook 'pdf-view-mode-hook 'eb-files-pdf-view-mode)
      (with-eval-after-load 'pdf-tools
        (custom-set-variables
         '(pdf-view-display-size 'fit-page)
@@ -992,7 +992,7 @@
                   '(warning-minimum-level :error))
                  ,#~""
                  (server-start)))))
-    ,(simple-service 'add-emacs-envs
+    ,(simple-service 'home-emacs-envs
                      home-environment-variables-service-type
                      `(("VISUAL" . ,(file-append package "/bin/emacsclient"))
                        ("EDITOR" . ,(file-append package "/bin/emacsclient"))))
