@@ -272,7 +272,8 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
 
 (defun eb-media-mpv-playing-time-display ()
   "Displays the current MPV playing time."
-  (setq eb-media-mpv-playing-time (round (1+ eb-media-mpv-playing-time)))
+  (unless eb-media-mpv-paused-p
+    (setq eb-media-mpv-playing-time (round (1+ eb-media-mpv-playing-time))))
   (unless eb-media-mpv-total-duration
     (setq eb-media-mpv-total-duration (or (ignore-errors (mpv-get-property "duration")) 0)))
   (cl-flet ((transform-time (time)
@@ -356,22 +357,27 @@ Block while waiting for the response."
                                 (concat shortened-title ".. ")
                               (concat shortened-title "... "))))
                       (concat (mpv-get-property "path") " ")))))
-    (setq eb-media-mpv-mode-line-string embellished-title)))
+    (setq eb-media-mpv-mode-line-string embellished-title))
+  (force-mode-line-update t))
 
 (defun eb-media-mpv-event-handler (result)
   "Handles the MPV events from RESULT."
   (pcase (alist-get 'event result)
     ((or "file-loaded" "start-file")
-     (eb-media-mpv-set-playlist)
      (eb-media-mpv-change-theme)
-     (unless eb-media-mpv-paused-p
-       (setq eb-media-mpv-stopped-p nil)
-       (run-hooks 'eb-media-mpv-started-hook)
-       (eb-media-mpv-set-paused)
-       (if (equal emms-player-mpv-proc
-                  mpv--process)
-           (eb-media-mpv-compute-title)
-         (run-at-time 2 nil #'eb-media-mpv-compute-title))))
+     (setq eb-media-mpv-stopped-p nil)
+     (eb-media-mpv-set-playlist)
+     (eb-media-mpv-set-paused)
+     (if (equal emms-player-mpv-proc
+                mpv--process)
+         (eb-media-mpv-compute-title)
+       (run-at-time 2 nil #'eb-media-mpv-compute-title))
+     (if eb-media-mpv-paused-p
+         (progn
+           (setq eb-media-mpv-playing-time 0)
+           (eb-media-mpv-playing-time-display)
+           (run-hooks 'eb-media-mpv-paused-hook))
+       (run-hooks 'eb-media-mpv-started-hook)))
     ("pause"
      (eb-media-mpv-set-paused)
      (unless eb-media-mpv-paused-p
@@ -396,11 +402,11 @@ Block while waiting for the response."
 (defun eb-media-mpv-display-mode-line (&optional result)
   "Updates and displays the necessary MPV metadata in the modeline."
   (interactive)
-      (if result
-          (eb-media-mpv-event-handler result)
-        (eb-media-mpv-set-paused)
-        (eb-media-mpv-set-playlist)
-        (eb-media-mpv-compute-title)))
+  (if result
+      (eb-media-mpv-event-handler result)
+    (eb-media-mpv-set-paused)
+    (eb-media-mpv-set-playlist)
+    (eb-media-mpv-compute-title)))
 
 ;;;###autoload
 (defun eb-media-mpv-seek-start ()
