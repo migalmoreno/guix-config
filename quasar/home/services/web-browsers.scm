@@ -195,9 +195,10 @@
                                                     ".js-inline-dashboard-render"
                                                     ".js-feed-item-component"
                                                     ".js-yearly-contributions"
-                                                    ".js-profile-editable-area"
-                                                    "#js-contribution-activity"
+                                                    ".js-profile-editable-area div .mb3"
                                                     ".starring-container"
+                                                    "#js-contribution-activity"
+                                                    "#year-list-container"
                                                     "a[href$=watchers]"
                                                     "a[href$=stargazers]"
                                                     "a[href$=followers]"
@@ -426,6 +427,10 @@
                `((exec . ,(format #f "guix shell -D -f ~a -- ~a" nyxt-file
                                   (string-append ((compose dirname dirname) nyxt-file) "/nyxt")))))))
             '())))))
+   (simple-service
+    'home-nyxt-envs
+    home-environment-variables-service-type
+    `(("BROWSER" . ,(file-append nyxt-next "/bin/nyxt"))))
    routing-service
    appearance-service
    engines-service
@@ -581,7 +586,8 @@
                                                         "nyxt-dev.desktop"
                                                         (concat (xdg-data-home)
                                                                 "/applications/")))
-                                                 (browser (not (getenv "BROWSER"))))
+                                                 (development-p (and (boundp 'eb-web-nyxt-development-p)
+                                                                     eb-web-nyxt-development-p)))
                                                 (and (file-exists-p file)
                                                      (gethash "Exec" (xdg-desktop-read-file file)))
                                                 (getenv "BROWSER")))
