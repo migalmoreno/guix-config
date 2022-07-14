@@ -55,7 +55,13 @@
       ,#~""
       (with-eval-after-load 'srht
         (custom-set-variables
-         '(srht-username (password-store-get-field "vc/sourcehut" "username")))))
+         '(srht-username (password-store-get-field "vc/sourcehut" "username"))))
+      ,#~""
+      (with-eval-after-load 'git-email
+        (custom-set-variables
+         '(git-email-format-patch-default-args "-o ~/src/patches"))
+        (define-key vc-prefix-map "W" 'git-email-format-patch)
+        (git-email-gnus-mode 1)))
     #:elisp-packages (list
                       emacs-magit
                       emacs-forge
