@@ -101,6 +101,20 @@
   "Outputs whether the current theme is of a light or dark variant."
   (string= (car custom-enabled-themes) eb-look-dark-theme))
 
+(defun eb-look-tweak-faces ()
+  "Tweaks various interface faces."
+  (if (eb-look--theme-dark-p)
+      (eb-faces
+       '((tab-bar nil :box (:line-width 1 :color "#a8a8a8" :style unspecified))
+         (vertical-border nil :foreground "#000000")))
+    (eb-faces
+     '((tab-bar nil :box (:line-width 1 :color "#505050" :style unspecified))
+       (vertical-border nil :foreground "#ffffff"))))
+  (eb-faces
+   `((default nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
+     (fixed-pitch nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
+     (variable-pitch nil :family ,eb-look-variable-font :height ,eb-look-default-font-size))))
+
 ;;;###autoload
 (defun eb-look-change-theme ()
   "Changes the theme on the fly and applies corresponding changes to
@@ -108,30 +122,14 @@ currently-running applications."
   (interactive)
   (if (eb-look--theme-dark-p)
       (progn
-        (eb-faces
-         '((tab-bar nil :box (:line-width 1 :color "#a8a8a8" :style unspecified))
-           (vertical-border nil :foreground "#000000")))
         (setenv "GTK_THEME" ":dark")
-        (eb-web-nyxt-change-theme eb-look-dark-theme)
-        (cl-loop for buffer in (eb-files--list-pdf-buffers)
-                 do (with-current-buffer buffer
-                      (pdf-view-themed-minor-mode 1))))
-    (eb-faces
-     '((tab-bar nil :box (:line-width 1 :color "#505050" :style unspecified))
-       (vertical-border nil :foreground "#ffffff")))
+        (eb-web-nyxt-change-theme eb-look-dark-theme))
     (setenv "GTK_THEME" ":light")
-    (eb-web-nyxt-change-theme eb-look-light-theme)
-    (cl-loop for buffer in (eb-files--list-pdf-buffers)
-             do (with-current-buffer buffer
-                  (pdf-view-themed-minor-mode -1))))
+    (eb-web-nyxt-change-theme eb-look-light-theme))
+  (eb-look-tweak-faces)
+  (eb-files-update-pdf-buffers)
   (eb-media-mpv-change-theme)
-  (cl-loop for buffer in (org-buffer-list)
-           do (with-current-buffer buffer
-                (eb-org-tweak-faces)))
-  (eb-faces
-   `((default nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
-     (fixed-pitch nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
-     (variable-pitch nil :family ,eb-look-variable-font :height ,eb-look-default-font-size))))
+  (eb-org-update-buffers-faces))
 
 (defun eb-look-tweak-info-faces ()
   "Applies some extra appearance settings to `Info-mode' and `Info+-mode'."
