@@ -5,14 +5,20 @@
   "File editing tools."
   :group 'eb)
 
-;;;###autoload
 (defun eb-files--list-pdf-buffers ()
-  "List all currently-opened `pdf-view-mode' buffers."
+  "List all currently-opened `pdf-view' mode buffers."
   (cl-remove-if-not
    (lambda (buffer)
      (with-current-buffer buffer
        (derived-mode-p 'pdf-view-mode)))
    (buffer-list)))
+
+(defun eb-files-update-pdf-buffers ()
+  "Applies `eb-files-pdf-view-mode' to the currently opened
+`pdf-view' mode buffers. "
+  (cl-loop for buffer in (eb-files--list-pdf-buffers)
+           do (with-current-buffer buffer
+                (eb-files-pdf-view-mode 1))))
 
 (defun eb-files--parse-sconfig-hosts ()
   "Parses SSH configuration file and returns a list of its host defebions."
@@ -81,5 +87,15 @@ read remote directory/file depending on READ."
   (require 'consult)
   (let ((files (dired-get-marked-files)))
     (mapc #'consult-file-externally files)))
+
+;;;###autoload
+(define-minor-mode eb-files-pdf-view-mode
+  "Custom `pdf-view' mode that applies settings based on the current theme."
+  :global t :group 'eb-files
+  (if eb-files-pdf-view-mode
+      (if (eb-look--theme-dark-p)
+          (pdf-view-themed-minor-mode 1)
+        (pdf-view-themed-minor-mode -1))
+    (pdf-view-themed-minor-mode -1)))
 
 (provide 'eb-files)
