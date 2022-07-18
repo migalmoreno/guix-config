@@ -155,9 +155,12 @@
          '(org-capture-bookmark nil)
          '(org-capture-templates
            '(("t" "Tasks/Projects")
-             ("tt" "TODO Entry" entry (file+olp "~/documents/tasks.org" "TODOs")
+             ("tt" "TODO Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
               "* TODO %? %^G\n%U\n"
               :empty-lines 1)
+             ("tl" "Linked Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
+              "* TODO %? %a %^G\n%U\n"
+              :immediate-finish 1)
              ("tb" "Read It Later" entry (file+headline "~/documents/tasks.org" "Read It Later")
               "* %a %^G"
               :immediate-finish 1)
@@ -375,29 +378,17 @@
                            emacs-visual-fill-column))
    (nyxt-configuration-service
     `((define-command org-capture ()
-        "Captures the current page in Org mode."
+        "Stores and captures the current page link via Org mode."
         (eval-in-emacs
-         `(org-link-set-parameters
-           "nyxt"
-           :store (lambda ()
-                    (org-link-store-props
-                     :type "nyxt"
-                     :link ,(quri:render-uri (url (current-buffer)))
-                     :description ,(title (current-buffer)))))
-         `(org-capture nil "tb"))
-        (echo "Org mode note stored"))
+         '(org-store-link t)
+         '(org-capture nil "tb"))
+        (echo "Org link successfully stored and captured"))
       ,#~""
       (define-command org-roam-capture ()
-        "Captures the current page as an Org Roam node."
+        "Stores and captures the current page as an Org Roam node."
         (eval-in-emacs
-         `(org-link-set-parameters
-           "nyxt"
-           :store (lambda ()
-                    (org-link-store-props
-                     :type "nyxt"
-                     :link ,(quri:render-uri (url (current-buffer)))
-                     :description ,(title (current-buffer)))))
-         `(org-roam-capture nil "w")))
+         '(org-store-link t)
+         '(org-roam-capture nil "w")))
       (define-key *custom-keymap*
         "M-c c" 'org-capture
         "M-c n" 'org-roam-capture)))))
@@ -693,6 +684,7 @@
       '(display-time-24hr-format t)
       '(display-time-world-list '(("Europe/London" "London")
                                   ("Europe/Madrid" "Madrid")
+                                  ("Europe/Moscow" "Moscow")
                                   ("America/New_York" "New York")))
       '(display-time-world-time-format "%R %Z"))
      (display-time-mode))))

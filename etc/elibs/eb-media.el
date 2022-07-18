@@ -59,6 +59,8 @@ from which to play content."
 (defvar eb-media-mpv-playing-time 0
   "Time elapsed for the current MPV playback.")
 (defvar eb-media-mpv-playing-time-display-timer nil)
+(defvar eb-media-mpv-playlist-p nil
+  "Indicates if the current MPV process contains a playlist.")
 (defvar eb-media-mpv-paused-p nil
   "Whether the current MPV playback is paused or not.")
 (defvar eb-media-mpv-stopped-p nil
@@ -182,18 +184,33 @@ Optionally, provide a LENGTH for the mode line and whether to PLAY the track."
        download-type)
     (error "`mpv' is not currently active")))
 
-;;;###autoload
-(defun eb-media-mpv-capture-link ()
-  "Stores the current mpv playback link and captures it."
-  (let ((url (mpv-get-property "path"))
-        (title (mpv-get-property "media-title")))
-    (org-link-set-parameters
-     "mpv"
-     :store (lambda ()
-              (org-link-store-props
-               :type "mpv"
-               :link url
-               :description title)))
+(org-link-set-parameters
+ "mpv"
+ :store #'eb-media-mpv-store-link)
+
+(defun eb-media-mpv-store-link ()
+  "Store a link to an mpv track."
+  (when (and (mpv-live-p)
+             (not (equal (mpv--with-json
+                          (mpv-get-property "video"))
+                         'false))
+             (string-match (rx (: "mpv:")) (buffer-name (current-buffer))))
+    (let ((url (mpv-get-property "path"))
+          (title (mpv-get-property "media-title")))
+      (org-link-store-props
+       :type "mpv"
+       :link url
+       :description title))))
+
+(defun eb-media-mpv-capture ()
+  "Stores and captures the current mpv playback link with the corresponding
+Org capture template."
+  (interactive)
+  (with-current-buffer (car (cl-remove-if-not (lambda (buffer)
+                                                (string-match (rx (: "mpv:"))
+                                                              (buffer-name buffer)))
+                                              (buffer-list)))
+    (org-store-link t)
     (org-capture nil "tv")))
 
 ;;;###autoload
@@ -272,7 +289,8 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
 
 (defun eb-media-mpv-playing-time-display ()
   "Displays the current MPV playing time."
-  (unless eb-media-mpv-paused-p
+  (unless (and eb-media-mpv-paused-p
+               eb-media-mpv-playlist-p)
     (setq eb-media-mpv-playing-time (round (1+ eb-media-mpv-playing-time))))
   (unless eb-media-mpv-total-duration
     (setq eb-media-mpv-total-duration (or (ignore-errors (mpv-get-property "duration")) 0)))
@@ -298,7 +316,8 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
   (setq eb-media-mpv-mode-line-string nil)
   (setq eb-media-mpv-toggle-button nil)
   (setq eb-media-mpv-prev-button nil)
-  (setq eb-media-mpv-next-button nil))
+  (setq eb-media-mpv-next-button nil)
+  (setq eb-media-mpv-playing-time-string nil))
 
 (defun eb-media-mpv-set-playlist ()
   "Sets appropriate information if current MPV process involves a playlist."
@@ -307,10 +326,13 @@ If PRIVATE, use a privacy-friendly alternative of URL as defined per
     (if (and (not (equal playlist 'false))
              (consp playlist)
              (> (length playlist) 1))
-        (setq eb-media-mpv-prev-button ""
-              eb-media-mpv-next-button "")
-      (setq eb-media-mpv-prev-button nil
-            eb-media-mpv-next-button nil))))
+        (progn
+          (setq eb-media-mpv-playlist-p t)
+          (setq eb-media-mpv-prev-button ""
+                eb-media-mpv-next-button ""))
+      (setq eb-media-mpv-playlist-p nil)
+      (setq eb-media-mpv-prev-button nil)
+      (setq eb-media-mpv-next-button nil))))
 
 (defun eb-media-mpv-set-paused ()
   "Sets appropriate information if the current MPV process is stopped."
@@ -372,7 +394,7 @@ Block while waiting for the response."
                 mpv--process)
          (eb-media-mpv-compute-title)
        (run-at-time 2 nil #'eb-media-mpv-compute-title))
-     (if eb-media-mpv-paused-p
+     (if (and eb-media-mpv-paused-p eb-media-mpv-playlist-p)
          (progn
            (setq eb-media-mpv-playing-time 0)
            (eb-media-mpv-playing-time-display)
@@ -479,7 +501,9 @@ Block while waiting for the response."
          (mpv--tq-filter mpv--queue string)))))
   (run-hooks 'mpv-on-start-hook)
   (run-hooks 'eb-media-mpv-started-hook)
-  (eb-media-mpv-display-mode-line)
+  (when (equal mpv--process
+               emms-player-mpv-proc)
+    (eb-media-mpv-display-mode-line))
   t)
 
 (defun eb-media-mpv--filter-processes ()

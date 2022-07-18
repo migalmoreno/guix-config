@@ -5,6 +5,7 @@
 (require 'consult)
 (require 'webpaste)
 (require 'sly)
+(require 'ol)
 
 (defgroup eb-web nil
   "Web browser integrations and tweaks."
@@ -136,20 +137,6 @@
   (cl-letf (((symbol-function 'browse-url-can-use-xdg-open) #'ignore))
     (eb-web--jump-to-bookmark bookmark)))
 
-;;;###autoload
-(defun eb-web--slynk-connected-p ()
-  "Indicates whether there's a connection to `eb-web-nyxt-port' currently."
-  (require 'sly)
-  (cl-find-if (lambda (p)
-                (= (sly-connection-port p) eb-web-nyxt-port))
-              sly-net-processes))
-
-(defun eb-web--slynk-eval-sexps (&rest sexps)
-  "Transform STRING to S-expression form to send to `slynk'."
-  (cl-letf (((symbol-function 'sly-display-eval-result) #'ignore))
-    (let ((string (mapconcat #'prin1-to-string sexps "")))
-      (sly-interactive-eval string))))
-
 (defun eb-web-open-with-cookies (cookies &optional url)
   "Fetches and opens URL with corresponding external application and COOKIES."
   (interactive "\nsURL: ")
@@ -175,6 +162,28 @@
   (interactive)
   (shr-browse-url nil nil t))
 
+;;;###autoload
+(cl-defun eb-web-sly-eval (sexp &rest args &key &allow-other-keys)
+  "Evaluate SEXP and ARGS with Slynk, automatically attaching a Slynk
+process if needed."
+  (let ((sly-default-connection (or (eb-web--slynk-connected-p)
+                                    (eb-web-connect-to-slynk))))
+    (apply #'sly-eval sexp args)))
+
+;;;###autoload
+(defun eb-web--slynk-connected-p ()
+  "Indicates whether there's currently a connection to `eb-web-nyxt-port'."
+  (require 'sly)
+  (cl-find-if (lambda (p)
+                (= (sly-connection-port p) eb-web-nyxt-port))
+              sly-net-processes))
+
+(defun eb-web--slynk-eval-sexps (&rest sexps)
+  "Transform STRING to S-expression form to send to `slynk'."
+  (cl-letf (((symbol-function 'sly-display-eval-result) #'ignore))
+    (let ((string (mapconcat #'prin1-to-string sexps "")))
+      (sly-interactive-eval string))))
+
 (defun eb-web--system-nyxt-p ()
   "Returns non-`nil' if the Nyxt system process is currently running."
   (cl-some (lambda (pid)
@@ -189,10 +198,9 @@ and if exwm is enabled, it switches to the corresponding workspace."
   (interactive
    (when current-prefix-arg
      (list :focus t)))
-  (let* ((nyxt-buffer (car (seq-filter (lambda (buf)
-                                         (string-prefix-p
-                                          "Nyxt:" (string-trim (buffer-name buf)) t))
-                                       (buffer-list))))
+  (let* ((nyxt-buffer (car (cl-remove-if-not (lambda (buffer)
+                                               (string-match (rx (: "Nyxt:")) (buffer-name buffer)))
+                                             (buffer-list))))
          (exwm-workspace (when (require 'exwm nil t)
                            (exwm-workspace--position
                             (window-frame (or (get-buffer-window nyxt-buffer t)
@@ -244,6 +252,20 @@ process is not found, it will automatically create one and connect Slynk to it."
       (eb-web-nyxt-set-up-window :focus focus)
       (eb-web--slynk-eval-sexps sexps)))))
 
+(org-link-set-parameters
+ "nyxt"
+ :store #'eb-web-nyxt-store-link)
+
+(defun eb-web-nyxt-store-link ()
+  "Stores the current page link via Org mode."
+  (when (and (or eb-web-nyxt-process
+                 (eb-web--system-nyxt-p))
+             (string-match (rx (: "Nyxt:")) (buffer-name (current-buffer))))
+    (org-link-store-props
+     :type "nyxt"
+     :link (eb-web-sly-eval '(nyxt:render-url (nyxt:url (nyxt:current-buffer))))
+     :description (eb-web-sly-eval '(nyxt:title (nyxt:current-buffer))))))
+
 ;;;###autoload
 (defun eb-web-connect-to-slynk ()
   "Connects to the Slynk server to interact with the Nyxt browser."
@@ -258,7 +280,6 @@ process is not found, it will automatically create one and connect Slynk to it."
    `(simple-search ,query)
    :focus t :autostart t))
 
-;;;###autoload
 (defun eb-web-nyxt-change-theme (theme)
   "Switches current browser THEME in Nyxt."
   (interactive
