@@ -598,6 +598,11 @@
   (elisp-configuration-service
    `((pdf-loader-install)
      (add-hook 'pdf-view-mode-hook 'eb-files-pdf-view-mode)
+     (advice-add 'pdf-view-next-page-command :around 'eb-files-run-with-pdf-view)
+     (advice-add 'pdf-view-previous-page-command :around 'eb-files-run-with-pdf-view)
+     (let ((mode mode-specific-map))
+       (define-key mode (kbd "pn") 'pdf-view-next-page-command)
+       (define-key mode (kbd "pp") 'pdf-view-previous-page-command))
      (with-eval-after-load 'pdf-tools
        (custom-set-variables
         '(pdf-view-display-size 'fit-page)

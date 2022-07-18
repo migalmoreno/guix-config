@@ -20,6 +20,15 @@
            do (with-current-buffer buffer
                 (eb-files-pdf-view-mode 1))))
 
+(defun eb-files-run-with-pdf-view (fun &rest args)
+  "Run FUN with ARGS in the context of the first `pdf-view' mode buffer."
+  (if (find (current-buffer) (eb-files--list-pdf-buffers))
+      (apply fun args)
+    (let ((buffer (car (eb-files--list-pdf-buffers))))
+      (save-window-excursion
+        (with-selected-window (get-buffer-window buffer)
+          (apply fun args))))))
+
 (defun eb-files--parse-sconfig-hosts ()
   "Parses SSH configuration file and returns a list of its host defebions."
   (when-let ((file (expand-file-name "~/.ssh/config")))
