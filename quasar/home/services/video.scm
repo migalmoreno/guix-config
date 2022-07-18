@@ -14,12 +14,15 @@
   #:use-module (gnu packages kodi)
   #:use-module (gnu packages graphics)
   #:use-module (guix gexp)
+  #:use-module (ice-9 match)
   #:export (mpv-service
             youtube-dl-service))
 
 (define (mpv-service)
   (define (run-with-emacs command)
-    (format #f "run \"/bin/sh\" \"-c\" \"emacsclient -e '~s'\"" command))
+    (format #f (match command
+                 ((? string? e) "run \"/bin/sh\" \"-c\" \"emacsclient -e ~a\"'")
+                 (_ "run \"/bin/sh\" \"-c\" \"emacsclient -e '~s'\"")) command))
 
   (list
    (home-generic-service
