@@ -59,6 +59,4 @@
                      ("HISTFILE" . "$XDG_STATE_HOME/bash/history")))
    (service home-bash-service-type
             (home-bash-configuration
-             (guix-defaults? #t)
-             (bashrc
-              (list "eval \"$(opam env)\""))))))
+             (guix-defaults? #t)))))
