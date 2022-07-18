@@ -19,7 +19,7 @@
               `((IMAPAccount personal)
                 (Host ,(getenv "MAIL_PERSONAL_HOST"))
                 (User ,(getenv "MAIL_PERSONAL_USERNAME"))
-                (PassCmd "pass mail/personal")
+                (Pass ,(getenv "MAIL_PERSONAL_PASSWORD"))
                 (SSLType IMAPS)
                 (CertificateFile "/etc/ssl/certs/ca-certificates.crt")
                 ,#~""
