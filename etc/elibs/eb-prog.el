@@ -77,9 +77,10 @@ in Comint mode."
 
 (defun eb-prog-ocaml-set-environment ()
   "Sets OPAM environment variables."
-  (dolist (var (car (read-from-string
-                     (shell-command-to-string "opam config env --sexp"))))
-    (setenv (car var) (cadr var))))
+  (when (executable-find "opam")
+    (dolist (var (car (read-from-string
+                       (shell-command-to-string "opam config env --sexp"))))
+      (setenv (car var) (cadr var)))))
 
 ;;;###autoload
 (defun eb-prog-output-embellisher ()
