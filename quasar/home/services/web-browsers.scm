@@ -195,7 +195,7 @@
                                                     ".js-inline-dashboard-render"
                                                     ".js-feed-item-component"
                                                     ".js-yearly-contributions"
-                                                    ".js-profile-editable-area div .mb3"
+                                                    ".js-profile-editable-area div .mb-3"
                                                     ".starring-container"
                                                     "#js-contribution-activity"
                                                     "#year-list-container"
@@ -304,6 +304,7 @@
             :base-search-url "https://teddit.namazso.eu/search?q=~a")
            (engines:hacker-news
             :shortcut "hn"
+            :fallback-url (quri:uri "https://news.ycombinator.com")
             :search-type :all)
            (engines:lobsters
             :shortcut "lo")
@@ -356,7 +357,7 @@
         (router:banner-p t)
         (router:routes
          (list
-          (make-route '(match-regex "https://insta.*")
+          (make-route '(match-regex "https://(www.)?insta.*")
                       :redirect '("bibliogram.pussthecat.org" (:path ("/u" (not "/" "/p/" "/tv"))))
                       :instances 'make-bibliogram-instances)
           (make-route (match-domain "tiktok.com")
@@ -376,7 +377,7 @@
                                                              :audio-only t :repeat t))))
           (make-route '(match-regex "https://gfycat.com/.*"
                                     "https://streamable.com/.*"
-                                    ".*/w/.*"
+                                    "https://.*/videos/watch/.*"
                                     ".*cloudfront.*master.m3u8")
                       :external (lambda (data)
                                   (eval-in-emacs
@@ -540,13 +541,7 @@
                               "--incognito"
                               "--blink-settings=imagesEnabled=false"
                               "--show-avatar-button=never")))
-    (list
-     (if alt-browser-p
-         (home-generic-service 'home-browser-packages
-                               #:packages (list
-                                           ungoogled-chromium
-                                           ublock-origin/chromium))
-         '())
+    (cons*
      (simple-service
       'web-environment-variables
       home-environment-variables-service-type
@@ -606,4 +601,11 @@
         ,#~""
         (advice-add 'browse-url-xdg-open :around 'eb-web-add-url-scheme))
       #:elisp-packages (list emacs-webpaste
-                             emacs-nginx-mode)))))
+                             emacs-nginx-mode))
+     (if alt-browser-p
+         (list
+          (home-generic-service 'home-browser-packages
+                                #:packages (list
+                                            ungoogled-chromium
+                                            ublock-origin/chromium)))
+         '()))))
