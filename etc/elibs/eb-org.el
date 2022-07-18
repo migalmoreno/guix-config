@@ -69,7 +69,7 @@ run again for tomorrow."
      (org-headline-done nil :strike-through t)
      (org-special-keyword nil :inherit (font-lock-comment-face))
      (org-table nil :inherit fixed-pitch)
-     (org-indent nil :inherit '(org-hide fixed-pitch))))
+     (org-indent nil :inherit (org-hide fixed-pitch))))
   (cl-loop for (face . height) in '((org-level-1 . 1.2)
                                     (org-level-2 . 1.1)
                                     (org-level-3 . 1.1)

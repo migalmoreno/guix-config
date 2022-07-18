@@ -141,8 +141,7 @@
                                   ("^ *\\([+]\\)[[:space:]][^[]+?"
                                    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "‣")))))))
       ,#~""
-      (with-eval-after-load 'ob-core
-          (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+      (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
       ,#~""
       (advice-add 'org-refile :after 'org-save-all-org-buffers)
       (with-eval-after-load 'org-refile
