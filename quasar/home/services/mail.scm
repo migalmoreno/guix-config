@@ -61,8 +61,7 @@
                 (boxes . #("Inbox"))))))
    (elisp-configuration-service
     `((define-key mode-specific-map "g" 'gnus)
-      (setq user-full-name (password-store-get-field "mail/personal" "username")
-            user-mail-address (password-store-get-field "mail/personal" "email"))
+      (setq mail-user-agent 'gnus-user-agent)
       (with-eval-after-load 'gnus
         (with-eval-after-load 'ebdb
           (require 'ebdb-gnus))
@@ -160,8 +159,7 @@
                                 (nnfolder-directory "~/.local/share/mail/archive")
                                 (nnfolder-get-new-mail nil)
                                 (nnfolder-inhibit-expiry t)))))
-        (setq gnus-message-archive-method
-              `(nnmaildir ,(password-store-get-field "mail/personal" "host")))
+        (setq gnus-message-archive-method `(nnmaildir "personal"))
         (setq gnus-update-message-archive-method t))
       ,#~"
 (with-eval-after-load 'gnus-art
