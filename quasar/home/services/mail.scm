@@ -198,7 +198,10 @@
       (add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart)
       (add-hook 'message-mode-hook 'eb-mail-message-mode)
       (with-eval-after-load 'message
+        (setq user-full-name (password-store-get-field "mail/personal" "username"))
+        (setq user-mail-address (password-store-get-field "mail/personal" "email"))
         (require 'ebdb-message)
+        (add-hook 'message-header-setup-hook 'eb-mail-message-add-gcc-header)
         (let ((map message-mode-map))
           (define-key map (kbd "C-c M-z") 'org-mime-htmlize)
           (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode))
@@ -213,7 +216,7 @@
       ,#~""
       (with-eval-after-load 'smtpmail
         (custom-set-variables
-         '(smptmail-smtp-user (password-store-get-field "mail/personal" "email"))
+         '(smtpmail-smtp-user (password-store-get-field "mail/personal" "email"))
          '(smtpmail-smtp-service 587)
          '(smtpmail-stream-type 'starttls)
          '(smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail")

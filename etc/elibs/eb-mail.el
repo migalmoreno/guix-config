@@ -32,6 +32,31 @@
    "blockquote" "border-left: 2px solid gray; padding-left: 4px;"))
 
 ;;;###autoload
+(defun eb-mail-message-add-gcc-header ()
+  "Prompt for a Gcc header from `eb-mail-gnus-topic-alist'. This will allow
+the message to be stored in the right directory of the IMAP Server (usually
+\"Sent\"). If this header is missing, the outgoing message will go through,
+but it won't appear on the right Maildir directory."
+  (if (gnus-alive-p)
+      (unless (message-fetch-field "Gcc")
+        (message-add-header (format "Gcc: %s"
+                                    (let ((groups
+                                           (cl-remove-if-not
+                                            (lambda (group)
+                                              (string-match (rx (: "Sent" eol)) group))
+                                            (eb-mail--gnus-get-topic-groups))))
+                                      (if (> 1 (length groups))
+                                          (completing-read "Account: " groups)
+                                        (car groups))))))
+    (user-error "Gnus is not running. No GCC header will be inserted.")))
+
+(defun eb-mail--gnus-get-topic-groups ()
+  "Return a flattened list of groups from `eb-mail-gnus-topic-alist'."
+  (flatten-list (mapcar (lambda (topic)
+                          (cdr topic))
+                        eb-mail-gnus-topic-alist)))
+
+;;;###autoload
 (define-minor-mode eb-mail-gnus-topic-mode
   "Custom mode to apply Gnus topics topology declaratively and subscribe
 automatically to the defined groups in them."
@@ -40,9 +65,7 @@ automatically to the defined groups in them."
   (setq gnus-topic-alist eb-mail-gnus-topic-alist)
   (mapc (lambda (topic)
           (gnus-subscribe-hierarchically topic))
-        (flatten-list (mapcar (lambda (topic)
-                                  (cdr topic))
-                                eb-mail-gnus-topic-alist))))
+        (eb-mail--gnus-get-topic-groups)))
 
 ;;;###autoload
 (define-minor-mode eb-mail-message-mode
