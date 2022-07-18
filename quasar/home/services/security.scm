@@ -67,7 +67,7 @@
         (custom-set-variables
          '(pass-show-keybindings nil)))
       ,#~""
-      (define-key mode-specific-map "p" 'password-store-copy)
+      (define-key mode-specific-map "P" 'password-store-copy)
       (with-eval-after-load 'password-store
         (custom-set-variables
          '(password-store-time-before-clipboard-restore 60)))
