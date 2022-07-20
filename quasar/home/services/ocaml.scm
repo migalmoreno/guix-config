@@ -37,10 +37,12 @@
              (config
               `((format #f "#directory \"~a/.guix-home/profile/lib/ocaml/site-lib/\""
                         ,(getenv "HOME"))
+                "#directory \"_build\""
                 "#use \"topfind\""
                 "#thread"
                 "#require \"core.top\""
                 "#require \"ppx_fields_conv\""
+                "#require \"str\""
                 "open Core"))))
    (elisp-configuration-service
     `((add-to-list 'auto-mode-alist '("\\.ml[ily]?\\'" . tuareg-mode))

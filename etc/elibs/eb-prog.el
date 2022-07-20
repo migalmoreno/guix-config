@@ -68,12 +68,12 @@ in Comint mode."
 
 (defun eb-prog-ocaml-load-merlin ()
   "Sets up `merlin-mode' for OCaml."
-  (let ((opam-share (ignore-errors
+  (let ((opam-share (when (executable-find "opam")
                       (car (process-lines "opam" "var" "share")))))
     (when (and opam-share (file-directory-p opam-share))
       (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-      ;; (add-hook 'tuareg-mode-hook #'merlin-mode)
-      (autoload #'merlin-mode "merlin" nil t nil))))
+      (autoload #'merlin-mode "merlin" nil t nil))
+    (add-hook 'tuareg-mode-hook #'merlin-mode)))
 
 (defun eb-prog-ocaml-set-environment ()
   "Sets OPAM environment variables."
