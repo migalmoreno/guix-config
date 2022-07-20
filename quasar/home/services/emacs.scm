@@ -15,6 +15,7 @@
   #:use-module (gnu packages imagemagick)
   #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages aspell)
+  #:use-module (gnu packages graphviz)
   #:use-module (gnu home services)
   #:use-module (gnu home services xdg)
   #:use-module (gnu home-services base)
@@ -58,7 +59,7 @@
 
 (define org-service
   (list
-   (home-generic-service 'home-org-packages #:packages (list unoconv libreoffice))
+   (home-generic-service 'home-org-packages #:packages (list unoconv libreoffice graphviz))
    (elisp-configuration-service
     `((dolist (module '(org-indent org-tempo org-habit org-crypt org-protocol))
               (add-to-list 'org-modules module))
@@ -590,9 +591,9 @@
      (add-hook 'pdf-view-mode-hook 'eb-files-pdf-view-mode)
      (advice-add 'pdf-view-next-page-command :around 'eb-files-run-with-pdf-view)
      (advice-add 'pdf-view-previous-page-command :around 'eb-files-run-with-pdf-view)
-     (let ((mode mode-specific-map))
-       (define-key mode (kbd "pn") 'pdf-view-next-page-command)
-       (define-key mode (kbd "pp") 'pdf-view-previous-page-command))
+     (let ((map mode-specific-map))
+       (define-key map (kbd "pn") 'pdf-view-next-page-command)
+       (define-key map (kbd "pp") 'pdf-view-previous-page-command))
      (with-eval-after-load 'pdf-tools
        (custom-set-variables
         '(pdf-view-display-size 'fit-page)
