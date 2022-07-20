@@ -18,7 +18,7 @@
              (config
               `((IMAPAccount personal)
                 (Host ,(getenv "MAIL_PERSONAL_HOST"))
-                (User ,(getenv "MAIL_PERSONAL_USERNAME"))
+                (User ,(getenv "MAIL_PERSONAL_EMAIL"))
                 (Pass ,(getenv "MAIL_PERSONAL_PASSWORD"))
                 (SSLType IMAPS)
                 (CertificateFile "/etc/ssl/certs/ca-certificates.crt")
@@ -49,7 +49,7 @@
                 (port . 143)
                 (tls . #f)
                 (tlsOptions . ((rejectUnauthorized . #t)))
-                (username . ,(getenv "MAIL_PERSONAL_USERNAME"))
+                (username . ,(getenv "MAIL_PERSONAL_EMAIL"))
                 (password . ,(getenv "MAIL_PERSONAL_PASSWORD"))
                 (xoauth2 . #f)
                 (onNewMail . "mbsync --all")
@@ -60,7 +60,9 @@
                 (trigger . 20)
                 (boxes . #("Inbox"))))))
    (elisp-configuration-service
-    `((define-key mode-specific-map "g" 'gnus)
+    `((setq user-full-name ,(getenv "MAIL_PERSONAL_FULLNAME"))
+      (setq user-mail-address ,(getenv "MAIL_PERSONAL_EMAIL"))
+      (define-key mode-specific-map "g" 'gnus)
       (setq mail-user-agent 'gnus-user-agent)
       (with-eval-after-load 'gnus
         (with-eval-after-load 'ebdb
@@ -198,8 +200,6 @@
       (add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart)
       (add-hook 'message-mode-hook 'eb-mail-message-mode)
       (with-eval-after-load 'message
-        (setq user-full-name (password-store-get-field "mail/personal" "username"))
-        (setq user-mail-address (password-store-get-field "mail/personal" "email"))
         (require 'ebdb-message)
         (add-hook 'message-header-setup-hook 'eb-mail-message-add-gcc-header)
         (let ((map message-mode-map))
