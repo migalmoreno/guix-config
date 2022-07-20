@@ -538,34 +538,12 @@
 
 (define* (web-service #:key alt-browser-p)
   (let ((chromium-flags (list "--remove-tabsearch-button"
-                              "--incognito"
-                              "--blink-settings=imagesEnabled=false"
                               "--show-avatar-button=never")))
     (cons*
      (simple-service
       'web-environment-variables
       home-environment-variables-service-type
       `(("BROWSER" . #t)))
-     (if alt-browser-p
-         (simple-service
-          'home-chromium-xdg
-          home-xdg-mime-applications-service-type
-          (home-xdg-mime-applications-configuration
-           (desktop-entries
-            (list
-             (xdg-desktop-entry
-              (file "chromium")
-              (name "Chromium")
-              (type 'application)
-              (config
-               `((exec . ,#~(string-append
-                             #$(file-append ungoogled-chromium "/bin/chromium")
-                             " "
-                             #$(string-join chromium-flags)
-                             " %U"))
-                 (terminal . #f)
-                 (comment . "Access the Internet"))))))))
-         '())
      (elisp-configuration-service
       `((add-hook 'eww-mode-hook 'eb-web-eww-mode)
         (with-eval-after-load 'eww
@@ -607,5 +585,28 @@
           (home-generic-service 'home-browser-packages
                                 #:packages (list
                                             ungoogled-chromium
-                                            ublock-origin/chromium)))
+                                            ublock-origin/chromium))
+          (simple-service
+           'home-chromium-xdg
+           home-xdg-mime-applications-service-type
+           (home-xdg-mime-applications-configuration
+            (desktop-entries
+             (list
+              (xdg-desktop-entry
+               (file "chromium")
+               (name "Chromium")
+               (type 'application)
+               (config
+                `((exec . ,#~(string-append
+                              #$(file-append ungoogled-chromium "/bin/chromium")
+                              " "
+                              #$(string-join chromium-flags)
+                              " %U"))
+                  (terminal . #f)
+                  (comment . "Access the Internet"))))))))
+          (nyxt-configuration-service
+           `((define-command open-with-chromium ()
+               "Opens the current page with Chromium."
+               (eval-in-emacs
+                `(browse-url-chromium ,(render-url (url (current-buffer)))))))))
          '()))))
