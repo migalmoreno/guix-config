@@ -88,8 +88,7 @@
      cryptsetup
      git
      curl
-     gnu-make
-     password-store)
+     gnu-make)
     %base-packages))
 
 (define %lyra-services
