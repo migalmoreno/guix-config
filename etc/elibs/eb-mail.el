@@ -16,8 +16,8 @@
   :group 'eb-mail
   :type 'list)
 
-(defvar eb-mail-gnus-subscribe-groups-done nil
-  "Only subscribe to groups once, else Gnus won't restart.")
+(defvar eb-mail-gnus-subscribed-p nil
+  "Only subscribe to Gnus groups once.")
 
 ;;;###autoload
 (defun eb-mail-org-mime-darken-codeblocks ()
@@ -34,7 +34,7 @@
 ;;;###autoload
 (defun eb-mail-message-add-gcc-header ()
   "Prompt for a Gcc header from `eb-mail-gnus-topic-alist'. This will allow
-the message to be stored in the right directory of the IMAP Server (usually
+the message to be stored in the right directory of the IMAP server (usually
 \"Sent\"). If this header is missing, the outgoing message will go through,
 but it won't appear on the right Maildir directory."
   (if (gnus-alive-p)
@@ -63,9 +63,11 @@ automatically to the defined groups in them."
   :global t :group 'eb-mail
   (setq gnus-topic-topology eb-mail-gnus-topic-topology)
   (setq gnus-topic-alist eb-mail-gnus-topic-alist)
-  (mapc (lambda (topic)
-          (gnus-subscribe-hierarchically topic))
-        (eb-mail--gnus-get-topic-groups)))
+  (unless eb-mail-gnus-subscribed-p
+    (mapc (lambda (topic)
+            (gnus-subscribe-hierarchically topic))
+          (eb-mail--gnus-get-topic-groups)))
+  (setq eb-mail-gnus-subscribed-p t))
 
 ;;;###autoload
 (define-minor-mode eb-mail-message-mode
