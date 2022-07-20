@@ -2,14 +2,66 @@
 (require 'ement)
 (require 'telega)
 (require 'consult)
-(require 'password-store)
 (require 'erc)
+(require 'auth-source)
 (require 'erc-status-sidebar)
 (require 'eb-util)
 
 (defgroup eb-chat nil
   "Chat-oriented applications and customizations."
   :group 'eb)
+
+(defcustom eb-chat-irc-bouncer-nick
+  (or (plist-get (car (auth-source-search :host "chat.sr.ht"))
+                 :user)
+      "")
+  "The nick to use for the IRC bouncer connection."
+  :type 'string
+  :group 'eb-chat)
+
+(defcustom eb-chat-irc-bouncer-password
+  (if-let ((fun (plist-get (car (auth-source-search :host "chat.sr.ht"))
+                           :secret)))
+      (funcall fun)
+    "")
+  "The password to use for the IRC bouncer connection."
+  :type 'string
+  :group 'eb-chat)
+
+(defcustom eb-chat-irc-oftc-nick
+  (or (plist-get (car (auth-source-search :host "oftc.net"))
+                 :user)
+      "")
+  "The nick to use for the IRC connection to the OFTC network."
+  :type 'string
+  :group 'eb-chat)
+
+(defcustom eb-chat-irc-libera-nick
+  (or (plist-get (car (auth-source-search :host "libera.chat"))
+                 :user)
+      "")
+  "The nick to use for the IRC connection to the Libera.chat network."
+  :type 'string
+  :group 'eb-chat)
+
+(defcustom eb-chat-irc-libera-password
+  (if-let ((fun (plist-get (car (auth-source-search :host "libera.chat"))
+                           :secret)))
+      (funcall fun)
+    "")
+  "The password to use for the IRC connection to the Libera.chat network."
+  :type 'string
+  :group 'eb-chat)
+
+(defcustom eb-chat-ement-username nil
+  "The username to use to connect to the Matrix homeserver."
+  :type 'string
+  :group 'eb-chat)
+
+(defcustom eb-chat-ement-password nil
+  "The password to use to connect to the Matrix homeserver."
+  :type 'string
+  :group 'eb-chat)
 
 (autoload #'erc-buffer-list "erc")
 
@@ -52,8 +104,8 @@
   "Connect to Ement with personal credentials."
   (interactive)
   (ement-connect
-   :user-id (password-store-get-field "chat/matrix" "username")
-   :password (password-store-get "chat/matrix")
+   :user-id eb-chat-ement-username
+   :password eb-chat-ement-password
    :uri-prefix "http://localhost:8009"))
 
 ;;;###autoload
@@ -63,24 +115,23 @@
   (erc-tls
    :server "irc.libera.chat"
    :port 6697
-   :nick (password-store-get-field "chat/irc/libera" "username")
-   :password (password-store-get "chat/irc/libera"))
+   :nick eb-chat-irc-libera-nick
+   :password eb-chat-irc-libera-password)
   (erc-tls
    :server "irc.oftc.net"
    :port 6697
-   :nick (password-store-get-field "chat/irc/oftc" "username")))
+   :nick eb-chat-irc-oftc-nick))
 
 ;;;###autoload
 (defun eb-chat-erc-bouncer-connect-libera ()
   "Connects to Libera via an IRC bouncer."
   (interactive)
-  (setq erc-email-userid (format "%s/irc.libera.chat"
-                                 (password-store-get-field "chat/irc/libera" "username")))
+  (setq erc-email-userid (format "%s/irc.libera.chat" eb-chat-irc-libera-nick))
   (erc-tls
    :server "chat.sr.ht"
    :port 6697
-   :nick (password-store-get-field "chat/irc/chat.sr.ht" "username")
-   :password (password-store-get "chat/irc/chat.sr.ht")))
+   :nick eb-chat-irc-bouncer-nick
+   :password eb-chat-irc-bouncer-password))
 
 (defun eb-chat-erc-status-sidebar-toggle ()
   "Toggles the status sidebar killing its buffer when closed."
@@ -111,13 +162,12 @@
 (defun eb-chat-erc-bouncer-connect-oftc ()
   "Connects to the OFTC network via an IRC bouncer."
   (interactive)
-  (setq erc-email-userid (format "%s/irc.oftc.net"
-                                 (password-store-get-field "chat/irc/oftc" "username")))
+  (setq erc-email-userid (format "%s/irc.oftc.net" eb-chat-irc-oftc-nick))
   (erc-tls
    :server "chat.sr.ht"
    :port 6697
-   :nick (password-store-get-field "chat/irc/chat.sr.ht" "username")
-   :password (password-store-get "chat/irc/chat.sr.ht")))
+   :nick eb-chat-irc-bouncer-nick
+   :password eb-chat-irc-bouncer-password))
 
 ;;;###autoload
 (defun eb-chat-erc-close-buffers ()
