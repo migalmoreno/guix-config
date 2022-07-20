@@ -62,8 +62,7 @@ in ``@code{GUIX_PROFILE}''."))
   (filter
    (compose not null?)
    (list
-    (optional (not (null? ((configuration-field-getter
-                            (car (filter-fields 'channels))) config)))
+    (optional (not (null? (home-guix-configuration-channels config)))
               `("guix/channels.scm"
                 ,(mixed-text-file
                   "channels.scm"

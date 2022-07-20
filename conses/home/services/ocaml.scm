@@ -27,8 +27,7 @@
   (filter
    (compose not null?)
    (list
-    (optional (not (null? ((configuration-field-getter
-                            (car (filter-fields 'config))) config)))
+    (optional (not (null? (home-ocaml-configuration-config config)))
               `("ocaml/init.ml"
                 ,(mixed-text-file
                   "init-ml"
