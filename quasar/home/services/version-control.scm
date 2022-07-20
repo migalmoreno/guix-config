@@ -61,7 +61,10 @@
         (custom-set-variables
          '(git-email-format-patch-default-args "-o ~/src/patches"))
         (define-key vc-prefix-map "W" 'git-email-format-patch)
-        (git-email-gnus-mode 1)))
+        (git-email-gnus-mode 1))
+      ,#~""
+      (custom-set-variables
+       '(eb-web-srht-token (password-store-get-field "vc/sourcehut" "oauth2-token"))))
     #:elisp-packages (list
                       emacs-magit
                       emacs-forge

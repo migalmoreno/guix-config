@@ -31,6 +31,11 @@
   :type 'integer
   :group 'eb-web)
 
+(defcustom eb-web-srht-token nil
+  "The OAuth2 token for the user account."
+  :type 'string
+  :group 'eb-web)
+
 (defvar eb-web-nyxt-development-flags
   (when (and (file-exists-p
               (expand-file-name
@@ -53,7 +58,7 @@
 (defun eb-web-srht-repo-id (name)
   "Return the ID associated with the sourcehut repository NAME."
     (interactive "sRepo name: ")
-    (let* ((srht-token (password-store-get-field "vc/sourcehut" "oauth2-token"))
+    (let* ((srht-token eb-web-srht-token)
            (oauth2-token (concat "Bearer " srht-token))
            (id (assoc-default
                 'id
@@ -85,7 +90,7 @@
                    (name (string-match (rx (: "/" (group (+ (not "/"))) "/" eol)) dir)))
              (eb-web-srht-repo-id (match-string 1 dir))
              (call-interactively #'eb-web-srht-repo-id))))
-  (let* ((srht-token (password-store-get-field "vc/sourcehut" "oauth2-token"))
+  (let* ((srht-token eb-web-srht-token)
          (oauth2-token (concat "Bearer " srht-token))
          (readme (if (derived-mode-p 'html-mode)
                      (buffer-substring-no-properties (point-min) (point-max))
@@ -173,13 +178,12 @@ process if needed."
 ;;;###autoload
 (defun eb-web--slynk-connected-p ()
   "Indicates whether there's currently a connection to `eb-web-nyxt-port'."
-  (require 'sly)
   (cl-find-if (lambda (p)
                 (= (sly-connection-port p) eb-web-nyxt-port))
               sly-net-processes))
 
 (defun eb-web--slynk-eval-sexps (&rest sexps)
-  "Transform STRING to S-expression form to send to `slynk'."
+  "Transform SEXPS to string form to send to `slynk'."
   (cl-letf (((symbol-function 'sly-display-eval-result) #'ignore))
     (let ((string (mapconcat #'prin1-to-string sexps "")))
       (sly-interactive-eval string))))
