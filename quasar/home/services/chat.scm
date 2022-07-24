@@ -29,6 +29,10 @@
     `((let ((map mode-specific-map))
         (define-key map "ed" 'ement-disconnect)
         (define-key map "ee" 'eb-chat-ement-connect))
+      (with-eval-after-load 'eb-chat
+        (custom-set-variables
+         '(eb-chat-ement-username (password-store-get-field "chat/matrix" "username"))
+         '(eb-chat-ement-password (password-store-get "chat/matrix"))))
       (with-eval-after-load 'ement
         (let ((map ement-room-mode-map))
           (define-key map "c" 'ement-room-compose-message)
@@ -51,8 +55,11 @@
         (define-key map "Io" 'eb-chat-erc-bouncer-connect-oftc))
       (with-eval-after-load 'eb-chat
         (custom-set-variables
-         '(eb-chat-ement-username (password-store-get-field "chat/matrix" "username"))
-         '(eb-chat-ement-password (password-store-get "chat/matrix"))))
+         '(eb-chat-irc-bouncer-nick (password-store-get-field "chat/irc/chat.sr.ht" "username"))
+         '(eb-chat-irc-bouncer-password (password-store-get "chat/irc/chat.sr.ht"))
+         '(eb-chat-irc-oftc-nick (password-store-get-field "chat/irc/oftc.net" "username"))
+         '(eb-chat-irc-libera-nick (password-store-get-field "chat/irc/libera.chat" "username"))
+         '(eb-chat-irc-libera-password (password-store-get "chat/irc/libera.chat"))))
       (with-eval-after-load 'erc
         (let ((map erc-mode-map))
           (define-key map (kbd "C-c C-q") 'eb-chat-erc-close-buffers)
@@ -67,7 +74,6 @@
         (erc-autojoin-enable)
         (erc-spelling-mode 1)
         (erc-fill-disable)
-        (setq erc-nick (password-store-get-field "chat/irc/libera.chat" "username"))
         (custom-set-variables
          '(erc-server "irc.libera.chat")
          '(erc-default-port 6697)
