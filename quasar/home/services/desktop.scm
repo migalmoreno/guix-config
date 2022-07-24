@@ -165,7 +165,7 @@ EndSection
    (service home-state-service-type
             (append
                 (list
-                 (state-git (string-append (dirname %project-root) "/guix/")
+                 (state-git (string-append (dirname %channel-root) "/guix/")
                             "https://git.savannah.gnu.org/git/guix.git"))))
    (elisp-configuration-service
     `((define-key mode-specific-map "bl" 'bluetooth-list-devices)
