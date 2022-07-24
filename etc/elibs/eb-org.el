@@ -52,6 +52,12 @@ run again for tomorrow."
     (setq org-timer-mode-line-string (substring (org-timer-value-string) 0 -1))
     (force-mode-line-update)))
 
+(defun eb-org-fix-inline-images ()
+  "Display inline images automatically."
+  (interactive)
+  (when org-inline-image-overlays
+    (org-redisplay-inline-images)))
+
 ;;;###autoload
 (defun eb-org-tweak-faces ()
   "Tweaks Org mode's various faces."
@@ -124,11 +130,8 @@ to Org mode buffers."
 (defun eb-org-roam-switch-to-buffer ()
   "Switches to current Org-roam buffer."
   (interactive)
-  (if (get-buffer org-roam-buffer)
-      (switch-to-buffer org-roam-buffer)
-    (progn
-      (org-roam-buffer-toggle)
-      (switch-to-buffer org-roam-buffer))))
+  (select-window (get-buffer-window org-roam-buffer))
+  (org-roam-buffer-refresh))
 
 (cl-defun eb-org-roam-node-find (&optional other-window initial-input filter-fn &key templates)
   "Find and open an org-roam node by its title or alias in the current window."
