@@ -3,7 +3,6 @@
 (require 'telega)
 (require 'consult)
 (require 'erc)
-(require 'auth-source)
 (require 'erc-status-sidebar)
 (require 'eb-util)
 
@@ -11,54 +10,37 @@
   "Chat-oriented applications and customizations."
   :group 'eb)
 
-(defcustom eb-chat-irc-bouncer-nick
-  (or (plist-get (car (auth-source-search :host "chat.sr.ht"))
-                 :user)
-      "")
+(defcustom eb-chat-irc-bouncer-nick ""
   "The nick to use for the IRC bouncer connection."
   :type 'string
   :group 'eb-chat)
 
-(defcustom eb-chat-irc-bouncer-password
-  (if-let ((fun (plist-get (car (auth-source-search :host "chat.sr.ht"))
-                           :secret)))
-      (funcall fun)
-    "")
+(defcustom eb-chat-irc-bouncer-password ""
   "The password to use for the IRC bouncer connection."
   :type 'string
   :group 'eb-chat)
 
-(defcustom eb-chat-irc-oftc-nick
-  (or (plist-get (car (auth-source-search :host "oftc.net"))
-                 :user)
-      "")
+(defcustom eb-chat-irc-oftc-nick ""
   "The nick to use for the IRC connection to the OFTC network."
   :type 'string
   :group 'eb-chat)
 
-(defcustom eb-chat-irc-libera-nick
-  (or (plist-get (car (auth-source-search :host "libera.chat"))
-                 :user)
-      "")
+(defcustom eb-chat-irc-libera-nick ""
   "The nick to use for the IRC connection to the Libera.chat network."
   :type 'string
   :group 'eb-chat)
 
-(defcustom eb-chat-irc-libera-password
-  (if-let ((fun (plist-get (car (auth-source-search :host "libera.chat"))
-                           :secret)))
-      (funcall fun)
-    "")
+(defcustom eb-chat-irc-libera-password ""
   "The password to use for the IRC connection to the Libera.chat network."
   :type 'string
   :group 'eb-chat)
 
-(defcustom eb-chat-ement-username nil
+(defcustom eb-chat-ement-username ""
   "The username to use to connect to the Matrix homeserver."
   :type 'string
   :group 'eb-chat)
 
-(defcustom eb-chat-ement-password nil
+(defcustom eb-chat-ement-password ""
   "The password to use to connect to the Matrix homeserver."
   :type 'string
   :group 'eb-chat)
