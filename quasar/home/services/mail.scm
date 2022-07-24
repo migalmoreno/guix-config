@@ -60,7 +60,7 @@
                 (trigger . 20)
                 (boxes . #("Inbox"))))))
    (elisp-configuration-service
-    `((setq user-full-name ,(getenv "MAIL_PERSONAL_FULLNAME"))
+    `((setq user-full-name ,(getenv "MAIL_PERSONAL_USERNAME"))
       (setq user-mail-address ,(getenv "MAIL_PERSONAL_EMAIL"))
       (define-key mode-specific-map "g" 'gnus)
       (setq mail-user-agent 'gnus-user-agent)
@@ -82,8 +82,8 @@
                               (gcc-self . "nnmaildir+personal:Sent"))
                              ("^nntp"
                               (display . 1000))))
-         '(gnus-posting-styles `(("personal"
-                                  (name ,(password-store-get-field "mail/personal" "full-name")))))
+         '(gnus-posting-styles '(("personal"
+                                  (name ,(getenv "MAIL_PERSONAL_FULLNAME")))))
          '(gnus-directory "~/.cache/gnus/News")
          '(gnus-home-directory (locate-user-emacs-file "gnus"))
          '(gnus-cache-directory "~/.cache/gnus/News/cache/")
@@ -216,12 +216,12 @@
       ,#~""
       (with-eval-after-load 'smtpmail
         (custom-set-variables
-         '(smtpmail-smtp-user (password-store-get-field "mail/personal" "email"))
+         '(smtpmail-smtp-user ,(getenv "MAIL_PERSONAL_EMAIL"))
          '(smtpmail-smtp-service 587)
          '(smtpmail-stream-type 'starttls)
          '(smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail")
          '(smtpmail-debug-info t))
-        (setq smtpmail-smtp-server (password-store-get-field "mail/personal" "host")
-              smtpmail-default-smtp-server (password-store-get-field "mail/personal" "host"))))
+        (setq smtpmail-smtp-server ,(getenv "MAIL_PERSONAL_HOST")
+              smtpmail-default-smtp-server ,(getenv "MAIL_PERSONAL_HOST"))))
     #:elisp-packages (list emacs-ebdb
                            emacs-debbugs))))
