@@ -340,7 +340,7 @@
                (alex:assoc-value
                 (json:with-decoder-simple-list-semantics
                  (json:decode-json-from-string
-                  (dex:get "https://bibliogram.pussthecat.org/api/instances")))
+                  (dex:get "https://bibliogram.art/api/instances")))
                 :data)))
      ,#~""
      (defun make-teddit-instances ()
@@ -396,15 +396,7 @@
           (make-route (match-domain "lemmy.ml")
                       :blocklist '(:path (:starts ("/u/" "/c"))))
           (make-route (match-domain "twitter.com")
-                      :redirect "nitter.42l.fr")
-          (make-route (match-regex ".*moodle.*(pdf|ppt|doc|pptx|docx)")
-                      :external (lambda (data)
-                                  (eval-in-emacs
-                                   `(eb-web-open-with-cookies
-                                     `(("MoodleSession" ,(password-store-get "education/moodle/session"))
-                                       ("SimpleSAMLSessionID" ,(password-store-get "education/moodle/id"))
-                                       ("SimpleSAMLAuthToken" ,(password-store-get "education/moodle/token")))
-                                     ,(quri:render-uri (url data)))))))))))))
+                      :redirect "nitter.42l.fr"))))))))
 
 (define (nyxt-service)
   (list
