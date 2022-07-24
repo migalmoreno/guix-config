@@ -115,7 +115,6 @@ currently-proxied URL."
   (ignore-errors
     (if (not emms-playlist-buffer)
         (progn
-          (emms-cache-reset)
           (emms-add-directory-tree eb-media-music-dir)
           (emms-playlist-mode-go))
       (with-current-emms-playlist
