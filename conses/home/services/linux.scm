@@ -79,7 +79,10 @@
 (define-configuration/no-serialization home-udiskie-configuration
   (package
     (package udiskie)
-    "The udiskie package to use."))
+    "The udiskie package to use.")
+  (notify?
+   (boolean #f)
+   "Whether to enable pop-up notifications."))
 
 (define (udiskie-profile-service config)
   (list (home-udiskie-configuration-package config)))
@@ -90,7 +93,11 @@
     (provision '(home-udiskie))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
-              (list #$(file-append (home-udiskie-configuration-package config) "/bin/udiskie")))))))
+              (list
+               #$(file-append (home-udiskie-configuration-package config) "/bin/udiskie")
+               (if #$(home-udiskie-configuration-notify? config)
+                   "-n"
+                   "-N")))))))
 
 (define home-udiskie-service-type
   (service-type
