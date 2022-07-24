@@ -128,7 +128,7 @@
              ("chore" . ?c)))
          '(org-fast-tag-selection-single-key 'expert)
          '(org-display-remote-inline-images 'cache)
-         '(org-image-actual-width '(350))
+         '(org-image-actual-width t)
          '(org-pretty-entities t)
          '(org-pretty-entities-include-sub-superscripts nil)
          '(org-M-RET-may-split-line nil)
@@ -143,6 +143,14 @@
                                    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "‣")))))))
       ,#~""
       (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+      (add-hook 'org-babel-after-execute-hook 'eb-org-fix-inline-images)
+      ,#~""
+      (add-to-list 'org-babel-load-languages '(dot . t))
+      (with-eval-after-load 'ob-dot
+        (setq org-babel-default-header-args:dot
+              (append
+               org-babel-default-header-args:dot
+               '((:cmdline . "-Kdot -Tpng")))))
       ,#~""
       (advice-add 'org-refile :after 'org-save-all-org-buffers)
       (with-eval-after-load 'org-refile
@@ -263,9 +271,9 @@
       (custom-set-variables
        '(org-roam-directory "~/notes"))
       (org-roam-db-autosync-enable)
+      (advice-add 'org-roam-buffer-toggle :after 'eb-org-roam-switch-to-buffer)
       (let ((map mode-specific-map))
-        (define-key map "nb" 'eb-org-roam-switch-to-buffer)
-        (define-key map "nl" 'org-roam-buffer-toggle)
+        (define-key map "nb" 'org-roam-buffer-toggle)
         (define-key map "nf" 'org-roam-node-find)
         (define-key map "nr" 'org-roam-ref-find)
         (define-key map "nc" 'org-roam-capture)
@@ -375,20 +383,19 @@
                            emacs-org-roam
                            emacs-org-appear
                            emacs-org-superstar
-                           emacs-visual-fill-column))
+                           emacs-visual-fill-column
+                           emacs-graphviz-dot-mode))
    (nyxt-configuration-service
     `((define-command org-capture ()
         "Stores and captures the current page link via Org mode."
         (eval-in-emacs
-         '(org-store-link t)
-         '(org-capture nil "tb"))
+         '(eb-web-nyxt-capture "tb"))
         (echo "Org link successfully stored and captured"))
       ,#~""
       (define-command org-roam-capture ()
         "Stores and captures the current page as an Org Roam node."
         (eval-in-emacs
-         '(org-store-link t)
-         '(org-roam-capture nil "w")))
+         '(eb-web-nyxt-capture "w" :roam-p t)))
       (define-key *custom-keymap*
         "M-c c" 'org-capture
         "M-c n" 'org-roam-capture)))))
