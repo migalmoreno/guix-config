@@ -92,7 +92,8 @@
            emacs-telega
            emacs-password-store
            emacs-dashboard
-           emacs-hexrgb))
+           emacs-hexrgb
+           emacs-daemons))
     (home-page "https://git.sr.ht/~conses/quasar")
     (synopsis "Various Emacs Lisp libraries.")
     (description "A set of Emacs Lisp libraries to enhance the functionality
