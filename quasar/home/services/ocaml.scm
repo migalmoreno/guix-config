@@ -46,7 +46,7 @@
                 "open Core"))))
    (elisp-configuration-service
     `((add-to-list 'auto-mode-alist '("\\.ml[ily]?\\'" . tuareg-mode))
-      (add-hook 'tuareg-mode-hook 'eb-prog-ocaml-mode)
+      (add-hook 'tuareg-mode-hook 'eb-ocaml-mode)
       (define-key mode-specific-map "ro" 'run-ocaml)
       (setq tuareg-interactive-program
             (if (executable-find "opam")

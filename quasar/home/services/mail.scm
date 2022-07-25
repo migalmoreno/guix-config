@@ -121,37 +121,37 @@
         (custom-set-variables
          '(gnus-thread-hide-subtree t)))
       ,#~""
-      (require 'eb-mail)
-      (custom-set-variables
-       '(eb-mail-gnus-topic-alist '(("personal"
-                                     "nnmaildir+personal:Inbox"
-                                     "nnmaildir+personal:Drafts"
-                                     "nnmaildir+personal:Sent"
-                                     "nnmaildir+personal:Junk"
-                                     "nnmaildir+personal:Trash")
-                                    ("clojure"
-                                     "nntp+gwene:gwene.clojure.planet")
-                                    ("lisp"
-                                     "nntp+gwene:gwene.org.lisp.planet"
-                                     "nntp+gwene:gwene.engineer.atlas.nyxt")
-                                    ("technology"
-                                     "nntp+gwene:gwene.org.fsf.news")
-                                    ("emacs"
-                                     "nntp+gwene:gmane.emacs.devel"
-                                     "nntp+gwene:gmane.emacs.erc.general")
-                                    ("guix"
-                                     "nntp+gwene:gmane.comp.gnu.guix.bugs"
-                                     "nntp+gwene:gmane.comp.gnu.guix.patches"
-                                     "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
-                                    ("Gnus")))
-       '(eb-mail-gnus-topic-topology '(("Gnus" visible)
-                                       (("personal" visible nil))
-                                       (("clojure" visible nil))
-                                       (("lisp" visible nil))
-                                       (("technology" visible nil))
-                                       (("emacs" visible nil))
-                                       (("guix" visible nil)))))
-      (add-hook 'gnus-topic-mode-hook 'eb-mail-gnus-topic-mode)
+      (add-hook 'gnus-topic-mode-hook 'eb-gnus-topic-mode)
+      (with-eval-after-load 'eb-gnus
+        (custom-set-variables
+         '(eb-gnus-topic-alist '(("personal"
+                                  "nnmaildir+personal:Inbox"
+                                  "nnmaildir+personal:Drafts"
+                                  "nnmaildir+personal:Sent"
+                                  "nnmaildir+personal:Junk"
+                                  "nnmaildir+personal:Trash")
+                                 ("clojure"
+                                  "nntp+gwene:gwene.clojure.planet")
+                                 ("lisp"
+                                  "nntp+gwene:gwene.org.lisp.planet"
+                                  "nntp+gwene:gwene.engineer.atlas.nyxt")
+                                 ("technology"
+                                  "nntp+gwene:gwene.org.fsf.news")
+                                 ("emacs"
+                                  "nntp+gwene:gmane.emacs.devel"
+                                  "nntp+gwene:gmane.emacs.erc.general")
+                                 ("guix"
+                                  "nntp+gwene:gmane.comp.gnu.guix.bugs"
+                                  "nntp+gwene:gmane.comp.gnu.guix.patches"
+                                  "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
+                                 ("Gnus")))
+         '(eb-gnus-topic-topology '(("Gnus" visible)
+                                    (("personal" visible nil))
+                                    (("clojure" visible nil))
+                                    (("lisp" visible nil))
+                                    (("technology" visible nil))
+                                    (("emacs" visible nil))
+                                    (("guix" visible nil))))))
       (with-eval-after-load 'gnus-topic
         (custom-set-variables
          '(gnus-message-archive-group
@@ -193,15 +193,15 @@
          '(ebdb-mua-pop-up nil)))
       ,#~""
       (require 'org-mime)
-      (add-hook 'org-mime-html-hook 'eb-mail-org-mime-darken-codeblocks)
-      (add-hook 'org-mime-html-hook 'eb-mail-org-mime-indent-quotes)
+      (add-hook 'org-mime-html-hook 'eb-org-mime-darken-codeblocks)
+      (add-hook 'org-mime-html-hook 'eb-org-mime-indent-quotes)
       (setq org-mime-export-options '(:section-numbers nil :with-author nil :with-toc nil))
       ,#~""
       (add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart)
-      (add-hook 'message-mode-hook 'eb-mail-message-mode)
+      (add-hook 'message-mode-hook 'eb-message-mode)
       (with-eval-after-load 'message
         (require 'ebdb-message)
-        (add-hook 'message-header-setup-hook 'eb-mail-message-add-gcc-header)
+        (add-hook 'message-header-setup-hook 'eb-message-add-gcc-header)
         (let ((map message-mode-map))
           (define-key map (kbd "C-c M-z") 'org-mime-htmlize)
           (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode))

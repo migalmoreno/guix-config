@@ -49,7 +49,7 @@
           (define-key map "e" 'emms-play-dired)
           (define-key map "q" 'kill-current-buffer)
           (define-key map (kbd "C-c C-r") 'dired-rsync)
-          (define-key map "V" 'eb-files-open-externally)))
+          (define-key map "V" 'eb-dired-open-externally)))
       ,#~""
       (with-eval-after-load 'ls-lisp
         (custom-set-variables
@@ -65,7 +65,7 @@
               (add-to-list 'org-modules module))
       ,#~""
       (add-hook 'org-mode-hook 'org-fragtog-mode)
-      (add-hook 'org-mode-hook 'eb-org-minimal-ui-mode)
+      (add-hook 'org-mode-hook 'eb-org-minimal-mode)
       ,#~""
       (let ((map mode-specific-map))
         (define-key map "l" 'org-store-link)
@@ -361,7 +361,8 @@
                               "Keymap for actions to be triggered on org-roam refs."
                               :parent embark-url-map
                               ("RET" browse-url-generic)
-                              ("v" eb-media-mpv-start)
+                              ("v" eb-mpv-start)
+                              ("V" eb-mpv-start-other-window)
                               ("c" browse-url-chromium))
         (add-to-list 'embark-keymap-alist '(org-roam-ref . embark-roam-ref-map)))
       ,#~""
@@ -389,13 +390,13 @@
     `((define-command org-capture ()
         "Stores and captures the current page link via Org mode."
         (eval-in-emacs
-         '(eb-web-nyxt-capture "tb"))
+         '(eb-nyxt-capture "tb"))
         (echo "Org link successfully stored and captured"))
       ,#~""
       (define-command org-roam-capture ()
         "Stores and captures the current page as an Org Roam node."
         (eval-in-emacs
-         '(eb-web-nyxt-capture "w" :roam-p t)))
+         '(eb-nyxt-capture "w" :roam-p t)))
       (define-key *custom-keymap*
         "M-c c" 'org-capture
         "M-c n" 'org-roam-capture)))))
@@ -435,13 +436,13 @@
          '(read-extended-command-predicate 'command-completion-default-include-p)
          '(completion-cycle-threshold t)
          '(completion-styles '(orderless basic))
-         '(completion-category-overrides '((file (styles partial-completion))))))
+         '(completion-category-overrides '((file (styles basic partial-completion))))))
       ,#~""
       (all-the-icons-completion-mode)
       (with-eval-after-load 'all-the-icons
         (add-hook 'marginalia-mode-hook 'all-the-icons-completion-marginalia-setup))
       ,#~""
-      (advice-add 'completing-read-multiple :filter-args 'eb-completion-crm-indicator)
+      (advice-add 'completing-read-multiple :filter-args 'eb-consult-crm-indicator)
       (advice-add 'completing-read-multiple
                   :override 'consult-completing-read-multiple)
       ,#~""
@@ -473,17 +474,17 @@
         (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
         (define-key isearch-mode-map (kbd "M-s e") 'consult-isearch-history))
     (define-key minibuffer-mode-map (kbd "C-c C-r") 'consult-history)
-    (add-hook 'minibuffer-setup-hook 'eb-completion-consult-initial-narrow)
+    (add-hook 'minibuffer-setup-hook 'eb-consult-initial-narrow)
     (with-eval-after-load 'consult
       (setq consult-buffer-sources
             (append
              consult-buffer-sources
-             '(eb-org-buffer-source
-               eb-chat-telega-buffer-source
-               eb-chat-erc-buffer-source
-               eb-chat-ement-buffer-source
-               eb-exwm-buffer-source
-               eb-shell-buffer-source)))
+             '(eb-consult-org-buffer-source
+               eb-consult-telega-buffer-source
+               eb-consult-erc-buffer-source
+               eb-consult-ement-buffer-source
+               eb-consult-exwm-buffer-source
+               eb-consult-comint-buffer-source)))
       (custom-set-variables
        '(consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
        '(consult-narrow-key (kbd "C-="))
@@ -496,7 +497,7 @@
        consult--source-hidden-buffer
        :preview-key (kbd "M-.")))
     (custom-set-variables
-     '(eb-completion-initial-narrow-alist
+     '(eb-consult-initial-narrow-alist
        `((erc-mode . ?e)
          (org-mode . ?o)
          (exwm-mode . ?x)
@@ -595,9 +596,9 @@
 (define pdf-service
   (elisp-configuration-service
    `((pdf-loader-install)
-     (add-hook 'pdf-view-mode-hook 'eb-files-pdf-view-mode)
-     (advice-add 'pdf-view-next-page-command :around 'eb-files-run-with-pdf-view)
-     (advice-add 'pdf-view-previous-page-command :around 'eb-files-run-with-pdf-view)
+     (add-hook 'pdf-view-mode-hook 'eb-pdf-view-mode)
+     (advice-add 'pdf-view-next-page-command :around 'eb-pdf-view-run-with-pdf-view)
+     (advice-add 'pdf-view-previous-page-command :around 'eb-pdf-view-run-with-pdf-view)
      (let ((map mode-specific-map))
        (define-key map (kbd "pn") 'pdf-view-next-page-command)
        (define-key map (kbd "pp") 'pdf-view-previous-page-command))
@@ -645,9 +646,9 @@
 (define tramp-service
   (elisp-configuration-service
    `((let ((map mode-specific-map))
-      (define-key map "Ff" 'eb-files-find-file)
-      (define-key map "Fd" 'eb-files-dired)
-      (define-key map "Fs" 'eb-files-tramp-shell))
+       (define-key map "Ff" 'eb-tramp-find-file)
+       (define-key map "Fd" 'eb-tramp-dired)
+       (define-key map "Fs" 'eb-tramp-shell))
      (with-eval-after-load 'tramp
        (custom-set-variables
         '(tramp-verbose 1)
@@ -718,7 +719,7 @@
                     ,(quri:render-uri (url (current-buffer)))
                     ,(title (current-buffer))))))
             (bookmark-set)))
-        (echo "Org Roam node stored"))
+        (echo "Bookmark stored"))
       (define-key *custom-keymap*
         "M-c r" 'save-as-emacs-bookmark)))
    (elisp-configuration-service
@@ -874,34 +875,31 @@
                   (push '(tool-bar-lines . 0) default-frame-alist)
                   (push '(vertical-scroll-bars) default-frame-alist))))
 
-(define tab-service
+(define tab-bar-service
   (elisp-configuration-service
    '((tab-bar-mode)
      (with-eval-after-load 'tab-bar
        (custom-set-variables
-        '(tab-bar-format '(eb-tab-format-left
-                           eb-tab-format-center
-                           eb-tab-format-align-right
-                           eb-tab-format-right))
+        '(tab-bar-format '(eb-tab-bar-format-left
+                           eb-tab-bar-format-center
+                           eb-tab-bar-format-align-right
+                           eb-tab-bar-format-right))
         '(tab-bar-close-button-show nil)
         '(tab-bar-show t))))))
 
 (define project-service
   (elisp-configuration-service
    `((add-hook 'project-find-functions 'project-try-vc)
-     (add-hook 'project-find-functions 'eb-prog-project-custom-root)
-     (advice-add 'project-compile :override 'eb-prog-project-compile)
-     (with-eval-after-load 'eb-prog
-       (custom-set-variables
-        '(eb-prog-configuration-project (expand-file-name "~/src/guixrc"))))
+     (add-hook 'project-find-functions 'eb-project-custom-root)
+     (advice-add 'project-compile :override 'eb-project-compile)
      (with-eval-after-load 'project
-       (eb-prog--add-project-commands
+       (eb-project-add-commands
         `((?c "Compile Project" project-compile)
           (?m "Show Magit Status" magit-status)
           (?s "Start an inferior shell" project-shell)
           (?F "Find file consult" consult-find)
-          (?R "Search for regexp with rg" eb-prog-project-ripgrep)
-          (?C "Capture with Org" eb-prog-org-capture)))))))
+          (?R "Search for regexp with rg" eb-project-ripgrep)
+          (?C "Capture with Org" eb-project-org-capture)))))))
 
 (define structures-service
   (elisp-configuration-service
@@ -958,7 +956,7 @@
     ,finance-service
     ,@bookmark-service
     ,appearance-service
-    ,tab-service
+    ,tab-bar-service
     ,project-service
     ,structures-service
     ,(service home-emacs-service-type
@@ -983,7 +981,6 @@
               (init-el
                `(,#~";; -*- lexical-binding: t; -*-"
                  (require 'xdg)
-                 (require 'eb-util)
                  ,#~""
                  (with-eval-after-load 'comp
                    (custom-set-variables

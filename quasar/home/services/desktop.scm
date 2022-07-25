@@ -128,7 +128,8 @@ EndSection
                                   (call-process "xset" nil nil nil  "-dpms" "s" "off")))
       (add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
       (add-hook 'exwm-manage-finish-hook 'eb-exwm-configure-window-by-class)
-      (eb-to-hooks 'eb-exwm-shorten-buffer-name 'exwm-update-class 'exwm-update-title)
+      (add-hook 'exwm-update-class-hook 'eb-exwm-shorten-buffer-name)
+      (add-hook 'exwm-update-title-hook 'eb-exwm-shorten-buffer-name)
       (exwm-enable)
       ,#~""
       ,#~"(with-eval-after-load 'exwm

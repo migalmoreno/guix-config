@@ -55,8 +55,8 @@
         (custom-set-variables
          '(inferior-lisp-program (executable-find "sbcl"))))
       ,#~""
-      (add-hook 'debugger-mode-hook 'eb-prog--truncate-lines)
-      (add-hook 'sly-mrepl-mode-hook 'eb-lisp-embellish-mrepl-output)
+      (add-hook 'debugger-mode-hook 'toggle-truncate-lines)
+      (add-hook 'comint-preoutput-filter-functions 'ansi-color-apply nil t)
       (add-hook 'sly-mode-hook 'eb-lisp-sly-autoconnect)
       (add-to-list 'display-buffer-alist '("\\*sly-mrepl.*\\*"
                                            (display-buffer-no-window)
@@ -73,7 +73,6 @@
          '(sly-enable-evaluate-in-emacs t)
          '(sly-keep-buffers-on-connection-close nil)))
       ,#~""
-      (add-hook 'sly-mrepl-mode-hook 'eb-prog-output-embellisher)
       (with-eval-after-load 'sly-mrepl
         (let ((map sly-mode-map))
           (define-key map (kbd "C-c M-n") 'sly-mrepl-next-prompt)
@@ -120,7 +119,7 @@
          '(xref-show-xrefs-function 'consult-xref)
          '(xref-show-definitions-function 'consult-xref)))
       ,#~""
-      (add-hook 'compilation-filter-hook 'eb-prog-output-embellisher)
+      (add-hook 'compilation-filter-hook 'eb-shell-ansi-color-apply)
       (with-eval-after-load 'compile
         (custom-set-variables
          '(compilation-ask-about-save nil)))

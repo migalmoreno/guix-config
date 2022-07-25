@@ -314,6 +314,8 @@
             :completion-function nil
             :theme :system
             :alternatives nil
+            :lang-results :english
+            :lang-ui :english
             :view-image t
             :no-javascript t
             :new-tab t))))))
@@ -361,7 +363,7 @@
                       :redirect '("bibliogram.pussthecat.org" (:path ("/u" (not "/" "/p/" "/tv"))))
                       :instances 'make-bibliogram-instances)
           (make-route (match-domain "tiktok.com")
-                      :redirect "proxitok.herokuapp.com"
+                      :redirect '("proxitok.herokuapp.com" (:path ("/@placeholder/video" (not "/"))))
                       :blocklist '(:path (:contains (not "video"))))
           (make-route '(match-domain "reddit.com")
                       :redirect "teddit.namazso.eu"
@@ -373,15 +375,15 @@
                       :redirect "youtube.com"
                       :external (lambda (data)
                                   (eval-in-emacs
-                                   `(eb-media-mpv-start ,(quri:render-uri (url data))
-                                                             :audio-only t :repeat t))))
+                                   `(eb-mpv-start ,(quri:render-uri (url data))
+                                                  :audio-only t :repeat t))))
           (make-route '(match-regex "https://gfycat.com/.*"
                                     "https://streamable.com/.*"
                                     "https://.*/videos/watch/.*"
                                     ".*cloudfront.*master.m3u8")
                       :external (lambda (data)
                                   (eval-in-emacs
-                                   `(eb-media-mpv-start ,(quri:render-uri (url data))))))
+                                   `(eb-mpv-start ,(quri:render-uri (url data))))))
           (make-route (match-scheme "magnet")
                       :external (lambda (data)
                                   (eval-in-emacs
@@ -517,16 +519,29 @@
         (add-to-list 'consult-bookmark-narrow
                      `(?n "Nyxt" ,'eb-web--jump-to-bookmark)))
       (let ((map mode-specific-map))
-        (define-key map "rn" 'eb-web-connect-to-slynk)
-        (define-key map "ws" 'eb-web-nyxt-search)
-        (define-key map "wb" 'eb-web-nyxt-set-up-window)
-        (define-key map "ww" 'eb-web-nyxt-copy-url)
-        (define-key map "wv" 'eb-web-nyxt-set-transient-map))
+        (define-key map "rn" 'eb-nyxt-connect-to-slynk)
+        (define-key map "ws" 'eb-nyxt-search)
+        (define-key map "wb" 'eb-nyxt-set-up-window)
+        (define-key map "ww" 'eb-nyxt-copy-url)
+        (define-key map "wv" 'eb-nyxt-set-transient-map))
       ,#~""
-      (with-eval-after-load 'eb-web
+      (with-eval-after-load 'eb-nyxt
         (custom-set-variables
-         '(eb-web-nyxt-development-p nil)
-         '(eb-web-nyxt-startup-threshold 8)))))))
+         '(eb-nyxt-development-p nil)
+         '(eb-nyxt-startup-threshold 8))
+        (setq eb-nyxt-development-flags
+                (when (and (file-exists-p
+                            (expand-file-name
+                             "nyxt-dev.desktop"
+                             (concat (xdg-data-home) "/applications/")))
+                           eb-nyxt-development-p)
+                  (thread-last
+                   (xdg-data-home)
+                   (format "%s/applications/nyxt-dev.desktop")
+                   (xdg-desktop-read-file)
+                   (gethash "Exec")
+                   (split-string)
+                   (cdr)))))))))
 
 (define* (web-service #:key alt-browser-p)
   (let ((chromium-flags (list "--remove-tabsearch-button"
@@ -551,8 +566,8 @@
                                                         "nyxt-dev.desktop"
                                                         (concat (xdg-data-home)
                                                                 "/applications/")))
-                                                 (development-p (and (boundp 'eb-web-nyxt-development-p)
-                                                                     eb-web-nyxt-development-p)))
+                                                 (development-p (and (boundp 'eb-nyxt-development-p)
+                                                                     eb-nyxt-development-p)))
                                                 (and (file-exists-p file)
                                                      (gethash "Exec" (xdg-desktop-read-file file)))
                                                 (getenv "BROWSER")))
@@ -568,6 +583,10 @@
           (custom-set-variables
            '(webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
            '(webpaste-paste-confirmation t)))
+        (with-eval-after-load 'eb-web
+          (custom-set-variables
+           '(eb-web-privacy-alts `(("youtube.com" . (,(rx (: "invidio" (+ any))) . "invidious.namazso.eu"))
+                                   ("reddit.com" . (,(rx (: "teddit" (+ any))) . "teddit.namazso.eu"))))))
         ,#~""
         (advice-add 'browse-url-xdg-open :around 'eb-web-add-url-scheme))
       #:elisp-packages (list emacs-webpaste

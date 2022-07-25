@@ -32,17 +32,17 @@
        (define-key map "eS" 'emms-seek-to)
        (define-key map (kbd "e SPC") 'emms-pause)
        (define-key map "er" 'emms-toggle-repeat-track)
-       (define-key map "el" 'eb-media-emms-library-load)
-       (define-key map "en" 'eb-media-emms-next)
-       (define-key map "ep" 'eb-media-emms-previous)
-       (define-key map "ea" 'eb-media-emms-seek-to-beginning))
+       (define-key map "el" 'eb-emms-library-load)
+       (define-key map "en" 'eb-emms-next)
+       (define-key map "ep" 'eb-emms-previous)
+       (define-key map "ea" 'eb-emms-seek-to-beginning))
       (with-eval-after-load 'emms
         (require 'emms-setup)
         (require 'emms-info-libtag)
         (emms-all)
         (emms-default-players)
         (emms-toggle-random-playlist)
-        (define-key emms-playlist-mode-map "m" 'eb-media-emms-download-track)
+        (define-key emms-playlist-mode-map "m" 'eb-emms-download-track)
         (emms-browser-make-filter
          "all-files" (emms-browser-filter-only-type 'file))
         (emms-browser-make-filter
@@ -77,11 +77,11 @@
     `((define-command emms-source-track ()
         "Sources the current site as an EMMS track."
         (let ((url (quri:render-uri (url (current-buffer)))))
-          (echo "Starting to play ~a in EMMS" url)
           (eval-in-emacs
-           `(eb-media-emms-source-track
+           `(eb-emms-source-track
              ,url
              ,(title (current-buffer))
-             t))))
+             t))
+          (echo "Starting to play ~a in EMMS" url)))
       (define-key *custom-keymap*
         "M-c e" 'emms-source-track)))))

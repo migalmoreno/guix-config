@@ -28,11 +28,10 @@
    (elisp-configuration-service
     `((let ((map mode-specific-map))
         (define-key map "ed" 'ement-disconnect)
-        (define-key map "ee" 'eb-chat-ement-connect))
-      (with-eval-after-load 'eb-chat
-        (custom-set-variables
-         '(eb-chat-ement-username (password-store-get-field "chat/matrix" "username"))
-         '(eb-chat-ement-password (password-store-get "chat/matrix"))))
+        (define-key map "ee" 'eb-ement-connect))
+      (with-eval-after-load 'eb-ement
+        (setq eb-ement-username (password-store-get-field "chat/matrix" "username")
+              eb-ement-password (password-store-get "chat/matrix")))
       (with-eval-after-load 'ement
         (let ((map ement-room-mode-map))
           (define-key map "c" 'ement-room-compose-message)
@@ -50,21 +49,20 @@
   (list
    (elisp-configuration-service
     `((let ((map mode-specific-map))
-        (define-key map "Ic" 'eb-chat-erc-connect)
-        (define-key map "Il" 'eb-chat-erc-bouncer-connect-libera)
-        (define-key map "Io" 'eb-chat-erc-bouncer-connect-oftc))
-      (with-eval-after-load 'eb-chat
-        (custom-set-variables
-         '(eb-chat-irc-bouncer-nick (password-store-get-field "chat/irc/chat.sr.ht" "username"))
-         '(eb-chat-irc-bouncer-password (password-store-get "chat/irc/chat.sr.ht"))
-         '(eb-chat-irc-oftc-nick (password-store-get-field "chat/irc/oftc.net" "username"))
-         '(eb-chat-irc-libera-nick (password-store-get-field "chat/irc/libera.chat" "username"))
-         '(eb-chat-irc-libera-password (password-store-get "chat/irc/libera.chat"))))
+        (define-key map "Ic" 'eb-erc-connect)
+        (define-key map "Il" 'eb-erc-bouncer-connect-libera)
+        (define-key map "Io" 'eb-erc-bouncer-connect-oftc))
+      (with-eval-after-load 'eb-erc
+        (setq eb-erc-bouncer-nick (password-store-get-field "chat/irc/chat.sr.ht" "username")
+              eb-erc-bouncer-password (password-store-get "chat/irc/chat.sr.ht")
+              eb-erc-oftc-nick (password-store-get-field "chat/irc/oftc.net" "username")
+              eb-erc-libera-nick (password-store-get-field "chat/irc/libera.chat" "username")
+              eb-erc-libera-password (password-store-get "chat/irc/libera.chat")))
       (with-eval-after-load 'erc
         (let ((map erc-mode-map))
-          (define-key map (kbd "C-c C-q") 'eb-chat-erc-close-buffers)
-          (define-key map (kbd "C-c C-t") 'eb-chat-erc-toggle-timestamps)
-          (define-key map (kbd "C-c C-s") 'eb-chat-erc-status-sidebar-toggle))
+          (define-key map (kbd "C-c C-q") 'eb-erc-close-buffers)
+          (define-key map (kbd "C-c C-t") 'eb-erc-toggle-timestamps)
+          (define-key map (kbd "C-c C-s") 'eb-erc-status-sidebar-toggle))
         (dolist (module '(keep-place services notifications hl-nicks image spelling log))
                 (add-to-list 'erc-modules module))
         (erc-update-modules)
@@ -94,13 +92,13 @@
          '(erc-prompt-for-password nil)))
       ,#~""
       (add-to-list 'display-buffer-alist
-                   '(eb-chat-erc-window-reuse-condition .
+                   '(eb-erc-window-reuse-condition .
                      (display-buffer-reuse-mode-window
                       (inhibit-same-window . t)
                       (inhibit-switch-frame . t)
                       (mode . erc-mode))))
       (with-eval-after-load 'erc-status-sidebar
-        (advice-add 'erc-status-sidebar-default-chan-format :around 'eb-chat-erc-status-add-padding)
+        (advice-add 'erc-status-sidebar-default-chan-format :around 'eb-erc-status-add-padding)
         (setq erc-status-sidebar-header-line-format
               (concat " " erc-status-sidebar-mode-line-format))
         (custom-set-variables

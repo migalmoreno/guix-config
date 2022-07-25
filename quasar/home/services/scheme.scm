@@ -48,7 +48,7 @@
             (?r "Records" font-lock-type-face)
             (?v "Variable" font-lock-variable-name-face)))))
       ,#~""
-      (add-hook 'geiser-mode-hook 'eb-lisp-geiser-autoconnect)
+      (add-hook 'geiser-mode-hook 'eb-scheme-geiser-autoconnect)
       (add-to-list 'display-buffer-alist '("\\*Geiser.*\\*.*"
                                            (display-buffer-no-window)
                                            (allow-no-window . t)))
@@ -109,11 +109,14 @@
       ;;   (define-key map "GS" 'guix-find-service-definition))
       ,#~""
       (define-key mode-specific-map "di" 'daemons)
-      (define-key mode-specific-map "dI" 'eb-lisp-daemons-root)
+      (define-key mode-specific-map "dI" 'eb-guix-daemons-root)
       (with-eval-after-load 'daemons
-                            (custom-set-variables
-                             '(daemons-init-system-submodules '(daemons-shepherd))
-                             '(daemons-always-sudo nil))))
+        (custom-set-variables
+         '(daemons-init-system-submodules '(daemons-shepherd))
+         '(daemons-always-sudo nil)))
+      (with-eval-after-load 'eb-guix
+        (custom-set-variables
+         '(eb-guix-home-configuration-dir ,%channel-root))))
     #:elisp-packages (list
                       ;; emacs-guix
                       emacs-daemons))))

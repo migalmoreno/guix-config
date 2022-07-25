@@ -70,8 +70,8 @@
                 (":" . "script-binding console/enable")
                 ("s" . "screenshot video")
                 ("Q" . "quit-watch-later")
-                ("D" . ,(run-with-emacs '(eb-media-mpv-download)))
-                ("Alt+c" . ,(run-with-emacs '(eb-media-mpv-capture)))
+                ("D" . ,(run-with-emacs '(eb-mpv-download)))
+                ("Alt+c" . ,(run-with-emacs '(eb-mpv-capture)))
                 ("O" . "no-osd cycle-values osd-level 3 0")
                 ("o" . "osd-bar show-progress")
                 ("v" . "cycle sub-visibility")
@@ -89,23 +89,22 @@
         (define-key map "MR" 'mpv-set-ab-loop)
         (define-key map "Mr" 'mpv-toggle-loop)
         (define-key map "Mv" 'mpv-toggle-video)
-        (define-key map "M\r" 'eb-media-mpv-start)
-        (define-key map "Ms" 'eb-media-mpv-download)
-        (define-key map "Ma" 'eb-media-mpv-seek-start)
-        (define-key map "Mw" 'eb-media-mpv-kill-url))
-       (define-key mode-specific-map "m" 'eb-media-mpv-set-transient-map)
-       (eb-media-mpv-mode-line-mode)
-       (eb-media-mpv-playing-time-mode)
-       (add-hook 'mpv-on-exit-hook 'eb-media-mpv-mode-line-clear)
-       (advice-add 'mpv-start :around 'eb-web-add-url-scheme)
-       (advice-add 'mpv-enqueue :after 'eb-media-mpv-update-playlist)
-       (with-eval-after-load 'mpv
-         (custom-set-variables
-          '(mpv-seek-step 3)))
+        (define-key map "M\r" 'eb-mpv-start)
+        (define-key map "Ms" 'eb-mpv-download)
+        (define-key map "Ma" 'eb-mpv-seek-start)
+        (define-key map "Mw" 'eb-mpv-kill-url))
+      (define-key mode-specific-map "m" 'eb-mpv-set-transient-map)
+      (eb-mpv-mode-line-mode)
+      (eb-mpv-playing-time-mode)
+      (advice-add 'mpv-start :around 'eb-web-add-url-scheme)
+      (advice-add 'mpv-enqueue :after 'eb-mpv-update-playlist)
+      (with-eval-after-load 'mpv
+        (custom-set-variables
+         '(mpv-seek-step 3)))
       ,#~""
       (with-eval-after-load 'embark
         (let ((map embark-url-map))
-          (define-key map "v" 'eb-media-mpv-start)
+          (define-key map "v" 'eb-mpv-start)
           (define-key map "c" 'browse-url-chromium))
         (embark-define-keymap embark-mpv-chapter-actions
                               "Keymap for actions on mpv chapters."
@@ -116,15 +115,15 @@
                               ("d" mpv-remove-file))
         (add-to-list 'embark-keymap-alist '(mpv-file . embark-mpv-file-actions)))
       ,#~""
-      (advice-add 'ytdl--download-async :override 'eb-media-ytdl--download-async))
+      (advice-add 'ytdl--download-async :override 'eb-ytdl--download-async))
     #:elisp-packages (list emacs-mpv-next))
    (nyxt-configuration-service
     '((define-command play-video-in-current-page (&optional (buffer (current-buffer)))
         "Plays video in the currently open buffer."
-        (let ((video-url (render-url (url buffer))))
-          (echo "Opening ~s with mpv." video-url)
+        (let ((url (render-url (url buffer))))
+          (echo "Opening ~s with mpv." url)
           (eval-in-emacs
-           `(eb-media-empv-start ,video-url))))
+           `(eb-mpv-start ,url))))
       (define-key *custom-keymap*
         "M-c v" 'play-video-in-current-page)))))
 
