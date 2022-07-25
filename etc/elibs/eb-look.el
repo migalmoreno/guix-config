@@ -1,14 +1,12 @@
 ;; -*- lexical-binding: t; -*-
 (require 'appt)
 (require 'dashboard)
-(require 'pdf-tools)
 (require 'modus-themes)
 (require 'all-the-icons)
 (require 'eb-exwm)
-(require 'eb-files)
-(require 'eb-util)
-(require 'eb-web )
-(require 'eb-media)
+(require 'eb-pdf-view)
+(require 'eb-nyxt)
+(require 'eb-mpv)
 
 (defgroup eb-look nil
   "Visual and stylistic settings."
@@ -104,16 +102,16 @@
 (defun eb-look-tweak-faces ()
   "Tweaks various interface faces."
   (if (eb-look--theme-dark-p)
-      (eb-faces
-       '((tab-bar nil :box (:line-width 1 :color "#a8a8a8" :style unspecified))
-         (vertical-border nil :foreground "#000000")))
-    (eb-faces
-     '((tab-bar nil :box (:line-width 1 :color "#505050" :style unspecified))
-       (vertical-border nil :foreground "#ffffff"))))
-  (eb-faces
-   `((default nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
-     (fixed-pitch nil :family ,eb-look-fixed-font :height ,eb-look-default-font-size)
-     (variable-pitch nil :family ,eb-look-variable-font :height ,eb-look-default-font-size))))
+      (progn
+        (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#a8a8a8" :style unspecified))
+        (set-face-attribute 'vertical-border nil :foreground "#000000"))
+    (progn
+      (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#505050" :style unspecified))
+      (set-face-attribute 'vertical-border nil :foreground "#ffffff")))
+  (progn
+    (set-face-attribute 'default nil :family eb-look-fixed-font :height eb-look-default-font-size)
+    (set-face-attribute 'fixed-pitch nil :family eb-look-fixed-font :height eb-look-default-font-size)
+    (set-face-attribute 'variable-pitch nil :family eb-look-variable-font :height eb-look-default-font-size)))
 
 ;;;###autoload
 (defun eb-look-change-theme ()
@@ -123,28 +121,27 @@ currently-running applications."
   (if (eb-look--theme-dark-p)
       (progn
         (setenv "GTK_THEME" ":dark")
-        (eb-web-nyxt-change-theme eb-look-dark-theme))
+        (eb-nyxt-change-theme eb-look-dark-theme))
     (setenv "GTK_THEME" ":light")
-    (eb-web-nyxt-change-theme eb-look-light-theme))
+    (eb-nyxt-change-theme eb-look-light-theme))
   (eb-look-tweak-faces)
-  (eb-files-update-pdf-buffers)
-  (eb-media-mpv-change-theme)
+  (eb-pdf-view-update-buffers)
+  (eb-mpv-change-theme)
   (eb-org-update-buffers-faces))
 
 (defun eb-look-tweak-info-faces ()
   "Applies some extra appearance settings to `Info-mode' and `Info+-mode'."
   (interactive)
   (when (eb-look--theme-dark-p)
-    (eb-faces
-     '((info-reference-item nil :background unspecified :foreground "#00d3d0")
-       (info-function-ref-item nil :background unspecified :foreground "#b6a0ff")
-       (info-quoted-name nil :foreground "#b0d6f5")
-       (info-double-quoted-name nil :foreground "#79a8ff")
-       (info-xref nil :foreground "#00bcff" :underline t)
-       (info-command-ref-item nil :background unspecified)
-       (info-macro-ref-item nil :background unspecified)
-       (info-variable-ref-item nil :background unspecified)
-       (info-string nil :foreground "#79a8ff")))))
+    (set-face-attribute 'info-reference-item nil :background 'unspecified :foreground "#00d3d0")
+    (set-face-attribute 'info-function-ref-item nil :background 'unspecified :foreground "#b6a0ff")
+    (set-face-attribute 'info-quoted-name nil :foreground "#b0d6f5")
+    (set-face-attribute 'info-double-quoted-name nil :foreground "#79a8ff")
+    (set-face-attribute 'info-xref nil :foreground "#00bcff" :underline t)
+    (set-face-attribute 'info-command-ref-item nil :background 'unspecified)
+    (set-face-attribute 'info-macro-ref-item nil :background 'unspecified)
+    (set-face-attribute 'info-variable-ref-item nil :background 'unspecified)
+    (set-face-attribute 'info-string nil :foreground "#79a8ff")))
 
 (defun eb-look-set-variable-pitched ()
   "Sets a variable-pitched font for the default face in a buffer."

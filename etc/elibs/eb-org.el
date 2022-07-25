@@ -3,25 +3,16 @@
 (require 'org)
 (require 'org-roam)
 (require 'org-indent)
+(require 'org-mime)
 (require 'consult)
+(require 'eb-look)
 
 (defgroup eb-org nil
-  "Org-mode and Org Roam customizations."
+  "Personal Org mode customizations."
   :group 'eb)
 
 (defvar eb-org-agenda-appt-timer nil
   "Timer to update `appt-time-msg-list' from Agenda entries.")
-
-(autoload #'org-buffer-list "org")
-
-;;;###autoload
-(defvar eb-org-buffer-source
-  `(:name "Org"
-          :narrow ?o
-          :category buffer
-          :preview-key ,(kbd "M-.")
-          :state ,#'consult--buffer-state
-          :items ,(lambda () (mapcar #'buffer-name (org-buffer-list)))))
 
 ;;;###autoload
 (defun eb-org-agenda-to-appt ()
@@ -38,6 +29,20 @@ run again for tomorrow."
   (setq eb-org-agenda-appt-timer
         (run-at-time "24:01" nil
                      #'eb-org-agenda-appt-reset)))
+
+;;;###autoload
+(defun eb-org-mime-darken-codeblocks ()
+  "Applies a dark background to email body codeblocks."
+  (org-mime-change-element-style
+   "pre"
+   "color: #E6E1Dc; background-color: #232323; padding: 0.5em;"))
+
+;;;###autoload
+(defun eb-org-mime-indent-quotes ()
+  "Adds padding to block quotes in email body."
+  (org-mime-change-element-style
+   "blockquote"
+   "border-left: 2px solid gray; padding-left: 4px;"))
 
 ;;;###autoload
 (defun eb-org-timer-reset ()
@@ -60,22 +65,29 @@ run again for tomorrow."
 
 ;;;###autoload
 (defun eb-org-tweak-faces ()
-  "Tweaks Org mode's various faces."
+  "Set Org mode's faces for `eb-org-minimal-mode'."
   (interactive)
-  (eb-faces
-   `((org-block nil :inherit modus-themes-fixed-pitch :weight normal)
-     (org-verbatim nil :inherit (fixed-pitch modus-themes-markup-verbatim) :weight normal)
-     (org-code nil :inherit (shadow fixed-pitch modus-themes-markup-code) :weight normal)
-     (org-document-info nil :weight bold)
-     (org-document-info-keyword nil :inherit (shadow fixed-pitch))
-     (org-ellipsis nil :inherit (font-lock-comment-face) :weight normal
-                   :height ,eb-look-default-font-size)
-     (org-link nil :underline t)
-     (org-meta-line nil :inherit (font-lock-comment-face fixed-pitch))
-     (org-headline-done nil :strike-through t)
-     (org-special-keyword nil :inherit (font-lock-comment-face))
-     (org-table nil :inherit fixed-pitch)
-     (org-indent nil :inherit (org-hide fixed-pitch))))
+  (set-face-attribute 'org-block nil
+                      :inherit 'modus-themes-fixed-pitch
+                      :weight 'normal)
+  (set-face-attribute 'org-verbatim nil
+                      :inherit '(fixed-pitch modus-themes-markup-verbatim)
+                      :weight 'normal)
+  (set-face-attribute 'org-code nil
+                      :inherit '(shadow fixed-pitch modus-themes-markup-code)
+                      :weight 'normal)
+  (set-face-attribute 'org-document-info nil :weight 'bold)
+  (set-face-attribute 'org-document-info-keyword nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-ellipsis nil
+                      :inherit '(font-lock-comment-face)
+                      :weight 'normal
+                      :height eb-look-default-font-size)
+  (set-face-attribute 'org-link nil :underline t)
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-headline-done nil :strike-through t)
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face))
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
   (cl-loop for (face . height) in '((org-level-1 . 1.2)
                                     (org-level-2 . 1.1)
                                     (org-level-3 . 1.1)
@@ -178,10 +190,10 @@ to Org mode buffers."
       (cancel-timer eb-org-agenda-appt-timer))))
 
 ;;;###autoload
-(define-minor-mode eb-org-minimal-ui-mode
-  "Provides a minimal interface to `org-mode'."
+(define-minor-mode eb-org-minimal-mode
+  "Provides a minimal interface to Org mode."
   :global t :group 'eb-org
-  (if eb-org-minimal-ui-mode
+  (if eb-org-minimal-mode
       (progn
         (corfu-mode -1)
         (org-indent-mode)

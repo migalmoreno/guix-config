@@ -2,23 +2,10 @@
 (require 'cl-lib)
 (require 'eshell)
 (require 'esh-mode)
-(require 'eb-util)
 
 (defgroup eb-shell nil
   "Shell customizations for Emacs."
   :group 'eb)
-
-;;;###autoload
-(defvar eb-shell-buffer-source
-  `(:name "Comint"
-          :narrow ?c
-          :category buffer
-          :preview-key ,(kbd "M-.")
-          :state ,#'consult--buffer-state
-          :items ,(lambda ()
-                    (mapcar #'buffer-name (eb-util--mode-buffers
-                                           'comint-mode 'cider-repl-mode))))
-  "Source for `comint-mode' buffers to be set in `consult-buffer-sources'.")
 
 (defun eb-shell--bookmark-make-record ()
   "Create a bookmark in an `eshell-mode' buffer."
@@ -36,6 +23,17 @@
     (eshell)
     (setq default-directory (alist-get 'filename bookmark))
     (eshell-reset)))
+
+;;;###autoload
+(defun eb-shell-ansi-color-apply ()
+  "Translate control sequences into text properties in the current buffer."
+  (interactive)
+  (ansi-color-apply-on-region (point-min) (point-max)))
+
+;;;###autoload
+(defun eb-shell--truncate-lines ()
+  "Truncate long lines in buffers."
+  (setq-local truncate-lines t))
 
 ;;;###autoload
 (defun eb-shell--set-bookmark-handler ()

@@ -1,7 +1,4 @@
 ;; -*- lexical-binding: t; -*-
-(require 'geiser)
-(require 'geiser-guile)
-(require 'geiser-repl)
 (require 'sly)
 
 (defgroup eb-lisp nil
@@ -33,25 +30,5 @@
             nick
             err-level
             (propertize "> " 'font-lock-face 'sly-mrepl-prompt-face))))
-
-;;;###autoload
-(defun eb-lisp-geiser-autoconnect ()
-  "Starts a Geiser REPL unless an active connection is already present."
-  (unless (geiser-repl--connection*)
-    (save-window-excursion
-      (run-guile))))
-
-;;;###autoload
-(defun eb-lisp-embellish-mrepl-output ()
-  "Translates the output codes in the pre-output filters
-for `sly-mrepl-mode' buffers."
-  (add-hook 'comint-preoutput-filter-functions #'ansi-color-apply nil t))
-
-;;;###autoload
-(defun eb-lisp-daemons-root ()
-  "Invokes the `daemons' command as `root' to get the list of system daemons."
-  (interactive)
-  (let ((default-directory (format "/sudo::%s" (make-temp-file nil t))))
-    (daemons)))
 
 (provide 'eb-lisp)

@@ -1,37 +1,37 @@
 ;; -*- lexical-binding: t; -*-
 (require 'eb-desktop)
-(require 'eb-media)
+(require 'eb-mpv)
 (require 'eb-look)
 (require 'tab-bar)
 
-(defgroup eb-tab nil
+(defgroup eb-tab-bar nil
   "Tab bar customizations."
   :group 'eb)
 
-(defvar-local eb-tab-notifications
+(defvar-local eb-tab-bar-notifications
   (list
    '(:eval (eb-desktop--notify)))
   "Displays desktop notifications in the tab bar.")
 
-(defvar eb-tab-format-separator '(separator menu-item " " nil)
+(defvar eb-tab-bar-format-separator '(separator menu-item " " nil)
   "Separator to be used inside menu item blocks.")
 
 ;;;###autoload
-(defun eb-tab-format-left ()
+(defun eb-tab-bar-format-left ()
   "Produces the items for the tab bar to output on its left-hand side."
   `((menu-bar menu-item " λ " tab-bar-menu-bar :help "Menu")
-    (mpv-string menu-item ,eb-media-mpv-mode-line-string nil)
-    (mpv-prev menu-item ,(eb-look--position-item eb-media-mpv-prev-button)
+    (mpv-string menu-item ,eb-mpv-mode-line-string nil)
+    (mpv-prev menu-item ,(eb-look--position-item eb-mpv-prev-button)
               mpv-playlist-prev :help "Previous playlist entry")
-    (mpv-toggle menu-item ,(eb-look--position-item eb-media-mpv-toggle-button)
+    (mpv-toggle menu-item ,(eb-look--position-item eb-mpv-toggle-button)
                 mpv-pause :help "Toggle playback")
-    (mpv-next menu-item ,(eb-look--position-item eb-media-mpv-next-button)
+    (mpv-next menu-item ,(eb-look--position-item eb-mpv-next-button)
               mpv-playlist-next :help "Next playlist entry")
-    (mpv-playing-time menu-item ,eb-media-mpv-playing-time-string nil)
-    (notifications menu-item ,(string-trim-right (format-mode-line eb-tab-notifications)) nil)))
+    (mpv-playing-time menu-item ,eb-mpv-playing-time-string nil)
+    (notifications menu-item ,(string-trim-right (format-mode-line eb-tab-bar-notifications)) nil)))
 
 ;;;###autoload
-(defun eb-tab-format-center ()
+(defun eb-tab-bar-format-center ()
   "Produces menu items to display information in the center of the tab bar."
   (let ((str (concat
               (propertize " " 'display
@@ -43,9 +43,9 @@
       (time menu-item ,display-time-string nil))))
 
 ;;;###autoload
-(defun eb-tab-format-align-right ()
+(defun eb-tab-bar-format-align-right ()
   "Align the rest of tab bar items to the right bearing in mind Unicode characters."
-  (let* ((rest (cdr (memq 'eb-tab-format-align-right tab-bar-format)))
+  (let* ((rest (cdr (memq 'eb-tab-bar-format-align-right tab-bar-format)))
          (rest (tab-bar-format-list rest))
          (rest (mapconcat (lambda (item) (nth 2 item)) rest ""))
          (hpos (+ 5 (length rest)))
@@ -53,7 +53,7 @@
     `((align-right menu-item ,str nil))))
 
 ;;;###autoload
-(defun eb-tab-format-right ()
+(defun eb-tab-bar-format-right ()
   "Produces menu items corresponding to the right side of the tab bar."
   `((org-timer menu-item ,(when (boundp 'org-timer-mode-line-string)
                             org-timer-mode-line-string)
@@ -65,9 +65,6 @@
     (volume menu-item ,eb-desktop-display-volume-string nil)
     (battery menu-item ,(when (boundp 'battery-mode-line-string)
                           battery-mode-line-string)
-             nil)
-    ;; TODO: instead of `keycast-tab-bar-mode'
-    ;; (keycast menu-item ,(keycast-tab-bar) nil)
-    ))
+             nil)))
 
-(provide 'eb-tab)
+(provide 'eb-tab-bar)

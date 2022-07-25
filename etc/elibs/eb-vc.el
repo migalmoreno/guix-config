@@ -8,15 +8,15 @@
   "Version control enhancements."
   :group 'eb)
 
-(defcustom eb-web-srht-token nil
+(defcustom eb-vc-srht-token nil
   "The OAuth2 token for the Sourcehut account."
   :type 'string
-  :group 'eb-web)
+  :group 'eb)
 
 (defun eb-vc-srht-repo-id (name)
   "Return the ID associated with the sourcehut repository NAME."
     (interactive "sRepo name: ")
-    (let* ((srht-token eb-web-srht-token)
+    (let* ((srht-token eb-vc-srht-token)
            (oauth2-token (concat "Bearer " srht-token))
            (id (assoc-default
                 'id
@@ -49,7 +49,7 @@
                    (name (string-match (rx (: "/" (group (+ (not "/"))) "/" eol)) dir)))
              (eb-vc-srht-repo-id (match-string 1 dir))
              (call-interactively #'eb-vc-srht-repo-id))))
-  (let* ((srht-token eb-web-srht-token)
+  (let* ((srht-token eb-vc-srht-token)
          (oauth2-token (concat "Bearer " srht-token))
          (readme (if (derived-mode-p 'html-mode)
                      (buffer-substring-no-properties (point-min) (point-max))

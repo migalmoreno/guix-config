@@ -8,16 +8,6 @@
   "EXWM customizations."
   :group 'eb-desktop)
 
-;;;###autoload
-(defvar eb-exwm-buffer-source
-  `(:name "EXWM"
-          :hidden t
-          :narrow ?x
-          :category buffer
-          :state ,#'consult--buffer-state
-          :items ,(lambda () (mapcar #'buffer-name (eb-exwm--list-all-buffers))))
-  "Source for EXWM buffers to be set in `consult-buffer-sources'.")
-
 (defvar eb-exwm-default-output nil
   "The name of the default RandR output.")
 
