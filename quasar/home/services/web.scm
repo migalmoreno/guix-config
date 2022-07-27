@@ -524,10 +524,11 @@
                      `(?n "Nyxt" ,'eb-web--jump-to-bookmark)))
       (let ((map mode-specific-map))
         (define-key map "rn" 'eb-nyxt-connect-to-slynk)
-        (define-key map "ws" 'eb-nyxt-search)
-        (define-key map "wb" 'eb-nyxt-set-up-window)
-        (define-key map "ww" 'eb-nyxt-copy-url)
-        (define-key map "wv" 'eb-nyxt-set-transient-map))
+        (define-key map "xs" 'eb-nyxt-search)
+        (define-key map "xb" 'eb-nyxt-set-up-window)
+        (define-key map "xw" 'eb-nyxt-copy-url)
+        (define-key map "xk" 'eb-nyxt-delete-current-buffer)
+        (define-key map "xv" 'eb-nyxt-set-transient-map))
       ,#~""
       (with-eval-after-load 'eb-nyxt
         (custom-set-variables

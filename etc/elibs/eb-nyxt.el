@@ -40,19 +40,19 @@
   (sly-connect "localhost" eb-nyxt-port))
 
 ;;;###autoload
+(defun eb-nyxt--slynk-connected-p ()
+  "Indicates whether there's currently a connection to `eb-nyxt-port'."
+  (cl-find-if (lambda (p)
+                (= (sly-connection-port p) eb-nyxt-port))
+              sly-net-processes))
+
+;;;###autoload
 (cl-defun eb-nyxt-sly-eval (sexp &rest args &key &allow-other-keys)
   "Evaluate SEXP and ARGS with Slynk, automatically attaching a Slynk
 process if needed."
   (let ((sly-default-connection (or (eb-nyxt--slynk-connected-p)
                                     (eb-nyxt-connect-to-slynk))))
     (apply #'sly-eval sexp args)))
-
-;;;###autoload
-(defun eb-nyxt--slynk-connected-p ()
-  "Indicates whether there's currently a connection to `eb-nyxt-port'."
-  (cl-find-if (lambda (p)
-                (= (sly-connection-port p) eb-nyxt-port))
-              sly-net-processes))
 
 (defun eb-nyxt--slynk-eval-sexps (&rest sexps)
   "Transform SEXPS to string form to send to `slynk'."
@@ -68,9 +68,9 @@ process if needed."
            (list-system-processes)))
 
 ;;;###autoload
-(cl-defun eb-nyxt-set-up-window (&key (focus nil))
-  "Handles Nyxt's window, focusing on Nyxt's Emacs buffer if FOCUS,
-and if exwm is enabled, it switches to the corresponding workspace."
+(cl-defun eb-nyxt-exwm-focus-window (&key (focus nil))
+  "Handles Nyxt's EXWM window, focusing on Nyxt's Emacs buffer if FOCUS,
+and if exwm is enabled, it switches to its corresponding workspace."
   (interactive
    (when current-prefix-arg
      (list :focus t)))
@@ -78,23 +78,24 @@ and if exwm is enabled, it switches to the corresponding workspace."
                                                (string-match (rx (: "Nyxt:")) (buffer-name buffer)))
                                              (buffer-list))))
          (exwm-workspace (when (require 'exwm nil t)
-                           (exwm-workspace--position
-                            (window-frame (or (get-buffer-window nyxt-buffer t)
-                                              (when focus
-                                                (frame-first-window
-                                                 (exwm-workspace--workspace-from-frame-or-index
-                                                  eb-nyxt-workspace)))))))))
-    (when (require 'exwm nil t)
-      (when (equal (current-buffer) nyxt-buffer)
-        ;; (exwm-input-set-local-simulation-keys nil)
-        )
-      (when focus
-        (exwm-workspace-switch exwm-workspace)
+                           (window-frame (or (get-buffer-window nyxt-buffer t)
+                                             (when focus
+                                               (frame-first-window
+                                                (exwm-workspace--workspace-from-frame-or-index
+                                                 eb-nyxt-workspace))))))))
+    (when (and (require 'exwm nil t) focus)
+      (exwm-workspace-switch (exwm-workspace--position exwm-workspace))
+      (if (and (= (exwm-workspace--position exwm-workspace--current)
+                  (exwm-workspace--position exwm-workspace))
+               (> (length (window-list exwm-workspace)) 1))
+          (if (get-buffer-window nyxt-buffer)
+              (select-window (get-buffer-window nyxt-buffer))
+            (switch-to-buffer-other-window nyxt-buffer))
         (switch-to-buffer nyxt-buffer)))))
 
 (cl-defun eb-nyxt-run-with-nyxt (sexps &key (focus nil) (autostart nil))
   "Evaluates SEXPS in the context of the current Nyxt connection and if FOCUS,
-changes focus to the Nyxt frame. If AUTOSTART is non-`nil' and a Nyxt system
+changes focus to the Nyxt exwm workspace. If AUTOSTART is non-`nil' and a Nyxt system
 process is not found, it will automatically create one and connect Slynk to it."
   (let* ((sly-log-events nil)
          (sly-default-connection (or (eb-nyxt--slynk-connected-p)
@@ -121,11 +122,11 @@ process is not found, it will automatically create one and connect Slynk to it."
        eb-nyxt-startup-threshold nil
        (lambda ()
          (let ((sly-default-connection (eb-nyxt-connect-to-slynk)))
-           (eb-nyxt-set-up-window :focus focus)
+           (eb-nyxt-exwm-focus-window :focus focus)
            (eb-nyxt--slynk-eval-sexps sexps)))))
      ((or (eb-nyxt--system-process-p)
           eb-nyxt-process)
-      (eb-nyxt-set-up-window :focus focus)
+      (eb-nyxt-exwm-focus-window :focus focus)
       (eb-nyxt--slynk-eval-sexps sexps)))))
 
 (org-link-set-parameters
@@ -136,7 +137,8 @@ process is not found, it will automatically create one and connect Slynk to it."
   "Stores the current page link via Org mode."
   (when (and (or eb-nyxt-process
                  (eb-nyxt--system-process-p))
-             (string-match (rx (: "Nyxt:")) (buffer-name (current-buffer))))
+             (when (require 'exwm nil t)
+               (string-match (rx (: "Nyxt:")) (buffer-name (current-buffer)))))
     (org-link-store-props
      :type "nyxt"
      :link (eb-nyxt-sly-eval '(nyxt:render-url (nyxt:url (nyxt:current-buffer))))
@@ -177,6 +179,12 @@ template."
   "Kills current page URL in Nyxt."
   (interactive)
   (eb-nyxt-run-with-nyxt '(copy-url)))
+
+;;;###autoload
+(defun eb-nyxt-delete-current-buffer ()
+  "Deletes the currently-selected buffer in Nyxt."
+  (interactive)
+  (eb-nyxt-run-with-nyxt '(delete-current-buffer)))
 
 ;;;###autoload
 (defun eb-nyxt-scroll-other-window ()
