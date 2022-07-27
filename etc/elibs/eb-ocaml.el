@@ -7,7 +7,7 @@
   :group 'eb)
 
 (defun eb-ocaml-load-merlin ()
-  "Sets up `merlin-mode' for OCaml."
+  "Set up `merlin-mode' for OCaml."
   (let ((opam-share (when (executable-find "opam")
                       (car (process-lines "opam" "var" "share")))))
     (when (and opam-share (file-directory-p opam-share))
@@ -16,7 +16,7 @@
     (add-hook 'tuareg-mode-hook #'merlin-mode)))
 
 (defun eb-ocaml-set-environment ()
-  "When using Opam, sets its corresponding environment variables."
+  "When using Opam, set its corresponding environment variables."
   (when (executable-find "opam")
     (dolist (var (car (read-from-string
                        (shell-command-to-string "opam config env --sexp"))))
@@ -24,9 +24,10 @@
 
 ;;;###autoload
 (define-minor-mode eb-ocaml-mode
-  "Sets up convenient tweaks for `tuareg-mode' and `merlin-mode'. Namely,
+  "Set up convenient tweaks for `tuareg-mode' and `merlin-mode'. Namely,
 it prevents a leading star from appearing on each comment line
-in a multi-line OCaml comment, and it enables `prettify-symbols-mode'."
+in a multi-line OCaml comment, enables `prettify-symbols-mode' and sets up
+the necessary tooling."
   :global t :group 'eb-ocaml
   (if eb-ocaml-mode
       (progn
