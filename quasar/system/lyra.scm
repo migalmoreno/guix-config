@@ -1,5 +1,6 @@
 (define-module (quasar system lyra)
   #:use-module (quasar home)
+  #:use-module (quasar home vega)
   #:use-module (conses serializers lisp)
   #:use-module (conses system services web)
   #:use-module (conses system services matrix)
@@ -26,6 +27,7 @@
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages version-control)
   #:use-module (gnu services cups)
+  #:use-module (gnu services home)
   #:use-module (gnu services networking)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
@@ -117,6 +119,8 @@
                      (postgresql-role
                       (name "vega")
                       (create-database? #t))))))
+         (service guix-home-service-type
+                  `(("vega" . ,%home/vega)))
          (modify-services %desktop-services
            (udev-service-type config =>
                               (udev-configuration

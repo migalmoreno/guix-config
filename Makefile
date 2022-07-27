@@ -3,6 +3,7 @@ export GUILE_LOAD_PATH := $(pwd):$(GUILE_LOAD_PATH):$(XDG_CONFIG_HOME)/guix
 channels-lock := guix time-machine -C channels-lock --
 
 HOSTNAME := $(shell hostname)
+USER := $(shell whoami)
 
 .PHONY: all
 all: pull update init home system build iso deploy
@@ -18,7 +19,7 @@ upgrade:
 init/%:
 	$(channels-lock) init -L . quasar/system/$*.scm /mnt
 
-home: home/${HOSTNAME}
+home: home/${USER}
 
 home/%:
 	$(channels-lock) home --allow-downgrades -L . reconfigure quasar/home/$*.scm

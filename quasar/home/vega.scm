@@ -1,4 +1,4 @@
-(define-module (quasar home lyra)
+(define-module (quasar home vega)
   #:use-module (quasar home services android)
   #:use-module (quasar home services audio)
   #:use-module (quasar home services bittorrent)
@@ -8,6 +8,7 @@
   #:use-module (quasar home services documentation)
   #:use-module (quasar home services emacs)
   #:use-module (quasar home services fonts)
+  #:use-module (quasar home services golang)
   #:use-module (quasar home services gtk)
   #:use-module (quasar home services keyboard)
   #:use-module (quasar home services tex)
@@ -20,14 +21,14 @@
   #:use-module (quasar home services version-control)
   #:use-module (quasar home services video)
   #:use-module (quasar home services virtualization)
-  #:use-module (quasar home services web-browsers)
+  #:use-module (quasar home services web)
   #:use-module (quasar home services xdg)
   #:use-module (quasar home services xorg)
   #:use-module (gnu home)
   #:use-module (gnu services)
-  #:export (%home/lyra))
+  #:export (%home/vega))
 
-(define %home/lyra
+(define %home/vega
   (home-environment
    (services
     (append
@@ -46,6 +47,7 @@
      (documentation-service)
      (emacs-service)
      (fonts-service)
+     (go-service)
      (gtk-service)
      (qmk-service)
      (keyboard-service)
@@ -69,4 +71,4 @@
      (cursor-service)
      (xorg-service)))))
 
-%home/lyra
+%home/vega
