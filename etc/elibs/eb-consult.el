@@ -11,6 +11,7 @@
   :group 'eb-consult
   :type 'list)
 
+;;;###autoload
 (defun eb-consult--mode-buffers (&rest modes)
   "Return a list of buffers that are derived from MODES
 in `buffer-list'."
@@ -29,7 +30,8 @@ in `buffer-list'."
           :category buffer
           :preview-key ,(kbd "M-.")
           :state ,#'consult--buffer-state
-          :items ,(lambda () (mapcar #'buffer-name (org-buffer-list)))))
+          :items ,(lambda () (mapcar #'buffer-name (org-buffer-list))))
+  "Source for Org buffers to be set in `consult-buffer-sources'.")
 
 (autoload #'erc-buffer-list "erc")
 
@@ -53,7 +55,7 @@ in `buffer-list'."
           :preview-key ,(kbd "M-.")
           :state ,#'consult--buffer-state
           :items ,(lambda () (mapcar #'buffer-name
-                                     (append (list (telega-root--buffer)) (telega-chat-buffers)))))
+                                     (eb-consult--mode-buffers 'telega-chat-mode 'telega-root-mode))))
   "Source for Telega buffers to be set in `consult-buffer-sources'.")
 
 ;;;###autoload
