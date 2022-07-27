@@ -11,6 +11,28 @@
   #:use-module (guix utils)
   #:use-module ((guix licenses) #:prefix license:))
 
+(define-public emacs-ob-go
+  (let ((commit "2067ed55f4c1d33a43cb3f6948609d240a8915f5")
+        (revision "0"))
+    (package
+      (name "ob-go")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://github.com/pope/ob-go")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256 (base32 "069w9dymiv97cvlpzabf193nyw174r38lz5j11x23x956ladvpbw"))))
+      (build-system emacs-build-system)
+      (home-page "https://github.com/pope/ob-go")
+      (synopsis "Org Babel support for evaluating go code.")
+      (description "@code{ob-go} enables Org-Babel support for evaluating go code. It
+was created based on the usage of ob-C.")
+      (license #f))))
+
 (define-public emacs-with-nyxt
   (let ((commit "7e5d14bbfedebc72af5ffdc41912cbc339de59e6")
         (revision "0"))
