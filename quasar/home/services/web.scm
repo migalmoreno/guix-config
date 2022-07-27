@@ -1,4 +1,4 @@
-(define-module (quasar home services web-browsers)
+(define-module (quasar home services web)
   #:use-module (quasar home)
   #:use-module (conses home services web-browsers)
   #:use-module (conses home services emacs)
@@ -293,6 +293,10 @@
             :shortcut "cv"
             :fallback-url (quri:uri "https://clojureverse.org")
             :base-search-url "https://clojureverse.org/search?q=~a")
+           (engines:discourse
+            :shortcut "or"
+            :fallback-url (quri:uri "https://org-roam.discourse.group")
+            :base-search-url "https://org-roam.discourse.group/search?q=~a")
            (engines:meetup
             :shortcut "me")
            (engines:gitea
@@ -547,6 +551,11 @@
   (let ((chromium-flags (list "--remove-tabsearch-button"
                               "--show-avatar-button=never")))
     (cons*
+     (elisp-configuration-service
+      '((require 'yaml-mode)
+        (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode)))
+      #:elisp-packages (list emacs-json-mode
+                             emacs-yaml-mode))
      (simple-service
       'web-environment-variables
       home-environment-variables-service-type
