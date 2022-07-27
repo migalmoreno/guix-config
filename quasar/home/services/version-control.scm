@@ -64,8 +64,7 @@
         (git-email-gnus-mode 1))
       ,#~""
       (with-eval-after-load 'eb-vc
-        (custom-set-variables
-         '(eb-vc-srht-token (password-store-get-field "vc/sourcehut" "oauth2-token")))))
+        (setq eb-vc-srht-token (password-store-get-field "vc/sourcehut" "oauth2-token"))))
     #:elisp-packages (list
                       emacs-magit
                       emacs-forge
