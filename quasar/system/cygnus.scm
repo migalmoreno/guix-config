@@ -138,7 +138,7 @@
               (password-authentication? #f)
               (permit-root-login 'prohibit-password)
               (authorized-keys
-               `(("root" ,(local-file "../../keys/ssh/lyra.pub"))))))
+               `(("root" (local-file ,(string-apend %channel-root "/etc/keys/ssh/lyra.pub")))))))
     (service whoogle-service-type))
    (modify-services %base-services
      (guix-service-type config =>
@@ -147,7 +147,7 @@
                          (authorized-keys
                           (append
                            (list
-                            (local-file "../../keys/signatures/lyra.pub"))
+                            (local-file (string-append %channel-root "/etc/keys/signatures/lyra.pub")))
                            %default-authorized-guix-keys)))))))
 
 (define %system/cygnus

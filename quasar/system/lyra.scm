@@ -138,7 +138,7 @@
                                (authorized-keys
                                 (append
                                   (list
-                                   (local-file "../../keys/signatures/nonguix.pub"))
+                                   (local-file (string-append %channel-root "/etc/keys/signatures/nonguix.pub")))
                                   %default-authorized-guix-keys))))
            (delete gdm-service-type))))
 
