@@ -4,6 +4,7 @@
   #:use-module (gnu home-services base)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu home services shells)
   #:export (go-service))
 
 (define (go-service)
@@ -18,4 +19,7 @@
       (with-eval-after-load 'ob-core
         (setq org-babel-default-header-args:go
               '((:imports . "fmt")))))
-    #:elisp-packages (list emacs-go-mode emacs-ob-go))))
+    #:elisp-packages (list emacs-go-mode emacs-ob-go))
+   (simple-service 'home-go-envs
+                   home-environment-variables-service-type
+                   '(("GOPATH" . "$XDG_DATA_HOME/go")))))
