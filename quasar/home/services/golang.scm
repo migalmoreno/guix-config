@@ -4,7 +4,7 @@
   #:use-module (gnu home-services base)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages emacs-xyz)
-  #:use-module (gnu home services shells)
+  #:use-module (gnu home services)
   #:export (go-service))
 
 (define (go-service)
