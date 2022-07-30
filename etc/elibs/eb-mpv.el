@@ -2,6 +2,7 @@
 (require 'cl-lib)
 (require 'ytdl)
 (require 'mpv)
+(require 'emms-player-mpv)
 (require 'tq)
 (require 'ol)
 (require 'eb-web)
