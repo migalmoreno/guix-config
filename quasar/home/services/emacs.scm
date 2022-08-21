@@ -135,7 +135,6 @@
          '(org-ellipsis " ⤵")
          '(org-hide-emphasis-markers t)
          '(org-fontify-done-headline t))
-        ;; TODO: tweak the regexp to not apply this within source blocks
         (font-lock-add-keywords 'org-mode
                                 '(("^ *\\([-]\\)[[:space:]][^[]+?"
                                    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))
@@ -158,6 +157,28 @@
         (custom-set-variables
          '(org-refile-targets
            '((org-agenda-files . (:maxlevel . 1))))))
+      ,#~""
+      (with-eval-after-load 'oc
+        (require 'oc-biblatex)
+        (custom-set-variables
+         '(org-cite-export-processors '((latex biblatex)
+                                        (t basic)))
+         '(org-cite-global-bibliography (list (expand-file-name "~/documents/references.bib")))))
+      ,#~""
+      (define-key mode-specific-map "i" 'citar-insert-citation)
+      (with-eval-after-load 'citar
+        (require 'citar-embark)
+        (citar-embark-mode)
+        (setq citar-symbols
+              `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+                (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+                (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+        (setq citar-symbol-separator "  ")
+        (custom-set-variables
+         '(org-cite-insert-processor 'citar)
+         '(org-cite-follow-processor 'citar)
+         '(org-cite-activate-processor 'citar))
+        (setq citar-bibliography (list (expand-file-name "~/documents/references.bib"))))
       ,#~""
       (with-eval-after-load 'org-capture
         (custom-set-variables
@@ -386,7 +407,8 @@
                            emacs-org-appear
                            emacs-org-superstar
                            emacs-visual-fill-column
-                           emacs-graphviz-dot-mode))
+                           emacs-graphviz-dot-mode
+                           emacs-citar))
    (nyxt-configuration-service
     `((define-command org-capture ()
         "Stores and captures the current page link via Org mode."
@@ -582,7 +604,14 @@
          '(ispell-program-name "aspell")
          '(ispell-dictionary "en_US")
          '(flyspell-issue-welcome-flag nil)
-         '(flyspell-issue-message-flag nil)))))))
+         '(flyspell-issue-message-flag nil)))
+      (add-hook 'markdown-mode-hook 'eb-markdown-minimal-mode)
+      (with-eval-after-load 'markdown-mode
+        (custom-set-variables
+         '(markdown-header-scaling t)
+         '(markdown-header-scaling-values '(1.2 1.1 1.1 1.0 1.0 0.9))
+         '(markdown-hide-urls t)
+         '(markdown-hide-markup t)))))))
 
 (define image-service
   (list
@@ -737,7 +766,7 @@
        (custom-set-variables
         '(eb-look-light-theme "modus-operandi")
         '(eb-look-dark-theme "modus-vivendi")
-        '(eb-look-dark-theme-threshold "21:30")
+        '(eb-look-dark-theme-threshold "20:30")
         '(eb-look-fixed-font "Iosevka")
         '(eb-look-variable-font "IBM Plex Sans")
         '(eb-look-headless-font-size 105)
