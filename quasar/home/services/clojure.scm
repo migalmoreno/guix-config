@@ -9,6 +9,7 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages clojure)
   #:use-module (gnu packages java)
+  #:use-module (gnu packages node)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages compression)
   #:use-module (guix profiles)
@@ -22,7 +23,8 @@
                                           leiningen
                                           unzip
                                           clojure-tools-next
-                                          (list openjdk17 "jdk")))
+                                          (list openjdk17 "jdk")
+                                          node))
    (simple-service
     'add-clojure-envs
     home-environment-variables-service-type
