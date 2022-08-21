@@ -21,7 +21,11 @@
                     texlive-xcolor
                     texlive-ulem
                     texlive-latex-preview
-                    texlive-amsfonts))
+                    texlive-amsfonts
+                    texlive-biblatex
+                    texlive-latex-natbib
+                    texlive-grfext
+                    biber))
              (envs
               '((mfhome . "$XDG_DATA_HOME/texmf")
                 (mfvar . "$XDG_CACHE_HOME/texlive/texmf-var")
@@ -40,5 +44,11 @@
              ("showtabs" "false")
              ("keywordstyle" "\\color{violet}")
              ("commentstyle" "\\color{gray}")
-             ("label" "{Figure}"))))))
+             ("label" "{Figure}")))))
+      (add-hook 'bibtex-mode-hook 'flyspell-mode)
+      (setq bibtex-user-optional-fields
+            '(("keywords" "Keywords to describe the entry" "")
+              ("file" "Link to document file" ":"))
+            bibtex-align-at-equal-sign t)
+      (setq bibtex-dialect 'biblatex))
     #:elisp-packages (list emacs-org-fragtog))))
