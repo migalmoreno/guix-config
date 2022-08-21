@@ -1,5 +1,4 @@
 (define-module (quasar home services fonts)
-  ;; #:use-module (baba home services fonts)
   #:use-module (gnu home-services base)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages fonts)
