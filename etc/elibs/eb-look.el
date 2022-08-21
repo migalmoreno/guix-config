@@ -182,8 +182,8 @@ currently-running applications."
                    (not (find-font (font-spec :name "all-the-icons"))))
           (all-the-icons-install-fonts t))
         (modus-themes-load-themes)
-        (eb-look-set-automatic-theme)
         (add-hook 'modus-themes-after-load-theme-hook #'eb-look-change-theme)
+        (eb-look-set-automatic-theme)
         (setq eb-look-light-theme-timer (run-at-time eb-look-light-theme-threshold
                                                      (* 60 60 24) #'modus-themes-load-operandi))
         (setq eb-look-dark-theme-timer (run-at-time eb-look-dark-theme-threshold
