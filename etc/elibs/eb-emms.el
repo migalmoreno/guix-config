@@ -70,6 +70,18 @@ Optionally, provide a LENGTH for the mode line and whether to PLAY the track."
     (emms-start)))
 
 ;;;###autoload
+(defun eb-emms-toggle-random-repeat ()
+  "Toggle both the random and repeat state for the current EMMS playlist."
+  (interactive)
+  (emms-toggle-random-playlist)
+  (if (and emms-repeat-track emms-random-playlist)
+      (progn
+        (setq emms-repeat-track nil)
+        (message "Will play the tracks randomly and repeat the current track"))
+    (setq emms-repeat-track t)
+    (message "Will play the tracks sequentially and repeat the current track")))
+
+;;;###autoload
 (defun eb-emms-seek-to-beginning ()
   "Seek to beginning of current EMMS track."
   (interactive)

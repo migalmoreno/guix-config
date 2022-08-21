@@ -32,6 +32,7 @@
        (define-key map "eS" 'emms-seek-to)
        (define-key map (kbd "e SPC") 'emms-pause)
        (define-key map "er" 'emms-toggle-repeat-track)
+       (define-key map "eR" 'eb-emms-toggle-random-repeat)
        (define-key map "el" 'eb-emms-library-load)
        (define-key map "en" 'eb-emms-next)
        (define-key map "ep" 'eb-emms-previous)
