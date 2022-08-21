@@ -156,14 +156,16 @@ to Org mode buffers."
   "Lists all ROAM_REFS in current buffer and lets you open them."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (let ((ref (consult--read
-                (mapcar
-                 (lambda (x)
-                   (org-unbracket-string "[[" "]]" x))
-                 (split-string (car (org-property-values "ROAM_REFS")) " "))
-                :prompt "Refs: "
-                :category 'org-roam-ref)))
-      ref)))
+    (if-let* ((refs (org-property-values "ROAM_REFS"))
+              (formatted-refs (consult--read
+                               (mapcar
+                                (lambda (x)
+                                  (org-unbracket-string "[[" "]]" x))
+                                (split-string (car (org-property-values "ROAM_REFS")) " "))
+                               :prompt "Refs: "
+                               :category 'org-roam-ref)))
+        formatted-refs)
+    (error "No roam refs in this node")))
 
 ;;;###autoload
 (defun eb-org-roam-node-insert-immediate (arg &rest args)
