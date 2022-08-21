@@ -136,7 +136,9 @@
                                   "nntp+gwene:gwene.org.lisp.planet"
                                   "nntp+gwene:gwene.engineer.atlas.nyxt")
                                  ("technology"
-                                  "nntp+gwene:gwene.org.fsf.news")
+                                  "nntp+gwene:gwene.org.fsf.news"
+                                  "nntp+gwene:gwene.rs.lobste"
+                                  "nntp+gwene:gwene.org.hnrss.newest.points")
                                  ("emacs"
                                   "nntp+gwene:gmane.emacs.devel"
                                   "nntp+gwene:gmane.emacs.erc.general")
