@@ -142,7 +142,7 @@
      (define-configuration tailor:tailor-mode
        ((tailor:auto-p :time)
         (tailor:light-theme-threshold (* 6 60 60))
-        (tailor:dark-theme-threshold (* 21.5 60 60))
+        (tailor:dark-theme-threshold (* 20.5 60 60))
         (tailor:main '("modus-operandi" . "modus-vivendi"))
         (tailor:themes
          (list
@@ -424,7 +424,8 @@
               (type 'application)
               (config
                `((exec . ,(format #f "guix shell -D -f ~a -- ~a" nyxt-file
-                                  (string-append ((compose dirname dirname) nyxt-file) "/nyxt")))))))
+                                  (string-append ((compose dirname dirname) nyxt-file) "/nyxt")))
+                 (comment . "Be Productive")))))
             '())))))
    (simple-service
     'home-nyxt-envs
@@ -553,8 +554,12 @@
                               "--show-avatar-button=never")))
     (cons*
      (elisp-configuration-service
-      '((require 'yaml-mode)
-        (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode)))
+      `((require 'yaml-mode)
+        (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode))
+        ,#~""
+        (with-eval-after-load 'css-mode
+          (custom-set-variables
+           '(css-indent-offset 2))))
       #:elisp-packages (list emacs-json-mode
                              emacs-yaml-mode))
      (simple-service
@@ -603,7 +608,7 @@
                              emacs-nginx-mode))
      (if alt-browser-p
          (list
-          (home-generic-service 'home-browser-packages
+          (home-generic-service 'home-alt-browser-packages
                                 #:packages (list
                                             ungoogled-chromium
                                             ublock-origin/chromium))
