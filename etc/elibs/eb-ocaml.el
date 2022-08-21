@@ -12,8 +12,7 @@
                       (car (process-lines "opam" "var" "share")))))
     (when (and opam-share (file-directory-p opam-share))
       (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-      (autoload #'merlin-mode "merlin" nil t nil))
-    (add-hook 'tuareg-mode-hook #'merlin-mode)))
+      (autoload #'merlin-mode "merlin" nil t nil))))
 
 (defun eb-ocaml-set-environment ()
   "When using Opam, set its corresponding environment variables."
@@ -36,6 +35,7 @@ the necessary tooling."
         (when (fboundp #'prettify-symbols-mode)
           (prettify-symbols-mode 1))
         (eb-ocaml-load-merlin)
-        (eb-ocaml-set-environment))))
+        (eb-ocaml-set-environment)
+        (add-hook 'tuareg-mode-hook #'merlin-mode))))
 
 (provide 'eb-ocaml)
