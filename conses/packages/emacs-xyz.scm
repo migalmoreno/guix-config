@@ -33,6 +33,24 @@
 was created based on the usage of ob-C.")
       (license #f))))
 
+(define-public emacs-display-wttr
+  (package
+    (name "emacs-display-wttr")
+    (version "20220316.213")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://melpa.org/packages/display-wttr-" version ".el"))
+       (sha256 (base32 "1xzhjbg8q1dhvd81n17vgfhpszvhbmfmgk1yy7zg9faqz0a9g0pz"))))
+    (build-system emacs-build-system)
+    (home-page "https://github.com/josegpt/display-wttr")
+    (synopsis "Display wttr (weather) in the mode line")
+    (description "Display-wttr package contains a minor mode that can be toggled on/off. It
+fetches weather information based on your location or on a location set in
+@code{display-wttr-locations} from @url{https://wttr.in} and then displays it on the mode line.
+The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}.")
+    (license license:gpl3+)))
+
 (define-public emacs-fontaine
   (package
    (name "emacs-fontaine")
