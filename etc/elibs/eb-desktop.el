@@ -17,22 +17,11 @@
   :group 'eb-desktop
   :type 'integer)
 
-(defcustom eb-desktop-display-weather-interval (* 60 60)
-  "Seconds between updates of weather in the mode line."
-  :group 'eb-desktop
-  :type 'integer)
-
 (defvar eb-desktop-screencast-process nil
   "Holds the current screencast process.")
 
-(defvar eb-desktop-display-weather-string nil
-  "Current weather string for mode line.")
-
 (defvar eb-desktop-display-volume-string nil
   "Current volume level string for the mode line.")
-
-(defvar eb-desktop-display-weather-timer nil
-  "Timer object for weather generating function.")
 
 (defvar eb-desktop-current-geolocation nil
   "Current position coordinates.")
@@ -160,7 +149,7 @@
         (setq eb-desktop-display-volume-string
               (concat
                (when source
-                 (format " %s %02d%% " (eb-look--position-item
+                 (format "%s %02d%% " (eb-look--position-item
                                         (if (eb-desktop--mute-p t) "" ""))
                          (compute-volume t)))
                (format "%s %02d%% " (eb-look--position-item
@@ -278,30 +267,6 @@ DEVICE is a device name such as 'Camera' or 'Webcam'."
            (longitude (plist-get location :lng)))
       (setq eb-desktop-current-geolocation (cons longitude latitude)))))
 
-(defun eb-desktop-display-weather-update ()
-  "Fetch weather in current location using `https://wttr.in'."
-  (interactive)
-  (let ((coordinates (or eb-desktop-current-geolocation
-                         (eb-desktop--get-geolocation))))
-    (url-retrieve
-     (format "https://v2d.wttr.in/~%s,%s?format=%%c%%t\n"
-             (cdr coordinates) (car coordinates))
-     (lambda (_status)
-       (buffer-string)
-       (goto-char (point-min))
-       (re-search-forward (rx (: bol "\n")) nil t)
-       (delete-region (point) (point-min))
-       (let ((weather (string-join (mapcar (lambda (s)
-                                             (string-trim s (rx (or "+" "-"))))
-                                           (split-string
-                                            (decode-coding-string (buffer-string) 'utf-8)))
-                                   " ")))
-         (if (string-match-p (rx (: bol "Unknown" (+ any))) weather)
-             (setq eb-desktop-display-weather-string nil)
-           (setq eb-desktop-display-weather-string weather))
-         (force-mode-line-update t)))
-     nil t)))
-
 (defun eb-desktop--notify ()
   "Display the latest EDNC notification."
   (when (ednc-notifications)
@@ -345,20 +310,6 @@ DEVICE is a device name such as 'Camera' or 'Webcam'."
   "Update the display of EDNC notifications."
   (interactive)
   (force-mode-line-update t))
-
-;;;###autoload
-(define-minor-mode eb-desktop-display-weather-mode
-  "Show the current weather in the mode line."
-  :global t :group 'eb-desktop
-  (when eb-desktop-display-weather-timer
-    (cancel-timer eb-desktop-display-weather-timer))
-  (setq eb-desktop-display-weather-timer nil
-        eb-desktop-display-weather-string nil)
-  (when eb-desktop-display-weather-mode
-    (eb-desktop-display-weather-update)
-    (setq eb-desktop-display-weather-timer
-          (run-at-time t eb-desktop-display-weather-interval
-                       #'eb-desktop-display-weather-update))))
 
 ;;;###autoload
 (define-minor-mode eb-desktop-display-volume-mode

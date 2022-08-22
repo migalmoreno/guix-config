@@ -61,7 +61,7 @@
     (appointments menu-item ,(when (boundp 'appt-mode-string)
                                appt-mode-string)
                   nil)
-    (weather menu-item ,eb-desktop-display-weather-string nil)
+    (weather menu-item ,display-wttr-string nil)
     (volume menu-item ,eb-desktop-display-volume-string nil)
     (battery menu-item ,(when (boundp 'battery-mode-line-string)
                           battery-mode-line-string)

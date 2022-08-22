@@ -912,7 +912,12 @@
                            eb-tab-bar-format-align-right
                            eb-tab-bar-format-right))
         '(tab-bar-close-button-show nil)
-        '(tab-bar-show t))))))
+        '(tab-bar-show t)))
+     (display-wttr-mode)
+     (with-eval-after-load 'display-wttr
+       (custom-set-variables
+        '(display-wttr-format "%C %t"))))
+   #:elisp-packages (list emacs-display-wttr)))
 
 (define project-service
   (elisp-configuration-service
