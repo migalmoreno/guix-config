@@ -11,14 +11,14 @@
 (defvar-local eb-tab-bar-notifications
   (list
    '(:eval (eb-desktop--notify)))
-  "Displays desktop notifications in the tab bar.")
+  "Display desktop notifications in the tab bar.")
 
 (defvar eb-tab-bar-format-separator '(separator menu-item " " nil)
   "Separator to be used inside menu item blocks.")
 
 ;;;###autoload
 (defun eb-tab-bar-format-left ()
-  "Produces the items for the tab bar to output on its left-hand side."
+  "Produce the items for the tab bar to output on its left-hand side."
   `((menu-bar menu-item " λ " tab-bar-menu-bar :help "Menu")
     (mpv-string menu-item ,eb-mpv-mode-line-string nil)
     (mpv-prev menu-item ,(eb-look--position-item eb-mpv-prev-button)
@@ -32,7 +32,7 @@
 
 ;;;###autoload
 (defun eb-tab-bar-format-center ()
-  "Produces menu items to display information in the center of the tab bar."
+  "Produce menu items to display information in the center of the tab bar."
   (let ((str (concat
               (propertize " " 'display
                           `(space :align-to
@@ -54,7 +54,7 @@
 
 ;;;###autoload
 (defun eb-tab-bar-format-right ()
-  "Produces menu items corresponding to the right side of the tab bar."
+  "Produce menu items corresponding to the right side of the tab bar."
   `((org-timer menu-item ,(when (boundp 'org-timer-mode-line-string)
                             org-timer-mode-line-string)
                nil)

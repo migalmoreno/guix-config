@@ -14,8 +14,8 @@
    (buffer-list)))
 
 (defun eb-pdf-view-update-buffers ()
-  "Applies `eb-pdf-view-mode' to currently opened
-`pdf-view' mode buffers. "
+  "Apply `eb-pdf-view-mode' to currently opened
+`pdf-view' mode buffers."
   (cl-loop for buffer in (eb-pdf-view--list-buffers)
            do (with-current-buffer buffer
                 (eb-pdf-view-mode 1))))
@@ -31,7 +31,7 @@
 
 ;;;###autoload
 (define-minor-mode eb-pdf-view-mode
-  "Custom `pdf-view' mode that applies settings based on the current theme."
+  "Apply `pdf-view' settings based on the current theme."
   :global t :group 'eb-pdf-view
   (if eb-pdf-view-mode
       (if (eb-look--theme-dark-p)

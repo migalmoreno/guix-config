@@ -24,9 +24,8 @@
 ;;;###autoload
 (define-minor-mode eb-ocaml-mode
   "Set up convenient tweaks for `tuareg-mode' and `merlin-mode'. Namely,
-it prevents a leading star from appearing on each comment line
-in a multi-line OCaml comment, enables `prettify-symbols-mode' and sets up
-the necessary tooling."
+prevent a leading star from appearing on each comment line in a multi-line
+OCaml comment, enable `prettify-symbols-mode' and set up the necessary tooling."
   :global t :group 'eb-ocaml
   (if eb-ocaml-mode
       (progn

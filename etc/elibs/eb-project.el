@@ -11,13 +11,13 @@
 
 ;;;###autoload
 (defun eb-project-custom-root (dir)
-  "Adds a custom project root function."
+  "Add a custom project root function."
   (let ((root (locate-dominating-file dir ".project.el")))
     (and root (cons 'explicit root))))
 
 ;;;###autoload
 (defun eb-project-add-commands (commands)
-  "Binds COMMANDS in `project-prefix-map' and adds new entries
+  "Bind COMMANDS in `project-prefix-map' and adds new entries
 to `project-switch-commands'."
   (cl-loop for (key doc action) in commands
            do (progn
@@ -41,7 +41,7 @@ to `project-switch-commands'."
 
 ;;;###autoload
 (defun eb-project-compile (&optional comint)
-  "Compiles the current project and if COMINT, the buffer will be
+  "Compile the current project and if COMINT, the buffer will be
 in Comint mode."
   (interactive "P")
   (let ((default-directory (project-root (project-current t)))

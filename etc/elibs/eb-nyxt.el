@@ -12,7 +12,7 @@
   :group 'eb-nyxt)
 
 (defcustom eb-nyxt-development-p t
-  "Indicates whether `nyxt' is to be used in its development version."
+  "Indicate whether `nyxt' is to be used in its development version."
   :type 'boolean
   :type 'eb-nyxt)
 
@@ -31,17 +31,17 @@
 `eb-nyxt-development-p' is non-`nil'.")
 
 (defvar eb-nyxt-process nil
-  "Holds the current Nyxt process.")
+  "Hold the current Nyxt process.")
 
 ;;;###autoload
 (defun eb-nyxt-connect-to-slynk ()
-  "Connects to the Slynk server to interact with the Nyxt browser."
+  "Connect to the Slynk server to interact with the Nyxt browser."
   (interactive)
   (sly-connect "localhost" eb-nyxt-port))
 
 ;;;###autoload
 (defun eb-nyxt--slynk-connected-p ()
-  "Indicates whether there's currently a connection to `eb-nyxt-port'."
+  "Indicate whether there's currently a connection to `eb-nyxt-port'."
   (cl-find-if (lambda (p)
                 (= (sly-connection-port p) eb-nyxt-port))
               sly-net-processes))
@@ -61,7 +61,7 @@ process if needed."
       (sly-interactive-eval string))))
 
 (defun eb-nyxt--system-process-p ()
-  "Returns non-`nil' if the Nyxt system process is currently running."
+  "Return non-`nil' if the Nyxt system process is currently running."
   (cl-some (lambda (pid)
              (string-match (rx (: (* any) "nyxt" (* any)))
                            (assoc-default 'comm (process-attributes pid))))
@@ -69,7 +69,7 @@ process if needed."
 
 ;;;###autoload
 (cl-defun eb-nyxt-exwm-focus-window (&key (focus nil))
-  "Handles Nyxt's EXWM window, focusing on Nyxt's Emacs buffer if FOCUS,
+  "Handle Nyxt's EXWM window, focusing on Nyxt's Emacs buffer if FOCUS,
 and if exwm is enabled, it switches to its corresponding workspace."
   (interactive
    (when current-prefix-arg
@@ -94,8 +94,8 @@ and if exwm is enabled, it switches to its corresponding workspace."
         (switch-to-buffer nyxt-buffer)))))
 
 (cl-defun eb-nyxt-run-with-nyxt (sexps &key (focus nil) (autostart nil))
-  "Evaluates SEXPS in the context of the current Nyxt connection and if FOCUS,
-changes focus to the Nyxt exwm workspace. If AUTOSTART is non-`nil' and a Nyxt system
+  "Evaluate SEXPS in the context of the current Nyxt connection and if FOCUS,
+change focus to the Nyxt exwm workspace. If AUTOSTART is non-`nil' and a Nyxt system
 process is not found, it will automatically create one and connect Slynk to it."
   (let* ((sly-log-events nil)
          (sly-default-connection (or (eb-nyxt--slynk-connected-p)
@@ -134,7 +134,7 @@ process is not found, it will automatically create one and connect Slynk to it."
  :store #'eb-nyxt-store-link)
 
 (defun eb-nyxt-store-link ()
-  "Stores the current page link via Org mode."
+  "Store the current page link via Org mode."
   (when (and (or eb-nyxt-process
                  (eb-nyxt--system-process-p))
              (when (require 'exwm nil t)
@@ -145,7 +145,7 @@ process is not found, it will automatically create one and connect Slynk to it."
      :description (eb-nyxt-sly-eval '(nyxt:title (nyxt:current-buffer))))))
 
 (cl-defun eb-nyxt-capture (template &key (roam-p nil))
-  "Stores and captures the current Nyxt page link in the corresponding
+  "Store and capture the current Nyxt page link in the corresponding
  Org capture TEMPLATE, or if ROAM-P, in the corresponding Org Roam capture
 template."
   (interactive)
@@ -161,14 +161,14 @@ template."
 
 ;;;###autoload
 (defun eb-nyxt-search (query)
-  "Searches for QUERY in Nyxt."
+  "Search for QUERY in Nyxt."
   (interactive "sSearch for: ")
   (eb-nyxt-run-with-nyxt
    `(simple-search ,query)
    :focus t :autostart t))
 
 (defun eb-nyxt-change-theme (theme)
-  "Switches current browser THEME in Nyxt."
+  "Switch current browser THEME in Nyxt."
   (interactive
    (list (completing-read "Theme: " custom-known-themes)))
   (eb-nyxt-run-with-nyxt
@@ -176,32 +176,32 @@ template."
 
 ;;;###autoload
 (defun eb-nyxt-copy-url ()
-  "Kills current page URL in Nyxt."
+  "Kill current page URL in Nyxt."
   (interactive)
   (eb-nyxt-run-with-nyxt '(copy-url)))
 
 ;;;###autoload
 (defun eb-nyxt-delete-current-buffer ()
-  "Deletes the currently-selected buffer in Nyxt."
+  "Delete the currently-selected buffer in Nyxt."
   (interactive)
   (eb-nyxt-run-with-nyxt '(delete-current-buffer)))
 
 ;;;###autoload
 (defun eb-nyxt-scroll-other-window ()
-  "Scrolls the Nyxt window."
+  "Scroll the Nyxt window."
   (interactive)
   (eb-nyxt-run-with-nyxt
    '(nyxt/document-mode::scroll-down)))
 
 ;;;###autoload
 (defun eb-nyxt-scroll-other-window-down ()
-  "Scrolls the Nyxt window upward."
+  "Scroll the Nyxt window upward."
   (interactive)
   (eb-nyxt-run-with-nyxt
    '(nyxt/document-mode::scroll-up)))
 
 (defun eb-nyxt-set-transient-map ()
-  "Sets a transient map for transient `eb-nyxt' commands."
+  "Set a transient map for transient `eb-nyxt' commands."
   (interactive)
   (set-transient-map
    (let ((map (make-sparse-keymap)))

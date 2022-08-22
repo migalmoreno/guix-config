@@ -43,25 +43,25 @@ read remote directory/file depending on READ."
 
 ;;;###autoload
 (defun eb-tramp-shell (&optional arg)
-  "Opens a shell buffer inside a TRAMP host."
+  "Open a shell buffer inside a TRAMP host."
   (interactive "P")
   (eb-tramp-run-with-tramp nil #'shell arg))
 
 ;;;###autoload
 (defun eb-tramp-eshell (&optional arg)
-  "Opens an eshell buffer inside a TRAMP host."
+  "Open an eshell buffer inside a TRAMP host."
   (interactive "P")
   (eb-tramp-run-with-tramp nil #'eshell arg))
 
 ;;;###autoload
 (defun eb-tramp-dired ()
-  "Opens a Dired buffer inside a TRAMP host."
+  "Open a Dired buffer inside a TRAMP host."
   (interactive)
   (eb-tramp-run-with-tramp 'dir #'dired))
 
 ;;;###autoload
 (defun eb-tramp-find-file ()
-  "Opens a file inside a TRAMP host."
+  "Open a file inside a TRAMP host."
   (interactive)
   (eb-tramp-run-with-tramp 'file #'find-file))
 

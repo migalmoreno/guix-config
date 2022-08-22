@@ -7,14 +7,14 @@
 
 ;;;###autoload
 (defun eb-lisp-sly-autoconnect ()
-  "Starts a SLY REPL unless an active connection is already present."
+  "Start a SLY REPL unless an active connection is already present."
   (unless (sly-connected-p)
     (save-excursion
       (sly))))
 
 ;;;###autoload
 (defun eb-lisp-sly-custom-prompt (_package nickname error-level next-entry-idx _condition)
-  "Constructs a custom SLY prompt."
+  "Construct a custom SLY prompt."
   (let ((dir (propertize (abbreviate-file-name default-directory) 'font-lock-face 'diff-mode))
         (nick (propertize nickname 'font-lock-face 'sly-mode-line))
         (idx (propertize (number-to-string next-entry-idx) 'font-lock-face 'diff-mode))

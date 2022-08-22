@@ -3,6 +3,7 @@
 (require 'eb-desktop)
 (require 'exwm)
 (require 'consult)
+(require 'fontaine)
 
 (defgroup eb-exwm nil
   "EXWM customizations."
@@ -15,7 +16,7 @@
   "The name of the external display RandR output.")
 
 (defun eb-exwm--list-all-buffers ()
-  "Lists all currently opened EXWM buffers."
+  "List all currently opened EXWM buffers."
   (cl-remove-if-not
    (lambda (buffer)
      (eq 'exwm-mode (buffer-local-value 'major-mode buffer)))
@@ -23,7 +24,7 @@
 
 ;;;###autoload
 (defun eb-exwm-shorten-buffer-name ()
-  "Shortens EXWM buffer names to be more discernible."
+  "Shorten EXWM buffer names to be more discernible."
   (interactive)
   (exwm-workspace-rename-buffer
    (concat exwm-class-name ": "
@@ -32,12 +33,12 @@
              (concat (substring exwm-title 0 29) "...")))))
 
 (defun eb-exwm--disable-tab-bar (frame)
-  "Disables the tab bar mode on new Emacs frames."
+  "Disable the tab bar mode on new Emacs frames."
   (set-frame-parameter frame 'tab-bar-lines 0))
 
 ;;;###autoload
 (defun eb-exwm-configure-window-by-class ()
-  "Assigns custom behavior to given EXWM windows."
+  "Assign custom behavior to given EXWM windows."
   (interactive)
   (pcase exwm-class-name
     ("Nyxt"
@@ -46,13 +47,13 @@
      (exwm-layout-hide-mode-line))))
 
 (defun eb-exwm--run-in-background (command)
-  "Runs COMMAND as a background process."
+  "Run COMMAND as a background process."
   (let ((command-parts (split-string command "[ ]+")))
     (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
 
 ;;;###autoload
 (defun eb-exwm-set-workspaces ()
-  "Sets up EXWM workspaces."
+  "Set up EXWM workspaces."
   (interactive)
   (cl-loop for i from 0 upto exwm-workspace-number
            do (exwm-workspace-switch-create i)
@@ -60,7 +61,7 @@
 
 ;;;###autoload
 (defun eb-exwm--docked-p ()
-  "Returns non-`nil' if the current setup is docked to an external display."
+  "Return non-`nil' if the current setup is docked to an external display."
   (let ((xrandr-output-regexp (rx (: "\n" bol (group (+ any)) " connected"))))
     (with-temp-buffer
       (call-process (executable-find "xrandr") nil t nil)
@@ -73,16 +74,16 @@
         (setq eb-exwm-docked-output (match-string 1))))))
 
 ;;;###autoload
-(defun eb-exwm-apply-initial-settings ()
-  "Applies the corresponding display settings after EXWM is enabled."
+(defun eb-exwm-apply-initial-font-settings ()
+  "Apply the corresponding display settings after EXWM is enabled."
   (interactive)
   (if (eb-exwm--docked-p)
-      (setq eb-look-default-font-size eb-look-docked-font-size)
-    (setq eb-look-default-font-size eb-look-headless-font-size)))
+      (fontaine-set-preset 'docked)
+    (fontaine-set-preset 'headless)))
 
 ;;;###autoload
 (defun eb-exwm-update-output (&optional change-res-p)
-  "Updates RandR output configuration. If CHANGE-RES-P, it allows to change
+  "Update RandR output configuration. If CHANGE-RES-P, it allows to change
 the resolution of the primary output."
   (interactive "P")
   (when change-res-p
@@ -111,7 +112,7 @@ the resolution of the primary output."
       (setq exwm-randr-workspace-monitor-plist (list 0 eb-exwm-docked-output)))))
 
 (defun eb-exwm--invoke-xrandr (&rest args)
-  "Calls `xrandr' with the supplied ARGS."
+  "Call `xrandr' with the supplied ARGS."
   (let ((process (apply #'start-process "xrandr" nil (executable-find "xrandr") args)))
     (set-process-sentinel
      process
@@ -120,7 +121,7 @@ the resolution of the primary output."
          (add-hook 'exwm-randr-screen-change-hook #'eb-exwm-update-output))))))
 
 (defun eb-exwm-get-resolution ()
-  "Prompts the user for a list of available resolutions in the current
+  "Prompt the user for a list of available resolutions in the current
  primary output and returns it."
   (interactive)
   (with-temp-buffer

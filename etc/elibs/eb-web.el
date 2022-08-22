@@ -16,7 +16,7 @@ a media service and PRIVATE-MAPPING is a cons pair of REGEX . PRIVATE-HOST to
 
 (cl-defun eb-web--transform-host (url &key (original-p t))
   "Transform URL to its currently set proxy in `eb-web-privacy-alts'.
-If ORIGINAL-P is nil, it indicates that URL is a proxy URL and it tries to find the
+If ORIGINAL-P is nil, URL is a proxy URL, so try to find the
 original service url."
   (string-match (rx (: (+ any) "//" (group (+ (not "/"))))) url)
   (if-let* ((service-url (match-string 1 url))

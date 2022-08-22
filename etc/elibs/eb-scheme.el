@@ -9,7 +9,7 @@
 
 ;;;###autoload
 (defun eb-scheme-geiser-autoconnect ()
-  "Starts a Geiser REPL unless an active connection is already present."
+  "Start a Geiser REPL unless an active connection is already present."
   (unless (geiser-repl--connection*)
     (save-window-excursion
       (run-guile))))

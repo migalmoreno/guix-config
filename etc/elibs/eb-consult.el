@@ -98,7 +98,7 @@ in `buffer-list'."
 
 ;;;###autoload
 (defun eb-consult-initial-narrow ()
-  "Sets buffer initial narrowing for buffers under a specific mode."
+  "Set buffer initial narrowing for buffers under a specific mode."
   (when-let* ((buffer-mode-assoc eb-consult-initial-narrow-alist)
               (key (and (eq this-command #'consult-buffer)
                         (or (alist-get (buffer-local-value

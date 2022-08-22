@@ -51,7 +51,7 @@
 
 ;;;###autoload
 (defun eb-mpv-download ()
-  "Downloads current mpv playback via `ytdl'."
+  "Download current mpv playback via `ytdl'."
   (interactive)
   (if-let ((download-type (completing-read "Download type: " '("Music" "Video")))
            (track (mpv-get-property "path"))
@@ -87,7 +87,7 @@
        :description title))))
 
 (defun eb-mpv-capture ()
-  "Stores and captures the current mpv playback link with the corresponding
+  "Store and capture the current mpv playback link with the corresponding
 Org capture template."
   (interactive)
   (with-current-buffer (car (cl-remove-if-not (lambda (buffer)
@@ -99,7 +99,7 @@ Org capture template."
 
 ;;;###autoload
 (cl-defun eb-mpv-start (url &key (force-private-p nil) (audio-only nil) (repeat nil))
-  "Prompts for video quality before calling `mpv-start' on URL.
+  "Prompt for video quality before calling `mpv-start' on URL.
 If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
  as defined in `eb-web-privacy-alts'. You can additionally specify whether
  to play the file as AUDIO-ONLY and if to REPEAT it by default."
@@ -143,13 +143,13 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
 
 ;;;###autoload
 (cl-defun eb-mpv-start-other-window (url &rest args &key &allow-other-keys)
-  "Launches mpv in another window."
+  "Launch mpv in another window."
   (interactive "sURI: ")
   (apply #'eb-mpv-start url args)
   (switch-to-buffer-other-window (current-buffer)))
 
 (defun eb-mpv-playing-time-start ()
-  "Sets up the display of mpv playback time."
+  "Set up the display of mpv playback time."
   (setq eb-mpv-total-duration nil)
   (setq eb-mpv-playing-time 0)
   (unless eb-mpv-playing-time-display-timer
@@ -165,7 +165,7 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
             (run-at-time t 1 #'eb-mpv-playing-time-display)))))
 
 (defun eb-mpv-playing-time-stop ()
-  "Removes the playing time of mpv playback."
+  "Remove the playing time of mpv playback."
   (if (or (not eb-mpv-paused-p)
           eb-mpv-stopped-p)
       (progn
@@ -177,13 +177,13 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
   (setq eb-mpv-total-duration nil))
 
 (defun eb-mpv-playing-time-seek ()
-  "Seeks forward or backward in the displayed playing time."
+  "Seek forward or backward in the displayed playing time."
   (setq eb-mpv-playing-time (mpv-get-property "playback-time"))
   (when (< eb-mpv-playing-time 0)
     (setq eb-mpv-playing-time 0)))
 
 (defun eb-mpv-playing-time-display ()
-  "Displays the current MPV playing time."
+  "Display the current MPV playing time."
   (unless (and eb-mpv-paused-p
                eb-mpv-playlist-p)
     (setq eb-mpv-playing-time (round (1+ eb-mpv-playing-time))))
@@ -206,7 +206,7 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
     (force-mode-line-update t)))
 
 (defun eb-mpv-mode-line-clear ()
-  "Clears the mode line after the mpv process exits."
+  "Clear the mode line after the mpv process exits."
   (interactive)
   (setq eb-mpv-mode-line-string nil)
   (setq eb-mpv-toggle-button nil)
@@ -215,7 +215,7 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
   (setq eb-mpv-playing-time-string nil))
 
 (defun eb-mpv-set-playlist ()
-  "Sets appropriate information if current MPV process involves a playlist."
+  "Set appropriate information if current MPV process involves a playlist."
   (let ((playlist (ignore-errors (mpv--with-json
                                   (mpv-get-property "playlist")))))
     (if (and (not (equal playlist 'false))
@@ -230,7 +230,7 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
       (setq eb-mpv-next-button nil))))
 
 (defun eb-mpv-set-paused ()
-  "Sets appropriate information if the current MPV process is stopped."
+  "Set appropriate information if the current MPV process is stopped."
   (mpv-get-property "pause")
   (prog1
       (if (equal (mpv--with-json (mpv-get-property "pause"))
@@ -261,7 +261,7 @@ Block while waiting for the response."
 (advice-add #'mpv-run-command :override #'eb-mpv-run-command)
 
 (defun eb-mpv-compute-title ()
-  "Computes and sets the current MPV process media title."
+  "Compute and set the current MPV process media title."
   (when-let* ((title (mpv--with-json (mpv-get-property "media-title")))
               (embellished-title
                (and (not (equal title 'false))
@@ -278,7 +278,7 @@ Block while waiting for the response."
   (force-mode-line-update t))
 
 (defun eb-mpv-event-handler (result)
-  "Handles the MPV events from RESULT."
+  "Handle the MPV events from RESULT."
   (pcase (alist-get 'event result)
     ((or "file-loaded" "start-file")
      (eb-mpv-change-theme)
@@ -313,11 +313,11 @@ Block while waiting for the response."
      (eb-mpv-mode-line-clear))))
 
 (defun eb-mpv-update-playlist (&rest _args)
-  "Invokes `eb-mpv-set-playlist' after calling `mpv-enqueue'."
+  "Invoke `eb-mpv-set-playlist' after calling `mpv-enqueue'."
   (eb-mpv-set-playlist))
 
 (defun eb-mpv-display-mode-line (&optional result)
-  "Updates and displays the necessary MPV metadata in the modeline."
+  "Update and display the necessary MPV metadata in the modeline."
   (interactive)
   (if result
       (eb-mpv-event-handler result)
@@ -332,7 +332,7 @@ Block while waiting for the response."
   (mpv-seek 0))
 
 (defun eb-mpv-kill ()
-  "Kills the mpv process unless this is not currently `emms-player-mpv-proc'."
+  "Kill the mpv process unless this is not currently `emms-player-mpv-proc'."
   (interactive)
   (when (equal mpv--process
                emms-player-mpv-proc)
@@ -408,13 +408,13 @@ Block while waiting for the response."
                     (process-list)))
 
 (defun eb-mpv-playlist-shuffle ()
-  "Toggles the shuffle state for the current playlist."
+  "Toggle the shuffle state for the current playlist."
   (interactive)
   (mpv-run-command "playlist-shuffle"))
 
 ;;;###autoload
 (defun eb-mpv-change-theme ()
-  "Sets theme in current mpv process according to current system theme."
+  "Set theme in current mpv process according to current system theme."
   (interactive)
   (if (string-match (getenv "GTK_THEME") ":dark")
       (progn
@@ -425,8 +425,8 @@ Block while waiting for the response."
 
 ;;;###autoload
 (defun eb-mpv-kill-url (original-p)
-  "Copies the URL in the current mpv stream to the system clibpoard. If
-ORIGINAL-P, it ensures the original service URL is killed rather than a
+  "Copy the URL in the current mpv stream to the system clibpoard. If
+ORIGINAL-P, ensure the original service URL is killed rather than a
 proxy url as per `eb-web-privacy-alts'."
   (interactive
    (list
@@ -440,7 +440,7 @@ proxy url as per `eb-web-privacy-alts'."
     (message (format "Copied \"%s\" to the system clipboard" title))))
 
 (defun eb-mpv-set-transient-map ()
-  "Sets a transient map for transient MPV commands."
+  "Set a transient map for transient MPV commands."
   (interactive)
   (set-transient-map
    (let ((map (make-sparse-keymap)))
@@ -452,7 +452,7 @@ proxy url as per `eb-web-privacy-alts'."
 
 ;;;###autoload
 (define-minor-mode eb-mpv-playing-time-mode
-  "Displays the current MPV playing time."
+  "Display the current MPV playing time."
   :global t :group 'eb-mpv
   (if eb-mpv-playing-time-mode
       (progn
@@ -468,7 +468,7 @@ proxy url as per `eb-web-privacy-alts'."
 
 ;;;###autoload
 (define-minor-mode eb-mpv-mode-line-mode
-  "Displays the current mpv playback information in the mode line."
+  "Display the current mpv playback information in the mode line."
   :global t :group 'eb-mpv
   (setq eb-mpv-mode-line-string nil)
   (if eb-mpv-mode-line-mode

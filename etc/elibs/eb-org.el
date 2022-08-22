@@ -1,11 +1,11 @@
 ;; -*- lexical-binding: t; -*-
+(require 'eb-look)
 (require 'cl-lib)
 (require 'org)
 (require 'org-roam)
 (require 'org-indent)
 (require 'org-mime)
 (require 'consult)
-(require 'eb-look)
 
 (defgroup eb-org nil
   "Personal Org mode customizations."
@@ -16,13 +16,13 @@
 
 ;;;###autoload
 (defun eb-org-agenda-to-appt ()
-  "Resets the `appt-mode' list and initializes it from Agenda entries."
+  "Reset the `appt-mode' list and initializes it from Agenda entries."
   (interactive)
   (setq appt-time-msg-list nil)
   (org-agenda-to-appt))
 
 (defun eb-org-agenda-appt-reset ()
-  "Initializes the `appt-mode' list for today and resets the timer to
+  "Initialize the `appt-mode' list for today and reset the timer to
 run again for tomorrow."
   (interactive)
   (eb-org-agenda-to-appt)
@@ -32,21 +32,21 @@ run again for tomorrow."
 
 ;;;###autoload
 (defun eb-org-mime-darken-codeblocks ()
-  "Applies a dark background to email body codeblocks."
+  "Apply a dark background to email body codeblocks."
   (org-mime-change-element-style
    "pre"
    "color: #E6E1Dc; background-color: #232323; padding: 0.5em;"))
 
 ;;;###autoload
 (defun eb-org-mime-indent-quotes ()
-  "Adds padding to block quotes in email body."
+  "Add padding to block quotes in email body."
   (org-mime-change-element-style
    "blockquote"
    "border-left: 2px solid gray; padding-left: 4px;"))
 
 ;;;###autoload
 (defun eb-org-timer-reset ()
-  "Sets `org-timer-mode-line-string' to nil."
+  "Set `org-timer-mode-line-string' to nil."
   (interactive)
   (setq org-timer-mode-line-string nil))
 
@@ -81,7 +81,7 @@ run again for tomorrow."
   (set-face-attribute 'org-ellipsis nil
                       :inherit '(font-lock-comment-face)
                       :weight 'normal
-                      :height eb-look-default-font-size)
+                      :height (or (eb-look--get-current-preset :default-height) 1.0))
   (set-face-attribute 'org-link nil :underline t)
   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-headline-done nil :strike-through t)
@@ -100,14 +100,14 @@ run again for tomorrow."
 
 ;;;###autoload
 (defun eb-org-update-buffers-faces ()
-  "Goes through the current buffer list and applies the appropriate faces
+  "Go through the current buffer list and apply the appropriate faces
 to Org mode buffers."
   (cl-loop for buffer in (org-buffer-list)
            do (with-current-buffer buffer
                 (eb-org-tweak-faces))))
 
 (defun eb-org-set-poly-block-faces ()
-  "Correctly sets a fixed pitch face for polymode source blocks."
+  "Correctly set a fixed pitch face for polymode source blocks."
   (interactive)
   (let* ((fix-pitch (face-attribute 'fixed-pitch :family))
          (fix-font (face-attribute 'fixed-pitch :font))
@@ -125,7 +125,7 @@ to Org mode buffers."
   (org-agenda nil "d"))
 
 (cl-defun eb-org-do-promote (&optional (levels 1))
-  "Allows promoting the current heading a number of LEVELS high up the tree."
+  "Allow promoting the current heading a number of LEVELS high up the tree."
   (interactive "p")
   (save-excursion
     (if (org-region-active-p)
@@ -140,7 +140,7 @@ to Org mode buffers."
 
 ;;;###autoload
 (defun eb-org-roam-switch-to-buffer ()
-  "Switches to current Org-roam buffer."
+  "Switch to the current Org-roam buffer."
   (interactive)
   (select-window (get-buffer-window org-roam-buffer))
   (org-roam-buffer-refresh))
@@ -153,7 +153,7 @@ to Org mode buffers."
 
 ;;;###autoload
 (defun eb-org-roam-open-ref ()
-  "Lists all ROAM_REFS in current buffer and lets you open them."
+  "List all ROAM_REFS in the current buffer and allow you to open them."
   (interactive)
   (when (derived-mode-p 'org-mode)
     (if-let* ((refs (org-property-values "ROAM_REFS"))
@@ -169,7 +169,7 @@ to Org mode buffers."
 
 ;;;###autoload
 (defun eb-org-roam-node-insert-immediate (arg &rest args)
-  "Immediately inserts new Org Roam node and then inserts its link in the buffer."
+  "Immediately insert new Org Roam node and insert its link in the buffer."
   (interactive "P")
   (let ((args (cons arg args))
         (org-roam-capture-templates (list
@@ -180,7 +180,7 @@ to Org mode buffers."
 
 ;;;###autoload
 (define-minor-mode eb-org-agenda-appt-mode
-  "Mode that sets up `appt-mode' integration for Agenda items."
+  "Set up `appt-mode' integration for Agenda items."
   :global t :group 'eb-org
   (if eb-org-agenda-appt-mode
       (progn
@@ -193,7 +193,7 @@ to Org mode buffers."
 
 ;;;###autoload
 (define-minor-mode eb-org-minimal-mode
-  "Provides a minimal interface to Org mode."
+  "Provide a minimal interface to Org mode."
   :global t :group 'eb-org
   (if eb-org-minimal-mode
       (progn

@@ -42,7 +42,7 @@
 
 ;;;###autoload
 (define-minor-mode eb-shell-mode-setup
-  "Sets up environment on `eshell-mode' invocation."
+  "Set up environment on `eshell-mode' invocation."
   :global t :group 'eb-shell
   (if eb-shell-mode-setup
       (progn

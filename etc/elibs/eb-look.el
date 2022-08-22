@@ -12,16 +12,6 @@
   "Visual and stylistic settings."
   :group 'eb)
 
-(defcustom eb-look-fixed-font nil
-  "The default fixed pitch font."
-  :group 'eb-look
-  :type 'string)
-
-(defcustom eb-look-variable-font nil
-  "The default variable pitch font."
-  :group 'eb-look
-  :type 'string)
-
 (defcustom eb-look-light-theme nil
   "The light theme to use."
   :group 'eb-look
@@ -31,22 +21,6 @@
   "The dark theme to use."
   :group 'eb-look
   :type 'string)
-
-(defcustom eb-look-headless-font-size 70
-  "The font size when the setup is headless."
-  :group 'eb-look
-  :type 'integer)
-
-(defcustom eb-look-docked-font-size 113
-  "The font size when the setup is docked into an external display."
-  :group 'eb-look
-  :type 'integer)
-
-(defcustom eb-look-default-font-size 70
-  "Holds the initial default font size for faces. This is not
- meant to change within the current Emacs session."
-  :group 'eb-look
-  :type 'integer)
 
 (defcustom eb-look-light-theme-threshold "06:00"
   "The time at which to apply a light theme automatically."
@@ -66,7 +40,7 @@
 
 ;;;###autoload
 (cl-defun eb-look--position-item (string &optional (factor (- 0.125)))
-  "Raises or lowers the text in STRING, mostly to fix icons' quirkiness."
+  "Raise or lower the text in STRING, mostly to fix icons' quirkiness."
   (when string
     (propertize string 'display `(raise ,factor))))
 
@@ -88,7 +62,7 @@
 
 ;;;###autoload
 (defun eb-look-emoji-insert ()
-  "Inserts an emoji character to the current buffer."
+  "Insert an emoji character to the current buffer."
   (interactive)
   (thread-first
     (completing-read "Select emoji: " eb-look-emoji-list)
@@ -96,26 +70,27 @@
     (insert)))
 
 (defun eb-look--theme-dark-p ()
-  "Outputs whether the current theme is of a light or dark variant."
+  "Output whether the current theme is of a light or dark variant."
   (string= (car custom-enabled-themes) eb-look-dark-theme))
 
-(defun eb-look-tweak-faces ()
-  "Tweaks various interface faces."
+(defun eb-look-set-theme-dependent-faces ()
+  "Set theme-dependent faces."
   (if (eb-look--theme-dark-p)
       (progn
         (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#a8a8a8" :style unspecified))
         (set-face-attribute 'vertical-border nil :foreground "#000000"))
-    (progn
-      (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#505050" :style unspecified))
-      (set-face-attribute 'vertical-border nil :foreground "#ffffff")))
-  (progn
-    (set-face-attribute 'default nil :family eb-look-fixed-font :height eb-look-default-font-size)
-    (set-face-attribute 'fixed-pitch nil :family eb-look-fixed-font :height eb-look-default-font-size)
-    (set-face-attribute 'variable-pitch nil :family eb-look-variable-font :height eb-look-default-font-size)))
+    (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#505050" :style unspecified))
+    (set-face-attribute 'vertical-border nil :foreground "#ffffff")))
+
+(defun eb-look--get-current-preset (property)
+  "Retrieve PROPERTY from Fontaine's current PRESET."
+  (plist-get
+   (alist-get fontaine--current-preset fontaine-presets)
+   property))
 
 ;;;###autoload
 (defun eb-look-change-theme ()
-  "Changes the theme on the fly and applies corresponding changes to
+  "Change the theme on the fly and applies corresponding changes to
 currently-running applications."
   (interactive)
   (if (eb-look--theme-dark-p)
@@ -124,13 +99,13 @@ currently-running applications."
         (eb-nyxt-change-theme eb-look-dark-theme))
     (setenv "GTK_THEME" ":light")
     (eb-nyxt-change-theme eb-look-light-theme))
-  (eb-look-tweak-faces)
+  (eb-look-set-theme-dependent-faces)
   (eb-pdf-view-update-buffers)
   (eb-mpv-change-theme)
   (eb-org-update-buffers-faces))
 
 (defun eb-look-tweak-info-faces ()
-  "Applies some extra appearance settings to `Info-mode' and `Info+-mode'."
+  "Apply some extra appearance settings to `Info-mode' and `Info+-mode'."
   (interactive)
   (when (eb-look--theme-dark-p)
     (set-face-attribute 'info-reference-item nil :background 'unspecified :foreground "#00d3d0")
@@ -144,12 +119,12 @@ currently-running applications."
     (set-face-attribute 'info-string nil :foreground "#79a8ff")))
 
 (defun eb-look-set-variable-pitched ()
-  "Sets a variable-pitched font for the default face in a buffer."
+  "Set a variable-pitched font for the default face in a buffer."
   (face-remap-add-relative 'default :inherit 'variable-pitch))
 
 ;;;###autoload
 (defun eb-look-dashboard-open ()
-  "Jumps to a dashboard buffer, creating one if it doesn't exist."
+  "Jump to a dashboard buffer, creating one if it doesn't exist."
   (interactive)
   (when (get-buffer-create dashboard-buffer-name)
     (switch-to-buffer dashboard-buffer-name)
@@ -159,7 +134,7 @@ currently-running applications."
 
 ;;;###autoload
 (defun eb-look-set-automatic-theme ()
-  "Sets the theme automatically based on the time of the day."
+  "Set the theme automatically based on the time of the day."
   (interactive)
   (let ((current-timestamp (decode-time (current-time))))
     (if (> (+ (decoded-time-second current-timestamp)
@@ -174,7 +149,7 @@ currently-running applications."
 
 ;;;###autoload
 (define-minor-mode eb-look-automatic-theme-mode
-  "Configures the appropriate appearance settings."
+  "Configure the appropriate appearance settings."
   :global t :group 'eb-look
   (if eb-look-automatic-theme-mode
       (progn

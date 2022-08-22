@@ -5,7 +5,7 @@
 
 ;;;###autoload
 (defun eb-dired-open-externally ()
-  "Opens files in Dired through their corresponding external program."
+  "Open files in Dired through their corresponding external program."
   (interactive)
   (let ((files (dired-get-marked-files)))
     (mapc #'consult-file-externally files)))

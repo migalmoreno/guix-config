@@ -12,14 +12,14 @@
 
 ;;;###autoload
 (defun eb-guix-daemons-root ()
-  "Invokes the `daemons' command as `root' to get the list of system daemons."
+  "Invoke the `daemons' command as `root' to get the list of system daemons."
   (interactive)
   (let ((default-directory (format "/sudo::%s" (make-temp-file nil t))))
     (daemons)))
 
 ;;;###autoload
 (defun eb-guix-compile-configuration ()
-  "Compiles the project in `eb-guix-home-configuration-dir'."
+  "Compile the project in `eb-guix-home-configuration-dir'."
   (interactive)
   (let ((default-directory eb-guix-home-configuration-dir)
         (compilation-read-command nil)

@@ -38,7 +38,7 @@
   "Current position coordinates.")
 
 (defun eb-desktop-take-screenshot (&optional region)
-  "Takes a fullscreen or REGION screenshot of the current display."
+  "Take a fullscreen or REGION screenshot of the current display."
   (interactive "P")
   (when-let* ((pictures-dir (xdg-user-dir "PICTURES"))
               (file-name (replace-regexp-in-string
@@ -62,7 +62,7 @@
 
 ;; TODO: fix
 (defun eb-desktop-record-screencast (&optional region)
-  "Records a desktop screencast. If REGION, records portion of the screen."
+  "Record a desktop screencast. If REGION, records portion of the screen."
   (interactive "P")
   (if-let* ((videos-dir (xdg-user-dir "VIDEOS"))
             (file-name (format-time-string "%Y%m%e-%H%M%S.mp4"))
@@ -279,7 +279,7 @@ DEVICE is a device name such as 'Camera' or 'Webcam'."
       (setq eb-desktop-current-geolocation (cons longitude latitude)))))
 
 (defun eb-desktop-display-weather-update ()
-  "Fetches weather in current location using `https://wttr.in'."
+  "Fetch weather in current location using `https://wttr.in'."
   (interactive)
   (let ((coordinates (or eb-desktop-current-geolocation
                          (eb-desktop--get-geolocation))))
@@ -336,19 +336,19 @@ DEVICE is a device name such as 'Camera' or 'Webcam'."
 
 ;;;###autoload
 (defun eb-desktop-close-all-notifications ()
-  "Dismisses all EDNC notifications."
+  "Dismiss all EDNC notifications."
   (interactive)
   (mapc #'ednc-dismiss-notification (cdr ednc--state)))
 
 ;;;###autoload
 (defun eb-desktop-update-notifications (&rest _)
-  "Updates the display of EDNC notifications."
+  "Update the display of EDNC notifications."
   (interactive)
   (force-mode-line-update t))
 
 ;;;###autoload
 (define-minor-mode eb-desktop-display-weather-mode
-  "Mode that shows the current weather in the mode line."
+  "Show the current weather in the mode line."
   :global t :group 'eb-desktop
   (when eb-desktop-display-weather-timer
     (cancel-timer eb-desktop-display-weather-timer))
@@ -362,7 +362,7 @@ DEVICE is a device name such as 'Camera' or 'Webcam'."
 
 ;;;###autoload
 (define-minor-mode eb-desktop-display-volume-mode
-  "Mode that shows the current volume level in the mode line."
+  "Show the current volume level in the mode line."
   :global t :group 'eb-desktop
   (setq eb-desktop-display-volume-string nil)
   (when eb-desktop-display-volume-mode

@@ -37,7 +37,7 @@
 
 ;;;###autoload
 (defun eb-emms-library-load ()
-  "Loads an EMMS playlist with local music files and moves to it."
+  "Load an EMMS playlist with local music files and move to it."
   (interactive)
   (ignore-errors
     (if (not emms-playlist-buffer)
