@@ -15,7 +15,7 @@
   (let ((commit "2067ed55f4c1d33a43cb3f6948609d240a8915f5")
         (revision "0"))
     (package
-      (name "ob-go")
+      (name "emacs-ob-go")
       (version (git-version "0" revision commit))
       (source
        (origin
@@ -32,6 +32,27 @@
       (description "@code{ob-go} enables Org-Babel support for evaluating go code. It
 was created based on the usage of ob-C.")
       (license #f))))
+
+(define-public emacs-fontaine
+  (package
+   (name "emacs-fontaine")
+   (version "0.3.0")
+   (source
+    (origin
+      (method git-fetch)
+      (uri
+       (git-reference
+        (url "https://git.sr.ht/~protesilaos/fontaine")
+        (commit version)))
+      (file-name (git-file-name name version))
+      (sha256 (base32 "0b3zxnx8wnchiqk02pk2dhgacgcz3g9bri3735m8h3h7p415mvgs"))))
+   (build-system emacs-build-system)
+   (home-page "https://sr.ht/~protesilaos/fontaine")
+   (synopsis "Set Emacs font configurations using presets.")
+   (description "Fontaine lets the user specify presets of font configurations and
+set them on demand on graphical Emacs frames. The user option @code{fontaine-presets} holds
+all such presets.")
+   (license license:fdl1.3+)))
 
 (define-public emacs-with-nyxt
   (let ((commit "7e5d14bbfedebc72af5ffdc41912cbc339de59e6")
