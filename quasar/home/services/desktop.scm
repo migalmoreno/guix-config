@@ -122,7 +122,7 @@ EndSection
       ,#~""
       (add-hook 'exwm-init-hook 'eb-exwm-set-workspaces)
       (add-hook 'exwm-init-hook 'eb-look-automatic-theme-mode)
-      (add-hook 'exwm-init-hook 'eb-exwm-apply-initial-settings)
+      (add-hook 'exwm-init-hook 'eb-exwm-apply-initial-font-settings)
       (add-hook 'exwm-init-hook (lambda ()
                                   (call-process "xmodmap" nil nil nil (concat (getenv "HOME") "/.config/xmodmap/config"))
                                   (call-process "xset" nil nil nil  "-dpms" "s" "off")))
@@ -165,9 +165,9 @@ EndSection
    (service home-udiskie-service-type)
    (service home-state-service-type
             (append
-                (list
-                 (state-git (string-append (dirname %channel-root) "/guix/")
-                            "https://git.savannah.gnu.org/git/guix.git"))))
+             (list
+              (state-git (string-append (dirname %channel-root) "/guix/")
+                         "https://git.savannah.gnu.org/git/guix.git"))))
    (elisp-configuration-service
     `((define-key mode-specific-map "bl" 'bluetooth-list-devices)
       (with-eval-after-load 'bluetooth
