@@ -64,7 +64,7 @@ run again for tomorrow."
     (org-redisplay-inline-images)))
 
 ;;;###autoload
-(defun eb-org-tweak-faces ()
+(defun eb-org-set-org-faces ()
   "Set Org mode's faces for `eb-org-minimal-mode'."
   (interactive)
   (set-face-attribute 'org-block nil
@@ -88,7 +88,7 @@ run again for tomorrow."
   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face))
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
-  (cl-loop for (face . height) in '((org-level-1 . 1.2)
+  (cl-loop for (face . height) in '((org-level-1 . 1.15)
                                     (org-level-2 . 1.1)
                                     (org-level-3 . 1.1)
                                     (org-level-4 . 1.0)
@@ -104,7 +104,7 @@ run again for tomorrow."
 to Org mode buffers."
   (cl-loop for buffer in (org-buffer-list)
            do (with-current-buffer buffer
-                (eb-org-tweak-faces))))
+                (eb-org-set-org-faces))))
 
 (defun eb-org-set-poly-block-faces ()
   "Correctly set a fixed pitch face for polymode source blocks."
@@ -208,7 +208,7 @@ to Org mode buffers."
         (org-appear-mode)
         (org-make-toc-mode)
         (setq-local fill-prefix "")
-        (eb-org-tweak-faces))
+        (eb-org-set-org-faces))
     (corfu-mode 1)
     (org-indent-mode -1)
     (org-superstar-mode -1)
