@@ -93,7 +93,8 @@
            emacs-password-store
            emacs-dashboard
            emacs-hexrgb
-           emacs-daemons))
+           emacs-daemons
+           emacs-fontaine))
     (home-page "https://git.sr.ht/~conses/quasar")
     (synopsis "Various Emacs Lisp libraries.")
     (description "A set of Emacs Lisp libraries to enhance the functionality
