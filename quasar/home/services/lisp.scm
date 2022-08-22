@@ -104,7 +104,8 @@
                              '(minibuffer-inactive-mode
                                sly-mode
                                comint-mode
-                               elisp-mode)
+                               elisp-mode
+                               lisp-data-mode)
                              sp-lisp-modes))
         (dolist (command '(smartparens-mode smartparens-strict-mode))
                 (mapc (lambda (hook) (add-hook (intern (format "%s-hook" hook)) command)) sp-lisp-modes))
