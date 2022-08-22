@@ -766,11 +766,8 @@
        (custom-set-variables
         '(eb-look-light-theme "modus-operandi")
         '(eb-look-dark-theme "modus-vivendi")
-        '(eb-look-dark-theme-threshold "20:30")
-        '(eb-look-fixed-font "Iosevka")
-        '(eb-look-variable-font "IBM Plex Sans")
-        '(eb-look-headless-font-size 105)
-        '(eb-look-docked-font-size 105)))
+        '(eb-look-light-theme-threshold "07:00")
+        '(eb-look-dark-theme-threshold "20:30")))
      (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
      (set-fontset-font "fontset-default" nil (font-spec :name "Noto Color Emoji"))
      (set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)
