@@ -116,7 +116,7 @@
         (add-to-list 'embark-keymap-alist '(mpv-file . embark-mpv-file-actions)))
       ,#~""
       (advice-add 'ytdl--download-async :override 'eb-ytdl--download-async))
-    #:elisp-packages (list emacs-mpv-next))
+    #:elisp-packages (list emacs-mpv))
    (nyxt-configuration-service
     '((define-command play-video-in-current-page (&optional (buffer (current-buffer)))
         "Plays video in the currently open buffer."

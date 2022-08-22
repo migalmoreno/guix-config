@@ -150,12 +150,12 @@ and easily switch to and manipulate them.")
 (define-public emacs-mpv
   (package
     (name "emacs-mpv")
-    (version "20211228.2043")
+    (version "20220801.1917")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://melpa.org/packages/mpv-" version ".el"))
-       (sha256 (base32 "0zkacix37y9ypy1g0q62w8fhrzcs18v4sfv6r2dhbcq347v9ir9v"))))
+       (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))
     (build-system emacs-build-system)
     (home-page "https://github.com/kljohann/mpv.el")
     (synopsis "Control mpv for easy note-taking.")
