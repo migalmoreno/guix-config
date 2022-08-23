@@ -1,11 +1,11 @@
 ;; -*- lexical-binding: t; -*-
-(require 'eb-look)
 (require 'cl-lib)
 (require 'org)
 (require 'org-roam)
 (require 'org-indent)
 (require 'org-mime)
 (require 'consult)
+(require 'fontaine)
 
 (defgroup eb-org nil
   "Personal Org mode customizations."
@@ -81,7 +81,10 @@ run again for tomorrow."
   (set-face-attribute 'org-ellipsis nil
                       :inherit '(font-lock-comment-face)
                       :weight 'normal
-                      :height (or (eb-look--get-current-preset :default-height) 1.0))
+                      :height (or (plist-get
+                                   (alist-get fontaine--current-preset fontaine-presets)
+                                   :default-height)
+                                  1.0))
   (set-face-attribute 'org-link nil :underline t)
   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-headline-done nil :strike-through t)
