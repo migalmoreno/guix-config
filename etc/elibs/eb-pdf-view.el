@@ -13,6 +13,7 @@
        (derived-mode-p 'pdf-view-mode)))
    (buffer-list)))
 
+;;;###autoload
 (defun eb-pdf-view-update-buffers ()
   "Apply `eb-pdf-view-mode' to currently opened
 `pdf-view' mode buffers."
@@ -34,7 +35,7 @@
   "Apply `pdf-view' settings based on the current theme."
   :global t :group 'eb-pdf-view
   (if eb-pdf-view-mode
-      (if (eb-look--theme-dark-p)
+      (if (eq (car custom-enabled-themes) 'modus-vivendi)
           (pdf-view-themed-minor-mode 1)
         (pdf-view-themed-minor-mode -1))
     (pdf-view-themed-minor-mode -1)))
