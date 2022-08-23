@@ -110,4 +110,29 @@ in `buffer-list'."
                                              buffer-mode-assoc))))))
     (setq unread-command-events (append unread-command-events (list key 32)))))
 
+(defun eb-consult--build-emojis ()
+  "Create an emoji list by looping over the corresponding range of characters."
+  (delete
+   nil
+   (cl-loop with range = '(#x1f000 . #x1f9ff)
+            for i upto (- (cdr range) (car range))
+            collect (when-let* ((codepoint (+ (car range) i))
+                                (name (get-char-code-property codepoint 'name)))
+                      (thread-last
+                        (replace-regexp-in-string " " "-" (downcase name))
+                        (format ":%s:")
+                        (format "%s %s" (char-to-string (char-from-name name))))))))
+
+(defconst eb-consult-emoji-list (eb-consult--build-emojis)
+  "Cached list of emojis.")
+
+;;;###autoload
+(defun eb-consult-insert-emoji ()
+  "Insert an emoji character to the current buffer."
+  (interactive)
+  (thread-first
+    (completing-read "Select emoji: " eb-consult-emoji-list)
+    (substring 0 1)
+    (insert)))
+
 (provide 'eb-consult)
