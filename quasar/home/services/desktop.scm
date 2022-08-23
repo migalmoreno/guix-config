@@ -19,21 +19,8 @@
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
-  #:export (pulseaudio-service
-            exwm-service
+  #:export (exwm-service
             desktop-service))
-
-(define (pulseaudio-service)
-  (list
-   (home-generic-service 'pulseaudio-packages
-                         #:packages (list pulseaudio pamixer))
-   (elisp-configuration-service
-    `((pulseaudio-control-default-keybindings)
-      (with-eval-after-load 'pulseaudio-control
-        (custom-set-variables
-         '(pulseaudio-control-volume-step "5%")
-         '(pulseaudio-control-use-default-sink t))))
-    #:elisp-packages (list emacs-pulseaudio-control))))
 
 (define %xorg-libinput-configuration
   "Section \"InputClass\"
@@ -121,8 +108,8 @@ EndSection
        '(exwm-workspace-number 5))
       ,#~""
       (add-hook 'exwm-init-hook 'eb-exwm-set-workspaces)
-      (add-hook 'exwm-init-hook 'eb-look-automatic-theme-mode)
       (add-hook 'exwm-init-hook 'eb-exwm-apply-initial-font-settings)
+      (add-hook 'exwm-init-hook 'eb-modus-themes-set-theme-dependent-faces)
       (add-hook 'exwm-init-hook (lambda ()
                                   (call-process "xmodmap" nil nil nil (concat (getenv "HOME") "/.config/xmodmap/config"))
                                   (call-process "xset" nil nil nil  "-dpms" "s" "off")))
@@ -186,12 +173,10 @@ EndSection
         (define-key map "dl" 'eb-desktop-show-notification-log)
         (define-key map "ss" 'eb-desktop-take-screenshot))
       ,#~""
-      (add-hook 'after-init-hook 'eb-desktop-display-weather-mode)
       (eb-desktop-display-volume-mode)
       ,#~""
-      (custom-set-variables
-       '(battery-mode-line-format (concat (eb-look--position-item "")
-                                          " %b%p%% ")))
+      (setq battery-mode-line-format (concat (all-the-icons-material "battery_full" :v-adjust -0.1)
+                                             " %b%p%%"))
       (display-battery-mode))
     #:elisp-packages (list emacs-bluetooth
                            emacs-ednc
