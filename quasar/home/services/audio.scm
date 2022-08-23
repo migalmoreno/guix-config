@@ -7,10 +7,25 @@
   #:use-module (gnu home services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages music)
+  #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages photo)
   #:use-module (gnu packages video)
   #:use-module (guix gexp)
-  #:export (audio-service))
+  #:export (pulseaudio-service
+            audio-service))
+
+(define (pulseaudio-service)
+  (list
+   (home-generic-service 'pulseaudio-packages
+                         #:packages (list pulseaudio pamixer))
+   (elisp-configuration-service
+    `((pulseaudio-control-default-keybindings)
+      (with-eval-after-load 'pulseaudio-control
+        (custom-set-variables
+         '(pulseaudio-control-volume-step "5%")
+         '(pulseaudio-control-use-default-sink t)
+         '(pulseaudio-control-volume-verbose nil))))
+    #:elisp-packages (list emacs-pulseaudio-control))))
 
 (define (audio-service)
   (list
