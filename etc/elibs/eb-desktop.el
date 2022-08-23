@@ -2,6 +2,8 @@
 (require 'hexrgb)
 (require 'xdg)
 (require 'ednc)
+(require 'all-the-icons)
+(require 'dashboard)
 
 (defgroup eb-desktop nil
   "Desktop-related packages and customizations."
@@ -23,8 +25,15 @@
 (defvar eb-desktop-display-volume-string nil
   "Current volume level string for the mode line.")
 
-(defvar eb-desktop-current-geolocation nil
-  "Current position coordinates.")
+;;;###autoload
+(defun eb-desktop-dashboard-open ()
+  "Jump to a dashboard buffer, creating one if it doesn't exist."
+  (interactive)
+  (when (get-buffer-create dashboard-buffer-name)
+    (switch-to-buffer dashboard-buffer-name)
+    (dashboard-mode)
+    (dashboard-insert-startupify-lists)
+    (dashboard-refresh-buffer)))
 
 (defun eb-desktop-take-screenshot (&optional region)
   "Take a fullscreen or REGION screenshot of the current display."
@@ -149,11 +158,13 @@
         (setq eb-desktop-display-volume-string
               (concat
                (when source
-                 (format "%s %02d%% " (eb-look--position-item
-                                        (if (eb-desktop--mute-p t) "" ""))
+                 (format "%s %02d%% " (if (eb-desktop--mute-p t)
+                                          (all-the-icons-material "mic_off" :v-adjust -0.15)
+                                        (all-the-icons-material "mic" :v-adjust -0.15))
                          (compute-volume t)))
-               (format "%s %02d%% " (eb-look--position-item
-                                     (if (eb-desktop--mute-p) "" ""))
+               (format "%s %02d%% " (if (eb-desktop--mute-p)
+                                        (all-the-icons-material "volume_off" :v-adjust -0.15)
+                                      (all-the-icons-material "volume_up" :v-adjust -0.15))
                        (compute-volume))))
       (force-mode-line-update t))))
 
@@ -253,19 +264,6 @@ DEVICE is a device name such as 'Camera' or 'Webcam'."
     (if (string-equal is-enabled "1")
         (write-region "0" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping))
       (write-region "1" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping)))))
-
-(defun eb-desktop--get-geolocation ()
-  "Fetches the current location's coordinates."
-  (with-current-buffer
-      (url-retrieve-synchronously
-       "https://location.services.mozilla.com/v1/geolocate?key=geoclue" t)
-    (goto-char (point-min))
-    (re-search-forward (rx (: bol "\n")) nil t)
-    (delete-region (point) (point-min))
-    (let* ((location (car (cdr (json-parse-string (buffer-string) :object-type 'plist))))
-           (latitude (plist-get location :lat))
-           (longitude (plist-get location :lng)))
-      (setq eb-desktop-current-geolocation (cons longitude latitude)))))
 
 (defun eb-desktop--notify ()
   "Display the latest EDNC notification."
