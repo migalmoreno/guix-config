@@ -36,6 +36,20 @@ original service url."
     url))
 
 ;;;###autoload
+(defun eb-web--get-geolocation ()
+  "Fetch the current location's coordinates through Mozilla's Geolocation API."
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://location.services.mozilla.com/v1/geolocate?key=geoclue" t)
+    (goto-char (point-min))
+    (re-search-forward (rx (: bol "\n")) nil t)
+    (delete-region (point) (point-min))
+    (let* ((location (car (cdr (json-parse-string (buffer-string) :object-type 'plist))))
+           (latitude (plist-get location :lat))
+           (longitude (plist-get location :lng)))
+      (list :longitude longitude :latitude latitude))))
+
+;;;###autoload
 (defun eb-web--bookmark-make-record (url title)
   "Create a bookmark record from a browser buffer."
   (let* ((defaults (delq nil (list title url)))
