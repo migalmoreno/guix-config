@@ -163,6 +163,32 @@ and easily switch to and manipulate them.")
 IPC interface.")
     (license license:gpl3+)))
 
+(define-public emacs-circadian
+  (package
+    (name "emacs-circadian")
+    (version "20181024.1256")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://melpa.org/packages/circadian-" version ".el"))
+       (sha256 (base32 "041d65p9ksikpvbsk2bdc1b0cb7cfpxbk3xxqd38jnw8l7hjrp4z"))))
+    (build-system emacs-build-system)
+    (home-page "https://github.com/guidoschmidt/circadian.el")
+    (synopsis "Theme-switching for Emacs based on daytime.")
+    (description "Circadian provides automated theme switching based on daytime.")
+    (license license:expat)))
+
+(define-public emacs-org-modern-next
+  (package
+    (inherit emacs-org-modern)
+    (version "20220821.1927")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://melpa.org/packages/org-modern-" version ".el"))
+       (sha256 (base32 "020smw3ck08v11bb8vackabawahcjazlr0ll00cwmv9bgz3hcqh8"))))
+    (build-system emacs-build-system)))
+
 (define-public emacs-calc-currency
   (let ((commit "7021d892ef38b01b875082aba4bae2517ce47ae6")
         (revision "0"))
