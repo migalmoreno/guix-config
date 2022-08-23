@@ -297,6 +297,10 @@
             :shortcut "or"
             :fallback-url (quri:uri "https://org-roam.discourse.group")
             :base-search-url "https://org-roam.discourse.group/search?q=~a")
+           (engines:discourse
+            :shortcut "pc"
+            :fallback-url (quri:uri "https://community.penpot.app/latest")
+            :base-search-url "https://community.penpot.app/search?q=~a")
            (engines:meetup
             :shortcut "me")
            (engines:gitea
