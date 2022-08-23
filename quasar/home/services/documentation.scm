@@ -22,8 +22,7 @@
          '(Info-use-header-line nil))
         (require 'info+)
         (add-hook 'Info-mode-hook 'visual-line-mode)
-        (add-hook 'Info-mode-hook 'eb-look-set-variable-pitched)
-        (add-hook 'Info-mode-hook 'eb-look-tweak-info-faces)
+        (add-hook 'Info-mode-hook 'eb-modus-themes-set-info-faces)
         (custom-set-variables
          '(info-manual+node-buffer-name-mode t)
          '(Info-persist-history-mode t)
