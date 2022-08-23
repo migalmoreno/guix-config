@@ -1,8 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 (require 'eb-desktop)
 (require 'eb-mpv)
-(require 'eb-look)
 (require 'tab-bar)
+(require 'all-the-icons)
 
 (defgroup eb-tab-bar nil
   "Tab bar customizations."
@@ -19,13 +19,14 @@
 ;;;###autoload
 (defun eb-tab-bar-format-left ()
   "Produce the items for the tab bar to output on its left-hand side."
-  `((menu-bar menu-item " λ " tab-bar-menu-bar :help "Menu")
+  `((menu-bar menu-item ,(format " %s " (all-the-icons-fileicon "emacs" :v-adjust -0.1))
+              tab-bar-menu-bar :help "Menu")
     (mpv-string menu-item ,eb-mpv-mode-line-string nil)
-    (mpv-prev menu-item ,(eb-look--position-item eb-mpv-prev-button)
+    (mpv-prev menu-item ,eb-mpv-prev-button
               mpv-playlist-prev :help "Previous playlist entry")
-    (mpv-toggle menu-item ,(eb-look--position-item eb-mpv-toggle-button)
+    (mpv-toggle menu-item ,eb-mpv-toggle-button
                 mpv-pause :help "Toggle playback")
-    (mpv-next menu-item ,(eb-look--position-item eb-mpv-next-button)
+    (mpv-next menu-item ,eb-mpv-next-button
               mpv-playlist-next :help "Next playlist entry")
     (mpv-playing-time menu-item ,eb-mpv-playing-time-string nil)
     (notifications menu-item ,(string-trim-right (format-mode-line eb-tab-bar-notifications)) nil)))
