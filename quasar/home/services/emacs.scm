@@ -137,12 +137,7 @@
          '(org-M-RET-may-split-line nil)
          '(org-ellipsis " ⤵")
          '(org-hide-emphasis-markers t)
-         '(org-fontify-done-headline t))
-        (font-lock-add-keywords 'org-mode
-                                '(("^ *\\([-]\\)[[:space:]][^[]+?"
-                                   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))
-                                  ("^ *\\([+]\\)[[:space:]][^[]+?"
-                                   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "‣")))))))
+         '(org-fontify-done-headline t)))
       ,#~""
       (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
       (add-hook 'org-babel-after-execute-hook 'eb-org-fix-inline-images)
