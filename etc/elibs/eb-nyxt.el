@@ -167,12 +167,15 @@ template."
    `(simple-search ,query)
    :focus t :autostart t))
 
-(defun eb-nyxt-change-theme (theme)
-  "Switch current browser THEME in Nyxt."
-  (interactive
-   (list (completing-read "Theme: " custom-known-themes)))
-  (eb-nyxt-run-with-nyxt
-   `(nx-tailor:select-theme ,theme)))
+;;;###autoload
+(defun eb-nyxt-change-theme ()
+  "Switch theme in Nyxt."
+  (interactive)
+  (if (eq (car custom-enabled-themes) 'modus-vivendi)
+      (eb-nyxt-run-with-nyxt
+       '(nx-tailor:select-theme "modus-vivendi"))
+    (eb-nyxt-run-with-nyxt
+     '(nx-tailor:select-theme "modus-operandi"))))
 
 ;;;###autoload
 (defun eb-nyxt-copy-url ()
