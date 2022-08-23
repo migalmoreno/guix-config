@@ -61,16 +61,15 @@
   (list
    (home-generic-service 'home-org-packages #:packages (list unoconv libreoffice graphviz))
    (elisp-configuration-service
-    `((dolist (module '(org-indent org-tempo org-habit org-crypt org-protocol))
-              (add-to-list 'org-modules module))
-      ,#~""
-      (add-hook 'org-mode-hook 'org-fragtog-mode)
+    `((add-hook 'org-mode-hook 'org-fragtog-mode)
       (add-hook 'org-mode-hook 'eb-org-minimal-mode)
       ,#~""
       (let ((map mode-specific-map))
         (define-key map "l" 'org-store-link)
         (define-key map "c" 'org-capture))
       (with-eval-after-load 'org
+        (dolist (module '(org-indent org-tempo org-habit org-crypt org-protocol))
+              (add-to-list 'org-modules module))
         (add-to-list 'display-buffer-alist
                      '(("\\*Org Links\\*"
                         display-buffer-no-window
@@ -105,6 +104,10 @@
          '(org-lowest-priority ?C)
          '(org-log-done 'time)
          '(org-log-into-drawer t)
+         '(org-special-ctrl-a/e t)
+         '(org-insert-heading-respect-content t)
+         '(org-auto-align-tags nil)
+         '(org-tags-column 0)
          '(org-tags-exclude-from-inheritance '("project" "crypt"))
          '(org-default-priority ?B)
          '(org-default-notes-file "~/notes")
@@ -216,6 +219,14 @@
       (add-hook 'org-agenda-mode-hook 'hack-dir-local-variables-non-file-buffer)
       (with-eval-after-load 'org-agenda
         (custom-set-variables
+         '(org-agenda-tags-column 0)
+         '(org-agenda-block-separator ?-)
+         '(org-agenda-time-grid
+           '((daily today require-timed)
+             (800 1000 1200 1400 1600 1800 2000)
+             " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
+         '(org-agenda-current-time-string
+           "⭠ now ─────────────────────────────────────────────────")
          '(org-agenda-start-with-log-mode t)
          '(org-agenda-todo-ignore-scheduled t)
          '(org-agenda-todo-ignore-deadlines t)
@@ -261,7 +272,7 @@
          '(org-src-tab-acts-natively t)
          '(org-edit-src-content-indentation 0)
          '(org-src-window-setup 'current-window)
-         '(org-catch-invisible-edits 'smart)
+         '(org-catch-invisible-edits 'show-and-error)
          '(org-src-fontify-natively t)))
       ,#~""
       (with-eval-after-load 'org-list
@@ -287,7 +298,7 @@
       (advice-add 'org-timer-update-mode-line :override 'eb-org-timer-update-mode-line)
       (with-eval-after-load 'org-timer
         (custom-set-variables
-         '(org-timer-format (concat (eb-look--position-item "") " %s  "))))
+         '(org-timer-format (concat (all-the-icons-material "timer" :v-adjust -0.1) " %s  "))))
       ,#~""
       (setq org-roam-v2-ack t)
       (custom-set-variables
@@ -373,10 +384,12 @@
               :if-new (file+head "%<%Y-%m-%d>.org"
                                  "#+title: %<%Y-%m-d>\n"))))))
       ,#~""
-      (with-eval-after-load 'org-superstar
-        (setq org-superstar-headline-bullets-list '(?\s)
-              org-superstar-leading-bullet ?\s
-              org-superstar-prettify-item-bullets nil))
+      (add-hook 'org-mode-hook 'org-modern-mode)
+      (add-hook 'org-agenda-finalize-hook 'org-modern-agenda)
+      (with-eval-after-load 'org-modern
+        (custom-set-variables
+         '(org-modern-star '(""))
+         '(org-modern-hide-stars t)))
       ,#~""
       (with-eval-after-load 'embark
         (embark-define-keymap embark-roam-ref-map
@@ -405,7 +418,7 @@
                            emacs-org-make-toc
                            emacs-org-roam
                            emacs-org-appear
-                           emacs-org-superstar
+                           emacs-org-modern-next
                            emacs-visual-fill-column
                            emacs-graphviz-dot-mode
                            emacs-citar))
@@ -482,54 +495,54 @@
          '(embark-indicators '(embark-minimal-indicator))
          '(embark-prompter 'embark-keymap-prompter)))
       ,#~""
-      (let ((map global-map))
-        (define-key map (kbd "M-y") 'consult-yank-pop)
-        (define-key map (kbd "C-s") 'consult-line)
-        (define-key ctl-x-4-map "b" 'consult-buffer-other-window)
-        (define-key goto-map "a" 'consult-org-agenda)
-        (define-key goto-map "i"  'consult-imenu)
-        (define-key goto-map "g" 'consult-goto-line)
-        (define-key search-map "r" 'consult-ripgrep)
-        (define-key search-map "f" 'consult-find)
-        (define-key search-map "l" 'consult-line)
-        (define-key search-map "L" 'consult-line-multi)
-        (define-key ctl-x-map "b" 'consult-buffer)
-        (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
-        (define-key isearch-mode-map (kbd "M-s e") 'consult-isearch-history))
-    (define-key minibuffer-mode-map (kbd "C-c C-r") 'consult-history)
-    (add-hook 'minibuffer-setup-hook 'eb-consult-initial-narrow)
-    (with-eval-after-load 'consult
-      (setq consult-buffer-sources
-            (append
-             consult-buffer-sources
-             '(eb-consult-org-buffer-source
-               eb-consult-telega-buffer-source
-               eb-consult-erc-buffer-source
-               eb-consult-ement-buffer-source
-               eb-consult-exwm-buffer-source
-               eb-consult-comint-buffer-source)))
+      (define-key global-map (kbd "M-y") 'consult-yank-pop)
+      (define-key global-map (kbd "C-s") 'consult-line)
+      (define-key ctl-x-4-map "b" 'consult-buffer-other-window)
+      (define-key goto-map "a" 'consult-org-agenda)
+      (define-key goto-map "i"  'consult-imenu)
+      (define-key mode-specific-map "ei" 'eb-consult-insert-emoji)
+      (define-key goto-map "g" 'consult-goto-line)
+      (define-key search-map "r" 'consult-ripgrep)
+      (define-key search-map "f" 'consult-find)
+      (define-key search-map "l" 'consult-line)
+      (define-key search-map "L" 'consult-line-multi)
+      (define-key ctl-x-map "b" 'consult-buffer)
+      (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
+      (define-key isearch-mode-map (kbd "M-s e") 'consult-isearch-history)
+      (define-key minibuffer-mode-map (kbd "C-c C-r") 'consult-history)
+      (add-hook 'minibuffer-setup-hook 'eb-consult-initial-narrow)
+      (with-eval-after-load 'consult
+        (setq consult-buffer-sources
+              (append
+               consult-buffer-sources
+               '(eb-consult-org-buffer-source
+                 eb-consult-telega-buffer-source
+                 eb-consult-erc-buffer-source
+                 eb-consult-ement-buffer-source
+                 eb-consult-exwm-buffer-source
+                 eb-consult-comint-buffer-source)))
+        (custom-set-variables
+         '(consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
+         '(consult-narrow-key (kbd "C-="))
+         '(consult-widen-key (kbd "C--")))
+        (consult-customize
+         consult--source-buffer consult-ripgrep consult-buffer
+         consult-bookmark consult--source-bookmark
+         consult-recent-file consult--source-recent-file
+         consult--source-project-buffer
+         consult--source-hidden-buffer
+         :preview-key (kbd "M-.")))
       (custom-set-variables
-       '(consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
-       '(consult-narrow-key (kbd "C-="))
-       '(consult-widen-key (kbd "C--")))
-      (consult-customize
-       consult--source-buffer consult-ripgrep consult-buffer
-       consult-bookmark consult--source-bookmark
-       consult-recent-file consult--source-recent-file
-       consult--source-project-buffer
-       consult--source-hidden-buffer
-       :preview-key (kbd "M-.")))
-    (custom-set-variables
-     '(eb-consult-initial-narrow-alist
-       `((erc-mode . ?e)
-         (org-mode . ?o)
-         (exwm-mode . ?x)
-         (telega-root-mode . ?t)
-         (telega-chat-mode . ?t)
-         (comint-mode . ?c)
-         (cider-repl-mode . ?c)
-         (ement-room-mode . ?n)
-         (ement-room-list-mode . ?n))))
+       '(eb-consult-initial-narrow-alist
+         `((erc-mode . ?e)
+           (org-mode . ?o)
+           (exwm-mode . ?x)
+           (telega-root-mode . ?t)
+           (telega-chat-mode . ?t)
+           (comint-mode . ?c)
+           (cider-repl-mode . ?c)
+           (ement-room-mode . ?n)
+           (ement-room-list-mode . ?n))))
       ,#~""
       (marginalia-mode)
       ,#~""
@@ -762,16 +775,17 @@
 
 (define appearance-service
   (elisp-configuration-service
-   `((with-eval-after-load 'eb-look
-       (custom-set-variables
-        '(eb-look-light-theme "modus-operandi")
-        '(eb-look-dark-theme "modus-vivendi")
-        '(eb-look-light-theme-threshold "07:00")
-        '(eb-look-dark-theme-threshold "20:30")))
-     (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
+   `((set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
      (set-fontset-font "fontset-default" nil (font-spec :name "Noto Color Emoji"))
      (set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)
      (setq use-default-font-for-symbols nil)
+     ,#~""
+     (modus-themes-load-themes)
+     (add-hook 'modus-themes-after-load-theme-hook 'eb-modus-themes-set-theme-dependent-faces)
+     (add-hook 'modus-themes-after-load-theme-hook 'eb-pdf-view-update-buffers)
+     (add-hook 'modus-themes-after-load-theme-hook 'eb-mpv-change-theme)
+     (add-hook 'modus-themes-after-load-theme-hook 'eb-org-update-buffers-faces)
+     (add-hook 'modus-themes-after-load-theme-hook 'eb-nyxt-change-theme)
      (with-eval-after-load 'modus-themes
        (define-key mode-specific-map "Mt" 'modus-themes-toggle)
        (custom-set-variables
@@ -781,12 +795,26 @@
         '(modus-themes-region '(bg-only no-extend))
         '(modus-themes-markup '(intense))
         '(modus-themes-mixed-fonts t)))
+     ,#~""
+     (with-eval-after-load 'solar
+       (custom-set-variables
+        '(calendar-longitude (plist-get (eb-web--get-geolocation) :longitude))
+        '(calendar-latitude (plist-get (eb-web--get-geolocation) :latitude))))
+     (require 'circadian)
+     (custom-set-variables
+      '(circadian-themes '((:sunrise . modus-operandi)
+                           (:sunset . modus-vivendi))))
+     (circadian-setup)
+     ,#~""
+     (when (and (display-graphic-p)
+                (not (find-font (font-spec :name "all-the-icons"))))
+       (all-the-icons-install-fonts t))
      (with-eval-after-load 'all-the-icons
        (custom-set-variables
         '(all-the-icons-scale-factor 1)
         '(all-the-icons-default-adjust 0)))
      ,#~""
-     (define-key mode-specific-map "do" 'eb-look-dashboard-open)
+     (define-key mode-specific-map "do" 'eb-desktop-dashboard-open)
      (with-eval-after-load 'dashboard
        (custom-set-variables
         '(dashboard-banner-logo-title "Welcome to Emacs")
@@ -813,7 +841,6 @@
      (with-eval-after-load 'minions
        (custom-set-variables
         '(minions-mode-line-lighter ";")))
-     (define-key mode-specific-map "ei" 'eb-look-emoji-insert)
      (with-eval-after-load 'fringe
        (set-fringe-mode 10))
      ,#~""
@@ -854,32 +881,10 @@
        (custom-set-variables
         '(prettify-symbols-unprettify-at-point 'right-edge))
        (setq-default prettify-symbols-alist
-                     '(("#+BEGIN_SRC" . "Λ")
-                       ("#+END_SRC" . "λ")
-                       ("#+begin_src" . "λ")
-                       ("#+end_src" . "λ")
-                       ("#+begin_quote" . "")
-                       ("#+BEGIN_QUOTE" . "")
-                       ("#+end_quote" . "")
-                       ("#+END_QUOTE" . "")
-                       (":LOGBOOK:" . "")
+                     '((":LOGBOOK:" . "")
                        (":PROPERTIES:" . "")
-                       ("#+filetags:" . "")
-                       ("#+FILETAGS:" . "")
-                       ("#+title:" . "")
-                       ("#+TITLE:" . "")
-                       ("#+author:" . "")
-                       ("#+AUTHOR:" . "")
                        ("# -*-" . "")
-                       ("-*-" . "")
-                       ("- [ ]" . "")
-                       ("+ [ ]" . "")
-                       ("- [x]" . "")
-                       ("+ [x]" . "")
-                       ("- [X]" . "")
-                       ("+ [X]" . "")
-                       ("- [-]" . "")
-                       ("+ [-]" . ""))))
+                       ("-*-" . ""))))
      ,#~""
      (add-hook 'text-mode-hook 'display-line-numbers-mode)
      (add-hook 'conf-mode-hook 'display-line-numbers-mode)
@@ -893,7 +898,8 @@
                           emacs-modus-themes
                           emacs-all-the-icons
                           emacs-all-the-icons-dired
-                          emacs-dashboard)
+                          emacs-dashboard
+                          emacs-circadian)
    #:early-init `((setq inhibit-splash-screen t
                         inhibit-startup-message t)
                   (setq initial-scratch-message nil)
@@ -913,10 +919,10 @@
                            eb-tab-bar-format-right))
         '(tab-bar-close-button-show nil)
         '(tab-bar-show t)))
-     (display-wttr-mode)
-     (with-eval-after-load 'display-wttr
-       (custom-set-variables
-        '(display-wttr-format "%C %t"))))
+     (require 'display-wttr)
+     (custom-set-variables
+      '(display-wttr-format "%C %t"))
+     (display-wttr-mode))
    #:elisp-packages (list emacs-display-wttr)))
 
 (define project-service
