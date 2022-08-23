@@ -5,6 +5,7 @@
 (require 'emms-player-mpv)
 (require 'tq)
 (require 'ol)
+(require 'all-the-icons)
 (require 'eb-web)
 (require 'eb-ytdl)
 
@@ -223,8 +224,8 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
              (> (length playlist) 1))
         (progn
           (setq eb-mpv-playlist-p t)
-          (setq eb-mpv-prev-button ""
-                eb-mpv-next-button ""))
+          (setq eb-mpv-prev-button (all-the-icons-material "skip_previous" :v-adjust -0.1)
+                eb-mpv-next-button (all-the-icons-material "skip_next" :v-adjust -0.1)))
       (setq eb-mpv-playlist-p nil)
       (setq eb-mpv-prev-button nil)
       (setq eb-mpv-next-button nil))))
@@ -235,8 +236,8 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
   (prog1
       (if (equal (mpv--with-json (mpv-get-property "pause"))
                  'false)
-          (setq eb-mpv-toggle-button "")
-        (setq eb-mpv-toggle-button ""))
+          (setq eb-mpv-toggle-button (all-the-icons-material "pause" :v-adjust -0.1))
+        (setq eb-mpv-toggle-button (all-the-icons-material "play_arrow" :v-adjust -0.1)))
     (force-mode-line-update t)))
 
 (defun eb-mpv-run-command (command &rest arguments)
@@ -416,7 +417,7 @@ Block while waiting for the response."
 (defun eb-mpv-change-theme ()
   "Set theme in current mpv process according to current system theme."
   (interactive)
-  (if (string-match (getenv "GTK_THEME") ":dark")
+  (if (eq (car custom-enabled-themes) 'modus-vivendi)
       (progn
         (mpv-set-property "background" "#000000")
         (mpv-set-property "osd-color" "#ffffff"))
