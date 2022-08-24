@@ -1,6 +1,5 @@
 (define-module (quasar home services emacs)
   #:use-module (quasar home)
-  #:use-module (quasar home packages emacs-xyz)
   #:use-module (conses packages emacs-xyz)
   #:use-module (conses packages misc)
   #:use-module (conses home services emacs)
@@ -106,8 +105,8 @@
          '(org-log-into-drawer t)
          '(org-special-ctrl-a/e t)
          '(org-insert-heading-respect-content t)
-         '(org-auto-align-tags nil)
-         '(org-tags-column 0)
+         '(org-auto-align-tags t)
+         '(org-tags-column -77)
          '(org-tags-exclude-from-inheritance '("project" "crypt"))
          '(org-default-priority ?B)
          '(org-default-notes-file "~/notes")
@@ -383,7 +382,7 @@
       (add-hook 'org-agenda-finalize-hook 'org-modern-agenda)
       (with-eval-after-load 'org-modern
         (custom-set-variables
-         '(org-modern-star '(""))
+         '(org-modern-star nil)
          '(org-modern-hide-stars t)))
       ,#~""
       (with-eval-after-load 'embark
@@ -796,6 +795,7 @@
         '(calendar-longitude (plist-get (eb-web--get-geolocation) :longitude))
         '(calendar-latitude (plist-get (eb-web--get-geolocation) :latitude))))
      (require 'circadian)
+     (add-hook 'circadian-after-load-theme-hook 'eb-modus-themes-set-theme-dependent-faces)
      (custom-set-variables
       '(circadian-themes '((:sunrise . modus-operandi)
                            (:sunset . modus-vivendi))))
