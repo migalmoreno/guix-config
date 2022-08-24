@@ -1,6 +1,6 @@
 (define-module (quasar home services scheme)
   #:use-module (quasar home)
-  #:use-module (quasar home packages emacs-xyz)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (conses home services emacs)
   #:use-module (conses home services scheme)
   #:use-module (rrr packages emacs-xyz)

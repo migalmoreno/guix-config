@@ -1,7 +1,7 @@
 (define-module (conses packages emacs-xyz)
-  #:use-module (rrr packages emacs-xyz)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu packages ocaml)
   #:use-module (guix packages)
   #:use-module (guix build-system emacs)
   #:use-module (guix download)
@@ -97,10 +97,10 @@ this provides a function to browser URLs via Nyxt run via Slime.")
       (license license:bsd-3))))
 
 (define-public emacs-ement-next
-  (let ((commit "d216e049920ccb2839b274b202254842fe762c26")
+  (let ((commit "2626e37b824cb2a2e8fb008991d140ac3351a909")
         (revision "1"))
     (package
-      (name "emacs-ement")
+      (inherit emacs-ement)
       (version (git-version "0.1-pre" revision commit))
       (source
        (origin
@@ -111,19 +111,7 @@ this provides a function to browser URLs via Nyxt run via Slime.")
          (file-name (git-file-name name version))
          (sha256
           (base32
-           "06simqrz32rsf1jiq6dmq7l198iwf9f4rjh46p6jsghlmphzyh2m"))))
-      (build-system emacs-build-system)
-      (arguments
-       `(#:emacs ,emacs))
-      (propagated-inputs
-       (list emacs-rrr-plz
-             emacs-taxy
-             emacs-svg-lib
-             emacs-ts))
-      (home-page "https://github.com/alphapapa/ement.el")
-      (synopsis "Matrix client for Emacs")
-      (description "Ement.el is a Matrix client for Emacs.")
-      (license license:gpl3+))))
+           "1wkvx0hrbnlls8dd72g273fx7380jz2gb8ak9cyjbbnwr8a1j03f")))))))
 
 (define-public emacs-bufler
   (package
@@ -391,8 +379,153 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
 
 (define-public emacs-srht
+  (let ((commit "0e53961bbc997ec00317b1fd143e5e1336bd8754")
+        (revision "4")
+        (version "0.1"))
+    (package
+      (name "emacs-srht")
+      (version (git-version version revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://git.sr.ht/~akagi/srht.el")
+               (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32
+           "1c9d8ldxbr3f5bxsmfjgmnpx04hd1rnach8p84ns5xq68mjq9vil"))))
+      (build-system emacs-build-system)
+      (arguments
+       (list
+        #:phases
+        #~(modify-phases %standard-phases
+            ;; Move the source files to the top level, which is included in
+            ;; the EMACSLOADPATH.
+            (add-after 'unpack 'move-source-files
+              (lambda _
+                (let ((el-files (find-files "./lisp" ".*\\.el$")))
+                  (for-each (lambda (f)
+                              (rename-file f (basename f)))
+                            el-files)))))))
+      (propagated-inputs (list emacs-plz))
+      (home-page "https://git.sr.ht/~akagi/srht.el")
+      (synopsis "Interact with sourcehut")
+      (description #f)
+      (license license:gpl3+))))
+
+(define-public emacs-al-file
   (package
-    (inherit emacs-rrr-srht)
-    (arguments
-     (substitute-keyword-arguments (package-arguments emacs-rrr-srht)
-       ((#:emacs _) emacs)))))
+    (name "emacs-al-file")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-file.el")
+       (sha256
+        (base32 "01gj6z2d92li9l77h25ag7njgvalrdj2184fhjhxpbn7xg8z68h4"))))
+    (build-system emacs-build-system)
+    (home-page "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-file.el")
+    (synopsis "Additional functionality for working with files")
+    (description #f)
+    (license license:gpl3+)))
+
+(define-public emacs-al-autoload
+  (package
+    (name "emacs-al-autoload")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-autoload.el")
+       (sha256
+        (base32 "0f2r9g4k4fx9i55msd1d5fnnrhbjllx2nj2bg996yz9gc5vxs94w"))))
+    (build-system emacs-build-system)
+    (home-page "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-autoload.el")
+    (synopsis "Additional functionality to autoload Emacs packages")
+    (description #f)
+    (license license:gpl3+)))
+
+(define-public emacs-al-guix-autoload
+  (package
+    (name "emacs-al-guix-autoload")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-guix-autoload.el")
+       (sha256
+        (base32 "1qwhciqzybdd8acsvpi2b5ypqhn3l15nbnd1q04liqwainxhkyzf"))))
+    (build-system emacs-build-system)
+    (propagated-inputs (list emacs-al-autoload emacs-al-file))
+    (home-page "https://github.com/alezost/emacs-config/blob/master/utils/al-guix-autoload.el")
+    (synopsis "Additional functionality to autoload Guix packages")
+    (description #f)
+    (license license:gpl3+)))
+
+(define-public emacs-elibs
+  (package
+    (name "emacs-elibs")
+    (version "0.1.0")
+    (source
+     (local-file "../../etc/elibs" #:recursive? #t))
+    (build-system emacs-build-system)
+    (propagated-inputs
+     (list emacs-consult
+           emacs-org
+           emacs-org-roam
+           emacs-org-superstar
+           emacs-geiser
+           emacs-geiser-guile
+           emacs-all-the-icons
+           emacs-sly
+           emacs-modus-themes
+           emacs-dashboard
+           emacs-pdf-tools
+           emacs-erc-status-sidebar
+           emacs-org-mime
+           emacs-emms
+           emacs-ytdl
+           emacs-mpv
+           emacs-tuareg
+           ocaml-merlin
+           emacs-ednc
+           emacs-exwm
+           emacs-webpaste
+           emacs-ement-next
+           emacs-telega
+           emacs-password-store
+           emacs-dashboard
+           emacs-hexrgb
+           emacs-daemons
+           emacs-fontaine))
+    (home-page "https://git.sr.ht/~conses/quasar")
+    (synopsis "Various Emacs Lisp libraries.")
+    (description "A set of Emacs Lisp libraries to enhance the functionality
+ of some Emacs packages and built-in features.")
+    (license license:gpl3+)))
+
+(define-public emacs-fdroid
+  (let ((commit "598549ffbbea4a015dca80fc2d061e6e01d77e40")
+        (revision "0"))
+    (package
+      (name "emacs-fdroid")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://git.sr.ht/~conses/fdroid.el")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "0hpbi5nh0bkrb2l422kn60giin73fmsq7gsai9qc9aifa7k1anwv"))))
+      (build-system emacs-build-system)
+      (propagated-inputs
+       (list emacs-consult emacs-embark))
+      (home-page "https://git.sr.ht/~conses/fdroid.el")
+      (synopsis "An Emacs interface to manage F-Droid repositories.")
+      (description "fdroid.el is an Emacs interface to fdroidcl. Its purpose is to aid the
+ management of F-Droid repository packages to be installed in an Android device from the comfort of Emacs.")
+      (license license:gpl3+))))

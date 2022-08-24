@@ -1,5 +1,4 @@
 (define-module (quasar home services video)
-  #:use-module (quasar home packages emacs-xyz)
   #:use-module (conses home services web-browsers)
   #:use-module (conses home services emacs)
   #:use-module (conses home services gtk)

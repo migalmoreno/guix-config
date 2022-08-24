@@ -1,6 +1,6 @@
 (define-module (quasar home services android)
-  #:use-module (quasar home packages emacs-xyz)
   #:use-module (conses home services emacs)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (conses packages android)
   #:use-module (gnu home services)
   #:use-module (gnu home-services base)
