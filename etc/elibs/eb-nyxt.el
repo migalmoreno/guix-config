@@ -144,6 +144,7 @@ process is not found, it will automatically create one and connect Slynk to it."
      :link (eb-nyxt-sly-eval '(nyxt:render-url (nyxt:url (nyxt:current-buffer))))
      :description (eb-nyxt-sly-eval '(nyxt:title (nyxt:current-buffer))))))
 
+;;;###autoload
 (cl-defun eb-nyxt-capture (template &key (roam-p nil))
   "Store and capture the current Nyxt page link in the corresponding
  Org capture TEMPLATE, or if ROAM-P, in the corresponding Org Roam capture

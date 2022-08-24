@@ -2,6 +2,7 @@
   "Markdown mode customizations."
   :group 'eb)
 
+;;;###autoload
 (define-minor-mode eb-markdown-minimal-mode
   "Set a more minimal interface to Markdown mode."
   :global t :group 'eb-markdown
