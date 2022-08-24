@@ -71,26 +71,6 @@ Microsoft Azure Active Directory accounts (AAD) and Microsoft Accounts (MSA)
 using industry standard OAuth2 and OpenID Connect.")
     (license license:expat)))
 
-(define-public python-bsdiff4
-  (package
-    (name "python-bsdiff4")
-    (version "1.2.1")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (pypi-uri "bsdiff4" version))
-       (sha256
-        (base32 "0jsxf2var03gfxjkwv6ia2pw0y92ml9b4r0mzl1xmzgg49szrkw7"))))
-    (build-system python-build-system)
-    (home-page "https://github.com/ilanschnell/bsdiff4")
-    (synopsis "Binary diff and patch using the BSDIFF4-format")
-    (description "This code is mostly derived from cx_bsdiff @url{http://cx-bsdiff.sourceforge.net/},
- which in turn was derived from bsdiff, the standalone utility produced for BSD which can be found at
-@url{http://www.daemonology.net/bsdiff}. In addition to the two functions (diff and patch) cx_bsdiff
-provides, this package includes an interface to the BSDIFF4-format, command line interfaces via bsdiff4
-and bspatch4 and tests.")
-    (license license:bsd-4)))
-
 (define-public python-matrix-common
   (package
     (name"python-matrix-common")
