@@ -175,8 +175,11 @@ EndSection
       ,#~""
       (eb-desktop-display-volume-mode)
       ,#~""
-      (setq battery-mode-line-format (concat (all-the-icons-material "battery_full" :v-adjust -0.1)
-                                             " %b%p%%"))
+      (setq battery-mode-line-format (concat (all-the-icons-material
+                                              "battery_full"
+                                              :v-adjust -0.1
+                                              :height 1)
+                                             "%b %p%%"))
       (display-battery-mode))
     #:elisp-packages (list emacs-bluetooth
                            emacs-ednc
