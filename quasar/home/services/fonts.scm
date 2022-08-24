@@ -15,7 +15,7 @@
       (custom-set-variables
        '(fontaine-presets '((docked
                              :default-family "Iosevka"
-                             :default-height 105
+                             :default-height 107
                              :fixed-pitch-family "Iosveka"
                              :fixed-pitch-height 1.0
                              :variable-pitch-family "Noto Sans"
