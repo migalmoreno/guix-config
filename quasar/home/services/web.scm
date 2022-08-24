@@ -60,17 +60,17 @@
             :background-color theme:background
             :color theme:on-background)
            ("h1,h2,h3,h4,h5,h6"
-            :font-family "IBM Plex Sans"
+            :font-family "Noto Sans"
             :color (make-important theme:primary))
            ("p,pre,td,dt"
-            :font-family "IBM Plex Sans"
+            :font-family "Noto Sans"
             :color theme:on-background)
            (pre
             :font-family "Iosevka"
             :background-color (make-important theme:background))
            ("button, a, a:link"
             :color theme:on-background
-            :font-family "IBM Plex Sans")
+            :font-family "Noto Sans")
            (".button, .button:hover , .button:visited, .button:active"
             :background-color theme:secondary
             :border "1px solid"
@@ -142,7 +142,7 @@
      (define-configuration tailor:tailor-mode
        ((tailor:auto-p :time)
         (tailor:light-theme-threshold (* 6 60 60))
-        (tailor:dark-theme-threshold (* 20.5 60 60))
+        (tailor:dark-theme-threshold (* 21 60 60))
         (tailor:main '("modus-operandi" . "modus-vivendi"))
         (tailor:themes
          (list
@@ -178,11 +178,6 @@
                       :on-accent-color "#282a36"
                       :font-family "Iosevka"
                       :cut (make-instance 'tailor:cut))))))
-     ,#~""
-     (define-configuration nxdr:dark-reader-mode
-       ((nxdr:brightness 80)
-        (nxdr:text-color "white")
-        (nyxt:glyph "nxdr")))
      ,#~""
      (define-configuration nyxt/user-script-mode:user-script-mode
        ((nyxt/user-script-mode:user-styles
@@ -494,7 +489,6 @@
                                     custom-keymap-mode
                                     tailor:tailor-mode
                                     router:router-mode
-                                    nxdr:dark-reader-mode
                                     ,@%slot-default%))))
                 ,#~""
                 (define-configuration browser
