@@ -35,7 +35,6 @@
       (with-eval-after-load 'cider
         (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
         (custom-set-variables
-         '(cider-preferred-build-tool 'clojure-cli)
          '(cider-repl-pop-to-buffer-on-connect nil)
          '(cider-allow-jack-in-without-project t)))
       ,#~""
