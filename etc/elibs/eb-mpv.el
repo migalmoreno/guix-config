@@ -224,8 +224,12 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
              (> (length playlist) 1))
         (progn
           (setq eb-mpv-playlist-p t)
-          (setq eb-mpv-prev-button (all-the-icons-material "skip_previous" :v-adjust -0.1)
-                eb-mpv-next-button (all-the-icons-material "skip_next" :v-adjust -0.1)))
+          (setq eb-mpv-prev-button (all-the-icons-material "skip_previous"
+                                                           :v-adjust -0.1
+                                                           :height 1)
+                eb-mpv-next-button (all-the-icons-material "skip_next"
+                                                           :v-adjust -0.1
+                                                           :height 1)))
       (setq eb-mpv-playlist-p nil)
       (setq eb-mpv-prev-button nil)
       (setq eb-mpv-next-button nil))))
@@ -236,8 +240,12 @@ If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
   (prog1
       (if (equal (mpv--with-json (mpv-get-property "pause"))
                  'false)
-          (setq eb-mpv-toggle-button (all-the-icons-material "pause" :v-adjust -0.1))
-        (setq eb-mpv-toggle-button (all-the-icons-material "play_arrow" :v-adjust -0.1)))
+          (setq eb-mpv-toggle-button (all-the-icons-material "pause"
+                                                             :v-adjust -0.14
+                                                             :height 1))
+        (setq eb-mpv-toggle-button (all-the-icons-material "play_arrow"
+                                                           :v-adjust -0.14
+                                                           :height 1)))
     (force-mode-line-update t)))
 
 (defun eb-mpv-run-command (command &rest arguments)

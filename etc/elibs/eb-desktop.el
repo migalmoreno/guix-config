@@ -159,12 +159,20 @@
               (concat
                (when source
                  (format "%s %02d%% " (if (eb-desktop--mute-p t)
-                                          (all-the-icons-material "mic_off" :v-adjust -0.15)
-                                        (all-the-icons-material "mic" :v-adjust -0.15))
+                                          (all-the-icons-material "mic_off"
+                                                                  :v-adjust -0.15
+                                                                  :height 1)
+                                        (all-the-icons-material "mic"
+                                                                :v-adjust -0.15
+                                                                :height 1))
                          (compute-volume t)))
                (format "%s %02d%% " (if (eb-desktop--mute-p)
-                                        (all-the-icons-material "volume_off" :v-adjust -0.15)
-                                      (all-the-icons-material "volume_up" :v-adjust -0.15))
+                                        (all-the-icons-material "volume_off"
+                                                                :v-adjust -0.15
+                                                                :height 1)
+                                      (all-the-icons-material "volume_up"
+                                                              :v-adjust -0.15
+                                                              :height 1))
                        (compute-volume))))
       (force-mode-line-update t))))
 

@@ -19,7 +19,9 @@
 ;;;###autoload
 (defun eb-tab-bar-format-left ()
   "Produce the items for the tab bar to output on its left-hand side."
-  `((menu-bar menu-item ,(format " %s " (all-the-icons-fileicon "emacs" :v-adjust -0.1))
+  `((menu-bar menu-item ,(format " %s " (all-the-icons-fileicon "emacs"
+                                                                :v-adjust -0.1
+                                                                :height 1))
               tab-bar-menu-bar :help "Menu")
     (mpv-string menu-item ,eb-mpv-mode-line-string nil)
     (mpv-prev menu-item ,eb-mpv-prev-button
