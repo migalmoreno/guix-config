@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 (require 'cl-lib)
+(require 'eb-modus-themes)
 
 (defgroup eb-pdf-view nil
   "Personal tweaks for `pdf-view'."
@@ -14,7 +15,7 @@
    (buffer-list)))
 
 ;;;###autoload
-(defun eb-pdf-view-update-buffers ()
+(defun eb-pdf-view-update-buffers (&optional _theme)
   "Apply `eb-pdf-view-mode' to currently opened
 `pdf-view' mode buffers."
   (cl-loop for buffer in (eb-pdf-view--list-buffers)
@@ -35,7 +36,7 @@
   "Apply `pdf-view' settings based on the current theme."
   :global t :group 'eb-pdf-view
   (if eb-pdf-view-mode
-      (if (eq (car custom-enabled-themes) 'modus-vivendi)
+      (if (eb-modus-themes--dark-theme-p)
           (pdf-view-themed-minor-mode 1)
         (pdf-view-themed-minor-mode -1))
     (pdf-view-themed-minor-mode -1)))

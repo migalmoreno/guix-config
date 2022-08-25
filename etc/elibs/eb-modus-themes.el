@@ -4,15 +4,22 @@
   :group 'eb)
 
 ;;;###autoload
-(defun eb-modus-themes-set-theme-dependent-faces ()
-  "Set faces based on the current theme in `modus-themes'."
+(defun eb-modus-themes-set-theme-dependent-faces (&optional theme)
+  "Set faces based on the current theme in `modus-themes' or THEME."
   (interactive)
-  (if (eq (car custom-enabled-themes) 'modus-vivendi)
+  (if (or (and theme (eb-modus-themes--dark-theme-p theme))
+          (eb-modus-themes--dark-theme-p))
       (progn
         (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#a8a8a8" :style unspecified))
         (set-face-attribute 'vertical-border nil :foreground "#000000"))
     (set-face-attribute 'tab-bar nil :box '(:line-width 1 :color "#505050" :style unspecified))
     (set-face-attribute 'vertical-border nil :foreground "#ffffff")))
+
+(defun eb-modus-themes--dark-theme-p (&optional theme)
+  "Indicate if there is a curently-active dark theme. Optionally, if THEME is
+provided, check if it's a dark theme."
+  (or (and theme (eq theme 'modus-operandi))
+      (eq (car custom-enabled-themes) 'modus-vivendi)))
 
 ;;;###autoload
 (defun eb-modus-themes-set-info-faces ()

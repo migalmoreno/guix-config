@@ -102,7 +102,7 @@ run again for tomorrow."
            do (set-face-attribute face nil :height height)))
 
 ;;;###autoload
-(defun eb-org-update-buffers-faces ()
+(defun eb-org-update-buffers-faces (&optional _theme)
   "Go through the current buffer list and apply the appropriate faces
 to Org mode buffers."
   (cl-loop for buffer in (org-buffer-list)

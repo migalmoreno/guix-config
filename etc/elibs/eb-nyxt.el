@@ -1,6 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 (require 'sly)
 (require 'ol)
+(require 'eb-modus-themes)
 
 (defgroup eb-nyxt nil
   "Nyxt browser integrations and tweaks."
@@ -169,10 +170,11 @@ template."
    :focus t :autostart t))
 
 ;;;###autoload
-(defun eb-nyxt-change-theme ()
-  "Switch theme in Nyxt."
+(defun eb-nyxt-change-theme (&optional theme)
+  "Switch theme in Nyxt according to current system theme or THEME."
   (interactive)
-  (if (eq (car custom-enabled-themes) 'modus-vivendi)
+  (if (or (and theme (eb-modus-themes--dark-theme-p theme))
+          (eb-modus-themes--dark-theme-p))
       (eb-nyxt-run-with-nyxt
        '(nx-tailor:select-theme "modus-vivendi"))
     (eb-nyxt-run-with-nyxt

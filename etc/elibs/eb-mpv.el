@@ -6,6 +6,7 @@
 (require 'tq)
 (require 'ol)
 (require 'all-the-icons)
+(require 'eb-modus-themes)
 (require 'eb-web)
 (require 'eb-ytdl)
 
@@ -422,10 +423,11 @@ Block while waiting for the response."
   (mpv-run-command "playlist-shuffle"))
 
 ;;;###autoload
-(defun eb-mpv-change-theme ()
-  "Set theme in current mpv process according to current system theme."
+(defun eb-mpv-change-theme (&optional theme)
+  "Set theme in current mpv process according to current system theme or THEME."
   (interactive)
-  (if (eq (car custom-enabled-themes) 'modus-vivendi)
+  (if (or (and theme (eb-modus-themes--dark-theme-p theme))
+          (eb-modus-themes--dark-theme-p))
       (progn
         (mpv-set-property "background" "#000000")
         (mpv-set-property "osd-color" "#ffffff"))
