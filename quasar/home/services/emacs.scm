@@ -796,6 +796,10 @@
         '(calendar-latitude (plist-get (eb-web--get-geolocation) :latitude))))
      (require 'circadian)
      (add-hook 'circadian-after-load-theme-hook 'eb-modus-themes-set-theme-dependent-faces)
+     (add-hook 'circadian-after-load-theme-hook 'eb-pdf-view-update-buffers)
+     (add-hook 'circadian-after-load-theme-hook 'eb-mpv-change-theme)
+     (add-hook 'circadian-after-load-theme-hook 'eb-org-update-buffers-faces)
+     (add-hook 'circadian-after-load-theme-hook 'eb-nyxt-change-theme)
      (custom-set-variables
       '(circadian-themes '((:sunrise . modus-operandi)
                            (:sunset . modus-vivendi))))
