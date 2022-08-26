@@ -20,6 +20,14 @@
                              :fixed-pitch-height 1.0
                              :variable-pitch-family "Noto Sans"
                              :variable-pitch-height 1.0
+                             :variable-pitch-weight semi-light)
+                            (headless
+                             :default-family "Iosevka"
+                             :default-height 105
+                             :fixed-pitch-family "Iosveka"
+                             :fixed-pitch-height 1.0
+                             :variable-pitch-family "Noto Sans"
+                             :variable-pitch-height 1.0
                              :variable-pitch-weight semi-light)))))
     #:elisp-packages (list emacs-fontaine))
    (home-generic-service 'home-font-packages
