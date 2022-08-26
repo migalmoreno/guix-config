@@ -8,7 +8,7 @@
   #:use-module (guix build-system)
   #:use-module (guix git-download)
   #:use-module (guix gexp)
-  #:use-module (guix utils)
+  #:use-module (guix build utils)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-ob-go
@@ -108,7 +108,7 @@ this provides a function to browser URLs via Nyxt run via Slime.")
          (uri (git-reference
                (url "https://github.com/alphapapa/ement.el")
                (commit commit)))
-         (file-name (git-file-name name version))
+         (file-name (git-file-name (package-name emacs-ement) version))
          (sha256
           (base32
            "1wkvx0hrbnlls8dd72g273fx7380jz2gb8ak9cyjbbnwr8a1j03f")))))))
