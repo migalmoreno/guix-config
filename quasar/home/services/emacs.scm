@@ -791,9 +791,8 @@
         '(modus-themes-mixed-fonts t)))
      ,#~""
      (with-eval-after-load 'solar
-       (custom-set-variables
-        '(calendar-longitude (plist-get (eb-web--get-geolocation) :longitude))
-        '(calendar-latitude (plist-get (eb-web--get-geolocation) :latitude))))
+       (setq calendar-longitude (plist-get (eb-web--get-geolocation) :longitude)
+             calendar-latitude (plist-get (eb-web--get-geolocation) :latitude)))
      (require 'circadian)
      (add-hook 'circadian-after-load-theme-hook 'eb-modus-themes-set-theme-dependent-faces)
      (add-hook 'circadian-after-load-theme-hook 'eb-pdf-view-update-buffers)
