@@ -398,6 +398,8 @@
                       :redirect "scribe.rip")
           (make-route (match-domain "imgur.com")
                       :redirect "imgin.voidnet.tech")
+          (make-route (match-domain "quora.com")
+                      :redirect "quora.vern.cc")
           (make-route (match-domain "lemmy.ml")
                       :blocklist '(:path (:starts ("/u/" "/c"))))
           (make-route (match-domain "twitter.com")
