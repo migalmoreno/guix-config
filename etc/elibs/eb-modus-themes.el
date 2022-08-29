@@ -16,10 +16,11 @@
     (set-face-attribute 'vertical-border nil :foreground "#ffffff")))
 
 (defun eb-modus-themes--dark-theme-p (&optional theme)
-  "Indicate if there is a curently-active dark theme. Optionally, if THEME is
+  "Indicate if there is a curently-active dark theme. Alternatively, if THEME is
 provided, check if it's a dark theme."
-  (or (and theme (eq theme 'modus-operandi))
-      (eq (car custom-enabled-themes) 'modus-vivendi)))
+  (if theme
+      (eq theme 'modus-vivendi)
+    (eq (car custom-enabled-themes) 'modus-vivendi)))
 
 ;;;###autoload
 (defun eb-modus-themes-set-info-faces ()
