@@ -32,7 +32,6 @@
     `((define-key global-map (kbd "s-d") 'dired-jump)
       (with-eval-after-load 'dired
         (add-hook 'dired-mode-hook 'dired-hide-details-mode)
-        (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
         (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode)
         (custom-set-variables
          '(dired-dwim-target t)
@@ -49,6 +48,10 @@
           (define-key map "q" 'kill-current-buffer)
           (define-key map (kbd "C-c C-r") 'dired-rsync)
           (define-key map "V" 'eb-dired-open-externally)))
+      (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+      (with-eval-after-load 'all-the-icons-dired
+        (custom-set-variables
+         '(all-the-icons-dired-monochrome nil)))
       ,#~""
       (with-eval-after-load 'ls-lisp
         (custom-set-variables
