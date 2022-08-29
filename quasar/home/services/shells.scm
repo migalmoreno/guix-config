@@ -6,6 +6,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages base)
+  #:use-module (gnu packages admin)
   #:use-module (gnu packages shellutils)
   #:use-module (guix gexp)
   #:export (shell-service))
@@ -15,7 +16,8 @@
    (home-generic-service 'home-shell-packages
                          #:packages (list
                                      gnu-make
-                                     direnv))
+                                     direnv
+                                     tree))
    (elisp-configuration-service
     `((with-eval-after-load 'sh-script
         (custom-set-variables
