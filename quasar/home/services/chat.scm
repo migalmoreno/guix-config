@@ -56,6 +56,7 @@
         (setq eb-erc-bouncer-nick (password-store-get-field "chat/irc/chat.sr.ht" "username")
               eb-erc-bouncer-password (password-store-get "chat/irc/chat.sr.ht")
               eb-erc-oftc-nick (password-store-get-field "chat/irc/oftc.net" "username")
+              eb-erc-oftc-password (password-store-get "chat/irc/oftc.net")
               eb-erc-libera-nick (password-store-get-field "chat/irc/libera.chat" "username")
               eb-erc-libera-password (password-store-get "chat/irc/libera.chat")))
       (with-eval-after-load 'erc
@@ -102,7 +103,7 @@
         (setq erc-status-sidebar-header-line-format
               (concat " " erc-status-sidebar-mode-line-format))
         (custom-set-variables
-         '(erc-status-sidebar-width 20)
+         '(erc-status-sidebar-width 22)
          '(erc-status-sidebar-mode-line-format nil)))
       ,#~""
       (with-eval-after-load 'erc-log

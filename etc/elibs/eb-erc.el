@@ -31,6 +31,11 @@
   :type 'string
   :group 'eb-erc)
 
+(defcustom eb-erc-oftc-password ""
+  "The password to use for the ERC connection to the OFTC.net network."
+  :type 'string
+  :group 'eb-erc)
+
 ;;;###autoload
 (defun eb-erc-connect ()
   "Connect to IRC networks via TLS."
@@ -43,7 +48,8 @@
   (erc-tls
    :server "irc.oftc.net"
    :port 6697
-   :nick eb-erc-oftc-nick))
+   :nick eb-erc-oftc-nick
+   :password eb-erc-oftc-password))
 
 ;;;###autoload
 (defun eb-erc-bouncer-connect-libera ()
