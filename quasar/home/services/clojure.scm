@@ -36,6 +36,7 @@
         (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
         (custom-set-variables
          '(cider-repl-pop-to-buffer-on-connect nil)
+         '(cider-repl-display-in-current-window t)
          '(cider-allow-jack-in-without-project t)))
       ,#~""
       (with-eval-after-load 'consult-imenu
