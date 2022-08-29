@@ -156,11 +156,5 @@
    (nyxt-configuration-service
     `((asdf:load-system :slynk)
       ,#~""
-      (define-command-global start-slynk (&optional (slynk-port *swank-port*))
-        "Starts a Slynk server to connect to via the underlying Lisp process
-from an interface such as Emacs's SLY."
-        (slynk:create-server :port slynk-port :dont-close t)
-        (echo "Slynk process started at port ~a." slynk-port))
-      ,#~""
       (unless nyxt::*run-from-repl-p*
         (start-slynk))))))
