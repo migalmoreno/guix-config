@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 (require 'gnus)
+(require 'message)
 
 (defgroup eb-gnus nil
   "Personal customizations for the Gnus newsreader."
@@ -23,6 +24,19 @@
   (flatten-list (mapcar (lambda (topic)
                           (cdr topic))
                         eb-gnus-topic-alist)))
+
+;;;###autoload
+(defun eb-gnus-get-article-participants ()
+  "Retrieve the participants from the current article."
+  (with-current-buffer gnus-article-buffer
+    (string-join
+     (remove-if
+      (lambda (address)
+        (string-match user-mail-address address))
+      (append
+       (split-string (message-fetch-field "from") ", ")
+       (split-string (message-fetch-field "to") ", ")))
+     ", ")))
 
 ;;;###autoload
 (define-minor-mode eb-gnus-topic-mode
