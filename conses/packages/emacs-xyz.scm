@@ -11,6 +11,22 @@
   #:use-module (guix build utils)
   #:use-module ((guix licenses) #:prefix license:))
 
+(define-public emacs-slack-next
+  (let ((commit "ff46d88726482211e3ac3d0b9c95dd4fdffe11c2")
+        (revision "0"))
+    (package
+      (inherit emacs-slack)
+      (version (git-version "0.0.2" revision commit))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/yuya373/emacs-slack")
+                      (commit commit)))
+                (file-name (git-file-name (package-name emacs-slack) commit))
+                (sha256
+                 (base32
+                  "15g4dmy4iqqpk8ivhkpsngzllbw0nc5d2sc9j36sdnhwkajzhidj")))))))
+
 (define-public emacs-ob-go
   (let ((commit "2067ed55f4c1d33a43cb3f6948609d240a8915f5")
         (revision "0"))
