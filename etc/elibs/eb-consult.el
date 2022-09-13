@@ -67,7 +67,18 @@ in `buffer-list'."
           :state ,#'consult--buffer-state
           :items ,(lambda ()
                     (mapcar #'buffer-name (eb-consult--mode-buffers 'ement-room-mode 'ement-room-list-mode))))
-  "Source for Telega buffers to be set in `consult-buffer-sources'.")
+  "Source for Ement buffers to be set in `consult-buffer-sources'.")
+
+;;;###autoload
+(defvar eb-consult-slack-buffer-source
+  `(:name "Slack"
+          :narrow ?s
+          :category buffer
+          :preview-key ,(kbd "M-.")
+          :state ,#'consult--buffer-state
+          :items ,(lambda ()
+                    (mapcar #'buffer-name (eb-consult--mode-buffers 'slack-message-buffer-mode 'slack-thread-message-buffer-mode))))
+  "Source for Slack buffers to be set in `consult-buffer-sources'.")
 
 ;;;###autoload
 (defvar eb-consult-comint-buffer-source
