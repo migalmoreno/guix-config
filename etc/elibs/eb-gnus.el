@@ -28,15 +28,16 @@
 ;;;###autoload
 (defun eb-gnus-get-article-participants ()
   "Retrieve the participants from the current article."
-  (with-current-buffer gnus-article-buffer
-    (string-join
-     (remove-if
-      (lambda (address)
-        (string-match user-mail-address address))
-      (append
-       (split-string (message-fetch-field "from") ", ")
-       (split-string (message-fetch-field "to") ", ")))
-     ", ")))
+  (when (buffer-live-p gnus-article-buffer)
+    (with-current-buffer gnus-article-buffer
+      (string-join
+       (remove-if
+        (lambda (address)
+          (string-match user-mail-address address))
+        (append
+         (split-string (message-fetch-field "from") ", ")
+         (split-string (message-fetch-field "to") ", ")))
+       ", "))))
 
 ;;;###autoload
 (define-minor-mode eb-gnus-topic-mode
