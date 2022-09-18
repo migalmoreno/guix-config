@@ -509,6 +509,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            emacs-exwm
            emacs-webpaste
            emacs-ement-next
+           emacs-nyxt
            emacs-telega
            emacs-password-store
            emacs-dashboard
@@ -544,4 +545,28 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (synopsis "An Emacs interface to manage F-Droid repositories.")
       (description "fdroid.el is an Emacs interface to fdroidcl. Its purpose is to aid the
  management of F-Droid repository packages to be installed in an Android device from the comfort of Emacs.")
+      (license license:gpl3+))))
+
+(define-public emacs-nyxt
+  (let ((commit "13f7b14c049bf7e85dccaaf416066997150b574c")
+        (revision "0"))
+    (package
+      (name "emacs-nyxt")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://git.sr.ht/~conses/nyxt.el")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "0zfbadl5wiiiibkrkwfzggvizvxf21czpgrw62c5dnslpr73p6n5"))))
+      (build-system emacs-build-system)
+      (propagated-inputs
+       (list emacs-sly))
+      (home-page "https://git.sr.ht/~conses/nyxt.el")
+      (synopsis "Interact with Nyxt from Emacs.")
+      (description "nyxt.el consists of custom logic to interact with Nyxt from Emacs.")
       (license license:gpl3+))))
