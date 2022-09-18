@@ -142,11 +142,13 @@
          '(org-hide-emphasis-markers t)
          '(org-fontify-done-headline t)))
       ,#~""
-      (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+      (with-eval-after-load 'org
+        (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
       (add-hook 'org-babel-after-execute-hook 'eb-org-fix-inline-images)
       ,#~""
       (require 'graphviz-dot-mode)
-      (add-to-list 'org-babel-load-languages '(dot . t))
+      (with-eval-after-load 'org
+        (add-to-list 'org-babel-load-languages '(dot . t)))
       (with-eval-after-load 'ob-dot
         (setq org-babel-default-header-args:dot
               (append
