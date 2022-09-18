@@ -165,12 +165,16 @@
 (define (slack-service)
   (list
    (elisp-configuration-service
-    '((with-eval-after-load 'slack
+    '((with-eval-after-load 'eb-slack
+        (setq eb-slack-workspace (password-store-get-field "chat/slack" "workspace"))
+        (setq eb-slack-token (password-store-get-field "chat/slack" "token"))
+        (setq eb-slack-cookie (password-store-get-field "chat/slack" "cookie")))
+      (with-eval-after-load 'slack
         (custom-set-variables
          '(slack-buffer-emojify t)
-         '(slack-prefer-current-team))
-        (slack-register-team
-         :name (password-store-get-field "chat/slack" "workspace")
-         :token (password-store-get-field "chat/slack" "token")
-         :cookie (password-store-get-field "chat/slack" "cookie"))))
-    #:elisp-packages (list emacs-slack))))
+         '(slack-prefer-current-team t)
+         '(slack-buffer-function 'switch-to-buffer))
+        (define-key mode-specific-map "sc" 'slack-channel-select)
+        (define-key mode-specific-map "st" 'slack-change-current-team)
+        (set-face-attribute 'slack-preview-face nil :background 'unspecified)))
+    #:elisp-packages (list emacs-slack-next))))

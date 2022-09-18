@@ -517,6 +517,7 @@
                  eb-consult-telega-buffer-source
                  eb-consult-erc-buffer-source
                  eb-consult-ement-buffer-source
+                 eb-consult-slack-buffer-source
                  eb-consult-exwm-buffer-source
                  eb-consult-comint-buffer-source)))
         (custom-set-variables
@@ -540,7 +541,9 @@
            (comint-mode . ?c)
            (cider-repl-mode . ?c)
            (ement-room-mode . ?n)
-           (ement-room-list-mode . ?n))))
+           (ement-room-list-mode . ?n)
+           (slack-message-buffer-mode . ?s)
+           (slack-thread-message-buffer-mode . ?s))))
       ,#~""
       (marginalia-mode)
       ,#~""
