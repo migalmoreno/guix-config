@@ -190,7 +190,5 @@
                            emacs-smartparens
                            emacs-rainbow-delimiters))
    (nyxt-configuration-service
-    `((asdf:load-system :slynk)
-      ,#~""
-      (unless nyxt::*run-from-repl-p*
+    `((unless nyxt::*run-from-repl-p*
         (start-slynk))))))
