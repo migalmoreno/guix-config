@@ -23,6 +23,7 @@
   #:use-module (flat packages emacs)
   #:use-module (guix gexp)
   #:use-module (ice-9 ftw)
+  #:use-module (rde home services emacs-xyz)
   #:export (emacs-service))
 
 (define dired-service
@@ -582,6 +583,34 @@
                            emacs-corfu
                            emacs-corfu-doc))))
 
+(define templates-service
+  (list
+   (elisp-configuration-service
+    `((add-hook 'text-mode-hook 'eb-tempel-setup-capf)
+      (add-hook 'prog-mode-hook 'eb-tempel-setup-capf)
+      (add-hook 'conf-mode-hook 'eb-tempel-setup-capf)
+      (add-hook 'fundamental-mode 'eb-tempel-setup-capf)
+      (define-key global-map (kbd "M-+") 'tempel-complete)
+      (define-key global-map (kbd "M-*") 'tempel-insert)
+      (with-eval-after-load 'tempel
+        (custom-set-variables
+         '(tempel-trigger-prefix "<"))))
+    #:elisp-packages (list emacs-tempel))
+   (service
+    home-emacs-tempel-service-type
+    (home-emacs-tempel-configuration
+     (templates
+      `(,#~"fundamental-mode"
+        (today (format-time-string "%Y-%m-%d"))
+        (copyright
+         (if (derived-mode-p 'lisp-data-mode 'clojure-data-mode 'scheme-mode)
+             ";;;"
+             comment-start)
+         (if (string-suffix-p " " comment-start) "" " ")
+         "Copyright ©" (format-time-string "%Y") " "
+         (format "%s <%s>" user-full-name user-mail-address)
+         comment-end)))))))
+
 (define editing-service
   (elisp-configuration-service
    `((custom-set-variables
@@ -990,6 +1019,7 @@
     ,editing-service
     ,@prose-service
     ,@completion-service
+    ,@templates-service
     ,@image-service
     ,pdf-service
     ,files-service
