@@ -445,8 +445,8 @@ proxy url as per `eb-web-privacy-alts'."
   (when-let* ((title (mpv-get-property "media-title"))
               (url (mpv-get-property "path"))
               (original-url (if original-p
-                                (eb-web--transform-host url :original-p nil)
-                              (eb-web--transform-url url))))
+                                (eb-web--transform-host url)
+                              (eb-web--transform-host url :alt-p nil))))
     (kill-new original-url)
     (message (format "Copied \"%s\" to the system clipboard" title))))
 

@@ -396,7 +396,8 @@
                               ("v" eb-mpv-start)
                               ("V" eb-mpv-start-other-window)
                               ("c" browse-url-chromium))
-        (add-to-list 'embark-keymap-alist '(org-roam-ref . embark-roam-ref-map)))
+        (add-to-list 'embark-keymap-alist '(org-roam-ref . embark-roam-ref-map))
+        (advice-add 'org-roam-ref-add :around 'eb-web-trace-url))
       ,#~""
       (with-eval-after-load 'ol
         (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file))

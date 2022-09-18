@@ -639,8 +639,12 @@
            '(webpaste-paste-confirmation t)))
         (with-eval-after-load 'eb-web
           (custom-set-variables
-           '(eb-web-privacy-alts `(("youtube.com" . (,(rx (: "invidio" (+ any))) . "invidious.namazso.eu"))
-                                   ("reddit.com" . (,(rx (: "teddit" (+ any))) . "teddit.namazso.eu"))))))
+           '(eb-web-privacy-alts `(("www.youtube.com" . (,(rx (: "invidio" (+ any))) . "invidious.namazso.eu"))
+                                   ("www.reddit.com" . (,(rx (: "teddit" (+ any))) . "teddit.namazso.eu"))
+                                   ("quora.com" . (,(rx (: "quora" (+ any))) . "quora.vern.cc"))
+                                   ("twitter.com" . (,(rx (: "nitter" (+ any))) . "nitter.namazso.eu"))
+                                   ("imgur.com" . (,(rx (: "imgin" (+ any))) . "imgin.voidnet.tech"))
+                                   ("medium.com" . (,(rx (: "scribe" (+ any))) . "scribe.rip"))))))
         ,#~""
         (advice-add 'browse-url-xdg-open :around 'eb-web-add-url-scheme))
       #:elisp-packages (list emacs-webpaste

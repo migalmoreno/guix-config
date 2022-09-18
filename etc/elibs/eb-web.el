@@ -9,30 +9,31 @@
 
 (defcustom eb-web-privacy-alts '()
   "Alist of the form SERVICE . PRIVATE-MAPPING where SERVICE is the hostname of
-a media service and PRIVATE-MAPPING is a cons pair of REGEX . PRIVATE-HOST to
- match against a privacy friendly alternative to open."
+a media service and PRIVATE-MAPPING is a cons pair of REGEX . PRIVATE-HOST
+where REGEX is what should match the alternative front-end and PRIVATE-HOST is
+the preferred instance to rewrite URLs to."
   :type 'list
   :group 'eb-web)
 
-(cl-defun eb-web--transform-host (url &key (original-p t))
+(cl-defun eb-web--transform-host (url &key (alt-p t))
   "Transform URL to its currently set proxy in `eb-web-privacy-alts'.
-If ORIGINAL-P is nil, URL is a proxy URL, so try to find the
+If ALT-P is non-`nil', URL is a proxy URL, so try to find the
 original service url."
   (string-match (rx (: (+ any) "//" (group (+ (not "/"))))) url)
   (if-let* ((service-url (match-string 1 url))
-            (mapping (if original-p
-                         (assoc-string service-url eb-web-privacy-alts)
-                       (cl-rassoc service-url eb-web-privacy-alts :test (lambda (url privacy-map)
-                                                                          (string-match-p (car privacy-map) url))))))
-      (if original-p
+            (mapping (if alt-p
+                         (cl-rassoc service-url eb-web-privacy-alts :test (lambda (url privacy-map)
+                                                                          (string-match-p (car privacy-map) url)))
+                       (assoc-string service-url eb-web-privacy-alts))))
+      (if alt-p
           (replace-regexp-in-string
-           service-url
-           (cddr mapping)
-           url)
-        (replace-regexp-in-string
          service-url
          (car mapping)
-         url))
+         url)
+        (replace-regexp-in-string
+           service-url
+           (cddr mapping)
+           url))
     url))
 
 ;;;###autoload
@@ -103,6 +104,12 @@ original service url."
   (let ((link (if (string-match (rx (: bol (+ (in (?A . ?Z))) ":")) url)
                   url
                 (concat "https:" url))))
+    (apply fun link args)))
+
+(defun eb-web-trace-url (fun url &rest args)
+  "Transform alternative front-end URL to its original service host and
+invoke FUN and ARGS with it."
+  (let ((link (eb-web--transform-host url)))
     (apply fun link args)))
 
 ;;;###autoload
