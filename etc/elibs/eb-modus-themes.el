@@ -1,4 +1,6 @@
 ;; -*- lexical-binding: t; -*-
+(require 'nyxt)
+
 (defgroup eb-modus-themes nil
   "Minor nits related to `modus-themes'."
   :group 'eb)
@@ -37,5 +39,14 @@ provided, check if it's a dark theme."
     (set-face-attribute 'info-macro-ref-item nil :background 'unspecified)
     (set-face-attribute 'info-variable-ref-item nil :background 'unspecified)
     (set-face-attribute 'info-string nil :foreground "#79a8ff")))
+
+;;;###autoload
+(defun eb-modus-themes-change-nyxt-theme (&optional theme)
+  "Switch theme in Nyxt according to current system theme or THEME."
+  (interactive)
+  (if (or (and theme (eb-modus-themes--dark-theme-p theme))
+          (eb-modus-themes--dark-theme-p))
+      (nyxt-change-theme "modus-vivendi")
+    (nyxt-change-theme "modus-operandi")))
 
 (provide 'eb-modus-themes)
