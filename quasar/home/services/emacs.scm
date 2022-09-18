@@ -424,13 +424,13 @@
     `((define-command org-capture ()
         "Stores and captures the current page link via Org mode."
         (eval-in-emacs
-         '(eb-nyxt-capture "tb"))
+         '(nyxt-capture "tb"))
         (echo "Org link successfully stored and captured"))
       ,#~""
       (define-command org-roam-capture ()
         "Stores and captures the current page as an Org Roam node."
         (eval-in-emacs
-         '(eb-nyxt-capture "w" :roam-p t)))
+         '(nyxt-capture "w" :roam-p t)))
       (define-key *custom-keymap*
         "M-c c" 'org-capture
         "M-c n" 'org-roam-capture)))))
