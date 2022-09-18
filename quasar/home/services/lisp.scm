@@ -3,6 +3,7 @@
   #:use-module (conses home services emacs)
   #:use-module (conses home services web-browsers)
   #:use-module (conses home services lisp)
+  #:use-module (rde home services emacs-xyz)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)
   #:use-module (gnu packages lisp)
@@ -50,6 +51,41 @@
                                          (format
                                           "(:tree \"~a/.guix-home/profile/share/emacs/site-lisp/\")"
                                           (getenv "HOME"))))))
+   (simple-service
+    'home-lisp-templates
+    home-emacs-tempel-service-type
+    `(,#~"lisp-mode emacs-lisp-mode"
+      (lambda "(lambda (" p ")" n> r> ")")
+      (fun "(defun " p " (" p ")\n \"" p "\"" n> r> ")")
+      (var "(defvar " p "\n  \"" p "\")")
+      (cond "(cond" n "(" q "))" >)
+      (let "(let (" p ")" n> r> ")")
+      (let* "(let* (" p ")" n> r> ")")
+      (dolist "(dolist (" p ")" n> r> ")")
+      ,#~"emacs-lisp-mode"
+      (autoload ";;;###autoload")
+      (pt "(point)")
+      (local "(defvar-local " p "\n \"" p "\")")
+      (const "(defconst " p "\n  \"" p "\")")
+      (custom "(defcustom " p "\n \"" p "\"" n> ":type '" p ")")
+      (face "(defface " p " '((t :inherit " p "))\n \"" p "\")")
+      (group "(defgroup " p " nil\n \"" p "\"" n> ":group '" p n> ":prefix \"" p "-\")")
+      (macro "(defmacro " p " (" p ")\n \"" p "\"" n> r> ")")
+      (alias "(defalias '" p " '" p ")")
+      (iflet "(if-let (" p ")" n> r> ")")
+      (whenlet "(when-let (" p ")" n> r> ")")
+      (iflet* "(if-let* (" p ")" n> r> ")")
+      (whenlet* "(when-let* (" p ")" n> r> ")")
+      (andlet "(and-let* (" p ")" n> r> ")")
+      (pcase "(pcase " (p "scrutinee") n "(" q "))" >)
+      (rec "(letrec (" p ")" n> r> ")")
+      (dotimes "(dotimes (" p ")" n> r> ")")
+      (loop "(cl-loop for " p " in " p " do" n> r> ")")
+      (command "(defnn " p " (" p ")\n  \"" "\"" n> "(interactive" p ")" n> r> ")")
+      (advice "(defun " (p "adv" name) " (&rest app)" n> p n> "(apply app))" n>
+              "(advice-add #'" (p "fun") " " (p ":around") " #'" (s name) ")")
+      (provide "(provide '" (file-name-base (or (buffer-file-name) (buffer-name))) ")" n
+               ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name))) " ends here" n)))
    (elisp-configuration-service
     `((with-eval-after-load 'lisp-mode
         (custom-set-variables
