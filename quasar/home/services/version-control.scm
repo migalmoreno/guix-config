@@ -57,10 +57,10 @@
         (custom-set-variables
          '(srht-username (password-store-get-field "vc/sourcehut" "username"))))
       ,#~""
+      (define-key vc-prefix-map "W" 'git-email-format-patch)
       (with-eval-after-load 'git-email
         (custom-set-variables
          '(git-email-format-patch-default-args "-o ~/src/patches"))
-        (define-key vc-prefix-map "W" 'git-email-format-patch)
         (git-email-gnus-mode 1))
       ,#~""
       (with-eval-after-load 'eb-vc
@@ -82,6 +82,7 @@
           (if (uiop:directory-exists-p path)
               (echo "Error: Directory ~a already exists." (namestring path))
               (eval-in-emacs
+               '(require 'magit)
                `(magit-clone-internal
                  ,(quri:render-uri (url (current-buffer)))
                  ,(namestring path)
