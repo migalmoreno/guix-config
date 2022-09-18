@@ -1,7 +1,7 @@
 (define-module (quasar home services clojure)
   #:use-module (conses home services emacs)
+  #:use-module (rde home services emacs-xyz)
   #:use-module (conses packages emacs-xyz)
-  #:use-module (conses packages clojure)
   #:use-module (nongnu packages clojure)
   #:use-module (gnu home-services base)
   #:use-module (gnu services)
@@ -18,17 +18,28 @@
 
 (define (clojure-service)
   (list
-   (home-generic-service 'home-clojure-service
+   (home-generic-service 'home-clojure-packages
                          #:packages (list clojure
                                           leiningen
                                           unzip
-                                          clojure-tools-next
+                                          clojure-tools
                                           (list openjdk17 "jdk")
                                           node))
    (simple-service
-    'add-clojure-envs
+    'home-clojure-envs
     home-environment-variables-service-type
     '(("LEIN_HOME" . "$XDG_DATA_HOME/lein")))
+   (simple-service
+    'home-clojure-templates
+    home-emacs-tempel-service-type
+    `(,#~"clojure-mode clojurescript-mode"
+      (var "(def " p ")")
+      (ns "(ns " p n> "(:require [" p " :as " p "]))")
+      (fn "(fn [" p "]" n> r> ")")
+      (defn "(defn " p n> "[" p "]" n> r> ")")
+      (let "(let [" p "]" n> r> ")")
+      (atom "(atom " p ")")
+      (record "(defrecord " p n> "[" p "])")))
    (elisp-configuration-service
     `((define-key mode-specific-map "rc" 'cider-jack-in)
       (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
