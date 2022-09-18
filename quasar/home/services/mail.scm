@@ -92,8 +92,13 @@
                               (gcc-self . "nnmaildir+personal:Sent"))
                              ("^nntp"
                               (display . 1000))))
-         '(gnus-posting-styles '(("personal"
-                                  (name ,(getenv "MAIL_PERSONAL_FULLNAME")))))
+         '(gnus-posting-styles `(("personal"
+                                  (name ,(getenv "MAIL_PERSONAL_FULLNAME")))
+                                 ((header "to" ".*@lists.sr.ht")
+                                  (name ,(getenv "MAIL_PERSONAL_USERNAME"))
+                                  (signature ,(concat "Best regards,\n"
+                                                      ,(getenv "MAIL_PERSONAL_USERNAME")))
+                                  (To ,(eb-gnus-get-article-participants)))))
          '(gnus-directory "~/.cache/gnus/News")
          '(gnus-home-directory (locate-user-emacs-file "gnus"))
          '(gnus-cache-directory "~/.cache/gnus/News/cache/")
@@ -141,17 +146,29 @@
                                   "nnmaildir+personal:Junk"
                                   "nnmaildir+personal:Trash")
                                  ("clojure"
-                                  "nntp+gwene:gwene.clojure.planet")
+                                  "nntp+gwene:gwene.clojure.planet"
+                                  "nntp+gwene:gwene.com.google.groups.clojure")
                                  ("lisp"
                                   "nntp+gwene:gwene.org.lisp.planet"
-                                  "nntp+gwene:gwene.engineer.atlas.nyxt")
+                                  "nntp+gwene:gwene.engineer.atlas.nyxt"
+                                  "nntp+gwene:gwene.org.wingolog")
                                  ("technology"
                                   "nntp+gwene:gwene.org.fsf.news"
                                   "nntp+gwene:gwene.rs.lobste"
-                                  "nntp+gwene:gwene.org.hnrss.newest.points")
+                                  "nntp+gwene:gwene.org.hnrss.newest.points"
+                                  "nntp+gwene:gwene.com.unixsheikh"
+                                  "nntp+gwene:gwene.com.drewdevault.blog"
+                                  "nntp+gwene:gwene.net.lwn.headlines.newrss"
+                                  "nntp+gwene:gwene.com.usesthis"
+                                  "nntp+gwene:gwene.org.sourcehut.blog"
+                                  "nntp+gwene:gwene.cc.tante"
+                                  "nntp+gwene:gwene.org.matrix.blog")
                                  ("emacs"
                                   "nntp+gwene:gmane.emacs.devel"
-                                  "nntp+gwene:gmane.emacs.erc.general")
+                                  "nntp+gwene:gmane.emacs.erc.general"
+                                  "nntp+gwene:gwene.com.oremacs"
+                                  "nntp+gwene:gwene.org.emacslife.planet"
+                                  "nntp+gwene:gwene.group.discourse.org-roam.latest")
                                  ("guix"
                                   "nntp+gwene:gmane.comp.gnu.guix.bugs"
                                   "nntp+gwene:gmane.comp.gnu.guix.patches"
