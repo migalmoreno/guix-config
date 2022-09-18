@@ -593,9 +593,14 @@
       `((require 'yaml-mode)
         (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode))
         ,#~""
+        (with-eval-after-load 'js
+          (custom-set-variables
+           '(js-indent-level 2)))
         (with-eval-after-load 'css-mode
           (custom-set-variables
-           '(css-indent-offset 2))))
+           '(css-indent-offset 2)))
+        (with-eval-after-load 'html-mode
+          (define-key html-mode-map (kbd "M-o") 'ace-window)))
       #:elisp-packages (list emacs-json-mode
                              emacs-yaml-mode))
      (simple-service
