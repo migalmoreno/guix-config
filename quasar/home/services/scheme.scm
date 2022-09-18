@@ -3,6 +3,7 @@
   #:use-module (conses packages emacs-xyz)
   #:use-module (conses home services emacs)
   #:use-module (conses home services scheme)
+  #:use-module (rde home services emacs-xyz)
   #:use-module (rrr packages emacs-xyz)
   #:use-module (gnu home-services base)
   #:use-module (gnu home services)
@@ -29,6 +30,16 @@
                 (load-compiled-path . ,(string-append
                                         "$XDG_CONFIG_HOME/guix/current/lib/guile/3.0/site-ccache:"
                                         "$GUILE_LOAD_COMPILED_PATH"))))))
+   (simple-service
+    'home-guile-templates
+    home-emacs-tempel-service-type
+    `(,#~"scheme-mode"
+      (lambda "(lambda (" p ")" n> r> ")")
+      (var "(define " p "\n" p ")")
+      (fun "(define (" p ")" n> r> ")")
+      (dmod "(define-module (" p ")" n> r> ")")
+      (umod "#:use-module (" p ")")
+      (ex "#:export (" p ")")))
    (elisp-configuration-service
     `((require 'al-scheme nil t)
       (setq scheme-imenu-generic-expression al/scheme-imenu-generic-expression)
@@ -70,7 +81,7 @@
          '(geiser-repl-use-other-window t)
          '(geiser-repl-per-project-p t)))
       ,#~""
-      (define-key mode-specific-map "rg" 'run-guile)
+      (define-key mode-specific-map "rg" 'geiser-guile)
       (with-eval-after-load 'geiser-guile
         (custom-set-variables
          '(geiser-guile-load-path (split-string (getenv "GUILE_LOAD_PATH") ":"))
@@ -95,6 +106,29 @@
                 "~/src/guixrc"))
              (envs
               `((profile . ,(string-append (getenv "HOME") "/.guix-profile"))))))
+   (simple-service
+    'home-guix-templates
+    home-emacs-tempel-service-type
+    `(,#~"scheme-mode"
+      (pkg "(define-public " (p "" name) n>
+           "(package" n>
+           "(name \"" (s name) "\")" n>
+           "(version \"" p "\")" n>
+           "(source " n> p ")" n>
+           "(build-system " p ")" n>
+           "(home-page \"" p "\")" n>
+           "(synopsis \"" p "\")" n>
+           "(description \"" p "\")" n>
+           "(license " p ")))")
+      (gitref "(git-reference" n>
+              "(url \"" p "\")" n>
+              "(commit " (p "commit") "))")
+      (orig "(origin " n>
+            "(method " (p "git" method) "-fetch)" n>
+            "(uri " p ")" n>
+            "(file-name (" (s method) "-file-name name version))" n>
+            "(sha256" n>
+            "(base32 \"" p "\")))")))
    (elisp-configuration-service
     `(;; (require 'guix-autoloads)
       ;; (guix-emacs-autoload-packages)
