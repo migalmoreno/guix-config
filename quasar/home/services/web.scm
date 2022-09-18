@@ -289,6 +289,10 @@
             :fallback-url (quri:uri "https://clojureverse.org")
             :base-search-url "https://clojureverse.org/search?q=~a")
            (engines:discourse
+            :shortcut "oc"
+            :fallback-url (quri:uri "https://discuss.ocaml.org")
+            :base-search-url "https://discuss.ocaml.org/search?q=~a")
+           (engines:discourse
             :shortcut "or"
             :fallback-url (quri:uri "https://org-roam.discourse.group")
             :base-search-url "https://org-roam.discourse.group/search?q=~a")
@@ -304,6 +308,7 @@
             :shortcut "giu")
            (engines:teddit
             :shortcut "re"
+            :fallback-url (quri:uri "https://teddit.namazso.eu")
             :base-search-url "https://teddit.namazso.eu/search?q=~a")
            (engines:hacker-news
             :shortcut "hn"
@@ -311,6 +316,10 @@
             :search-type :all)
            (engines:lobsters
             :shortcut "lo")
+           (make-search-engine
+            "clj"
+            "https://clojars.org/search?q=~a"
+            "https://clojars.org")
            (engines:whoogle
             :shortcut "who"
             :base-search-url "http://localhost:5000/search?q=~a"
@@ -321,35 +330,37 @@
             :lang-ui :english
             :view-image t
             :no-javascript t
-            :new-tab t))))))
-     ,#~""
-     (defun simple-search (query)
-       "Executes a simple search with QUERY in the default search engine."
-       (buffer-load
-        (first (nyxt::input->queries query))
-        :buffer (make-buffer-focus))))))
+            :new-tab t)))))))))
 
 (define routing-service
   (nyxt-configuration-service
    `((defun make-invidious-instances ()
-         "Returns a list of Invidious instances."
-         (mapcar 'first
-                 (json:with-decoder-simple-list-semantics
-                  (json:decode-json-from-string
-                   (dex:get "https://api.invidious.io/instances.json")))))
+       "Return a list of Invidious instances."
+       (mapcar 'first
+               (json:with-decoder-simple-list-semantics
+                (json:decode-json-from-string
+                 (dex:get "https://api.invidious.io/instances.json")))))
      ,#~""
-     (defun make-bibliogram-instances ()
-       "Returns a list of Bibliogram instances."
-       (mapcar (lambda (instance)
-                 (alex:assoc-value instance :address))
-               (alex:assoc-value
-                (json:with-decoder-simple-list-semantics
-                 (json:decode-json-from-string
-                  (dex:get "https://bibliogram.art/api/instances")))
-                :data)))
+     (defun set-invidious-instance ()
+       "Set the primary Invidious instance."
+       (let ((instances (remove-if-not
+                         (lambda (instance)
+                           (and (string= (alex:assoc-value (second instance) :region)
+                                         "DE")
+                                (string= (alex:assoc-value (second instance) :type)
+                                         "https")))
+                         (json:with-decoder-simple-list-semantics
+                          (json:decode-json-from-string
+                           (dex:get "https://api.invidious.io/instances.json"))))))
+         (first (car instances))))
+     ,#~""
+     (defun make-scribe-instances ()
+       "Return a list of Scribe instances."
+       (json:decode-json-from-string
+        (dex:get "https://git.sr.ht/~edwardloveall/scribe/blob/main/docs/instances.json")))
      ,#~""
      (defun make-teddit-instances ()
-       "Returns a list of Teddit instances."
+       "Return a list of Teddit instances."
        (mapcar (lambda (instance)
                  (unless (str:emptyp (alex:assoc-value instance :url))
                    (alex:assoc-value instance :url)))
