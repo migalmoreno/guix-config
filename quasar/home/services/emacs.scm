@@ -480,8 +480,6 @@
         (add-hook 'marginalia-mode-hook 'all-the-icons-completion-marginalia-setup))
       ,#~""
       (advice-add 'completing-read-multiple :filter-args 'eb-consult-crm-indicator)
-      (advice-add 'completing-read-multiple
-                  :override 'consult-completing-read-multiple)
       ,#~""
       (autoload 'embark-pp-eval-defun "embark")
       (define-key global-map (kbd "C-.") 'embark-act)
