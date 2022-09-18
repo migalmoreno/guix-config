@@ -376,28 +376,41 @@
         (router:banner-p t)
         (router:routes
          (list
-          (make-route '(match-regex "https://(www.)?insta.*")
-                      :redirect '("bibliogram.pussthecat.org" (:path ("/u" (not "/" "/p/" "/tv"))))
-                      :instances 'make-bibliogram-instances)
+          (make-route (match-regex "https://(www.)?insta.*")
+                      :original "www.instagram.com"
+                      :redirect (make-instance
+                                 'router:redirect
+                                 :to "www.picuki.com"
+                                 :rules '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
+                                          ("/media/" . "/p/"))))
           (make-route (match-domain "tiktok.com")
-                      :redirect '("proxitok.herokuapp.com" (:path ("/@placeholder/video" (not "/"))))
+                      :original "www.tiktok.com"
+                      :redirect (make-instance
+                                 'router:redirect
+                                 :to "proxitok.herokuapp.com"
+                                 :rules '(("/@placeholder/video/" . (not "/" "/@"))))
                       :blocklist '(:path (:contains (not "video"))))
-          (make-route '(match-domain "reddit.com")
+          (make-route (match-domain "reddit.com")
+                      :original "www.reddit.com"
                       :redirect "teddit.namazso.eu"
-                      :blocklist '(:path (:contains (not "/comments"))))
+                      :instances 'make-teddit-instances
+                      :blocklist (make-instance
+                                  'router:blocklist
+                                  :rules '(:contains (not "/comments"))))
           (make-route (match-regex "https://whoogle.*"
                                    "https://.*google.com/search.*")
-                      :redirect "localhost:5000")
-          (make-route '(match-regex ".*/watch\\?v=.*")
-                      :redirect "youtube.com"
+                      :original (quri:uri "https://www.google.com")
+                      :redirect (quri:uri "http://localhost:5000"))
+          (make-route (match-regex ".*/watch\\?.*v=.*")
+                      :redirect "www.youtube.com"
                       :external (lambda (data)
                                   (eval-in-emacs
                                    `(eb-mpv-start ,(quri:render-uri (url data))
                                                   :audio-only t :repeat t))))
-          (make-route '(match-regex "https://gfycat.com/.*"
-                                    "https://streamable.com/.*"
-                                    "https://.*/videos/watch/.*"
-                                    ".*cloudfront.*master.m3u8")
+          (make-route (match-regex "https://gfycat.com/.*"
+                                   "https://streamable.com/.*"
+                                   "https://.*/videos/watch/.*"
+                                   ".*cloudfront.*master.m3u8")
                       :external (lambda (data)
                                   (eval-in-emacs
                                    `(eb-mpv-start ,(quri:render-uri (url data))))))
@@ -405,22 +418,38 @@
                       :external (lambda (data)
                                   (eval-in-emacs
                                    `(transmission-add ,(quri:render-uri (url data))))))
-          (make-route '(match-domain "youtube.com" "youtu.be")
-                      :redirect "invidious.namazso.eu"
-                      :blocklist '(:path (:starts ("/c/"))))
+          (make-route (match-domain "youtube.com" "youtu.be")
+                      :original "www.youtube.com"
+                      :redirect 'set-invidious-instance
+                      :instances 'make-invidious-instances
+                      :blocklist '(:path (:starts "/c/")))
           (make-route (match-domain "medium.com")
-                      :redirect "scribe.rip")
+                      :original "www.medium.com"
+                      :redirect "scribe.rip"
+                      :instances 'make-scribe-instances)
           (make-route (match-domain "imgur.com")
+                      :original "imgur.com"
                       :redirect "imgin.voidnet.tech")
           (make-route (match-domain "quora.com")
+                      :original "www.quora.com"
                       :redirect "quora.vern.cc")
           (make-route (match-domain "lemmy.ml")
                       :blocklist '(:path (:starts ("/u/" "/c"))))
           (make-route (match-domain "twitter.com")
-                      :redirect "nitter.42l.fr"))))))))
+                      :original "www.twitter.com"
+                      :redirect (make-instance
+                                 'router:redirect
+                                 :to "farside.link"
+                                 :rules '(("/nitter/" . "/"))))))))
+     ,#~""
+     (defmethod nyxt:on-signal-load-finished :around ((mode nyxt/history-mode:history-mode) url)
+       (call-next-method mode (router:trace-url url)))
+     (defmethod nyxt/bookmark-mode:bookmark-current-url :around (&optional (buffer (current-buffer)))
+       (setf (url buffer) (router:trace-url url))
+       (call-next-method buffer)))))
 
-(define (nyxt-service)
-  (list
+(define* (nyxt-service #:key development-p)
+  (cons*
    (simple-service
     'home-nyxt-xdg
     home-xdg-mime-applications-service-type
