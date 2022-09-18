@@ -1,7 +1,8 @@
 (define-module (quasar home services mail)
   #:use-module (quasar home)
   #:use-module (conses home services emacs)
-  #:use-module (conses home services mail)
+  #:use-module (rde home services mail)
+  #:use-module (rde home services emacs-xyz)
   #:use-module (gnu services)
   #:use-module (gnu home services mcron)
   #:use-module (gnu home-services mail)
@@ -59,6 +60,15 @@
                                                                  :timeout 0)))
                 (trigger . 20)
                 (boxes . #("Inbox"))))))
+   (simple-service
+    'home-mail-templates
+    home-emacs-tempel-service-type
+    `(,#~"text-mode"
+      (cut "--8<---------------cut here---------------start------------->8---" n r n
+           "--8<---------------cut here---------------end--------------->8---" n)
+      (asciibox "+-" (make-string (length str) ?-) "-+" n
+                "| " (s str) " |" n
+                "+-" (make-string (length str) ?-) "-+" n)))
    (elisp-configuration-service
     `((setq user-full-name ,(getenv "MAIL_PERSONAL_USERNAME"))
       (setq user-mail-address ,(getenv "MAIL_PERSONAL_EMAIL"))
@@ -202,6 +212,7 @@
       (add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart)
       (add-hook 'message-mode-hook 'eb-message-mode)
       (with-eval-after-load 'message
+        (require 'ebdb)
         (require 'ebdb-message)
         (add-hook 'message-header-setup-hook 'eb-message-add-gcc-header)
         (let ((map message-mode-map))
@@ -209,6 +220,7 @@
           (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode))
         (define-key org-mode-map (kbd "C-c M-o") 'org-mime-org-buffer-htmlize)
         (custom-set-variables
+         '(message-signature ,(getenv "MAIL_PERSONAL_FULLNAME"))
          '(message-send-mail-function 'smtpmail-send-it)
          '(message-kill-buffer-on-exit t)))
       ,#~""
