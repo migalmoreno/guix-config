@@ -3,6 +3,7 @@
   #:use-module (conses home services web-browsers)
   #:use-module (conses home services emacs)
   #:use-module (conses packages web-browsers)
+  #:use-module (conses packages emacs-xyz)
   #:use-module (gnu home-services base)
   #:use-module (gnu home services)
   #:use-module (gnu home services xdg)
@@ -534,31 +535,24 @@
     `((with-eval-after-load 'consult
         (add-to-list 'consult-bookmark-narrow
                      `(?n "Nyxt" ,'eb-web--jump-to-bookmark)))
-      (let ((map mode-specific-map))
-        (define-key map "rn" 'eb-nyxt-connect-to-slynk)
-        (define-key map "xs" 'eb-nyxt-search)
-        (define-key map "xb" 'eb-nyxt-set-up-window)
-        (define-key map "xw" 'eb-nyxt-copy-url)
-        (define-key map "xk" 'eb-nyxt-delete-current-buffer)
-        (define-key map "xv" 'eb-nyxt-set-transient-map))
-      ,#~""
-      (with-eval-after-load 'eb-nyxt
-        (custom-set-variables
-         '(eb-nyxt-development-p nil)
-         '(eb-nyxt-startup-threshold 8))
-        (setq eb-nyxt-development-flags
-                (when (and (file-exists-p
-                            (expand-file-name
-                             "nyxt-dev.desktop"
-                             (concat (xdg-data-home) "/applications/")))
-                           eb-nyxt-development-p)
+      (define-key mode-specific-map "rn" 'nyxt-connect-to-slynk)
+      (nyxt-default-keybindings))
+    #:elisp-packages (list emacs-nyxt))
+   (if development-p
+       (elisp-configuration-service
+        '((setq nyxt-startup-flags
+                (when (file-exists-p
+                       (expand-file-name
+                        "nyxt-dev.desktop"
+                        (concat (xdg-data-home) "/applications/")))
                   (thread-last
                    (xdg-data-home)
                    (format "%s/applications/nyxt-dev.desktop")
                    (xdg-desktop-read-file)
                    (gethash "Exec")
                    (split-string)
-                   (cdr)))))))))
+                   (cdr))))))
+       '())))
 
 (define* (web-service #:key alt-browser-p)
   (let ((chromium-flags (list "--remove-tabsearch-button"
@@ -591,9 +585,7 @@
            '(browse-url-generic-program (if-let ((file (expand-file-name
                                                         "nyxt-dev.desktop"
                                                         (concat (xdg-data-home)
-                                                                "/applications/")))
-                                                 (development-p (and (boundp 'eb-nyxt-development-p)
-                                                                     eb-nyxt-development-p)))
+                                                                "/applications/"))))
                                                 (and (file-exists-p file)
                                                      (gethash "Exec" (xdg-desktop-read-file file)))
                                                 (getenv "BROWSER")))
@@ -643,7 +635,7 @@
                   (comment . "Access the Internet"))))))))
           (nyxt-configuration-service
            `((define-command open-with-chromium ()
-               "Opens the current page with Chromium."
+               "Open the current page with Chromium."
                (eval-in-emacs
                 `(browse-url-chromium ,(render-url (url (current-buffer)))))))))
          '()))))
