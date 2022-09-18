@@ -201,7 +201,9 @@
                                                     "a[href$=following]"
                                                     "a[href$=achievements]"
                                                     "[action*=follow]"))
-                                   :display "none !important"))))))))
+                                   :display "none !important")
+                                  ("img[class*=avatar]"
+                                   :visibility "hidden"))))))))
      ,#~""
      (defmethod custom-format-buttons ((status status-buffer))
        "Buttons used for custom status formatter."
