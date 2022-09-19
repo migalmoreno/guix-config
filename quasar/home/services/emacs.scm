@@ -810,12 +810,12 @@
      (set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)
      (setq use-default-font-for-symbols nil)
      ,#~""
-     (modus-themes-load-themes)
      (add-hook 'modus-themes-after-load-theme-hook 'eb-modus-themes-set-theme-dependent-faces)
      (add-hook 'modus-themes-after-load-theme-hook 'eb-pdf-view-update-buffers)
      (add-hook 'modus-themes-after-load-theme-hook 'eb-mpv-change-theme)
      (add-hook 'modus-themes-after-load-theme-hook 'eb-org-update-buffers-faces)
-     (add-hook 'modus-themes-after-load-theme-hook 'eb-nyxt-change-theme)
+     (add-hook 'modus-themes-after-load-theme-hook 'eb-modus-themes-change-nyxt-theme)
+     (modus-themes-load-themes)
      (with-eval-after-load 'modus-themes
        (define-key mode-specific-map "Mt" 'modus-themes-toggle)
        (custom-set-variables
@@ -834,7 +834,7 @@
      (add-hook 'circadian-after-load-theme-hook 'eb-pdf-view-update-buffers)
      (add-hook 'circadian-after-load-theme-hook 'eb-mpv-change-theme)
      (add-hook 'circadian-after-load-theme-hook 'eb-org-update-buffers-faces)
-     (add-hook 'circadian-after-load-theme-hook 'eb-nyxt-change-theme)
+     (add-hook 'circadian-after-load-theme-hook 'eb-modus-themes-change-nyxt-theme)
      (custom-set-variables
       '(circadian-themes '((:sunrise . modus-operandi)
                            (:sunset . modus-vivendi))))
@@ -1046,11 +1046,11 @@
                                                  (setq gc-cons-threshold 800000)))
                  ,#~""
                  (setq gc-cons-threshold most-positive-fixnum
-                       package-enable-at-startup nil
                        package-native-compile t
                        package-user-dir (expand-file-name "emacs/elpa" (xdg-data-home))
                        auto-save-list-file-prefix (expand-file-name "emacs/auto-save-list/.saves-"
-                                                                    (xdg-data-home)))))
+                                                                    (xdg-data-home)))
+                 (setq package-enable-at-startup nil)))
               (init-el
                `(,#~";; -*- lexical-binding: t; -*-"
                  (require 'xdg)
