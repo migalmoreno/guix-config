@@ -567,7 +567,10 @@
         (add-to-list 'consult-bookmark-narrow
                      `(?n "Nyxt" ,'eb-web--jump-to-bookmark)))
       (define-key mode-specific-map "rn" 'nyxt-connect-to-slynk)
-      (nyxt-default-keybindings))
+      (nyxt-default-keybindings)
+      (with-eval-after-load 'nyxt
+        (custom-set-variables
+         '(nyxt-startup-flags nil))))
     #:elisp-packages (list emacs-nyxt))
    (if development-p
        (elisp-configuration-service
