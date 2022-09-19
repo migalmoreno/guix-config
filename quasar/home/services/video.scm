@@ -118,7 +118,7 @@
     #:elisp-packages (list emacs-mpv))
    (nyxt-configuration-service
     '((define-command play-video-in-current-page (&optional (buffer (current-buffer)))
-        "Plays video in the currently open buffer."
+        "Play video in the currently open buffer."
         (let ((url (render-url (url buffer))))
           (echo "Opening ~s with mpv." url)
           (eval-in-emacs
