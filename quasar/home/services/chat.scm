@@ -28,7 +28,7 @@
    (elisp-configuration-service
     `((let ((map mode-specific-map))
         (define-key map "ed" 'ement-disconnect)
-        (define-key map "ee" 'eb-ement-connect))
+        (define-key map "ec" 'eb-ement-connect))
       (with-eval-after-load 'eb-ement
         (setq eb-ement-username (password-store-get-field "chat/matrix" "username")
               eb-ement-password (password-store-get "chat/matrix")))
@@ -174,7 +174,8 @@
          '(slack-buffer-emojify t)
          '(slack-prefer-current-team t)
          '(slack-buffer-function 'switch-to-buffer))
-        (define-key mode-specific-map "sc" 'slack-channel-select)
+        (define-key mode-specific-map "sc" 'eb-slack-connect)
+        (define-key mode-specific-map "ss" 'slack-channel-select)
         (define-key mode-specific-map "st" 'slack-change-current-team)
         (set-face-attribute 'slack-preview-face nil :background 'unspecified)))
     #:elisp-packages (list emacs-slack-next))))
