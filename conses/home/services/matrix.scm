@@ -21,7 +21,7 @@
    (ini-config '())
    "Alist of pairs to define the daemon configuration."))
 
-(define (pantalaimon-shepherd-service config)
+(define (home-pantalaimon-shepherd-service config)
   (list
    (shepherd-service
     (documentation "Pantalaimon user service for non-E2EE Matrix clients.")
@@ -36,21 +36,16 @@
                           "/pantalaimon.log")))
     (stop #~(make-kill-destructor)))))
 
-(define (add-pantalaimon-configuration config)
+(define (home-pantalaimon-files-service config)
   (define (uglify-term term)
     (let ((str (maybe-object->string term)))
       (apply string-append (map string-capitalize (string-split str #\-)))))
 
-  (define (serialize-term term)
-    (match term
-      ((? symbol? e) (symbol->string e))
-      ((? number? e) (number->string e))
-      ((? boolean? e) (boolean->true-or-false e #t))
-      (e e)))
-
   (define (serialize-field key val)
-    (let ((name ((compose uglify-term serialize-term) key))
-          (value (serialize-term val)))
+    (let ((name (uglify-term key))
+          (value (cond
+                  ((boolean? val) (boolean->true-or-false val #t))
+                  (else val))))
       (format #f "~a = ~a\n" name value)))
 
   (list
@@ -61,7 +56,7 @@
         #:serialize-field serialize-field
         #:fields (home-pantalaimon-configuration-config config))))))
 
-(define (pantalaimon-profile-service config)
+(define (home-pantalaimon-profile-service config)
   (list (home-pantalaimon-configuration-package config)))
 
 (define home-pantalaimon-service-type
@@ -71,12 +66,12 @@
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-pantalaimon-configuration)
-      (service-extension
-       home-profile-service-type
-       pantalaimon-profile-service)
-      (service-extension
-       home-shepherd-service-type
-       pantalaimon-shepherd-service)))
+      home-pantalaimon-files-service)
+     (service-extension
+      home-profile-service-type
+      home-pantalaimon-profile-service)
+     (service-extension
+      home-shepherd-service-type
+      home-pantalaimon-shepherd-service)))
    (description "Configure the Pantalaimon E2EE daemon.")
    (default-value (home-pantalaimon-configuration))))

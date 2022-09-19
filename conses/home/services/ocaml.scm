@@ -14,7 +14,7 @@
     "The @code{ocaml} package to use.")
   (tools
    (list-of-file-likes '())
-   "OCaml tools and libraries to install alongside @code{package}.")
+   "OCaml tools and libraries to install alongside @code{ocaml}.")
   (config
    (list '())
    "List of strings that make up a @file{.ocamlinit} configuration."))

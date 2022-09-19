@@ -45,7 +45,7 @@ The list of expressions will be interposed with \n and everything will end up in
    "List of expressions to add to @file{config-lisp}. See
 home-nyxt-service-type for more information."))
 
-(define (add-nyxt-configuration-files config)
+(define (home-nyxt-files-service config)
   (define (filter-fields field)
     (filter-configuration-fields home-nyxt-configuration-fields
                                  (list field)))
@@ -78,7 +78,7 @@ home-nyxt-service-type for more information."))
             (append-map
              home-nyxt-extension-config-lisp extension-configs)))))
 
-(define (nyxt-profile-service config)
+(define (home-nyxt-profile-service config)
   (list (home-nyxt-configuration-package config)))
 
 (define home-nyxt-service-type
@@ -88,10 +88,10 @@ home-nyxt-service-type for more information."))
     (list
      (service-extension
       home-profile-service-type
-      nyxt-profile-service)
+      home-nyxt-profile-service)
      (service-extension
       home-files-service-type
-      add-nyxt-configuration-files)))
+      home-nyxt-files-service)))
    (compose identity)
    (extend home-nyxt-extensions)
    (default-value (home-nyxt-configuration))

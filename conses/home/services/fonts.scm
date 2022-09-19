@@ -41,7 +41,7 @@
    (maybe-font-spec)
    "Monospace font."))
 
-(define (add-font-configuration config)
+(define (home-font-files-service config)
   `(("fontconfig/conf.d/50-default-fonts.conf"
      ,(mixed-text-file
        "50-user.conf"
@@ -67,7 +67,7 @@
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-font-configuration)
+      home-font-files-service)
      (service-extension
       home-profile-service-type
       home-font-profile-service)))

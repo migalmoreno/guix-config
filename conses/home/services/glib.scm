@@ -8,7 +8,7 @@
   #:export (home-dbus
             home-dbus-service-type))
 
-(define (dbus-shepherd-service config)
+(define (home-dbus-shepherd-service config)
   (list
    (shepherd-service
     (provision '(home-dbus))
@@ -22,7 +22,7 @@
                 "--address=" "unix:path="
                 (getenv "XDG_RUNTIME_DIR") "/bus")))))))
 
-(define (dbus-environment-variables-service config)
+(define (home-dbus-environment-variables-service config)
   `(("DBUS_SESSION_BUS_ADDRESS" . "unix:path=$XDG_RUNTIME_DIR/bus")))
 
 (define home-dbus-service-type
@@ -32,9 +32,9 @@
     (list
      (service-extension
       home-shepherd-service-type
-      dbus-shepherd-service)
+      home-dbus-shepherd-service)
      (service-extension
       home-environment-variables-service-type
-      dbus-environment-variables-service)))
+      home-dbus-environment-variables-service)))
    (default-value #f)
    (description "Set up a user-level D-Bus daemon.")))

@@ -21,7 +21,7 @@
 automatically be prepended with ``@code{TEX}'', meaning that @code{mfhome} will result
 in ``@code{TEXMFHOME}''."))
 
-(define (add-tex-environment-variables config)
+(define (home-tex-environment-variables-service config)
   (define (serialize-field field-name val)
     (cons
      (string-append "TEX"
@@ -34,7 +34,7 @@ in ``@code{TEXMFHOME}''."))
          ((car . cdr) (serialize-field car cdr)))
        (home-tex-configuration-envs config)))
 
-(define (add-tex-packages config)
+(define (home-tex-profile-service config)
   (append (list texlive-base)
           (home-tex-configuration-packages config)))
 
@@ -45,9 +45,9 @@ in ``@code{TEXMFHOME}''."))
     (list
      (service-extension
       home-environment-variables-service-type
-      add-tex-environment-variables)
+      home-tex-environment-variables-service)
      (service-extension
       home-profile-service-type
-      add-tex-packages)))
+      home-tex-profile-service)))
    (default-value (home-tex-configuration))
    (description "Sets up @code{TeX} packages and environment.")))

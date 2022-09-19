@@ -15,7 +15,7 @@
     (package transmission)
     "The transmission package to use."))
 
-(define (transmission-shepherd-service config)
+(define (home-transmission-shepherd-service config)
   (list
    (shepherd-service
     (provision '(home-transmission))
@@ -25,7 +25,7 @@
                     "--foreground")))
     (stop #~(make-kill-destructor)))))
 
-(define (transmission-profile-service config)
+(define (home-transmission-profile-service config)
   (list (home-transmission-configuration-package config)))
 
 (define home-transmission-service-type
@@ -33,9 +33,11 @@
    (name 'home-transmission)
    (extensions
     (list
-     (service-extension home-profile-service-type
-                        transmission-profile-service)
-     (service-extension home-shepherd-service-type
-                        transmission-shepherd-service)))
+     (service-extension
+      home-profile-service-type
+      home-transmission-profile-service)
+     (service-extension
+      home-shepherd-service-type
+      home-transmission-shepherd-service)))
    (description "Launch a transmission daemon from the user local space.")
    (default-value (home-transmission-configuration))))

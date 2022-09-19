@@ -4,6 +4,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home-services-utils)
+  #:use-module (gnu home services utils)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
   #:export (home-gtk-service-type
@@ -23,21 +24,15 @@
    (alist '())
    "List of CSS rules which set the GTK theme."))
 
-(define (add-gtk-settings config)
+(define (home-gtk-files-service config)
   (define (boolean->one-or-zero bool)
     (if (eq? bool #t) 1 0))
 
-  (define (serialize-term term)
-    (match term
-      ((? symbol? e) (symbol->string e))
-      ((? number? e) (number->string e))
-      ((? boolean? e) (boolean->one-or-zero e))
-      (e e)))
-
   (define (serialize-field key val)
-    (let ((name (serialize-term key))
-          (value (serialize-term val)))
-      (format #f "~a = ~a\n" name value)))
+    (let ((value (cond
+                  ((boolean? val) (boolean->one-or-zero val))
+                  (else val))))
+      (format #f "~a = ~a\n" key value)))
 
   (list
    `("gtk-3.0/settings.ini"
@@ -58,6 +53,6 @@
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-gtk-settings)))
+      home-gtk-files-service)))
    (description "Configure GTK settings and theme.")
    (default-value (home-gtk-configuration))))

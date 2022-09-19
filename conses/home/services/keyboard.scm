@@ -21,7 +21,7 @@
    (alist '())
    "Alist of key and value pairs for the @code{QMK} configuration file."))
 
-(define (add-qmk-configuration config)
+(define (home-qmk-files-service config)
   (define (serialize-field key val)
     (let ((val (match val
                  ((? list? v) (string-join (map maybe-object->string val)))
@@ -43,7 +43,7 @@
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-qmk-configuration)))
+      home-qmk-files-service)))
    (default-value (home-qmk-configuration))
    (description "Sets up the QMK Firmware configuration.")))
 
@@ -55,7 +55,7 @@
    (alist '())
    "Association list of key and value pairs for the @code{xmodmap} configuration file."))
 
-(define (xmodmap-shepherd-service config)
+(define (home-xmodmap-shepherd-service config)
   (list
    (shepherd-service
     (provision '(home-xmodmap))
@@ -100,7 +100,7 @@
          (map serialize-field val)
          "\n" 'suffix)))
 
-(define (add-xmodmap-configuration config)
+(define (home-xmodmap-files-service config)
   (filter (compose not null?)
           `(("xmodmap/config"
              ,(home-xmodmap-file config)))))
@@ -110,7 +110,7 @@
        "config"
        (get-xmodmap-configuration #f (home-xmodmap-configuration-config config))))
 
-(define (xmodmap-profile-service config)
+(define (home-xmodmap-profile-service config)
   (list (home-xmodmap-configuration-package config)))
 
 (define home-xmodmap-service-type
@@ -120,13 +120,13 @@
     (list
      (service-extension
       home-profile-service-type
-      xmodmap-profile-service)
+      home-xmodmap-profile-service)
      (service-extension
       home-xdg-configuration-files-service-type
-      add-xmodmap-configuration)
+      home-xmodmap-files-service)
      (service-extension
       home-shepherd-service-type
-      xmodmap-shepherd-service)))
+      home-xmodmap-shepherd-service)))
    (description "Configure @code{xmodmap} bindings and rules.")
    (default-value (home-xmodmap-configuration))))
 

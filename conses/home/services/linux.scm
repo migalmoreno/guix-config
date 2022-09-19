@@ -18,7 +18,7 @@
    (package pipewire-0.3)
    "Pipewire package to use."))
 
-(define (pipewire-shepherd-service config)
+(define (home-pipewire-shepherd-service config)
   (list
    (shepherd-service
     (provision '(home-pipewire))
@@ -58,7 +58,7 @@
               (append (list "DISABLE_RTKIT=1")
                       (default-environment-variables)))))))
 
-(define (pipewire-profile-service config)
+(define (home-pipewire-profile-service config)
   (list (home-pipewire-configuration-package config)
         wireplumber))
 
@@ -69,10 +69,10 @@
     (list
      (service-extension
       home-profile-service-type
-      pipewire-profile-service)
+      home-pipewire-profile-service)
      (service-extension
       home-shepherd-service-type
-      pipewire-shepherd-service)))
+      home-pipewire-shepherd-service)))
    (description "Add and configure the Pipewire daemon.")
    (default-value (home-pipewire-configuration))))
 
@@ -84,10 +84,10 @@
    (boolean #f)
    "Whether to enable pop-up notifications."))
 
-(define (udiskie-profile-service config)
+(define (home-udiskie-profile-service config)
   (list (home-udiskie-configuration-package config)))
 
-(define (udiskie-shepherd-service config)
+(define (home-udiskie-shepherd-service config)
   (list
    (shepherd-service
     (provision '(home-udiskie))
@@ -106,9 +106,9 @@
     (list
      (service-extension
       home-profile-service-type
-      udiskie-profile-service)
+      home-udiskie-profile-service)
      (service-extension
       home-shepherd-service-type
-      udiskie-shepherd-service)))
+      home-udiskie-shepherd-service)))
    (description "Sets a udiskie daemon to automount removable media.")
    (default-value (home-udiskie-configuration))))

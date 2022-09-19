@@ -27,7 +27,7 @@ The list of expressions will be interposed with \n and everything will end up in
    (lisp-config '())
    "As per @code{slynk-config}, but everything will be placed in @file{sbclrc.lisp}."))
 
-(define (add-lisp-configuration-files config)
+(define (home-lisp-files-service config)
   (define (filter-fields field)
     (filter-configuration-fields home-lisp-configuration-fields
                                  (list field)))
@@ -54,7 +54,7 @@ The list of expressions will be interposed with \n and everything will end up in
     (file-if-not-empty 'sbclrc-lisp)
     (file-if-not-empty 'slynk-lisp))))
 
-(define (lisp-profile-service config)
+(define (home-lisp-profile-service config)
   (list (home-lisp-configuration-package config)))
 
 (define home-lisp-service-type
@@ -64,10 +64,10 @@ The list of expressions will be interposed with \n and everything will end up in
     (list
      (service-extension
       home-profile-service-type
-      lisp-profile-service)
+      home-lisp-profile-service)
      (service-extension
       home-files-service-type
-      add-lisp-configuration-files)))
+      home-lisp-files-service)))
    (default-value (home-lisp-configuration))
    (description "Configures Lisp-related settings.")))
 

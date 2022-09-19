@@ -36,7 +36,7 @@ in @file{channels.scm}.")
 automatically be prepended with ``@code{GUIX_}'', meaning that @code{profile} will result
 in ``@code{GUIX_PROFILE}''."))
 
-(define (add-guix-environment-variables config)
+(define (home-guix-environment-variables-service config)
   (define (serialize-field field-name val)
     (cons
      (string-append "GUIX_"
@@ -49,7 +49,7 @@ in ``@code{GUIX_PROFILE}''."))
          ((car . cdr) (serialize-field car cdr)))
        (home-guix-configuration-envs config)))
 
-(define (add-guix-configuration-files config)
+(define (home-guix-files-service config)
   (define (filter-fields field)
     (filter-configuration-fields home-guix-configuration-fields
                                  (list field)))
@@ -79,10 +79,10 @@ in ``@code{GUIX_PROFILE}''."))
     (list
      (service-extension
       home-xdg-configuration-files-service-type
-      add-guix-configuration-files)
+      home-guix-files-service)
      (service-extension
       home-environment-variables-service-type
-      add-guix-environment-variables)))
+      home-guix-environment-variables-service)))
    (default-value (home-guix-configuration))
    (description "Adds configuration files for Guix.")))
 
@@ -105,7 +105,7 @@ The list of expressions will be interposed with \n and everything will end up in
 automatically be prepended with ``@code{GUILE_}'', meaning that @code{load-path} will result
 in ``@code{GUILE_LOAD_PATH}''."))
 
-(define (add-guile-environment-variables config)
+(define (home-guile-environment-variables-service config)
   (define (serialize-field field-name val)
     (cons
      (string-append "GUILE_"
@@ -118,7 +118,7 @@ in ``@code{GUILE_LOAD_PATH}''."))
          ((car . cdr) (serialize-field car cdr)))
        (home-guile-configuration-envs config)))
 
-(define (add-guile-configuration-files config)
+(define (home-guile-files-service config)
   (define (filter-fields field)
     (filter-configuration-fields home-guile-configuration-fields
                                  (list field)))
@@ -135,7 +135,7 @@ in ``@code{GUILE_LOAD_PATH}''."))
         "guile"
         (serialize-field 'config))))))
 
-(define (guile-profile-service config)
+(define (home-guile-profile-service config)
   (list (home-guile-configuration-package config)))
 
 (define home-guile-service-type
@@ -145,12 +145,12 @@ in ``@code{GUILE_LOAD_PATH}''."))
     (list
      (service-extension
       home-profile-service-type
-      guile-profile-service)
+      home-guile-profile-service)
      (service-extension
       home-files-service-type
-      add-guile-configuration-files)
+      home-guile-files-service)
      (service-extension
       home-environment-variables-service-type
-      add-guile-environment-variables)))
+      home-guile-environment-variables-service)))
    (default-value (home-guile-configuration))
    (description "Sets up Guile user settings.")))

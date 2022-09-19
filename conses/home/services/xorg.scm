@@ -33,7 +33,7 @@
    (integer 5)
    "The number of idle seconds to wait for @code{unclutter} to remove the cursor."))
 
-(define (unclutter-shepherd-service config)
+(define (home-unclutter-shepherd-service config)
   (list
    (shepherd-service
     (provision '(home-unclutter))
@@ -50,7 +50,7 @@
                                       (getenv "HOME")))
                           "/unclutter.log"))))))
 
-(define (unclutter-profile-service config)
+(define (home-unclutter-profile-service config)
   (list (home-unclutter-configuration-package config)))
 
 (define home-unclutter-service-type
@@ -58,10 +58,12 @@
    (name 'home-unclutter)
    (extensions
     (list
-     (service-extension home-profile-service-type
-                        unclutter-profile-service)
-     (service-extension home-shepherd-service-type
-                        unclutter-shepherd-service)))
+     (service-extension
+      home-profile-service-type
+      home-unclutter-profile-service)
+     (service-extension
+      home-shepherd-service-type
+      home-unclutter-shepherd-service)))
    (default-value (home-unclutter-configuration))
    (description "Sets up an unclutter daemon.")))
 
