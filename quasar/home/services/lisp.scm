@@ -97,7 +97,9 @@
       (add-to-list 'display-buffer-alist '("\\*sly-mrepl.*\\*"
                                            (display-buffer-no-window)
                                            (allow-no-window . t)))
+      (sly-setup)
       (with-eval-after-load 'sly
+        (setq sly-words-of-encouragement '(""))
         (custom-set-variables
          '(sly-command-switch-to-existing-lisp 'always)
          '(sly-mrepl-history-file-name (let ((history-file (locate-user-emacs-file "sly-mrepl-history")))
