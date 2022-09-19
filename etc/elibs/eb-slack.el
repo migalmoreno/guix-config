@@ -28,4 +28,4 @@
    :cookie eb-slack-cookie)
   (slack-change-current-team))
 
-(provide 'eb-ement)
+(provide 'eb-slack)
