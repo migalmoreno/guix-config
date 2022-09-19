@@ -44,9 +44,10 @@ provided, check if it's a dark theme."
 (defun eb-modus-themes-change-nyxt-theme (&optional theme)
   "Switch theme in Nyxt according to current system theme or THEME."
   (interactive)
-  (if (or (and theme (eb-modus-themes--dark-theme-p theme))
-          (eb-modus-themes--dark-theme-p))
-      (nyxt-change-theme "modus-vivendi")
-    (nyxt-change-theme "modus-operandi")))
+  (when nyxt-process
+    (if (or (and theme (eb-modus-themes--dark-theme-p theme))
+            (eb-modus-themes--dark-theme-p))
+        (nyxt-change-theme "modus-vivendi")
+      (nyxt-change-theme "modus-operandi"))))
 
 (provide 'eb-modus-themes)
