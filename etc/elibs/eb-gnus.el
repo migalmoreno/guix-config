@@ -28,7 +28,7 @@
 ;;;###autoload
 (defun eb-gnus-get-article-participants ()
   "Retrieve the participants from the current article."
-  (when (buffer-live-p gnus-article-buffer)
+  (when (gnus-alive-p)
     (with-current-buffer gnus-article-buffer
       (string-join
        (remove-if
