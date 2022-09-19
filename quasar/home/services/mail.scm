@@ -92,19 +92,27 @@
                               (gcc-self . "nnmaildir+personal:Sent"))
                              ("^nntp"
                               (display . 1000))))
-         '(gnus-posting-styles `(("personal"
-                                  (name ,(getenv "MAIL_PERSONAL_FULLNAME")))
-                                 ((header "to" ".*@lists.sr.ht")
-                                  (name ,(getenv "MAIL_PERSONAL_USERNAME"))
-                                  (signature ,(concat "Best regards,\n"
-                                                      ,(getenv "MAIL_PERSONAL_USERNAME")))
-                                  (To ,(eb-gnus-get-article-participants)))))
          '(gnus-directory "~/.cache/gnus/News")
          '(gnus-home-directory (locate-user-emacs-file "gnus"))
          '(gnus-cache-directory "~/.cache/gnus/News/cache/")
          '(gnus-kill-files-directory "~/.cache/gnus/News/")
          '(gnus-article-save-directory "~/.cache/gnus/News/")
          '(gnus-large-newsgroup 100))
+        (setq gnus-posting-styles
+              '(("personal"
+                 (name ,(getenv "MAIL_PERSONAL_FULLNAME")))
+                ((header "to" ".*@lists.sr.ht")
+                 (name ,(getenv "MAIL_PERSONAL_USERNAME"))
+                 (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
+                 (signature ,(string-append "Best regards,\n"
+                                            (getenv "MAIL_PERSONAL_USERNAME")))
+                 (To (eb-gnus-get-article-participants)))
+                ("^nntp.+:"
+                 (name ,(getenv "MAIL_PERSONAL_USERNAME"))
+                 (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
+                 (signature ,(string-append "Best regards,\n"
+                                            (getenv "MAIL_PERSONAL_USERNAME")))
+                 (To (eb-gnus-get-article-participants)))))
         (setq gnus-secondary-select-methods
               `((nntp "gwene"
                       (nntp-address "news.gwene.org"))
