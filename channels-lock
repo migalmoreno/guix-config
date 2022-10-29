@@ -3,7 +3,7 @@
         (url "https://gitlab.com/nonguix/nonguix")
         (branch "master")
         (commit
-          "31e958fabaf981afaf27145c846b71a62b80a220")
+          "7c26b2060ab781dd9cebbf06c71c14a2ae31b1ab")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -14,7 +14,7 @@
         (url "https://git.savannah.gnu.org/git/guix")
         (branch "master")
         (commit
-          "575dbab74622ee8304827b98865a26225145e22a")
+          "34e6c5d4280d67729bbd8cdae333ca5e0bd580f5")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -25,26 +25,9 @@
         (url "https://git.sr.ht/~abcdw/rde")
         (branch "master")
         (commit
-          "5f3f2e6b8e0cc0405ef76b38c867773356b4e928")
+          "7701c838d03d3a247bc4f4f896cbd235e669e02e")
         (introduction
           (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
             (openpgp-fingerprint
-              "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
-      (channel
-        (name 'rrr)
-        (url "https://git.sr.ht/~akagi/rrr")
-        (branch "master")
-        (commit
-          "b463b0f1b56c2ac3bde73bed12590a3de31204c2")
-        (introduction
-          (make-channel-introduction
-            "794d6e5eb362bfcf81ada12b6a49a0cd55c8e031"
-            (openpgp-fingerprint
-              "FF72 877C 4F21 FC4D 467D  20C4 DCCB 5255 2098 B6C1"))))
-      (channel
-        (name 'flat)
-        (url "https://github.com/flatwhatson/guix-channel.git")
-        (branch "master")
-        (commit
-          "e57424b680e1724105e2598b68c30084b180cf58")))
+              "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0")))))

@@ -1,12 +1,12 @@
 (define-module (conses packages web-browsers)
-  #:use-module (gnu packages aspell)
-  #:use-module (gnu packages gstreamer)
-  #:use-module (gnu packages lisp-xyz)
-  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages tls)
+  #:use-module (gnu packages aspell)
+  #:use-module (gnu packages lisp-xyz)
+  #:use-module (gnu packages gstreamer)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages web-browsers)
-  #:use-module (guix git-download)
-  #:use-module (guix packages))
+  #:use-module (guix packages)
+  #:use-module (guix git-download))
 
 (define-public nyxt-next
   (let ((commit "df86d95a62d5a5f03b2744092945f47f7631a449")

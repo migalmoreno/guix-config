@@ -1,32 +1,32 @@
 (define-module (conses home services bittorrent)
   #:use-module (gnu services)
-  #:use-module (gnu services configuration)
-  #:use-module (guix packages)
-  #:use-module (gnu home services)
-  #:use-module (guix gexp)
-  #:use-module (gnu packages bittorrent)
   #:use-module (gnu services shepherd)
+  #:use-module (gnu services configuration)
+  #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
+  #:use-module (gnu packages bittorrent)
+  #:use-module (guix gexp)
+  #:use-module (guix packages)
   #:export (home-transmission-configuration
             home-transmission-service-type))
 
 (define-configuration/no-serialization home-transmission-configuration
-  (package
+  (transmission
     (package transmission)
     "The transmission package to use."))
 
 (define (home-transmission-shepherd-service config)
   (list
    (shepherd-service
-    (provision '(home-transmission))
+    (provision '(transmission))
     (start #~(make-forkexec-constructor
-              (list #$(file-append (home-transmission-configuration-package config)
+              (list #$(file-append (home-transmission-configuration-transmission config)
                                    "/bin/transmission-daemon")
                     "--foreground")))
     (stop #~(make-kill-destructor)))))
 
 (define (home-transmission-profile-service config)
-  (list (home-transmission-configuration-package config)))
+  (list (home-transmission-configuration-transmission config)))
 
 (define home-transmission-service-type
   (service-type

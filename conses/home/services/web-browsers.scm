@@ -1,25 +1,27 @@
 (define-module (conses home services web-browsers)
-  #:use-module (conses serializers lisp)
-  #:use-module (gnu packages web-browsers)
+  #:use-module (conses serializers base)
   #:use-module (gnu services)
-  #:use-module (gnu services configuration)
-  #:use-module (guix packages)
-  #:use-module (gnu home services)
-  #:use-module (guix gexp)
   #:use-module (gnu services shepherd)
+  #:use-module (gnu services configuration)
+  #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
+  #:use-module (gnu packages web-browsers)
+  #:use-module (guix gexp)
+  #:use-module (guix packages)
   #:use-module (srfi srfi-1)
   #:export (home-nyxt-configuration
             home-nyxt-service-type
-            nyxt-configuration-service))
+            home-nyxt-extension))
 
 (define packages? (list-of package?))
 (define serialize-packages empty-serializer)
+(define lisp-config? sexp-config?)
+(define serialize-lisp-config serialize-sexp-config)
 
 (define-configuration home-nyxt-configuration
-  (package
-    (package nyxt)
-    "The nyxt package to use.")
+  (nyxt
+   (package nyxt)
+   "The nyxt package to use.")
   (lisp-packages
    (packages '())
    "List of Lisp packages to install.")
@@ -67,19 +69,20 @@ home-nyxt-service-type for more information."))
         (serialize-field 'auto-mode-rules-lisp))))))
 
 (define (home-nyxt-extensions original-config extension-configs)
-  (home-nyxt-configuration
-   (inherit original-config)
-   (lisp-packages
-    (append (home-nyxt-configuration-lisp-packages original-config)
-            (append-map
-             home-nyxt-extension-lisp-packages extension-configs)))
-   (config-lisp
-    (append (home-nyxt-configuration-config-lisp original-config)
-            (append-map
-             home-nyxt-extension-config-lisp extension-configs)))))
+  (let ((extensions (reverse extension-configs)))
+    (home-nyxt-configuration
+     (inherit original-config)
+     (lisp-packages
+      (append (home-nyxt-configuration-lisp-packages original-config)
+              (append-map
+               home-nyxt-extension-lisp-packages extensions)))
+     (config-lisp
+      (append (home-nyxt-configuration-config-lisp original-config)
+              (append-map
+               home-nyxt-extension-config-lisp extensions))))))
 
 (define (home-nyxt-profile-service config)
-  (list (home-nyxt-configuration-package config)))
+  (list (home-nyxt-configuration-nyxt config)))
 
 (define home-nyxt-service-type
   (service-type
@@ -95,19 +98,10 @@ home-nyxt-service-type for more information."))
    (compose identity)
    (extend home-nyxt-extensions)
    (default-value (home-nyxt-configuration))
-   (description "Installs and configures Nyxt, the hacker's power-browser.")))
+   (description "Install and configure Nyxt, the hacker's power-browser.")))
 
 (define (generate-home-nyxt-documentation)
   (generate-documentation
    `((home-nyxt-configuration
       ,home-nyxt-configuration-fields))
    'home-nyxt-configuration))
-
-(define* (nyxt-configuration-service #:optional (lisp-expressions '())
-                                     #:key (lisp-packages '()))
-  (simple-service
-   (gensym "nyxt-configuration-service")
-   home-nyxt-service-type
-   (home-nyxt-extension
-    (config-lisp `(,@lisp-expressions))
-    (lisp-packages lisp-packages))))

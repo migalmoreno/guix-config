@@ -1,7 +1,8 @@
 (define-module (conses home services keyboard)
-  #:use-module (gnu services)
+  #:use-module (rde serializers ini)
   #:use-module (gnu packages)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
@@ -16,25 +17,22 @@
             home-qmk-service-type
             home-qmk-configuration))
 
+
+;;;
+;;; qmk
+;;;
+
 (define-configuration/no-serialization home-qmk-configuration
-  (config
-   (alist '())
+  (settings
+   (ini-config '())
    "Alist of key and value pairs for the @code{QMK} configuration file."))
 
 (define (home-qmk-files-service config)
-  (define (serialize-field key val)
-    (let ((val (match val
-                 ((? list? v) (string-join (map maybe-object->string val)))
-                 ((? boolean? v) (boolean->true-or-false v))
-                 (v v))))
-      (format #f "~a = ~a\n" key val)))
-
   `(("qmk/qmk.ini"
-     ,(mixed-text-file
-       "qmk.ini"
-       (generic-serialize-ini-config
-        #:serialize-field serialize-field
-        #:fields (home-qmk-configuration-config config))))))
+     ,(apply mixed-text-file
+             "qmk.ini"
+             (serialize-ini-config
+              (home-qmk-configuration-settings config))))))
 
 (define home-qmk-service-type
   (service-type
@@ -45,23 +43,37 @@
       home-xdg-configuration-files-service-type
       home-qmk-files-service)))
    (default-value (home-qmk-configuration))
-   (description "Sets up the QMK Firmware configuration.")))
+   (description "Set up the QMK Firmware configuration.")))
+
+(define (generate-home-qmk-documentation)
+  (generate-documentation
+   `((home-qmk-configuration
+      ,home-qmk-configuration-fields))
+   'home-qmk-configuration))
+
+
+;;;
+;;; xmodmap
+;;;
 
 (define-configuration/no-serialization home-xmodmap-configuration
-  (package
-    (package xmodmap)
-    "The xmodmap package to use.")
+  (xmodmap
+   (package xmodmap)
+   "The xmodmap package to use.")
   (config
    (alist '())
-   "Association list of key and value pairs for the @code{xmodmap} configuration file."))
+   "Association list of key and value pairs for the
+ @code{xmodmap} configuration file."))
 
 (define (home-xmodmap-shepherd-service config)
   (list
    (shepherd-service
-    (provision '(home-xmodmap))
+    (provision '(xmodmap))
     (start #~(make-system-constructor
               (string-join
-               (list #$(file-append (home-xmodmap-configuration-package config) "/bin/xmodmap")
+               (list #$(file-append
+                        (home-xmodmap-configuration-xmodmap config)
+                        "/bin/xmodmap")
                      #$(home-xmodmap-file config)))))
     (one-shot? #t))))
 
@@ -111,7 +123,7 @@
        (get-xmodmap-configuration #f (home-xmodmap-configuration-config config))))
 
 (define (home-xmodmap-profile-service config)
-  (list (home-xmodmap-configuration-package config)))
+  (list (home-xmodmap-configuration-xmodmap config)))
 
 (define home-xmodmap-service-type
   (service-type

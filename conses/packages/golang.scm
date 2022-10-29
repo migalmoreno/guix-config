@@ -1,11 +1,11 @@
 (define-module (conses packages golang)
-  #:use-module (gnu packages protobuf)
   #:use-module (gnu packages golang)
+  #:use-module (gnu packages protobuf)
+  #:use-module (guix gexp)
+  #:use-module (guix utils)
   #:use-module (guix packages)
   #:use-module (guix git-download)
   #:use-module (guix build-system go)
-  #:use-module (guix utils)
-  #:use-module (guix gexp)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public go-filippo-io-edwards25519
@@ -494,7 +494,7 @@ for structured data.")
      '(#:import-path "maunium.net/go/maulogger"))
     (home-page "https://github.com/tulir/maulogger")
     (synopsis "A logger for Go programs.")
-    (description "A logger in go")
+    (description "A logger in go.")
     (license license:mpl2.0)))
 
 (define-public go-mau-fi-libsignal

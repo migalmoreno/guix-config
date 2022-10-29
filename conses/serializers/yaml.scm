@@ -1,11 +1,11 @@
 (define-module (conses serializers yaml)
+  #:use-module (gnu home services utils)
+  #:use-module (gnu services configuration)
+  #:use-module (guix gexp)
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
-  #:use-module (guix gexp)
-  #:use-module (gnu services configuration)
-  #:use-module (gnu home services utils)
   #:export (yaml-print
             yaml-config?
             serialize-yaml-config))

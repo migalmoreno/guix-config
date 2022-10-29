@@ -4,13 +4,13 @@
   #:use-module (guix packages)
   #:use-module (gnu packages)
   #:use-module (gnu services)
-  #:use-module (gnu services configuration)
   #:use-module (gnu services shepherd)
+  #:use-module (gnu services configuration)
   #:export (whoogle-service-type
             whoogle-configuration))
 
 (define-configuration/no-serialization whoogle-configuration
-  (package
+  (whoogle
     (package whoogle-search)
     "The @code{whoogle-search} package to use."))
 
@@ -19,7 +19,7 @@
    (shepherd-service
     (provision '(whoogle-search))
     (start #~(make-forkexec-constructor
-              (list (string-append #$(whoogle-configuration-package config)
+              (list (string-append #$(whoogle-configuration-whoogle config)
                                    "/bin/whoogle-search"))
               #:environment-variables
               (append (list "CONFIG_VOLUME=/var/cache/whoogle-search")
@@ -29,7 +29,7 @@
 
 (define (whoogle-profile-service config)
   (list
-   (whoogle-configuration-package config)))
+   (whoogle-configuration-whoogle config)))
 
 (define whoogle-service-type
   (service-type

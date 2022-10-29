@@ -1,20 +1,14 @@
 (define-module (conses home services gtk)
   #:use-module (rde serializers css)
   #:use-module (gnu services)
-  #:use-module (gnu home services)
   #:use-module (gnu services configuration)
-  #:use-module (gnu home-services-utils)
+  #:use-module (gnu home services)
   #:use-module (gnu home services utils)
+  #:use-module (gnu home-services-utils)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
   #:export (home-gtk-service-type
-            home-gtk-configuration
-            gtk-theme-light-p))
-
-(define (gtk-theme-light-p)
-  (if (getenv "GTK_THEME")
-      (string= (getenv "GTK_THEME") ":light")
-      #t))
+            home-gtk-configuration))
 
 (define-configuration/no-serialization home-gtk-configuration
   (settings

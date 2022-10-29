@@ -1,16 +1,15 @@
 (define-module (conses home services xorg)
-  #:use-module (conses home services glib)
-  #:use-module (gnu services configuration)
-  #:use-module (gnu packages)
   #:use-module (gnu services)
   #:use-module (gnu services base)
+  #:use-module (gnu services configuration)
   #:use-module (gnu home services)
-  #:use-module (gnu packages xdisorg)
-  #:use-module (gnu packages xorg)
-  #:use-module (gnu packages gl)
   #:use-module (gnu home services shepherd)
-  #:use-module (gnu system keyboard)
+  #:use-module (gnu packages)
+  #:use-module (gnu packages gl)
+  #:use-module (gnu packages xorg)
+  #:use-module (gnu packages xdisorg)
   #:use-module (gnu system setuid)
+  #:use-module (gnu system keyboard)
   #:use-module (guix gexp)
   #:use-module (guix store)
   #:use-module (guix packages)
@@ -26,7 +25,7 @@
             xorg-configuration))
 
 (define-configuration/no-serialization home-unclutter-configuration
-  (package
+  (unclutter
     (package unclutter)
     "The @code{unclutter} package to use.")
   (seconds
@@ -36,12 +35,14 @@
 (define (home-unclutter-shepherd-service config)
   (list
    (shepherd-service
-    (provision '(home-unclutter))
-    (requirement '(home-dbus))
+    (provision '(unclutter))
+    (requirement '(dbus))
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
               (list
-               #$(file-append (home-unclutter-configuration-package config) "/bin/unclutter")
+               #$(file-append
+                  (home-unclutter-configuration-unclutter config)
+                  "/bin/unclutter")
                "-display" ":0" "-idle"
                (number->string #$(home-unclutter-configuration-seconds config)))
               #:log-file (string-append
@@ -51,7 +52,7 @@
                           "/unclutter.log"))))))
 
 (define (home-unclutter-profile-service config)
-  (list (home-unclutter-configuration-package config)))
+  (list (home-unclutter-configuration-unclutter config)))
 
 (define home-unclutter-service-type
   (service-type
@@ -316,7 +317,7 @@ in @var{config}, are available.  The result should be used in place of
   exp)
 
 (define* (xinitrc #:key wm)
-  "Returns a xinitrc script that starts X with the specified WM."
+  "Return a xinitrc script that starts xorg with the specified WM."
   (define builder
     (let* ((name (package-name wm))
            (args (match name

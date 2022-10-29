@@ -1,9 +1,10 @@
 (define-module (conses home services scheme)
-  #:use-module (conses serializers lisp)
+  #:use-module (conses serializers base)
+  #:use-module (conses home services lisp)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
-  #:use-module (gnu home-services-utils)
   #:use-module (gnu home services utils)
+  #:use-module (gnu home-services-utils)
   #:use-module (guix packages)
   #:use-module (gnu packages guile)
   #:use-module (gnu home services)
@@ -84,10 +85,16 @@ in ``@code{GUIX_PROFILE}''."))
       home-environment-variables-service-type
       home-guix-environment-variables-service)))
    (default-value (home-guix-configuration))
-   (description "Adds configuration files for Guix.")))
+   (description "Add user configuration files for Guix.")))
+
+(define (generate-home-guix-documentation)
+  (generate-documentation
+   `((home-guix-configuration
+      ,home-guix-configuration-fields))
+   'home-guix-configuration))
 
 (define-configuration home-guile-configuration
-  (package
+  (guile
     (package guile-3.0)
     "The @code{guile} package to use")
   (config
@@ -136,7 +143,7 @@ in ``@code{GUILE_LOAD_PATH}''."))
         (serialize-field 'config))))))
 
 (define (home-guile-profile-service config)
-  (list (home-guile-configuration-package config)))
+  (list (home-guile-configuration-guile config)))
 
 (define home-guile-service-type
   (service-type
@@ -153,4 +160,10 @@ in ``@code{GUILE_LOAD_PATH}''."))
       home-environment-variables-service-type
       home-guile-environment-variables-service)))
    (default-value (home-guile-configuration))
-   (description "Sets up Guile user settings.")))
+   (description "Set up Guile user settings.")))
+
+(define (generate-home-guile-documentation)
+  (generate-documentation
+   `((home-guile-configuration
+      ,home-guile-configuration-fields))
+   'home-guile-configuration))

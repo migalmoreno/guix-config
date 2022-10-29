@@ -1,12 +1,12 @@
-export GUILE_LOAD_PATH := $(pwd):$(GUILE_LOAD_PATH):$(XDG_CONFIG_HOME)/guix
+export GUILE_LOAD_PATH := $(pwd):$(XDG_CONFIG_HOME)/guix:$(GUILE_LOAD_PATH)
 
-channels-lock := guix time-machine -C channels-lock --
-
-HOSTNAME := $(shell hostname)
+CHANNELS-LOCK := guix time-machine -C channels-lock --
+CONFIG := conses/config.scm
+HOST := $(shell hostname)
 USER := $(shell whoami)
 
 .PHONY: all
-all: pull update init home system build iso deploy
+all: pull upgrade init home home/% system system/% build/home/% build/system/% deploy/% iso
 
 pull:
 	guix pull --allow-downgrades -C channels-lock
@@ -14,29 +14,29 @@ pull:
 upgrade:
 	guix time-machine -C channels -- describe -f channels > channels-lock.2
 	mv channels-lock.2 channels-lock
-	$(channels-lock) upgrade
+	$(CHANNELS-LOCK) upgrade
 
-init/%:
-	$(channels-lock) init -L . quasar/system/$*.scm /mnt
+init:
+	RDE_TARGET=system $(CHANNELS-LOCK) init -L . $(CONFIG) /mnt
 
 home: home/${USER}
 
 home/%:
-	$(channels-lock) home --allow-downgrades -L . reconfigure quasar/home/$*.scm
+	RDE_TARGET=home RDE_USER=$* $(CHANNELS-LOCK) home --allow-downgrades -L . reconfigure $(CONFIG)
 
-system: system/${HOSTNAME}
+system: system/${HOST}
 
 system/%:
-	sudo -E $(channels-lock) system -L . reconfigure quasar/system/$*.scm
-
-build/system/%:
-	$(channels-lock) system build -L . quasar/system/$*.scm
+	RDE_TARGET=system RDE_SYSTEM=$* sudo -E $(CHANNELS-LOCK) system -L . reconfigure $(CONFIG)
 
 build/home/%:
-	$(channels-lock) home build -L . quasar/home/$*.scm
+	RDE_TARGET=home RDE_USER=$* $(CHANNELS-LOCK) home build -L . $(CONFIG)
+
+build/system/%:
+	RDE_TARGET=system RDE_SYSTEM=$* $(CHANNELS-LOCK) system build -L . $(CONFIG)
 
 deploy/%:
-	$(channels-lock) deploy -L . quasar/deployment/$*.scm
+	RDE_TARGET=deploy RDE_SYSTEM=$* $(CHANNELS-LOCK) deploy -L . $(CONFIG)
 
 iso:
-	$(channels-lock) system -L . image -t iso9660 quasar/system/install.scm
+	RDE_TARGET=system RDE_SYSTEM=iso $(CHANNELS-LOCK) system -L . image -t iso9660 $(CONFIG)

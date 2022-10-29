@@ -2,6 +2,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
+  #:use-module (gnu packages fontutils)
   #:use-module (guix gexp)
   #:use-module (guix records)
   #:use-module (srfi srfi-1)
@@ -51,6 +52,10 @@
 " (serialize-configuration config home-font-configuration-fields) "
 </fontconfig>"))))
 
+(define (regenerate-font-cache-gexp _)
+  `(("profile/share/fonts"
+     ,#~(system* #$(file-append fontconfig "/bin/fc-cache") "-fv"))))
+
 (define (home-font-profile-service config)
   (fold (lambda (field res)
           (let ((val ((configuration-field-getter field) config)))
@@ -70,6 +75,9 @@
       home-font-files-service)
      (service-extension
       home-profile-service-type
-      home-font-profile-service)))
+      home-font-profile-service)
+     (service-extension
+      home-run-on-change-service-type
+      regenerate-font-cache-gexp)))
    (description "Set up font configuration for the current user.")
    (default-value (home-font-configuration))))

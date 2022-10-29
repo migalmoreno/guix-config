@@ -1,9 +1,9 @@
 (define-module (conses system services databases)
-  #:use-module (gnu packages databases)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
-  #:use-module (guix records)
+  #:use-module (gnu packages databases)
   #:use-module (guix gexp)
+  #:use-module (guix records)
   #:use-module (srfi srfi-1)
   #:export (postgresql-role
             postgresql-role-configuration

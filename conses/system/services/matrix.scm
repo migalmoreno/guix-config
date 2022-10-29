@@ -1,20 +1,23 @@
 (define-module (conses system services matrix)
+  #:use-module (conses packages matrix)
   #:use-module (conses serializers yaml)
   #:use-module (conses system services databases)
-  #:use-module (conses packages matrix)
-  #:use-module (gnu packages matrix)
-  #:use-module (gnu packages admin)
   #:use-module (gnu services)
-  #:use-module (gnu services configuration)
   #:use-module (gnu services shepherd)
+  #:use-module (gnu services configuration)
+  #:use-module (gnu packages admin)
+  #:use-module (gnu packages matrix)
   #:use-module (gnu system shadow)
-  #:use-module (guix packages)
+  #:use-module (gnu system accounts)
   #:use-module (guix gexp)
+  #:use-module (guix packages)
   #:use-module (srfi srfi-1)
   #:export (synapse-configuration
+            synapse-configuration?
             synapse-service-type
             synapse-extension
             mautrix-whatsapp-configuration
+            mautrix-whatsapp-configuration?
             mautrix-whatsapp-service-type))
 
 (define (maybe-string? x)
@@ -23,8 +26,8 @@
 (define-maybe/no-serialization maybe-string)
 
 (define-configuration/no-serialization synapse-configuration
-  (package
-    (package synapse-next)
+  (synapse
+    (package synapse)
     "The @code{synapse} package to use.")
   (server-name
    (string "localhost")
@@ -84,7 +87,7 @@ configuration to be placed under @file{homeserver.yaml}. See more settings in
                      '(postgres)
                      '()))
     (start #~(make-forkexec-constructor
-              (list (string-append #$(synapse-configuration-package config)
+              (list (string-append #$(synapse-configuration-synapse config)
                                    "/bin/synapse_homeserver")
                     "-c"
                     #$(synapse-file config)
@@ -171,7 +174,7 @@ configuration to be placed under @file{homeserver.yaml}. See more settings in
       ,(synapse-file config)))))
 
 (define (synapse-profile-service config)
-  (list (synapse-configuration-package config)))
+  (list (synapse-configuration-synapse config)))
 
 (define (synapse-postgresql-service config)
   (if (synapse-configuration-postgresql-db? config)
@@ -195,7 +198,7 @@ configuration to be placed under @file{homeserver.yaml}. See more settings in
                                                 "/homeserver.signing.key"))
       (define (generate-signing-key)
         (unless (stat signing-key-path #f)
-          (system* #$(file-append (synapse-configuration-package config) "/bin/generate_signing_key")
+          (system* #$(file-append (synapse-configuration-synapse config) "/bin/generate_signing_key")
                    "-o"
                    signing-key-path)))
 
@@ -256,7 +259,7 @@ configuration to be placed under @file{homeserver.yaml}. See more settings in
    (description "System service for Synapse, the Matrix flagship implementation.")))
 
 (define-configuration/no-serialization mautrix-whatsapp-configuration
-  (package
+  (mautrix-whatsapp
     (package mautrix-whatsapp)
     "The @code{mautrix-whatsapp} package to use.")
   (address
@@ -389,7 +392,8 @@ configuration to be placed under @file{config.yaml}. See more settings in
       (define (generate-registration-file)
         (unless (stat registration-file #f)
           (copy-file #$(mautrix-whatsapp-file config) config-file)
-          (system* #$(file-append (mautrix-whatsapp-configuration-package config) "/bin/mautrix-whatsapp")
+          (system* #$(file-append (mautrix-whatsapp-configuration-mautrix-whatsapp config)
+                                  "/bin/mautrix-whatsapp")
                    "--generate-registration"
                    "--config=" config-file
                    "--registration=" registration-file)))
@@ -411,7 +415,7 @@ configuration to be placed under @file{config.yaml}. See more settings in
     (requirement '(synapse))
     (start #~(make-forkexec-constructor
               (list
-               (string-append #$(mautrix-whatsapp-configuration-package config)
+               (string-append #$(mautrix-whatsapp-configuration-mautrix-whatsapp config)
                               "/bin/mautrix-whatsapp")
                "--config="
                (string-append #$(mautrix-whatsapp-configuration-data-directory config)
@@ -425,7 +429,7 @@ configuration to be placed under @file{config.yaml}. See more settings in
     (stop #~(make-kill-destructor)))))
 
 (define (mautrix-whatsapp-profile-service config)
-  (list (mautrix-whatsapp-configuration-package config)))
+  (list (mautrix-whatsapp-configuration-mautrix-whatsapp config)))
 
 (define mautrix-whatsapp-service-type
   (service-type

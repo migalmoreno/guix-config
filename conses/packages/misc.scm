@@ -1,8 +1,8 @@
 (define-module (conses packages misc)
+  #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix build-system trivial)
-  #:use-module (guix gexp)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public gnu-meditate-logo

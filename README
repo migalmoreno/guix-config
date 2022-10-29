@@ -1,43 +1,4 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; -*-
 #+OPTIONS: toc:nil
-* Quasar
-The nucleus of my computing, consisting of a set of configuration files centered around [[https://guix.gnu.org/][GNU Guix]], [[https://www.gnu.org/software/emacs/][GNU Emacs]], and the [[https://nyxt.atlas.engineer/][Nyxt browser]], all of which are structured as per [[https://guix.gnu.org/en/manual/devel/en/guix.html#Home-Configuration][Home Configuration]] and [[https://guix.gnu.org/manual/en/html_node/System-Configuration.html][System Configuration]] to ensure a high level of reproducibility.
-
-I also provide some custom services and packages under =conses/= which you might find useful. To use them, make sure to add this channel to your Guix channels list at =~/.config/guix/channels.scm=.
-
-#+begin_src scheme
-(cons*
- (channel
-  (name 'quasar)
-  (url "https://git.sr.ht/~conses/quasar")
-  (introduction
-   (make-channel-introduction
-    "526cb82eda897f98deab783880eea23f510947b9"
-    (openpgp-fingerprint
-     "4956 DAC8 B077 15EA 9F14  E13A EF1F 69BF 5F23 F458"))))
- %default-channels)
-#+end_src
-
-** Configuration
-[[https://en.wikipedia.org/wiki/IAU_designated_constellations]]
-
-*** Lyra
-#+begin_quote
-Lyra is a small constellation, but it's noticeable thanks to its main star Vega, which is one of the brightest stars in the night sky and forms a corner of the famed Summer Triangle asterism.
-#+end_quote
-
-This is the system configuration of my development work station running in a laptop. It contains basic desktop services and it's mostly kept very close to the defaults.
-
-**** Vega
-#+begin_quote
-Vega is the brightest star in the northern constellation of Lyra. It's relatively close at only 25-light years from the Sun, and it's one of the most luminous stars in the Sun's neighborhood.
-#+end_quote
-
-The single user of Lyra, which includes all of the home services that I use for software development, communication, entertainment, among other.
-
-*** Cygnus
-#+begin_quote
-A very large constellation, Cygnus is one of the most recognizable constellations of the northern summer and autumn.
-#+end_quote
-
-Main remote server which exposes various services to the public web.
+* Dotfiles
+A set of configuration files centered around [[https://guix.gnu.org/][GNU Guix]] and [[https://sr.ht/~abcdw/rde/][RDE]].

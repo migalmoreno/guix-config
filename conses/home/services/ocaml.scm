@@ -12,9 +12,6 @@
   (ocaml
     (file-like ocaml)
     "The @code{ocaml} package to use.")
-  (tools
-   (list-of-file-likes '())
-   "OCaml tools and libraries to install alongside @code{ocaml}.")
   (config
    (list '())
    "List of strings that make up a @file{.ocamlinit} configuration."))
@@ -36,8 +33,7 @@
                                    "\n" 'suffix))))))))
 
 (define (home-ocaml-profile-service config)
-  (cons* (home-ocaml-configuration-ocaml config)
-         (home-ocaml-configuration-tools config)))
+  (list (home-ocaml-configuration-ocaml config)))
 
 (define home-ocaml-service-type
   (service-type
@@ -52,3 +48,9 @@
       home-ocaml-files-service)))
    (default-value (home-ocaml-configuration))
    (description "Home service for the OCaml programming language.")))
+
+(define (generate-home-ocaml-documentation)
+  (generate-documentation
+   `((home-ocaml-configuration
+      ,home-ocaml-configuration-fields))
+   'home-ocaml-configuration))

@@ -65,7 +65,6 @@
                          (mkdir-p bin)
                          (copy-file (string-append #$source "/payload_dumper.py") target)
                          (install-file "update_metadata_pb2.py" pydir)
-                         ;; Can't use patch-shebang possibly due to a Unicode BOM
                          (substitute* target
                            (("/usr/bin/env python") (which "python3")))
                          (chmod target #o555))))))))

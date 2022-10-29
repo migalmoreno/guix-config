@@ -1,17 +1,20 @@
 (define-module (conses home services lisp)
-  #:use-module (conses serializers lisp)
-  #:use-module (gnu services configuration)
+  #:use-module (conses serializers base)
   #:use-module (gnu services)
-  #:use-module (guix packages)
-  #:use-module (guix gexp)
+  #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu home-services-utils)
   #:use-module (gnu packages lisp)
+  #:use-module (guix gexp)
+  #:use-module (guix packages)
   #:export (home-lisp-configuration
             home-lisp-service-type))
 
+(define-public lisp-config? sexp-config?)
+(define-public serialize-lisp-config serialize-sexp-config)
+
 (define-configuration home-lisp-configuration
-  (package
+  (lisp
     (package sbcl)
     "The Lisp implementation to use.")
   (slynk-lisp
@@ -55,7 +58,7 @@ The list of expressions will be interposed with \n and everything will end up in
     (file-if-not-empty 'slynk-lisp))))
 
 (define (home-lisp-profile-service config)
-  (list (home-lisp-configuration-package config)))
+  (list (home-lisp-configuration-lisp config)))
 
 (define home-lisp-service-type
   (service-type

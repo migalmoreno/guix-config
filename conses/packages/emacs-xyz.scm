@@ -1,31 +1,35 @@
 (define-module (conses packages emacs-xyz)
+  #:use-module (conses utils)
   #:use-module (gnu packages emacs)
-  #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages ocaml)
-  #:use-module (guix packages)
-  #:use-module (guix build-system emacs)
-  #:use-module (guix download)
-  #:use-module (guix build-system)
-  #:use-module (guix git-download)
+  #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
+  #:use-module (guix packages)
+  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build utils)
-  #:use-module ((guix licenses) #:prefix license:))
+  #:use-module (guix build-system)
+  #:use-module (guix build-system emacs)
+  #:use-module ((guix licenses) #:prefix license:)
+  #:export (emacs-mpv-next
+            emacs-pulseaudio-control-next))
 
-(define-public emacs-slack-next
-  (let ((commit "ff46d88726482211e3ac3d0b9c95dd4fdffe11c2")
-        (revision "0"))
-    (package
-      (inherit emacs-slack)
-      (version (git-version "0.0.2" revision commit))
-      (source (origin
-                (method git-fetch)
-                (uri (git-reference
-                      (url "https://github.com/yuya373/emacs-slack")
-                      (commit commit)))
-                (file-name (git-file-name (package-name emacs-slack) commit))
-                (sha256
-                 (base32
-                  "15g4dmy4iqqpk8ivhkpsngzllbw0nc5d2sc9j36sdnhwkajzhidj")))))))
+(define-public emacs-al-scheme
+  (package
+    (name "emacs-al-scheme")
+    (version "0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://raw.githubusercontent.com/alezost/emacs-config/master/utils/al-scheme.el")
+       (sha256
+        (base32
+         "1j43cnznfg6zzggdfgnm2cmfz7s4d3g5vj2gvkj5jp1npsaix8qy"))))
+    (build-system emacs-build-system)
+    (home-page "https://github.com/alezost/emacs-config/blob/master/utils/al-scheme.el")
+    (synopsis "Additional functionality for @code{scheme-mode}.")
+    (description #f)
+    (license license:gpl3+)))
 
 (define-public emacs-ob-go
   (let ((commit "2067ed55f4c1d33a43cb3f6948609d240a8915f5")
@@ -52,12 +56,12 @@ was created based on the usage of ob-C.")
 (define-public emacs-display-wttr
   (package
     (name "emacs-display-wttr")
-    (version "20220316.213")
+    (version "20220907.1625")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://melpa.org/packages/display-wttr-" version ".el"))
-       (sha256 (base32 "1xzhjbg8q1dhvd81n17vgfhpszvhbmfmgk1yy7zg9faqz0a9g0pz"))))
+       (sha256 (base32 "1x397gqgai96r1vls6zjjnzc8p18xd6y7pygmmbdy25lkp6qzblk"))))
     (build-system emacs-build-system)
     (home-page "https://github.com/josegpt/display-wttr")
     (synopsis "Display wttr (weather) in the mode line")
@@ -66,6 +70,26 @@ fetches weather information based on your location or on a location set in
 @code{display-wttr-locations} from @url{https://wttr.in} and then displays it on the mode line.
 The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}.")
     (license license:gpl3+)))
+
+(define-public emacs-display-wttr-local
+  (package
+    (inherit emacs-display-wttr)
+    (name "emacs-display-wttr-local")
+   (source
+    (local-file
+     (string-append (dirname (dirname %project-root))
+                    "/elisp/display-wttr")
+     #:recursive? #t))))
+
+(define-public emacs-ytdl-next
+  (package
+    (inherit emacs-ytdl)
+    (name "emacs-ytdl-next")
+   (source
+    (local-file
+     (string-append (dirname (dirname %project-root))
+                    "/elisp/ytdl")
+     #:recursive? #t))))
 
 (define-public emacs-fontaine
   (package
@@ -87,30 +111,6 @@ The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}
 set them on demand on graphical Emacs frames. The user option @code{fontaine-presets} holds
 all such presets.")
    (license license:fdl1.3+)))
-
-(define-public emacs-with-nyxt
-  (let ((commit "7e5d14bbfedebc72af5ffdc41912cbc339de59e6")
-        (revision "0"))
-    (package
-      (name "emacs-with-nyxt")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/ag91/emacs-with-nyxt")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256 (base32 "1bkaz7jqlj4w9qx379picyq3di64x66gwwywq7i81yx7x1z9m34z"))))
-      (build-system emacs-build-system)
-      (propagated-inputs
-       (list emacs-s))
-      (home-page "https://github.com/ag91/emacs-with-nyxt")
-      (synopsis "Some code to make Emacs interact with Nyxt.")
-      (description "This is some little hack to make Emacs command Nyxt. In particular
-this provides a function to browser URLs via Nyxt run via Slime.")
-      (license license:bsd-3))))
 
 (define-public emacs-ement-next
   (let ((commit "2626e37b824cb2a2e8fb008991d140ac3351a909")
@@ -167,6 +167,52 @@ and easily switch to and manipulate them.")
 IPC interface.")
     (license license:gpl3+)))
 
+(define* (emacs-mpv-next
+          #:key
+          (local? #t))
+  (let ((commit "")
+        (revision "0"))
+    (package
+      (inherit emacs-mpv)
+      (version (if local? "0.1" (git-version "0" revision commit)))
+      (source
+       (if local?
+           (local-file
+            (string-append (dirname (dirname %project-root))
+                           "/elisp/mpv")
+            #:recursive? #t)
+           (origin
+             (method git-fetch)
+             (uri
+              (git-reference
+               (url "https://github.com/efimerspan/mpv")
+               (commit commit)))
+             (file-name (git-file-name (package-name emacs-mpv) version))
+             (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))))))
+
+(define* (emacs-pulseaudio-control-next
+          #:key
+          (local? #t))
+  (let ((commit "22f54ae7282b37eaec0231a21e60213a5dbc7172")
+        (revision "0"))
+    (package
+      (inherit emacs-pulseaudio-control)
+      (version (if local? "0.1" (git-version "0" revision commit)))
+      (source
+       (if local?
+           (local-file
+            (string-append (dirname (dirname %project-root))
+                           "/elisp/pulseaudio-control")
+            #:recursive? #t)
+           (origin
+             (method git-fetch)
+             (uri
+              (git-reference
+               (url "https://github.com/efimerspan/pulseaudio-control")
+               (commit commit)))
+             (file-name (git-file-name (package-name emacs-pulseaudio-control) version))
+             (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))))))
+
 (define-public emacs-circadian
   (package
     (name "emacs-circadian")
@@ -175,7 +221,7 @@ IPC interface.")
      (origin
        (method url-fetch)
        (uri (string-append "https://melpa.org/packages/circadian-" version ".el"))
-       (sha256 (base32 "041d65p9ksikpvbsk2bdc1b0cb7cfpxbk3xxqd38jnw8l7hjrp4z"))))
+       (sha256 (base32 "09pkyjb6h83xy6hq9ik98cfm8nfqhfjaa10s6yd81wi12bfaszas"))))
     (build-system emacs-build-system)
     (home-page "https://github.com/guidoschmidt/circadian.el")
     (synopsis "Theme-switching for Emacs based on daytime.")
@@ -258,51 +304,6 @@ exchange rates backends.")
     (description "vertico-posframe is a Vertico extension, which lets Vertico use posframe show its
 candidate menu.")
     (license license:gpl3+)))
-
-(define-public emacs-ednc
-  (let ((commit "537e2e165984b53b45cf760ea9e4b86794b8a09d")
-        (revision "0"))
-    (package
-      (name "emacs-ednc")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/sinic/ednc")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256 (base32 "07cnp40rbl2p4mn40cib6mvby1svxqd8kb3dxb3a8idb736nzqrp"))))
-      (build-system emacs-build-system)
-      (home-page "https://github.com/sinic/ednc")
-      (synopsis "Emacs Desktop Notification Center.")
-      (description "EDNC is an Emacs package written in pure Lisp that implements a Desktop
-Notifications service according to the freedesktop.org specification. EDNC aspires to be a small,
- but flexible drop-in replacement of standalone daemons like Dunst.")
-      (license license:gpl3+))))
-
-(define-public emacs-app-launcher
-  (let ((commit "80a9ed37892ee6e21fe44487ed11f66a15e3f440")
-        (revision "0"))
-    (package
-      (name "emacs-app-launcher")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/SebastienWae/app-launcher")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256 (base32 "1ywhfx8604ifmvcy2397bmvq2wj03jyqnm0g7lmqqi5p97rjbdgc"))))
-      (build-system emacs-build-system)
-      (home-page "https://github.com/SebastienWae/app-launcher")
-      (synopsis "Launch applications from Emacs.")
-      (description "app-launcher defines an app-launcher-run-command which uses the Emacs standard
-completion to select an application in your machine and open it.")
-      (license license:gpl3+))))
 
 (define-public emacs-capf-autosuggest
   (package
@@ -479,49 +480,6 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
     (description #f)
     (license license:gpl3+)))
 
-(define-public emacs-elibs
-  (package
-    (name "emacs-elibs")
-    (version "0.1.0")
-    (source
-     (local-file "../../etc/elibs" #:recursive? #t))
-    (build-system emacs-build-system)
-    (propagated-inputs
-     (list emacs-consult
-           emacs-org
-           emacs-org-roam
-           emacs-org-superstar
-           emacs-geiser
-           emacs-geiser-guile
-           emacs-all-the-icons
-           emacs-sly
-           emacs-modus-themes
-           emacs-dashboard
-           emacs-pdf-tools
-           emacs-erc-status-sidebar
-           emacs-org-mime
-           emacs-emms
-           emacs-ytdl
-           emacs-mpv
-           emacs-tuareg
-           ocaml-merlin
-           emacs-ednc
-           emacs-exwm
-           emacs-webpaste
-           emacs-ement-next
-           emacs-nyxt
-           emacs-telega
-           emacs-password-store
-           emacs-dashboard
-           emacs-hexrgb
-           emacs-daemons
-           emacs-fontaine))
-    (home-page "https://git.sr.ht/~conses/quasar")
-    (synopsis "Various Emacs Lisp libraries.")
-    (description "A set of Emacs Lisp libraries to enhance the functionality
- of some Emacs packages and built-in features.")
-    (license license:gpl3+)))
-
 (define-public emacs-fdroid
   (let ((commit "598549ffbbea4a015dca80fc2d061e6e01d77e40")
         (revision "0"))
@@ -548,7 +506,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
 
 (define-public emacs-nyxt
-  (let ((commit "2573e49663c95e7b179d1ec3c70eccc0558fab56")
+  (let ((commit "05f49bc3728855dffd71cdd29c2780202b41d19c")
         (revision "0"))
     (package
       (name "emacs-nyxt")
@@ -562,7 +520,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "05cs7wdhlhjbmm8hwk5b1lq00ywh958a0nw0z32k2ri9lz56pc45"))))
+          (base32 "0ih6c6g5p629i442hpn5qsr895y0jmkbkf3i985ygb3ckna77682"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-sly))

@@ -1,13 +1,13 @@
 (define-module (conses packages desktop)
   #:use-module (conses packages python-xyz)
-  #:use-module (guix packages)
-  #:use-module (guix build-system gnu)
-  #:use-module (guix git-download)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages image)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages python-build)
+  #:use-module (guix packages)
+  #:use-module (guix git-download)
+  #:use-module (guix build-system gnu)
   #:use-module ((guix licenses) #:prefix license:))
 
 (define-public bibata-cursor-theme
