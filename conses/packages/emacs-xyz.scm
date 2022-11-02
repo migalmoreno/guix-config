@@ -74,7 +74,6 @@ The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}
 (define-public emacs-display-wttr-local
   (package
     (inherit emacs-display-wttr)
-    (name "emacs-display-wttr-local")
    (source
     (local-file
      (string-append (dirname (dirname %project-root))
