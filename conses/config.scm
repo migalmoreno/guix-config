@@ -19,6 +19,7 @@
           (system-submodule '(conses system))
           (deploy-submodule '(conses deploy))
           (initial-os %initial-os)
+          (first-run? (not (nil? (getenv "RDE_FIRST_RUN"))))
           (pretty-print? #f))
   "Dispatch a configuration depending on a set of targets."
   (ensure-pred string? user)
@@ -27,6 +28,7 @@
   (ensure-pred list? system-submodule)
   (ensure-pred list? deploy-submodule)
   (ensure-pred operating-system? initial-os)
+  (ensure-pred boolean? first-run?)
   (ensure-pred boolean? pretty-print?)
 
   (define* (mod-ref sub mod var-name #:optional default-value)
@@ -42,7 +44,7 @@
   (define %config
     (rde-config
      (initial-os initial-os)
-     (integrate-he-in-os? #t)
+     (integrate-he-in-os? first-run?)
      (features (append %home-features
                        %system-features))))
 

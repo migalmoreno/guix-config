@@ -16,8 +16,8 @@ upgrade:
 	mv channels-lock.2 channels-lock
 	$(CHANNELS-LOCK) upgrade
 
-init:
-	RDE_TARGET=system $(CHANNELS-LOCK) init -L . $(CONFIG) /mnt
+init/%:
+	RDE_TARGET=system RDE_SYSTEM=$* RDE_FIRST_RUN=true $(CHANNELS-LOCK) init -L . $(CONFIG) /mnt
 
 home: home/${USER}
 
