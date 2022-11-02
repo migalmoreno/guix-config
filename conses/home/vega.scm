@@ -76,6 +76,12 @@
    (feature-emacs-project)
    (feature-emacs-appearance
     #:auto-theme? #f)
+   (feature-emacs-whitespace
+    #:global-modes '(not org-mode org-agenda-mode
+                         org-agenda-follow-mode org-capture-mode
+                         dired-mode eshell-mode magit-status-mode
+                         diary-mode magit-diff-mode text-mode
+                         pass-view-mode erc-mode))
    (feature-emacs-all-the-icons)
    (feature-emacs-completion
     #:consult-initial-narrowing? #t)
@@ -825,6 +831,6 @@
      (videos "$HOME/videos")
      (templates "$HOME")))
    (feature-pipewire)
-   (feature-cursor)
+   (feature-emacs-cursor)
    (feature-xorg)
    (feature-qemu)))

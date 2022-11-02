@@ -14,46 +14,7 @@
   #:use-module (gnu home-services xorg)
   #:use-module (gnu home-services base)
   #:use-module (guix gexp)
-  #:export (feature-cursor
-            feature-xorg))
-
-(define* (feature-cursor
-          #:key
-          (unclutter unclutter))
-  "Configure the graphical cursor."
-  (ensure-pred file-like? unclutter)
-
-  (define f-name 'cursor)
-
-  (define (get-home-services config)
-    "Return home services related to the cursor."
-    (list
-     (service home-unclutter-service-type
-              (home-unclutter-configuration
-               (unclutter unclutter)
-               (seconds 2)))
-     (rde-elisp-configuration-service
-      f-name
-      config
-      `((pixel-scroll-mode)
-        (with-eval-after-load 'mouse
-          (setq mouse-yank-at-point nil))
-        (with-eval-after-load 'mwheel
-          (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-          (setq mouse-wheel-progressive-speed nil)
-          (setq mouse-wheel-follow-mouse t)
-          (setq scroll-conservatively 100)
-          (setq mouse-autoselect-window nil)
-          (setq what-cursor-show-names t)
-          (setq focus-follows-mouse t))
-        (with-eval-after-load 'frame
-          (setq-default cursor-in-non-selected-windows nil)
-          (blink-cursor-mode 0))))))
-
-  (feature
-   (name f-name)
-   (values `((cursor . #t)))
-   (home-services-getter get-home-services)))
+  #:export (feature-xorg))
 
 (define* (feature-xorg
           #:key

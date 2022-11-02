@@ -13,6 +13,8 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:export (feature-emacs-appearance
+            feature-emacs-whitespace
+            feature-emacs-cursor
             feature-emacs-modus-themes
             feature-emacs-all-the-icons
             feature-emacs-completion
@@ -102,8 +104,8 @@
         (with-eval-after-load 'frame
           (add-to-list 'initial-frame-alist '(fullscreen . maximized))
           (set-frame-parameter (selected-frame) 'internal-border-width ,margin))
-        (autoload 'minions-mode "minions")
-        (minions-mode)
+        (with-eval-after-load 'minions-autoloads
+          (minions-mode))
         (with-eval-after-load 'minions
           (setq minions-mode-line-lighter ";"))
         (setq mode-line-misc-info
@@ -114,26 +116,8 @@
               '())
         (setq use-file-dialog nil)
         (setq use-dialog-box nil)
-        ,@(if fringes
-              '((with-eval-after-load 'fringe
-                  (fringe-mode 10)))
-              '((with-eval-after-load 'fringe
-                  (fringe-mode 0))))
-        (add-hook 'before-save-hook 'delete-trailing-whitespace)
-        (global-whitespace-mode)
-        (setq whitespace-style '(face tabs tab-mark))
-        (setq whitespace-global-modes '(not org-mode
-                                            org-agenda-mode
-                                            org-agenda-follow-mode
-                                            org-capture-mode
-                                            dired-mode
-                                            eshell-mode
-                                            magit-status-mode
-                                            diary-mode
-                                            magit-diff-mode
-                                            text-mode
-                                            pass-view-mode
-                                            erc-mode))
+        (with-eval-after-load 'fringe
+          (fringe-mode ,(or fringes 0)))
         (setq echo-keystrokes 0)
         (setq ring-bell-function 'ignore)
         (setq visible-bell nil)
@@ -161,6 +145,8 @@
         (setq x-gtk-use-system-tooltips nil)
         (push '(menu-bar-lines . 0) default-frame-alist)
         (push '(tool-bar-lines . 0) default-frame-alist)
+        (push (cons left-fringe (or fringes 0)) default-frame-alist)
+        (push (cons right-fringe (or fringes 0)) default-frame-alist)
         (push '(vertical-scroll-bars) default-frame-alist)
         (push '(no-special-glyphs) default-frame-alist)
         (push '(undecorated) default-frame-alist)
@@ -176,6 +162,64 @@
              (emacs-header-line-padding . ,header-line-padding)
              (emacs-tab-bar-padding . ,tab-bar-padding)
              (emacs-margin . ,margin)))
+   (home-services-getter get-home-services)))
+
+(define* (feature-emacs-whitespace
+          #:key
+          (global-modes '()))
+  "Configure whitespace, a minor mode to visualize whitespace characters."
+  (ensure-pred list? global-modes)
+
+  (define emacs-f-name 'whitespace)
+  (define f-name (symbol-append 'emacs- emacs-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to whitespace-mode."
+    (list
+     (rde-elisp-configuration-service
+      emacs-f-name
+      config
+      `((add-hook 'before-save-hook 'delete-trailing-whitespace)
+        (global-whitespace-mode)
+        (with-eval-after-load 'whitespace
+          (setq whitespace-style '(face tabs tab-mark))
+          (setq whitespace-global-modes ',global-modes))))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . #t)))
+   (home-services-getter get-home-services)))
+
+(define* (feature-emacs-cursor)
+  "Configure the Emacs graphical cursor."
+
+  (define emacs-f-name 'cursor)
+  (define f-name (symbol-append 'emacs- emacs-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to the cursor."
+    (list
+     (rde-elisp-configuration-service
+      f-name
+      config
+      `((pixel-scroll-mode)
+        (with-eval-after-load 'mouse
+          (setq mouse-yank-at-point nil))
+        (with-eval-after-load 'mwheel
+          (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+          (setq mouse-wheel-progressive-speed nil)
+          (setq mouse-wheel-follow-mouse t)
+          (setq scroll-conservatively 100)
+          (setq mouse-autoselect-window nil)
+          (setq what-cursor-show-names t)
+          (setq focus-follows-mouse t))
+        (with-eval-after-load 'frame
+          (setq-default cursor-in-non-selected-windows nil)
+          (blink-cursor-mode 0))))))
+
+  (feature
+   (name f-name)
+   (values `((emacs-cursor . #t)))
    (home-services-getter get-home-services)))
 
 (define* (feature-emacs-modus-themes
