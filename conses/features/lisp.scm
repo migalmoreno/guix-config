@@ -118,37 +118,43 @@
       `((require 'sly)
 
         (defgroup configure-lisp nil
-                  "Lisp tools and extensions."
-                  :group 'configure)
+          "Lisp tools and extensions."
+          :group 'configure)
 
         (defun configure-lisp-sly-autoconnect ()
-               "Start a SLY REPL unless an active connection is already present."
-               (unless (sly-connected-p)
-                 (save-excursion
-                  (sly))))
+          "Start a SLY REPL unless an active connection is already present."
+          (unless (sly-connected-p)
+            (save-excursion
+              (sly))))
 
         (defun configure-lisp-sly-custom-prompt (_package nickname error-level next-entry-idx _condition)
-               "Construct a custom SLY prompt with package NICKNAME, ERROR-LEVEL and NEXT-ENTRY-IDX."
-               (let ((dir (propertize (abbreviate-file-name default-directory) 'font-lock-face 'diff-mode))
-                     (nick (propertize nickname 'font-lock-face 'sly-mode-line))
-                     (idx (propertize (number-to-string next-entry-idx) 'font-lock-face 'diff-mode))
-                     (err-level (when (cl-plusp error-level)
-                                  (concat (sly-make-action-button
-                                           (format " [%d]" error-level)
-                                           #'sly-db-pop-to-debugger-maybe)
-                                          ""))))
-                 (concat "(" dir ")\n"
-                         (propertize "<" 'font-lock-face 'sly-mrepl-prompt-face)
-                         idx
-                         (propertize ":" 'font-lock-face 'sly-mrepl-prompt-face)
-                         nick
-                         err-level
-                         (propertize "> " 'font-lock-face 'sly-mrepl-prompt-face))))
+          "Construct a custom SLY prompt with package NICKNAME, ERROR-LEVEL and NEXT-ENTRY-IDX."
+          (let ((dir (propertize (abbreviate-file-name default-directory) 'font-lock-face 'diff-mode))
+                (nick (propertize nickname 'font-lock-face 'sly-mode-line))
+                (idx (propertize (number-to-string next-entry-idx) 'font-lock-face 'diff-mode))
+                (err-level (when (cl-plusp error-level)
+                             (concat (sly-make-action-button
+                                      (format " [%d]" error-level)
+                                      #'sly-db-pop-to-debugger-maybe)
+                                     ""))))
+            (concat "(" dir ")\n"
+                    (propertize "<" 'font-lock-face 'sly-mrepl-prompt-face)
+                    idx
+                    (propertize ":" 'font-lock-face 'sly-mrepl-prompt-face)
+                    nick
+                    err-level
+                    (propertize "> " 'font-lock-face 'sly-mrepl-prompt-face))))
+
+        (defun configure-lisp-setup-sly-history ()
+          "Create an empty history file for SLY if missing."
+          (unless (file-exists-p sly-mrepl-history-file-name)
+            (make-empty-file sly-mrepl-history-file-name)))
 
         (with-eval-after-load 'lisp-mode
           (setq inferior-lisp-program ,(file-append lisp "/bin/" (package-name lisp))))
         (add-hook 'debugger-mode-hook 'toggle-truncate-lines)
         (add-hook 'sly-mode-hook 'configure-lisp-sly-autoconnect)
+        (add-hook 'sly-mode-hook 'configure-lisp-setup-sly-history)
         (add-to-list 'display-buffer-alist `(,(rx "*sly-mrepl" (* any) "*")
                                              (display-buffer-no-window)
                                              (allow-no-window . t)))
@@ -156,20 +162,19 @@
         (with-eval-after-load 'sly
           (setq sly-words-of-encouragement '(""))
           (setq sly-command-switch-to-existing-lisp 'always)
-          (setq sly-mrepl-history-file-name (if-let ((history (expand-file-name "emacs/sly-mrepl-history" (xdg-cache-home))))
-                                                    history
-                                                    (make-empty-file history)))
           (setq sly-description-autofocus t)
           (setq sly-net-coding-system 'utf-8-unix)
           (setq sly-connection-poll-interval 0.1)
           (setq sly-enable-evaluate-in-emacs t)
           (setq sly-keep-buffers-on-connection-close nil))
         (with-eval-after-load 'sly-mrepl
+          (define-key sly-mrepl-mode-map (kbd "C-M-q") 'indent-sexp)
           (let ((map sly-mode-map))
             (define-key map (kbd "C-c M-n") 'sly-mrepl-next-prompt)
             (define-key map (kbd "C-c M-p") 'sly-mrepl-previous-prompt))
+          (setq sly-mrepl-history-file-name (expand-file-name "emacs/sly-mrepl-history" (xdg-cache-home)))
+          (setq sly-mrepl-prevent-duplicate-history t)
           (setq sly-mrepl-pop-sylvester nil)
-          (define-key sly-mrepl-mode-map (kbd "C-M-q") 'indent-sexp)
           (setq sly-mrepl-prompt-formatter 'configure-lisp-sly-custom-prompt))
         (with-eval-after-load 'org
           (require 'ob-lisp)
