@@ -145,8 +145,8 @@
         (setq x-gtk-use-system-tooltips nil)
         (push '(menu-bar-lines . 0) default-frame-alist)
         (push '(tool-bar-lines . 0) default-frame-alist)
-        (push (cons left-fringe (or fringes 0)) default-frame-alist)
-        (push (cons right-fringe (or fringes 0)) default-frame-alist)
+        (push (cons 'left-fringe ,(or fringes 0)) default-frame-alist)
+        (push (cons 'right-fringe ,(or fringes 0)) default-frame-alist)
         (push '(vertical-scroll-bars) default-frame-alist)
         (push '(no-special-glyphs) default-frame-alist)
         (push '(undecorated) default-frame-alist)
@@ -1330,7 +1330,7 @@ operate on buffers like Dired."
         (with-eval-after-load 'notifications
           ,@(if notifications-icon
                 `((setq notifications-application-icon ,notifications-icon))
-              '()))
+                '()))
         (let ((map mode-specific-map))
           (define-key map "dc" 'configure-ednc-close-last-notification)
           (define-key map "dl" 'configure-ednc-show-notification-log)
