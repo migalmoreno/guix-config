@@ -31,7 +31,7 @@
 
   (define* (mod-ref sub mod var-name #:optional default-value)
     (let ((var (module-variable (resolve-module `(,@sub ,(string->symbol mod))) var-name)))
-      (if var
+      (if (and var (not (unspecified? var)))
           (variable-ref var)
           default-value)))
 
