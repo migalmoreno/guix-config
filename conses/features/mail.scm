@@ -81,16 +81,17 @@ is not provided, use all the mail accounts."
                   (tls . #f)
                   (tlsOptions . ((rejectUnauthorized . #t)))
                   (username . ,(mail-account-fqda mail-acc))
-                  (password . ,(mail-account-get-pass-cmd mail-acc))
+                  (passwordCmd . ,(mail-account-get-pass-cmd mail-acc))
                   (xoauth2 . #f)
-                  (onNewMail . "mbsync -a")
-                  (onNewMailPost . ,(format #f "emacsclient -e '~s'"
-                                            '(notifications-notify
-                                              :app-name "goimapnotify"
-                                              :title "New email received"
-                                              :timeout 0)))
+                  (alias . ,(mail-account-id mail-acc))
                   (trigger . 20)
-                  (boxes . #("Inbox"))))
+                  (boxes . #(((mailbox . "Inbox")
+                              (onNewMail . ,(format #f "mbsync ~a" (mail-account-id mail-acc)))
+                              (onNewMailPost . ,(format #f "emacsclient -e '~s'"
+                                                        '(notifications-notify
+                                                          :app-name "goimapnotify"
+                                                          :title "New email received"
+                                                          :timeout 0))))))))
               mail-accounts)))))))
 
   (feature
