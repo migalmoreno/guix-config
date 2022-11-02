@@ -344,7 +344,7 @@ proxy url as per `configure-browse-url-mappings'."
                (let ((url (render-url (url buffer))))
                  (eval-in-emacs
                   `(configure-mpv-play-url ,url))))
-             (define-key *nl-keymap*
+             (define-key *rde-keymap*
                "M-c v" 'play-video-in-current-page))))
          '())))
 

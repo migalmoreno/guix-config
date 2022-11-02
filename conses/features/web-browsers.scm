@@ -63,17 +63,21 @@
           (default-browser? #f)
           (development? #f)
           (startup-flags '())
+          (default-cookie-policy ':always)
           (development-path "~/local/share/projects/nyxt")
           (extra-config-lisp '())
-          (auto-mode-rules '()))
+          (auto-mode-rules '())
+          (extra-bindings '()))
   "Configure the Nyxt browser."
   (ensure-pred file-like? nyxt)
   (ensure-pred boolean? default-browser?)
   (ensure-pred boolean? development?)
   (ensure-pred list? startup-flags)
+  (ensure-pred symbol? default-cookie-policy)
   (ensure-pred path? development-path)
   (ensure-pred lisp-config? extra-config-lisp)
   (ensure-pred lisp-config? auto-mode-rules)
+  (ensure-pred list? extra-bindings)
 
   (define f-name 'nyxt)
 
@@ -124,53 +128,26 @@
          (reset-asdf-registries)
          (use-nyxt-package-nicknames)
          (local-time:reread-timezone-repository)
-         (setf local-time:*default-timezone*
-               (local-time:find-timezone-by-location-name
-                ,(get-value 'timezone config)))
-         (defvar *nl-keymap* (make-keymap "nl-map"))
-         (define-key *nl-keymap*
-           "C-m" 'nyxt/bookmark-mode:bookmark-current-url
-           "C-s" 'nyxt/search-buffer-mode:search-buffer
-           "C-b" 'nyxt/history-mode:history-backwards
-           "M-n" 'switch-buffer-next
-           "M-p" 'switch-buffer-previous
-           "M-c f" 'nyxt/document-mode:focus-first-input-field
-           "M-c b" 'switch-buffer
-           "M-c k" 'delete-buffer
-           "M-c m" 'nyxt/bookmark-mode:set-url-from-bookmark
-           "M-c i" 'open-inspector
-           "M-c s" 'query-selection-in-search-engine
-           "M-h v" 'describe-variable
-           "M-h s" 'describe-slot
-           "M-h f" 'describe-function
-           "M-h c" 'describe-class
-           "M-h k" 'describe-key)
-         (delete-command 'nyxt/no-image-mode:no-image-mode)
+         (defvar *rde-keymap* (make-keymap "rde-map"))
+         (define-key *rde-keymap* ,@extra-bindings)
          (defmethod files:resolve ((profile nyxt-profile) (file nyxt:history-file))
-                    "Store history in a temporary directory."
-                    (sera:path-join (nfiles:expand (make-instance 'nyxt-temporary-directory))
-                                    (uiop:relativize-pathname-directory (call-next-method))))
-         (define-mode nl-keymap-mode ()
-           "Dummy mode to apply key bindings in `*nl-keymap*.'"
-           ((keyscheme-map (keymaps:make-keyscheme-map
-                            keyscheme:emacs *nl-keymap*))
+           "Store history in a temporary directory."
+           (sera:path-join (nfiles:expand (make-instance 'nyxt-temporary-directory))
+                           (uiop:relativize-pathname-directory (call-next-method))))
+         (define-mode rde-keymap-mode ()
+           "Dummy mode to apply key bindings in `*rde-keymap*.'"
+           ((keyscheme-map (keymaps:make-keyscheme-map keyscheme:emacs *rde-keymap*))
             (visible-in-status-p nil)))
          (define-configuration document-buffer
            ((smooth-scrolling t)
             (scroll-distance 150)))
          (define-configuration buffer
-           ((default-modes `(nyxt/blocker-mode:blocker-mode nl-keymap-mode ,@%slot-value%))))
+           ((default-modes `(rde-keymap-mode ,@%slot-value%))))
          (define-configuration browser
-           ((default-cookie-policy :no-third-party)
+           ((default-cookie-policy ,default-cookie-policy)
             (restore-session-on-startup-p nil)))
-         (define-configuration prompt-buffer
-           ((mouse-support-p nil)))
          (define-configuration nyxt/hint-mode:hint-mode
-           ((nyxt/hint-mode:hints-alphabet "asdfghjklqwertyuiop")
-            (visible-in-status-p nil)))
-         (define-configuration (nyxt/certificate-exception-mode:certificate-exception-mode
-                                nyxt/auto-mode:auto-mode)
-           ((visible-in-status-p nil)))))
+           ((nyxt/hint-mode:hints-alphabet "asdfghjklqwertyuiop")))))
       (service
        home-nyxt-service-type
        (home-nyxt-configuration

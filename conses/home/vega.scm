@@ -84,10 +84,18 @@
    (feature-clojure)
    (feature-nyxt
     #:default-browser? #t
+    #:default-cookie-policy ':no-third-party
     #:auto-mode-rules
-    '((((match-host "wikipedia.org") :included (nyxt/style-mode:dark-mode)))))
+    '((((match-host "wikipedia.org") :included (nyxt/style-mode:dark-mode))))
+    #:extra-config-lisp
+    '((define-configuration prompt-buffer
+        ((mouse-support-p nil))))
+    #:extra-bindings
+    '("C-x v" 'query-selection-in-search-engine))
    (feature-nyxt-emacs)
+   (feature-nyxt-blocker)
    (feature-emacs-pdf-tools)
+   (feature-fonts)
    (feature-mpv
     #:emacs-mpv ((@ (conses packages emacs-xyz) emacs-mpv-next))
     #:extra-mpv-conf
@@ -400,7 +408,6 @@
    (feature-emacs-yaml)
    (feature-emacs-lang-web)
    (feature-emacs-polymode)
-   (feature-fonts)
    (feature-go)
    (feature-qmk
     #:keyboard "dztech/dz65rgb/v1"
@@ -507,7 +514,21 @@
       (local? #t))))
    (feature-pantalaimon)
    (feature-emacs-ement)
-   (feature-nyxt-status)
+   (feature-nyxt-status
+    #:height 30
+    #:glyphs? #t
+    #:status-buffer-layout
+    '(:div :id "container"
+      (:div :id "controls"
+       (:raw
+        (format-close-button status)))
+      (:div :id "url"
+       (:raw
+        (format-status-load-status buffer)
+        (format-status-url buffer)))
+      (:div :id "modes"
+            :title (nyxt::modes-string buffer)
+       (:raw (format-status-modes status)))))
    (feature-nyxt-userscript
     #:userstyles
     '((make-instance
@@ -558,113 +579,7 @@
        :accent-color "#afafef"
        :on-accent-color "#a8a8a8"
        :font-family "Iosevka"
-       :cut (make-instance 'tailor:cut)))
-    #:default-cut
-    '(define-configuration tailor:cut
-       ((tailor:name "RDE")
-        (tailor:prompt
-         '((* :font-family theme:font-family)
-           ("#prompt-modes"
-            :display "none")
-           ("#prompt-area"
-            :background-color theme:secondary
-            :color theme:on-secondary)
-           ("#input"
-            :background-color theme:secondary
-            :color theme:on-background)
-           (".source-content"
-            :border "none"
-            :border-collapse collapse)
-           (".source-name"
-            :background-color theme:background
-            :color theme:on-background
-            :font-style "italic")
-           (".source-content th"
-            :padding-left "0"
-            :background-color theme:background
-            :font-weight "bold")
-           (".source-content td"
-            :padding "0 2px")
-           ("#selection"
-            :font-weight "bold"
-            :background-color theme:secondary
-            :color theme:on-background)))
-        (tailor:buffer
-         '(("*, body, div, section, input"
-            :font-family theme:font-family
-            :background-color theme:background
-            :color theme:on-background)
-           ("h1,h2,h3,h4,h5,h6"
-            :font-family "IBM Plex Sans"
-            :color (tailor:make-important theme:primary))
-           ("p,pre,td,dt"
-            :font-family "IBM Plex Sans"
-            :color theme:on-background)
-           (pre
-            :font-family "Iosevka"
-            :background-color (tailor:make-important theme:background))
-           ("button, a, a:link"
-            :color theme:on-background
-            :font-family "IBM Plex Sans")
-           (".button, .button:hover , .button:visited, .button:active"
-            :background-color theme:secondary
-            :border-color (if (theme:dark-p theme:theme)
-                              theme:on-secondary
-                              theme:on-background)
-            :color theme:on-background)
-           (code
-            :font-family "Iosevka"
-            :color (tailor:make-important theme:on-background)
-            :background-color (tailor:make-important theme:secondary))))
-        (tailor:status
-         '((body
-            :font-family theme:font-family
-            :height "100%"
-            :width "100%"
-            :line-height "30px"
-            :display "flex"
-            :flex-direction "column"
-            :background theme:secondary
-            :flex-wrap "wrap")
-           ("#container"
-            :display "flex"
-            :height "100%"
-            :width "100%"
-            :line-height "30px"
-            :justify-content "space-between"
-            :align-items "center")
-           ("#buttons"
-            :display "flex"
-            :align-items "center"
-            :justify-content "center"
-            :line-height "20px"
-            :height "100%")
-           ("#url"
-            :font-weight "bold"
-            :max-width "60%"
-            :padding-right "0"
-            :padding-left "5px"
-            :text-overflow "ellipsis"
-            :background-color theme:secondary
-            :color theme:on-background
-            :box-sizing "border-box"
-            :z-index "auto")
-           ("#tabs, #controls" :display "none")
-           ("#modes"
-            :padding-right "2px"
-            :background-color theme:secondary
-            :box-sizing "border-box"
-            :color theme:on-background
-            :display "flex"
-            :justify-contents "flex-end"
-            :z-index "auto")
-           (.button
-            :color theme:on-background)))
-        (tailor:message
-         '((body
-            :color theme:on-background
-            :background-color theme:background
-            :font-family theme:font-family))))))
+       :cut (make-instance 'tailor:cut))))
    (feature-nyxt-nx-router
     #:media-enabled? #f
     #:routes

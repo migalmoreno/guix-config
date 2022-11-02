@@ -12,7 +12,16 @@
   #:use-module (guix records)
   #:use-module (srfi srfi-9)
   #:export (font-specification
-            feature-fonts))
+            feature-fonts
+            font-name
+            font-default-size
+            font-docked-size
+            font-headless-size
+            font-weight
+            font-package
+            font?
+            make-font
+            font))
 
 (define-record-type* <font> font
   make-font
