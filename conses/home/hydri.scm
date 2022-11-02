@@ -1,4 +1,5 @@
 (define-module (conses home hydri)
+  #:use-module (conses utils)
   #:use-module (conses features xorg)
   #:use-module (conses features emacs)
   #:use-module (conses features security)
@@ -12,6 +13,9 @@
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu packages emacs))
+
+(define-public %hydri-signing-key
+  (project-file "conses/keys/hydri.pub"))
 
 (define-public %home-features
   (list
