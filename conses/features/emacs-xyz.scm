@@ -1166,13 +1166,15 @@ operate on buffers like Dired."
 
   (define (get-home-services config)
     "Return home services related to PulseAudio Control."
+    (define pactl (file-append (@ (gnu packages pulseaudio) pulseaudio) "/bin/pactl"))
+
     (list
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'cl-lib)
-        (autoload 'pulseaudio-control-default-keybindings "pulseaudio-control")
-        (pulseaudio-control-default-keybindings)
+      `((with-eval-after-load 'pulseaudio-control-autoloads
+          (pulseaudio-control-default-keybindings)
+          (pulseaudio-control-display-mode))
         ,@(if (get-value 'emacs-exwm config)
               '((with-eval-after-load 'exwm
                   (exwm-input-set-key (kbd "s-<next>") 'pulseaudio-control-decrease-volume)
@@ -1197,6 +1199,7 @@ operate on buffers like Dired."
                   (setq pulseaudio-control-source-active-string
                         (all-the-icons-material "mic" :v-adjust -0.15 :height 1)))
                 '())
+          (setq pulseaudio-control-pactl-path ,pactl)
           (setq pulseaudio-control--volume-maximum '(("percent" . 100)
                                                      ("decibels" . 10)
                                                      ("raw" . 98000)))
