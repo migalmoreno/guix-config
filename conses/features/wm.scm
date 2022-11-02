@@ -93,203 +93,203 @@ EndSection")
        config
        `((require 'cl-lib)
          (defvar configure-exwm-default-output nil
-                 "The name of the default RandR output.")
+           "The name of the default RandR output.")
 
          (defvar configure-exwm-docked-output nil
-                 "The name of the external display RandR output.")
+           "The name of the external display RandR output.")
 
-         ,@(if (get-value 'emacs-consult config)
+         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
                `((defvar configure-exwm-buffer-source
-                         `(:name "EXWM"
+                   `(:name "EXWM"
                            :hidden t
                            :narrow ?x
                            :category buffer
                            :state ,'consult--buffer-state
                            :items ,(lambda () (mapcar 'buffer-name (configure-completion--mode-buffers
                                                                     'exwm-mode))))
-                         "Source for EXWM buffers to be set in `consult-buffer-sources'.")
+                   "Source for EXWM buffers to be set in `consult-buffer-sources'.")
                  (add-to-list 'consult-buffer-sources configure-exwm-buffer-source)
                  (add-to-list 'configure-completion-initial-narrow-alist '(exwm-mode . ?x)))
                '())
 
          (defun configure-exwm--disable-tab-bar (frame)
-                "Disable the tab-bar on new Emacs FRAME."
-                (set-frame-parameter frame 'tab-bar-lines 0))
+           "Disable the tab-bar on new Emacs FRAME."
+           (set-frame-parameter frame 'tab-bar-lines 0))
 
          (defun configure-exwm--docked-p ()
-                "Return non-nil if RanR has currently more than one output connected."
-                (let ((xrandr-output-regexp (rx "\n" bol (group (+ any)) " connected")))
-                  (with-temp-buffer
-                   (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
-                   (goto-char (point-min))
-                   (re-search-forward xrandr-output-regexp nil 'noerror)
-                   (setq configure-exwm-default-output (match-string 1))
-                   (forward-line)
-                   (prog1
-                    (null (not (re-search-forward xrandr-output-regexp nil 'noerror)))
-                    (setq configure-exwm-docked-output (match-string 1))))))
+           "Return non-nil if RanR has currently more than one output connected."
+           (let ((xrandr-output-regexp (rx "\n" bol (group (+ any)) " connected")))
+             (with-temp-buffer
+               (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
+               (goto-char (point-min))
+               (re-search-forward xrandr-output-regexp nil 'noerror)
+               (setq configure-exwm-default-output (match-string 1))
+               (forward-line)
+               (prog1
+                   (null (not (re-search-forward xrandr-output-regexp nil 'noerror)))
+                 (setq configure-exwm-docked-output (match-string 1))))))
 
          (defun configure-exwm-apply-display-settings ()
-                "Apply the corresponding display settings after EXWM is enabled."
-                (interactive)
-                ,@(if (get-value 'emacs-fontaine config)
-                      '((require 'fontaine)
-                        (if (configure-exwm--docked-p)
-                            (fontaine-set-preset 'docked)
-                            (fontaine-set-preset 'headless)))
-                      '())
-                (cl-loop for i from 0 upto ,workspaces
-                         do (progn
-                             (exwm-workspace-switch-create i)
-                             (set-frame-parameter (selected-frame) 'internal-border-width
-                                                  ,(get-value 'emacs-margin config)))
-                         finally (progn
-                                  (exwm-workspace-switch-create 0)
-                                  (add-hook 'after-make-frame-functions 'configure-exwm--disable-tab-bar))))
+           "Apply the corresponding display settings after EXWM is enabled."
+           (interactive)
+           ,@(if (get-value 'emacs-fontaine config)
+                 '((require 'fontaine)
+                   (if (configure-exwm--docked-p)
+                       (fontaine-set-preset 'docked)
+                     (fontaine-set-preset 'headless)))
+               '())
+           (cl-loop for i from 0 upto ,workspaces
+                    do (progn
+                         (exwm-workspace-switch-create i)
+                         (set-frame-parameter (selected-frame) 'internal-border-width
+                                              ,(get-value 'emacs-margin config)))
+                    finally (progn
+                              (exwm-workspace-switch-create 0)
+                              (add-hook 'after-make-frame-functions 'configure-exwm--disable-tab-bar))))
 
          (defun configure-exwm-shorten-buffer-name ()
-                "Shorten EXWM buffer names to be more discernible."
-                (interactive)
-                (exwm-workspace-rename-buffer
-                 (concat exwm-class-name ": "
-                         (if (<= (length exwm-title) 30)
-                             exwm-title
-                             (concat (substring exwm-title 0 29) "...")))))
+           "Shorten EXWM buffer names to be more discernible."
+           (interactive)
+           (exwm-workspace-rename-buffer
+            (concat exwm-class-name ": "
+                    (if (<= (length exwm-title) 30)
+                        exwm-title
+                      (concat (substring exwm-title 0 29) "...")))))
 
          (defun configure-exwm-set-window-by-class ()
-                "Apply custom window configuration to EXWM windows."
-                (interactive)
-                (pcase exwm-class-name
-                       ,@window-configuration))
+           "Apply custom window configuration to EXWM windows."
+           (interactive)
+           (pcase exwm-class-name
+             ,@window-configuration))
 
          (defun configure-exwm--invoke-xrandr (&rest args)
-                "Call `xrandr' with the supplied ARGS."
-                (let ((process (apply 'start-process "xrandr" nil ,(file-append xrandr "/bin/xrandr") args)))
-                  (set-process-sentinel
-                   process
-                   (lambda (_p e)
-                     (when (string= e "finished\n")
-                       (add-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output))))))
+           "Call `xrandr' with the supplied ARGS."
+           (let ((process (apply 'start-process "xrandr" nil ,(file-append xrandr "/bin/xrandr") args)))
+             (set-process-sentinel
+              process
+              (lambda (_p e)
+                (when (string= e "finished\n")
+                  (add-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output))))))
 
          (defun configure-exwm-get-resolution ()
-                "Prompt the user for a list of available resolutions."
-                (interactive)
-                (with-temp-buffer
-                 (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
-                 (goto-char (point-min))
-                 (unless (re-search-forward
-                          (rx "\n" bol (+ any) " connected primary")
-                          nil 'noerror)
-                   (goto-char (point-min))
-                   (re-search-forward (rx bol (+ any) "connected") nil 'noerror))
-                 (let ((resolutions
-                        (cl-loop while (not (eobp))
-                                 do (forward-line 1)
-                                 when (re-search-forward
-                                       (rx (+ blank) (group (+ num) "x" (+ num)) (+ blank) (+ num))
-                                       nil 'noerror)
-                                 collect (match-string 1))))
-                   (completing-read "Select resolution: "
-                                    (lambda (string pred action)
-                                      (if (eq action 'metadata)
-                                          `(metadata
-                                            ,(cons 'display-sort-function 'identity))
-                                          (complete-with-action action resolutions string pred)))))))
+           "Prompt the user for a list of available resolutions."
+           (interactive)
+           (with-temp-buffer
+             (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
+             (goto-char (point-min))
+             (unless (re-search-forward
+                      (rx "\n" bol (+ any) " connected primary")
+                      nil 'noerror)
+               (goto-char (point-min))
+               (re-search-forward (rx bol (+ any) "connected") nil 'noerror))
+             (let ((resolutions
+                    (cl-loop while (not (eobp))
+                             do (forward-line 1)
+                             when (re-search-forward
+                                   (rx (+ blank) (group (+ num) "x" (+ num)) (+ blank) (+ num))
+                                   nil 'noerror)
+                             collect (match-string 1))))
+               (completing-read "Select resolution: "
+                                (lambda (string pred action)
+                                  (if (eq action 'metadata)
+                                      `(metadata
+                                        ,(cons 'display-sort-function 'identity))
+                                    (complete-with-action action resolutions string pred)))))))
 
          (defun configure-exwm-update-output (&optional change-res-p)
-                "Update RandR output configuration, and if CHANGE-RES-P change the resolution of the primary output."
-                (interactive "P")
-                (when change-res-p
-                  (remove-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output))
-                (let ((resolution (and change-res-p (configure-exwm-get-resolution)))
-                      (xrandr-monitor-regexp "\n .* \\([^ \n]+\\)"))
-                  (if (not (configure-exwm--docked-p))
-                      (progn
-                       (apply 'configure-exwm--invoke-xrandr `("--output" ,configure-exwm-default-output
-                                                               ,@(if resolution
-                                                                     `("--mode" ,resolution)
-                                                                     '("--auto"))))
-                       (with-temp-buffer
-                        (call-process ,(file-append xrandr "/bin/xrandr") nil t nil "--listactivemonitors")
-                        (goto-char (point-min))
-                        (while (not (eobp))
-                          (when (and (re-search-forward xrandr-monitor-regexp nil 'noerror)
-                                     (not (string= (match-string 1) configure-exwm-default-output)))
-                            (call-process ,(file-append xrandr "/bin/xrandr")
-                                          nil nil nil "--output" (match-string 1) "--auto")))))
-                      (apply 'configure-exwm--invoke-xrandr `("--output" ,configure-exwm-docked-output "--primary"
-                                                              ,@(if resolution
-                                                                    `("--mode" ,resolution)
-                                                                    '("--auto"))
-                                                              "--output" ,configure-exwm-default-output "--off"))
-                      (setq exwm-randr-workspace-monitor-plist (list 0 configure-exwm-docked-output)))))
+           "Update RandR output configuration, and if CHANGE-RES-P change the resolution of the primary output."
+           (interactive "P")
+           (when change-res-p
+             (remove-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output))
+           (let ((resolution (and change-res-p (configure-exwm-get-resolution)))
+                 (xrandr-monitor-regexp "\n .* \\([^ \n]+\\)"))
+             (if (not (configure-exwm--docked-p))
+                 (progn
+                   (apply 'configure-exwm--invoke-xrandr `("--output" ,configure-exwm-default-output
+                                                           ,@(if resolution
+                                                                 `("--mode" ,resolution)
+                                                               '("--auto"))))
+                   (with-temp-buffer
+                     (call-process ,(file-append xrandr "/bin/xrandr") nil t nil "--listactivemonitors")
+                     (goto-char (point-min))
+                     (while (not (eobp))
+                       (when (and (re-search-forward xrandr-monitor-regexp nil 'noerror)
+                                  (not (string= (match-string 1) configure-exwm-default-output)))
+                         (call-process ,(file-append xrandr "/bin/xrandr")
+                                       nil nil nil "--output" (match-string 1) "--auto")))))
+               (apply 'configure-exwm--invoke-xrandr `("--output" ,configure-exwm-docked-output "--primary"
+                                                       ,@(if resolution
+                                                             `("--mode" ,resolution)
+                                                           '("--auto"))
+                                                       "--output" ,configure-exwm-default-output "--off"))
+               (setq exwm-randr-workspace-monitor-plist (list 0 configure-exwm-docked-output)))))
 
          (defun configure-exwm-take-screenshot (&optional region)
-                "Take a fullscreen or REGION screenshot of the current display."
-                (interactive "P")
-                (when-let* ((pictures-dir (xdg-user-dir "PICTURES"))
-                            (file-name (replace-regexp-in-string
-                                        "[[:space:]]" "0" (format-time-string "%Y%m%e-%H%M%S.jpg")))
-                            (maim-bin (executable-find "maim"))
-                            (maim-flags (if region
-                                            (list "-s" "-p" "-3" "-c"
-                                                  (mapconcat 'number-to-string
-                                                             (hexrgb-hex-to-rgb "#51afef") ",")
-                                                  (expand-file-name file-name pictures-dir))
-                                            (list (expand-file-name file-name pictures-dir)))))
-                           (make-process
-                            :name maim-bin
-                            :buffer nil
-                            :command (append (list maim-bin) maim-flags)
-                            :sentinel (lambda (p _e)
-                                        (when (= (process-exit-status p) 0)
-                                          (run-at-time
-                                           2 nil (lambda ()
-                                                   (message "Screenshot taken"))))))))
+           "Take a fullscreen or REGION screenshot of the current display."
+           (interactive "P")
+           (when-let* ((pictures-dir (xdg-user-dir "PICTURES"))
+                       (file-name (replace-regexp-in-string
+                                   "[[:space:]]" "0" (format-time-string "%Y%m%e-%H%M%S.jpg")))
+                       (maim-bin (executable-find "maim"))
+                       (maim-flags (if region
+                                       (list "-s" "-p" "-3" "-c"
+                                             (mapconcat 'number-to-string
+                                                        (hexrgb-hex-to-rgb "#51afef") ",")
+                                             (expand-file-name file-name pictures-dir))
+                                     (list (expand-file-name file-name pictures-dir)))))
+             (make-process
+              :name maim-bin
+              :buffer nil
+              :command (append (list maim-bin) maim-flags)
+              :sentinel (lambda (p _e)
+                          (when (= (process-exit-status p) 0)
+                            (run-at-time
+                             2 nil (lambda ()
+                                     (message "Screenshot taken"))))))))
 
          (defun configure-exwm--toggle-x-input-device (name)
-                "Toggle active status of an X input device (NAME can be e.g. 'Touchpad') through xinput."
-                (let* ((string (shell-command-to-string "xinput"))
-                       (id (progn
-                            (string-match (format ".*%s.*id=\\([[:digit:]]+\\)[[:space:]].*" name) string)
-                            (match-string 1 string)))
-                       (device-props (shell-command-to-string
-                                      (format "xinput list-props %s" id)))
-                       (is-enabled
-                        (progn
-                         (string-match
-                          "\\.*Device Enabled (186):[[:space:]]+\\([[:digit:]]\\).*"
-                          device-props)
-                         (match-string 1 device-props))))
-                  (if (string-equal is-enabled "1")
-                      (start-process-shell-command "xinput" nil (concat "xinput disable " id))
-                      (start-process-shell-command "xinput" nil (concat "xinput enable " id)))))
+           "Toggle active status of an X input device (NAME can be e.g. 'Touchpad') through xinput."
+           (let* ((string (shell-command-to-string "xinput"))
+                  (id (progn
+                        (string-match (format ".*%s.*id=\\([[:digit:]]+\\)[[:space:]].*" name) string)
+                        (match-string 1 string)))
+                  (device-props (shell-command-to-string
+                                 (format "xinput list-props %s" id)))
+                  (is-enabled
+                   (progn
+                     (string-match
+                      "\\.*Device Enabled (186):[[:space:]]+\\([[:digit:]]\\).*"
+                      device-props)
+                     (match-string 1 device-props))))
+             (if (string-equal is-enabled "1")
+                 (start-process-shell-command "xinput" nil (concat "xinput disable " id))
+               (start-process-shell-command "xinput" nil (concat "xinput enable " id)))))
 
          (defun configure-exwm--toggle-lsusb-device (device)
-                "Toggle active status of lsusb devices, where DEVICE is a device name such as 'Camera' or 'Webcam'."
-                (let* ((buses (shell-command-to-string "lsusb"))
-                       (bus (progn
-                             (string-match (format "^.*ID[[:space:]]\\([[:alnum:]]+:[[:alnum:]]+\\).*%s.*" device) buses)
-                             (match-string 1 buses)))
-                       (product-id (cadr (split-string bus ":")))
-                       (devices (directory-files "/sys/bus/usb/devices" nil ".*[[:digit:]]-[[:digit:]]$"))
-                       (device-mapping
-                        (with-temp-buffer
-                         (let (value)
-                           (dolist (mapping devices value)
-                             (insert-file-contents
-                              (format "/sys/bus/usb/devices/%s/idProduct" mapping) nil nil nil t)
-                             (when (equal (substring (buffer-string) 0 -1) product-id)
-                               (setq value mapping)))
-                           value)))
-                       (is-enabled
-                        (with-temp-buffer
+           "Toggle active status of lsusb devices, where DEVICE is a device name such as 'Camera' or 'Webcam'."
+           (let* ((buses (shell-command-to-string "lsusb"))
+                  (bus (progn
+                         (string-match (format "^.*ID[[:space:]]\\([[:alnum:]]+:[[:alnum:]]+\\).*%s.*" device) buses)
+                         (match-string 1 buses)))
+                  (product-id (cadr (split-string bus ":")))
+                  (devices (directory-files "/sys/bus/usb/devices" nil ".*[[:digit:]]-[[:digit:]]$"))
+                  (device-mapping
+                   (with-temp-buffer
+                     (let (value)
+                       (dolist (mapping devices value)
                          (insert-file-contents
-                          (format "/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping))
-                         (substring (buffer-string) 0 -1))))
-                  (if (string-equal is-enabled "1")
-                      (write-region "0" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping))
-                      (write-region "1" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping)))))
+                          (format "/sys/bus/usb/devices/%s/idProduct" mapping) nil nil nil t)
+                         (when (equal (substring (buffer-string) 0 -1) product-id)
+                           (setq value mapping)))
+                       value)))
+                  (is-enabled
+                   (with-temp-buffer
+                     (insert-file-contents
+                      (format "/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping))
+                     (substring (buffer-string) 0 -1))))
+             (if (string-equal is-enabled "1")
+                 (write-region "0" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping))
+               (write-region "1" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping)))))
 
          (setq exwm-workspace-number ,workspaces)
          ,#~"

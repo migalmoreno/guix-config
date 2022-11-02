@@ -74,24 +74,23 @@
           :type 'list
           :group 'configure-erc)
 
-        ,@(if (get-value 'emacs-consult config)
+        ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-erc-buffer-source
                   `(:name "ERC"
-                          :narrow ?e
+                          :narrow ?i
                           :category buffer
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
                           :items ,(lambda () (mapcar 'buffer-name (erc-buffer-list))))
                   "Source for ERC buffers to be set in `consult-buffer-sources'.")
                 (add-to-list 'consult-buffer-sources configure-erc-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(erc-mode . ?e)))
+                (add-to-list 'configure-completion-initial-narrow-alist '(erc-mode . ?i)))
               '())
 
         (cl-defstruct configure-erc-user
           "An ERC user."
           id network nick bouncer-p)
 
-        ,#~";;;###autoload"
         (defun configure-erc-connect (user)
           "Connect USER to IRC network via tls."
           (interactive

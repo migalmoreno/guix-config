@@ -69,7 +69,7 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
           :type 'list
           :group 'configure-slack)
 
-        ,@(if (get-value 'emacs-consult config)
+        ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-slack-buffer-source
                   `(:name "Slack"
                           :narrow ?s
@@ -90,7 +90,6 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
           "A Slack team."
           workspace token cookie)
 
-        ,#~";;;###autoload"
         (defun configure-slack-connect (team)
           "Connect to Slack TEAM with personal credentials."
           (interactive

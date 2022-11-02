@@ -388,12 +388,14 @@ themes for Emacs."
           (emacs-orderless emacs-orderless)
           (emacs-consult emacs-consult)
           (emacs-embark emacs-embark)
-          (emacs-marginalia emacs-marginalia))
+          (emacs-marginalia emacs-marginalia)
+          (consult-initial-narrowing? #f))
   "Configure a set of modular completion system components for Emacs."
   (ensure-pred file-like? emacs-orderless)
   (ensure-pred file-like? emacs-consult)
   (ensure-pred file-like? emacs-embark)
   (ensure-pred file-like? emacs-marginalia)
+  (ensure-pred boolean? consult-initial-narrowing?)
 
   (define emacs-f-name 'completion)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -412,9 +414,13 @@ themes for Emacs."
       emacs-f-name
       config
       `((require 'consult)
-        (add-hook 'after-init-hook 'savehist-mode)
-        (run-with-idle-timer 30 t 'savehist-save)
+        (defgroup configure-completion nil
+          "Tweaks to the built-in Emacs completion via `consult'."
+          :group 'configure)
+        (autoload 'savehist-mode "savehist")
+        (savehist-mode)
         (with-eval-after-load 'savehist
+          (savehist-save)
           (setq savehist-file (expand-file-name "emacs/history" (or (xdg-cache-home) "~/.cache")))
           (setq history-length 1000)
           (setq history-delete-duplicates t))
@@ -455,41 +461,37 @@ themes for Emacs."
           (setq embark-indicators '(embark-minimal-indicator))
           (setq embark-prompter 'embark-keymap-prompter))
 
-        (defgroup configure-completion nil
-          "Tweaks to the built-in Emacs completion via `consult'."
-          :group 'configure)
-
-        (defcustom configure-completion-initial-narrow-alist '()
-          "Alist of MODE . KEY to present an initial completion narrowing via `consult'."
-          :group 'configure-completion
-          :type 'list)
-
-        (defun configure-completion--mode-buffers (&rest modes)
-          "Return a list of buffers that are derived from MODES in `buffer-list'."
-          (cl-remove-if-not
-           (lambda (buffer)
-             (with-current-buffer buffer
-               (cl-some 'derived-mode-p modes)))
-           (buffer-list)))
+        ,@(if consult-initial-narrowing?
+              '((defcustom configure-completion-initial-narrow-alist '()
+                  "Alist of MODE . KEY to present an initial completion narrowing via `consult'."
+                  :group 'configure-completion
+                  :type 'list)
+                (defun configure-completion--mode-buffers (&rest modes)
+                  "Return a list of buffers that are derived from MODES in `buffer-list'."
+                  (cl-remove-if-not
+                   (lambda (buffer)
+                     (with-current-buffer buffer
+                       (cl-some 'derived-mode-p modes)))
+                   (buffer-list)))
+                (defun configure-completion-initial-narrow ()
+                  "Set initial narrow source for buffers under a specific mode."
+                  (let* ((buffer-mode-assoc configure-completion-initial-narrow-alist)
+                         (key (and (eq this-command 'consult-buffer)
+                                   (or (alist-get (buffer-local-value
+                                                   'major-mode (window-buffer (minibuffer-selected-window)))
+                                                  buffer-mode-assoc)
+                                       (cdr (cl-find-if (lambda (mode)
+                                                          (with-current-buffer
+                                                              (window-buffer (minibuffer-selected-window))
+                                                            (derived-mode-p (car mode))))
+                                                        buffer-mode-assoc))))))
+                    (when key
+                      (setq unread-command-events (append unread-command-events (list key 32)))))))
+              '())
 
         (defun configure-completion-crm-indicator (args)
           "Display a discernible indicator for `completing-read-multiple'."
           (cons (concat "[CRM] " (car args)) (cdr args)))
-
-        (defun configure-completion-initial-narrow ()
-          "Set initial narrow source for buffers under a specific mode."
-          (let* ((buffer-mode-assoc configure-completion-initial-narrow-alist)
-                 (key (and (eq this-command 'consult-buffer)
-                           (or (alist-get (buffer-local-value
-                                           'major-mode (window-buffer (minibuffer-selected-window)))
-                                          buffer-mode-assoc)
-                               (cdr (cl-find-if (lambda (mode)
-                                                  (with-current-buffer
-                                                   (window-buffer (minibuffer-selected-window))
-                                                   (derived-mode-p (car mode))))
-                                                buffer-mode-assoc))))))
-            (when key
-              (setq unread-command-events (append unread-command-events (list key 32))))))
 
         ,@(if (get-value 'emacs-project config)
               '((require 'project)
@@ -538,7 +540,8 @@ themes for Emacs."
   (feature
    (name f-name)
    (values (append
-             `((,f-name . #t))
+            `((,f-name . #t)
+              (emacs-consult-initial-narrowing? . ,consult-initial-narrowing?))
              (make-feature-values emacs-orderless
                                   emacs-embark
                                   emacs-consult
@@ -1641,7 +1644,7 @@ and organizer for Emacs."
                    "Extensions for basic Org mode features."
                    :group 'configure)
 
-         ,@(if (get-value 'emacs-consult config)
+         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
                '((defvar configure-org-buffer-source
                          `(:name "Org"
                            :narrow ?o
@@ -2759,6 +2762,18 @@ tool for Emacs."
                   (funcall command action)
                 (funcall command)))))
 
+        ,@(if (get-value 'emacs-consult-initial-narrowing? config)
+              '((defvar configure-tramp-buffer-source
+                  `(:name "Tramp"
+                          :narrow ?r
+                          :category buffer
+                          :preview-key ,(kbd "M-.")
+                          :state ,'consult--buffer-state
+                          :items ,(lambda () (mapcar 'buffer-name (tramp-list-remote-buffers))))
+                  "Source for TRAMP buffers to be set in `consult-buffer-sources'.")
+                (add-to-list 'consult-buffer-sources configure-tramp-buffer-source))
+            '())
+
         (defun configure-tramp-shell (&optional arg)
           "Open a shell buffer inside a TRAMP host with ARG."
           (interactive "P")
@@ -2979,7 +2994,7 @@ process-in-a-buffer derived packages like shell, REPLs, etc."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `(,@(if (get-value 'emacs-consult config)
+      `(,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-comint-buffer-source
                   `(:name "Comint"
                           :narrow ?c
@@ -3127,7 +3142,7 @@ implemented in Emacs Lisp."
       emacs-f-name
       config
       `((require 'configure-rde-keymaps)
-        ,@(if (get-value 'emacs-consult config)
+        ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-telega-buffer-source
                         `(:name "Telega"
                           :narrow ?t

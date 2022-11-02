@@ -77,7 +77,8 @@
    (feature-emacs-appearance
     #:auto-theme? #f)
    (feature-emacs-all-the-icons)
-   (feature-emacs-completion)
+   (feature-emacs-completion
+    #:consult-initial-narrowing? #t)
    (feature-direnv)
    (feature-compile)
    (feature-password-store

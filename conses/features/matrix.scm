@@ -181,10 +181,10 @@ daemon for Matrix clients."
           "An Ement user."
           id homeserver local-p)
 
-        ,@(if (get-value 'emacs-consult config)
+        ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-ement-buffer-source
                   `(:name "Ement"
-                          :narrow ?n
+                          :narrow ?e
                           :category buffer
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
@@ -194,8 +194,8 @@ daemon for Matrix clients."
                                                           'ement-room-list-mode))))
                   "Source for Ement buffers to be set in `consult-buffer-sources'.")
                 (add-to-list 'consult-buffer-sources configure-ement-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(ement-room-mode . ?n))
-                (add-to-list 'configure-completion-initial-narrow-alist '(ement-room-list-mode . ?n)))
+                (add-to-list 'configure-completion-initial-narrow-alist '(ement-room-mode . ?e))
+                (add-to-list 'configure-completion-initial-narrow-alist '(ement-room-list-mode . ?e)))
               '())
 
         (defun configure-ement-connect (user)
