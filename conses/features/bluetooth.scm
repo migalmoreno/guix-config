@@ -21,7 +21,7 @@
       f-name
       config
       '((require 'configure-rde-keymaps)
-        (define-key rde-app-map "B" 'bluetooth-list-devices)
+        (define-key rde-app-map "b" 'bluetooth-list-devices)
         (with-eval-after-load 'bluetooth
           (add-hook 'kill-emacs-hook 'bluetooth-toggle-powered)
           (define-key bluetooth-mode-map "C" 'bluetooth-connect-profile)))
