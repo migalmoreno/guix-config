@@ -2916,9 +2916,9 @@ tool for Emacs."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((with-eval-after-load 'display-wttr-autoloads
-          (display-wttr-mode))
-        (setq display-wttr-format "%C %t"))
+      `((setq display-wttr-format "%C %t")
+        (with-eval-after-load 'display-wttr-autoloads
+          (display-wttr-mode)))
       #:elisp-packages (list emacs-display-wttr))))
 
   (feature
