@@ -76,7 +76,9 @@
             (name "Noto Color Emoji")
             (default-size default-font-size)
             (package font-google-noto)))
-          (emacs-fontaine emacs-fontaine))
+          (emacs-fontaine emacs-fontaine)
+          (extra-fontaine-presets '())
+          (default-fontaine-preset 'docked))
   "Configure user-space fonts."
   (ensure-pred integer? default-font-size)
   (ensure-pred font? font-sans)
@@ -84,6 +86,8 @@
   (ensure-pred font? font-monospace)
   (ensure-pred font? font-unicode)
   (ensure-pred file-like? emacs-fontaine)
+  (ensure-pred list? extra-fontaine-presets)
+  (ensure-pred symbol? default-fontaine-preset)
 
   (define f-name 'fonts)
 
@@ -114,7 +118,6 @@
         (defvar configure-fonts-emoji-list nil
           "Cached list of emojis.")
 
-        ,#~";;;###autoload"
         (defun configure-fonts-insert-emoji ()
           "Insert an emoji character to the current buffer."
           (interactive)
@@ -149,7 +152,11 @@
                  :fixed-pitch-height 1.0
                  :variable-pitch-family ,(font-name font-sans)
                  :variable-pitch-height 1.0
-                 :variable-pitch-weight ,(font-weight font-sans)))))
+                 :variable-pitch-weight ,(font-weight font-sans))
+                ,@extra-fontaine-presets))
+        (setq fontaine-latest-state-file (expand-file-name "emacs/fontaine-latest.state.eld" (xdg-cache-home)))
+        (when (display-graphic-p)
+          (fontaine-set-preset ',default-fontaine-preset)))
       #:elisp-packages (list emacs-fontaine))
      (service home-font-service-type
               (home-font-configuration
