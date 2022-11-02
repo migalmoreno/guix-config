@@ -486,8 +486,8 @@ themes for Emacs."
           (setq completion-styles '(orderless basic))
           (setq completion-category-overrides '((file (styles basic partial-completion)))))
         ,@(if (get-value 'emacs-all-the-icons config)
-              '((autoload 'all-the-icons-completion-mode "all-the-icons-completion")
-                (all-the-icons-completion-mode)
+              '((with-eval-after-load 'all-the-icons-completion-autoloads
+                  (all-the-icons-completion-mode))
                 (with-eval-after-load 'all-the-icons
                   (add-hook 'marginalia-mode-hook 'all-the-icons-completion-marginalia-setup)))
               '())
@@ -574,11 +574,14 @@ themes for Emacs."
            :preview-key (kbd "M-.")))
         (autoload 'marginalia-mode "marginalia")
         (marginalia-mode))
-      #:elisp-packages (list emacs-orderless
-                             emacs-embark
-                             emacs-consult
-                             emacs-marginalia
-                             emacs-all-the-icons-completion)
+      #:elisp-packages (append
+                        (list emacs-orderless
+                              emacs-embark
+                              emacs-consult
+                              emacs-marginalia)
+                        (if (get-value 'emacs-all-the-icons config)
+                            (list emacs-all-the-icons-completion)
+                            '()))
       #:commentary "Adds consult buffer sources for various buffer types to be selected via narrowing keys.")))
 
   (feature
@@ -905,7 +908,10 @@ on the current project."
         (setq window-divider-default-right-width ,(get-value 'emacs-margin config))
         (window-divider-mode)
         (winner-mode)
-        (define-key global-map (kbd "M-o") 'ace-window)
+        ,@(if (get-value 'emacs-exwm config)
+              '((with-eval-after-load 'exwm
+                  (exwm-input-set-key (kbd "M-o") 'ace-window)))
+              '((define-key global-map (kbd "M-o" 'ace-window))))
         (with-eval-after-load 'ace-window
           (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
           (setq aw-background nil)
@@ -1177,18 +1183,19 @@ operate on buffers like Dired."
         (with-eval-after-load 'pulseaudio-control
           (define-key pulseaudio-control-map "L" 'pulseaudio-control-toggle-sink-input-mute-by-index)
           ,@(if (get-value 'emacs-all-the-icons config)
-                '((with-eval-after-load 'all-the-icons
-                    (setq pulseaudio-control-sink-mute-string
-                          (all-the-icons-material "volume_off" :v-adjust -0.15 :height 1))
-                    (setq pulseaudio-control-sink-volume-strings
-                          (list
-                           (all-the-icons-material "volume_mute" :v-adjust -0.15 :height 1)
-                           (all-the-icons-material "volume_down" :v-adjust -0.15 :height 1)
-                           (all-the-icons-material "volume_up" :v-adjust -0.15 :height 1)))
-                    (setq pulseaudio-control-source-mute-string
-                          (all-the-icons-material "mic_off" :v-adjust -0.15 :height 1))
-                    (setq pulseaudio-control-source-active-string
-                          (all-the-icons-material "mic" :v-adjust -0.15 :height 1))))
+                '((eval-when-compile
+                   (require 'all-the-icons))
+                  (setq pulseaudio-control-sink-mute-string
+                        (all-the-icons-material "volume_off" :v-adjust -0.15 :height 1))
+                  (setq pulseaudio-control-sink-volume-strings
+                        (list
+                         (all-the-icons-material "volume_mute" :v-adjust -0.15 :height 1)
+                         (all-the-icons-material "volume_down" :v-adjust -0.15 :height 1)
+                         (all-the-icons-material "volume_up" :v-adjust -0.15 :height 1)))
+                  (setq pulseaudio-control-source-mute-string
+                        (all-the-icons-material "mic_off" :v-adjust -0.15 :height 1))
+                  (setq pulseaudio-control-source-active-string
+                        (all-the-icons-material "mic" :v-adjust -0.15 :height 1)))
                 '())
           (setq pulseaudio-control--volume-maximum '(("percent" . 100)
                                                      ("decibels" . 10)
@@ -1196,7 +1203,10 @@ operate on buffers like Dired."
           (setq pulseaudio-control-volume-step ,volume-step)
           (setq pulseaudio-control-use-default-sink t)
           (setq pulseaudio-control-volume-verbose nil)))
-      #:elisp-packages (list emacs-pulseaudio-control))))
+      #:elisp-packages (append (list emacs-pulseaudio-control)
+                               (if (get-value 'emacs-all-the-icons config)
+                                   (list (get-value 'emacs-all-the-icons config))
+                                   '())))))
 
   (feature
    (name f-name)
@@ -1907,7 +1917,9 @@ and organizer for Emacs."
              (define-key map "otq" 'org-timer-stop)
              (define-key map "otp" 'org-timer-pause-or-continue))
            ,@(if (get-value 'emacs-all-the-icons config)
-                 '((with-eval-after-load 'all-the-icons
+                 '((eval-when-compile
+                    (require 'all-the-icons))
+                   (with-eval-after-load 'all-the-icons
                      (setq org-timer-format (concat (all-the-icons-material "timer" :v-adjust -0.1) " %s  "))))
                  '()))
          (with-eval-after-load 'ol
@@ -1925,6 +1937,9 @@ and organizer for Emacs."
                           emacs-org-modern
                           emacs-visual-fill-column
                           emacs-org-fragtog)
+                         (if (get-value 'emacs-all-the-icons config)
+                             (list (get-value 'emacs-all-the-icons config))
+                             '())
                          (if (get-value 'emacs-modus-themes config)
                              (list (get-value 'emacs-modus-themes config))
                              '()))))
@@ -2232,14 +2247,15 @@ and organizer for Emacs."
                   (citar-embark-mode))
                 '())
           ,@(if (get-value 'emacs-all-the-icons config)
-                '((with-eval-after-load 'all-the-icons
-                    (setq citar-symbols
-                          `((file ,(all-the-icons-faicon
-                                    "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-                            (note ,(all-the-icons-material
-                                    "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-                            (link ,(all-the-icons-octicon
-                                    "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))))
+                '((eval-when-compile
+                   (require 'all-the-icons))
+                  (setq citar-symbols
+                        `((file ,(all-the-icons-faicon
+                                  "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+                          (note ,(all-the-icons-material
+                                  "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+                          (link ,(all-the-icons-octicon
+                                  "link" :face 'all-the-icons-orange :v-adjust 0.01) . " "))))
                 '())
           (setq citar-symbol-separator "  ")
           (setq org-cite-insert-processor 'citar)
@@ -3009,10 +3025,11 @@ tool for Emacs."
 
         (tab-bar-mode)
         ,@(if (get-value 'emacs-all-the-icons config)
-              `((with-eval-after-load 'all-the-icons
-                  (setq configure-tab-bar-modules-left (list ,@modules-left))
-                  (setq configure-tab-bar-modules-center (list ,@modules-center))
-                  (setq configure-tab-bar-modules-right (list ,@modules-right))))
+              `((eval-when-compile
+                 (require 'all-the-icons))
+                (setq configure-tab-bar-modules-left (list ,@modules-left))
+                (setq configure-tab-bar-modules-center (list ,@modules-center))
+                (setq configure-tab-bar-modules-right (list ,@modules-right)))
               '())
         (with-eval-after-load 'tab-bar
           (setq tab-bar-format '(configure-tab-bar-format-left
@@ -3020,6 +3037,9 @@ tool for Emacs."
                                  configure-tab-bar-format-right))
           (setq tab-bar-close-button-show nil)
           (setq tab-bar-show t)))
+      #:elisp-packages (if (get-value 'emacs-all-the-icons config)
+                           (list (get-value 'emacs-all-the-icons config))
+                           '())
       #:summary "Extensions to Emacs's Tab Bar"
       #:commentary "Provide extensions to the Emacs Tab Bar, supplying custom menu items
 in the form of modules to be displayed.")))

@@ -301,7 +301,9 @@ proxy url as per `configure-browse-url-mappings'."
          (with-eval-after-load 'mpv
            (setq mpv-seek-step 3)
            ,@(if (get-value 'emacs-all-the-icons config)
-                 '((with-eval-after-load 'all-the-icons
+                 '((eval-when-compile
+                    (require 'all-the-icons))
+                   (with-eval-after-load 'all-the-icons
                      (setq mpv-prev-entry-indicator
                            (all-the-icons-material "skip_previous" :v-adjust -0.1 :height 1))
                      (setq mpv-next-entry-indicator
