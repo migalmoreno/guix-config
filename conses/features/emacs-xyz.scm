@@ -871,9 +871,9 @@ on the current project."
           (setq custom-safe-themes t)
           (when (file-exists-p custom-file)
             (load custom-file)))
-        (add-hook 'after-init-hook 'recentf-mode)
-        (add-hook 'after-init-hook 'recentf-save-list)
+        (recentf-mode)
         (with-eval-after-load 'recentf
+          (recentf-save-list)
           (setq recent-save-file (expand-file-name "emacs/recentf" (or (xdg-cache-home) "~/.cache"))))
         (global-auto-revert-mode)
         (with-eval-after-load 'autorevert
@@ -1314,8 +1314,8 @@ operate on buffers like Dired."
           (interactive)
           (force-mode-line-update t))
 
-        (autoload 'ednc-mode "ednc")
-        (add-hook 'after-init-hook 'ednc-mode)
+        (with-eval-after-load 'ednc-autoloads
+          (add-hook 'after-init-hook 'ednc-mode))
         (add-hook 'ednc-notification-presentation-functions 'configure-ednc-update-notifications)
         (with-eval-after-load 'notifications
           ,@(if notifications-icon
@@ -1685,107 +1685,107 @@ and organizer for Emacs."
        config
        `((require 'cl-lib)
          (defgroup configure-org nil
-                   "Extensions for basic Org mode features."
-                   :group 'configure)
+           "Extensions for basic Org mode features."
+           :group 'configure)
 
          ,@(if (get-value 'emacs-consult-initial-narrowing? config)
                '((defvar configure-org-buffer-source
-                         `(:name "Org"
+                   `(:name "Org"
                            :narrow ?o
                            :category buffer
                            :preview-key ,(kbd "M-.")
                            :state ,'consult--buffer-state
                            :items ,(lambda () (mapcar 'buffer-name (org-buffer-list))))
-                         "Source for Org buffers to be set in `consult-buffer-sources'.")
+                   "Source for Org buffers to be set in `consult-buffer-sources'.")
                  (add-to-list 'consult-buffer-sources configure-org-buffer-source)
                  (add-to-list 'configure-completion-initial-narrow-alist '(org-mode . ?o)))
-               '())
+             '())
 
          (defun configure-org-timer-reset ()
-                "Set `org-timer-mode-line-string' to nil."
-                (interactive)
-                (setq org-timer-mode-line-string nil))
+           "Set `org-timer-mode-line-string' to nil."
+           (interactive)
+           (setq org-timer-mode-line-string nil))
 
          (defun configure-org-timer-update-mode-line ()
-                "Update the timer in the mode line without adding surrounding angle brackets."
-                (if org-timer-pause-time
-                    nil
-                    (setq org-timer-mode-line-string (substring (org-timer-value-string) 0 -1))
-                    (force-mode-line-update)))
+           "Update the timer in the mode line without adding surrounding angle brackets."
+           (if org-timer-pause-time
+               nil
+             (setq org-timer-mode-line-string (substring (org-timer-value-string) 0 -1))
+             (force-mode-line-update)))
 
          (defun configure-org-set-custom-faces ()
-                "Set Org mode's faces for `configure-org-minimal-mode'."
-                (interactive)
-                ,@(if (get-value 'emacs-modus-themes config)
-                      '((eval-when-compile
-                         (require 'modus-themes))
-                        (modus-themes-with-colors
-                         (custom-set-faces
-                          `(org-block ((,class :inherit modus-themes-fixed-pitch :weight normal)))
-                          `(org-verbatim ((,class :inherit (fixed-pitch modus-themes-markup-verbatim) :weight normal)))
-                          `(org-code ((,class :inherit (shadow fixed-pitch modus-themes-markup-code) :weight normal)))
-                          `(org-document-info ((,class :weight bold)))
-                          `(org-document-info ((,class :weight bold)))
-                          `(org-document-info-keyword ((,class :inherit (shadow fixed-pitch))))
-                          `(org-ellipsis ((,class :inherit (font-lock-comment-face)
-                                            :weight normal
-                                            :height ,(or (plist-get
-                                                          (alist-get fontaine--current-preset fontaine-presets)
-                                                          :default-height)
-                                                         1.0))))
-                          `(org-link ((,class :underline t)))
-                          `(org-meta-line ((,class :inherit (font-lock-comment-face fixed-pitch))))
-                          `(org-special-keyword ((,class :inherit (font-lock-comment-face))))
-                          `(org-headline-done ((,class :strike-through t)))
-                          `(org-table ((,class :inherit fixed-pitch)))
-                          `(org-indent ((,class :inherit (org-hide fixed-pitch)))))))
-                      '()))
+           "Set Org mode's faces for `configure-org-minimal-mode'."
+           (interactive)
+           ,@(if (get-value 'emacs-modus-themes config)
+                 '((eval-when-compile
+                     (require 'modus-themes))
+                   (modus-themes-with-colors
+                     (custom-set-faces
+                      `(org-block ((,class :inherit modus-themes-fixed-pitch :weight normal)))
+                      `(org-verbatim ((,class :inherit (fixed-pitch modus-themes-markup-verbatim) :weight normal)))
+                      `(org-code ((,class :inherit (shadow fixed-pitch modus-themes-markup-code) :weight normal)))
+                      `(org-document-info ((,class :weight bold)))
+                      `(org-document-info ((,class :weight bold)))
+                      `(org-document-info-keyword ((,class :inherit (shadow fixed-pitch))))
+                      `(org-ellipsis ((,class :inherit (font-lock-comment-face)
+                                              :weight normal
+                                              :height ,(or (plist-get
+                                                            (alist-get fontaine--current-preset fontaine-presets)
+                                                            :default-height)
+                                                           1.0))))
+                      `(org-link ((,class :underline t)))
+                      `(org-meta-line ((,class :inherit (font-lock-comment-face fixed-pitch))))
+                      `(org-special-keyword ((,class :inherit (font-lock-comment-face))))
+                      `(org-headline-done ((,class :strike-through t)))
+                      `(org-table ((,class :inherit fixed-pitch)))
+                      `(org-indent ((,class :inherit (org-hide fixed-pitch)))))))
+               '()))
 
          (defun configure-org-update-faces (&optional _theme)
-                "Apply appropriate faces to currently-active Org mode buffers."
-                (cl-loop for buffer in (org-buffer-list)
-                         do (with-current-buffer buffer
-                                                 (configure-org-set-custom-faces))))
+           "Apply appropriate faces to currently-active Org mode buffers."
+           (cl-loop for buffer in (org-buffer-list)
+                    do (with-current-buffer buffer
+                         (configure-org-set-custom-faces))))
 
          (cl-defun configure-org-do-promote (&optional (levels 1))
-                   "Allow promoting the current heading a number of LEVELS high up the tree."
-                   (interactive "p")
-                   (save-excursion
-                    (if (org-region-active-p)
-                        (org-map-region (lambda ()
-                                          (dotimes (_ levels)
-                                                   (org-promote)))
-                                        (region-beginning) (region-end))
-                        (dotimes (_ levels)
-                                 (org-promote))))
-                   (org-fix-position-after-promote))
+           "Allow promoting the current heading a number of LEVELS high up the tree."
+           (interactive "p")
+           (save-excursion
+             (if (org-region-active-p)
+                 (org-map-region (lambda ()
+                                   (dotimes (_ levels)
+                                     (org-promote)))
+                                 (region-beginning) (region-end))
+               (dotimes (_ levels)
+                 (org-promote))))
+           (org-fix-position-after-promote))
 
          (define-minor-mode configure-org-minimal-mode
            "Provide a minimal interface to Org mode."
            :global t :group 'configure-org
            (if configure-org-minimal-mode
                (progn
-                (corfu-mode -1)
-                (electric-pair-local-mode -1)
-                (org-indent-mode)
-                (visual-line-mode)
-                (variable-pitch-mode 1)
-                (prettify-symbols-mode)
-                (display-line-numbers-mode -1)
-                (org-appear-mode)
-                (org-make-toc-mode)
-                (setq-local fill-prefix "")
-                (configure-org-set-custom-faces))
-               (corfu-mode 1)
-               (electric-pair-local-mode)
-               (org-indent-mode -1)
-               (visual-line-mode -1)
-               (variable-pitch-mode -1)
-               (prettify-symbols-mode -1)
-               (display-line-numbers-mode 1)
-               (org-appear-mode -1)
-               (org-make-toc-mode -1)
-               (setq-local fill-prefix nil)))
+                 (corfu-mode -1)
+                 (electric-pair-local-mode -1)
+                 (org-indent-mode)
+                 (visual-line-mode)
+                 (variable-pitch-mode 1)
+                 (prettify-symbols-mode)
+                 (display-line-numbers-mode -1)
+                 (org-appear-mode)
+                 (org-make-toc-mode)
+                 (setq-local fill-prefix "")
+                 (configure-org-set-custom-faces))
+             (corfu-mode 1)
+             (electric-pair-local-mode)
+             (org-indent-mode -1)
+             (visual-line-mode -1)
+             (variable-pitch-mode -1)
+             (prettify-symbols-mode -1)
+             (display-line-numbers-mode 1)
+             (org-appear-mode -1)
+             (org-make-toc-mode -1)
+             (setq-local fill-prefix nil)))
 
          (advice-add 'org-do-promote :override 'configure-org-do-promote)
          (add-hook 'org-mode-hook 'org-fragtog-mode)
@@ -1813,7 +1813,7 @@ and organizer for Emacs."
            ,@(if (get-value 'emacs-consult config)
                  '((with-eval-after-load 'consult
                      (define-key org-mode-map (kbd "M-g h") 'consult-org-heading)))
-                 '())
+               '())
            (setq org-directory ,org-directory)
            (setq org-return-follows-link t)
            (setq org-startup-folded 'content)
@@ -1902,6 +1902,10 @@ and organizer for Emacs."
          (add-hook 'org-timer-stop-hook 'configure-org-timer-reset)
          (advice-add 'org-timer-update-mode-line :override 'configure-org-timer-update-mode-line)
          (with-eval-after-load 'org-timer
+           (let ((map mode-specific-map))
+             (define-key map "ots" 'org-timer-start)
+             (define-key map "otq" 'org-timer-stop)
+             (define-key map "otp" 'org-timer-pause-or-continue))
            ,@(if (get-value 'emacs-all-the-icons config)
                  '((with-eval-after-load 'all-the-icons
                      (setq org-timer-format (concat (all-the-icons-material "timer" :v-adjust -0.1) " %s  "))))
@@ -2893,8 +2897,8 @@ tool for Emacs."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((autoload 'display-wttr-mode "display-wttr")
-        (add-hook 'after-init-hook 'display-wttr-mode)
+      `((with-eval-after-load 'display-wttr-autoloads
+          (display-wttr-mode))
         (setq display-wttr-format "%C %t"))
       #:elisp-packages (list emacs-display-wttr))))
 
