@@ -40,20 +40,20 @@
       f-name
       config
       `((require 'configure-rde-keymaps)
-        (with-eval-after-load 'pass
-          (setq pass-show-keybindings nil))
+        (with-eval-after-load 'auth-source
+          (require 'password-store)
+          (setenv "GPG_AGENT_INFO" nil)
+          (setq auth-sources '(password-store))
+          (setq auth-source-pass-filename ,password-store-directory))
         (define-key rde-app-map "p" 'password-store-copy)
         (with-eval-after-load 'password-store
           (setq password-store-time-before-clipboard-restore 60))
-        (with-eval-after-load 'auth-source
-          (setenv "GPG_AGENT_INFO" nil)
-          (autoload 'pinentry-start "pinentry")
-          (pinentry-start)
-          (setq auth-sources '(password-store))
-          (setq auth-source-pass-filename ,password-store-directory))
+        (with-eval-after-load 'pass
+          (setq pass-show-keybindings nil))
         (with-eval-after-load 'epg-config
-          (setq epg-pinentry-mode 'loopback)
-          (setq epa-pinentry-mode 'loopback))
+          (setq epg-pinentry-mode 'loopback))
+        (with-eval-after-load 'pinentry-autoloads
+          (pinentry-start))
         (with-eval-after-load 'password-cache
           (setq password-cache t)
           (setq password-cache-expiry (* 60 10)))
