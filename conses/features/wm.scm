@@ -6,6 +6,7 @@
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (guix gexp)
+  #:use-module (guix packages)
   #:use-module (gnu services)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages linux)
@@ -42,13 +43,11 @@ EndSection")
           (emacs-exwm emacs-exwm)
           (workspaces 5)
           (autostart? #t)
-          (application-launcher? #t)
           (window-configuration '()))
   "Configure the Emacs X Window Manager."
   (ensure-pred file-like? emacs-exwm)
   (ensure-pred number? workspaces)
   (ensure-pred boolean? autostart?)
-  (ensure-pred boolean? application-launcher?)
 
   (define emacs-f-name 'exwm)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -316,8 +315,9 @@ EndSection")
                         (exwm-workspace-switch ,i))))
                 (number-sequence 0 exwm-workspace-number))
         (,(kbd \"s-`\") . (lambda () (interactive) (exwm-workspace-switch 0)))))"
-         ,@(if application-launcher?
-               `((exwm-input-set-key (kbd "s-SPC") 'app-launcher-run-app))
+         ,@(if (string= (package-name (get-value 'default-application-launcher? config))
+                        "app-launcher")
+               '((exwm-input-set-key (kbd "s-SPC") 'app-launcher-run-app))
                '())
          (setq exwm-workspace-show-all-buffers nil)
          (setq exwm-layout-show-all-buffers nil)
@@ -354,9 +354,6 @@ EndSection")
        #:elisp-packages (append
                          (list emacs-exwm
                                emacs-hexrgb)
-                         (if application-launcher?
-                             (list emacs-app-launcher)
-                             '())
                          (if (get-value 'emacs-fontaine config)
                              (list (get-value 'emacs-fontaine config))
                              '()))

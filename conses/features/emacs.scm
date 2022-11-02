@@ -13,6 +13,7 @@
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu packages emacs)
+  #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
   #:use-module (ice-9 ftw)
   #:export (feature-emacs))
@@ -23,7 +24,8 @@
           (emacs-server-mode? #t)
           (extra-init-el '())
           (extra-early-init-el '())
-          (additional-elisp-packages '()))
+          (additional-elisp-packages '())
+          (default-application-launcher? #t))
   "Configure the GNU Emacs extensible and self-documented editor."
   (ensure-pred any-package? emacs)
   (ensure-pred boolean? emacs-server-mode?)
@@ -52,8 +54,6 @@
           "Base configuration group."
           :group 'external
           :prefix 'configure-)
-
-        (add-hook 'after-init-hook 'server-start)
         (with-eval-after-load 'comp
           (setq native-comp-async-report-warnings-errors nil))
         (require 'warnings)
@@ -83,7 +83,10 @@
         (setq package-enable-at-startup nil)
         (setq auto-save-list-file-prefix (expand-file-name "emacs/auto-save-list/.saves-"
                                                            (xdg-data-home))))
-      #:elisp-packages (list configure-rde-keymaps))
+      #:elisp-packages (append (list configure-rde-keymaps)
+                               (if default-application-launcher?
+                                   (list emacs-app-launcher)
+                                   '())))
      (service
       home-emacs-service-type
       (home-emacs-configuration
@@ -105,7 +108,11 @@
 
   (feature
    (name 'emacs)
-   (values `((emacs . ,emacs)
-             (emacs-server-mode? . ,emacs-server-mode?)
-             (emacs-configure-rde-keymaps . ,configure-rde-keymaps)))
+   (values (append
+            `((emacs . ,emacs)
+              (emacs-server-mode? . ,emacs-server-mode?)
+              (emacs-configure-rde-keymaps . ,configure-rde-keymaps))
+            (if default-application-launcher?
+                `((default-application-launcher? . ,emacs-app-launcher))
+                '())))
    (home-services-getter get-home-services)))

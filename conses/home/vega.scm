@@ -63,7 +63,8 @@
    (feature-transmission)
    (feature-bluetooth)
    (feature-manpages)
-   (feature-emacs)
+   (feature-emacs
+    #:default-application-launcher? #t)
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
     #:ssh-keys '(("A23B61B2897F524D3D3410E1180423144F1DDB4E"))
@@ -804,7 +805,6 @@
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
    (feature-emacs-exwm
-    #:application-launcher? #f
     #:window-configuration
     '(("Nyxt"
        (exwm-workspace-move-window 2)
