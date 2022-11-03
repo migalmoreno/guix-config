@@ -1187,17 +1187,18 @@ operate on buffers like Dired."
           ,@(if (get-value 'emacs-all-the-icons config)
                 '((eval-when-compile
                    (require 'all-the-icons))
-                  (setq pulseaudio-control-sink-mute-string
-                        (all-the-icons-material "volume_off" :v-adjust -0.15 :height 1))
-                  (setq pulseaudio-control-sink-volume-strings
-                        (list
-                         (all-the-icons-material "volume_mute" :v-adjust -0.15 :height 1)
-                         (all-the-icons-material "volume_down" :v-adjust -0.15 :height 1)
-                         (all-the-icons-material "volume_up" :v-adjust -0.15 :height 1)))
-                  (setq pulseaudio-control-source-mute-string
-                        (all-the-icons-material "mic_off" :v-adjust -0.15 :height 1))
-                  (setq pulseaudio-control-source-active-string
-                        (all-the-icons-material "mic" :v-adjust -0.15 :height 1)))
+                  (with-eval-after-load 'all-the-icons
+                    (setq pulseaudio-control-sink-mute-string
+                          (all-the-icons-material "volume_off" :v-adjust -0.15 :height 1))
+                    (setq pulseaudio-control-sink-volume-strings
+                          (list
+                           (all-the-icons-material "volume_mute" :v-adjust -0.15 :height 1)
+                           (all-the-icons-material "volume_down" :v-adjust -0.15 :height 1)
+                           (all-the-icons-material "volume_up" :v-adjust -0.15 :height 1)))
+                    (setq pulseaudio-control-source-mute-string
+                          (all-the-icons-material "mic_off" :v-adjust -0.15 :height 1))
+                    (setq pulseaudio-control-source-active-string
+                          (all-the-icons-material "mic" :v-adjust -0.15 :height 1))))
                 '())
           (setq pulseaudio-control-pactl-path ,pactl)
           (setq pulseaudio-control--volume-maximum '(("percent" . 100)
@@ -1927,6 +1928,11 @@ and organizer for Emacs."
                  '()))
          (with-eval-after-load 'ol
            (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file))
+         ,@(if (and (get-value 'emacs-exwm config) (get-value 'nyxt config))
+               '((require 'ol)
+                 (org-link-set-parameters
+                  "nyxt"
+                  :store 'nyxt-store-link)))
          (with-eval-after-load 'ox
            (setq org-export-with-date nil)
            (setq org-export-with-author nil)
@@ -1942,6 +1948,9 @@ and organizer for Emacs."
                           emacs-org-fragtog)
                          (if (get-value 'emacs-all-the-icons config)
                              (list (get-value 'emacs-all-the-icons config))
+                             '())
+                         (if (get-value 'nyxt config)
+                             (list (get-value 'emacs-nyxt config))
                              '())
                          (if (get-value 'emacs-modus-themes config)
                              (list (get-value 'emacs-modus-themes config))
