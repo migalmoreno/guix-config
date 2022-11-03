@@ -201,8 +201,16 @@ daemon for Matrix clients."
         (defun configure-ement-connect (user)
           "Connect to Matrix homeserver with USER."
           (interactive
-           (list (cl-find (completing-read "User: " (mapcar 'configure-ement-user-id
-                                                            configure-ement-users))
+           (list (cl-find (completing-read
+                           "User: "
+                           (lambda (string pred action)
+                             (if (eq action 'metadata)
+                                 `(metadata
+                                   ,(cons 'display-sort-function 'identity))
+                               (complete-with-action
+                                action
+                                (mapcar 'configure-ement-user-id configure-ement-users)
+                                string pred))))
                           configure-ement-users :key 'configure-ement-user-id :test 'string=)))
           (let ((homeserver (configure-ement-user-homeserver user)))
             (ement-connect

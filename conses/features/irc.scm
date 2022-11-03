@@ -102,10 +102,17 @@
             (when (configure-erc-user-bouncer-p user)
               (let* ((irc-network (completing-read
                                    "Network: "
-                                   (mapcar 'configure-erc-user-network
-                                           (cl-remove network configure-erc-users
-                                                      :key 'configure-erc-user-network
-                                                      :test 'string=))))
+                                   (lambda (string pred action)
+                                     (if (eq action 'metadata)
+                                         `(metadata
+                                           ,(cons 'display-sort-function 'identity))
+                                       (complete-with-action
+                                        action
+                                        (mapcar 'configure-erc-user-network
+                                                (cl-remove network configure-erc-users
+                                                           :key 'configure-erc-user-network
+                                                           :test 'string=))
+                                        string pred)))))
                      (irc-network-nick (configure-erc-user-nick
                                         (cl-find irc-network configure-erc-users
                                                  :key 'configure-erc-user-network
