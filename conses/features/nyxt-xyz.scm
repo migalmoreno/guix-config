@@ -50,7 +50,7 @@
                              "🞫"))))
         (defmethod format-status ((status configure-status-buffer))
           (let ((buffer (current-buffer (window status))))
-            (spinneret:with-html-string ,@status-buffer-layout)))
+            (spinneret:with-html-string ,status-buffer-layout)))
         (define-mode configure-status-mode ()
           "Apply a custom status buffer.")
         (defmethod enable ((mode configure-status-mode) &key)
