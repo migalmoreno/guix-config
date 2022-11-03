@@ -10,6 +10,8 @@
   #:use-module (gnu services xorg)
   #:use-module (gnu services base)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages video)
+  #:use-module (gnu packages linux)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages suckless)
   #:use-module (gnu home services)
@@ -37,12 +39,15 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((defun configure-xorg-take-screenshot (&optional region)
+      `((require 'hexrgb)
+        (defvar configure-xorg-screencast-process nil
+          "The current screencast process.")
+        (defun configure-xorg-take-screenshot (&optional region)
           "Take a fullscreen or REGION screenshot of the current display."
           (interactive "P")
           (when-let* ((pictures-dir (xdg-user-dir "PICTURES"))
                       (file-name (replace-regexp-in-string
-                                  "[[:space:]]" "0" (format-time-string "%Y%m%e-%H%M%S.jpg")))
+                                  (rx space) "0" (format-time-string "%Y%m%e-%H%M%S.jpg")))
                       (maim-bin ,(file-append maim "/bin/maim"))
                       (maim-flags (if region
                                       (list "-s" "-p" "-3" "-c"
@@ -60,32 +65,95 @@
                             2 nil (lambda ()
                                     (message "Screenshot taken"))))))))
 
-        (defun configure-xorg--toggle-x-input-device (name)
-          "Toggle active status of an X input device (NAME can be e.g. 'Touchpad') through xinput."
-          (let* ((string (shell-command-to-string "xinput"))
-                 (id (progn
-                       (string-match (format ".*%s.*id=\\([[:digit:]]+\\)[[:space:]].*" name) string)
-                       (match-string 1 string)))
-                 (device-props (shell-command-to-string
-                                (format "xinput list-props %s" id)))
-                 (is-enabled
-                  (progn
-                    (string-match
-                     "\\.*Device Enabled (186):[[:space:]]+\\([[:digit:]]\\).*"
-                     device-props)
-                    (match-string 1 device-props))))
-            (if (string-equal is-enabled "1")
-                (start-process-shell-command "xinput" nil (concat "xinput disable " id))
-              (start-process-shell-command "xinput" nil (concat "xinput enable " id)))))
+        (defun configure-xorg-record-screencast (&optional region)
+          "Record a screencast and if REGION, record a portion of the screen."
+          (interactive "P")
+          (if-let* ((videos-dir (xdg-user-dir "VIDEOS"))
+                    (file-name (format-time-string "%Y%m%e-%H%M%S.mp4"))
+                    (screen-region
+                     (and region
+                          (split-string
+                           (shell-command-to-string
+                            (substring
+                             (concat ,(file-append slop "/bin/slop")
+                                     "-q -o -b 3 --format=%x,%y,%h,%w -c "
+                                     (mapconcat 'number-to-string (hexrgb-hex-to-rgb "#51afef") ","))
+                             0 -1))
+                           ",")))
+                    (pos-x (nth 0 screen-region))
+                    (pos-y (nth 1 screen-region))
+                    (height (nth 2 screen-region))
+                    (width (nth 3 screen-region)))
+              (setq configure-xorg-screencast-process
+                    (make-process
+                     :name "ffmpeg"
+                     :buffer nil
+                     :program (list ,(file-append ffmpeg "/bin/ffmpeg")
+                                    "-s" (format "%sx%s" width height)
+                                    "-show_region" "1" "-f" "x11grab"
+                                    "-i" (format ":0.0+%s,%s" pos-x pos-y)
+                                    "-framerate" "60" "-c:v" "libx264"
+                                    "-preset" "ultrafast" "-crf" "17"
+                                    "-pix_fmt" "yuv420p" "-vf"
+                                    "pad=\"width=ceil(iw/2)*2:height=ceil(ih/2)*2\""
+                                    (concat videos-dir "/" file-name))))
+            (let ((videos-dir (xdg-user-dir "VIDEOS"))
+                  (file-name (format-time-string "%Y%m%e-%H%M%S.mp4"))
+                  (frame-width (x-display-pixel-width))
+                  (frame-height (x-display-pixel-height)))
+              (notifications-notify :app-name "ffmpeg"
+                                    :title "Started recording screen"
+                                    :timeout 3000)
+              (run-at-time
+               2 nil
+               (lambda ()
+                 (setq configure-xorg-screencast-process
+                       (make-process
+                        :name "ffmpeg"
+                        :buffer nil
+                        :program (list ,(file-append ffmpeg "/bin/ffmpeg")
+                                       "-f" "x11grab" "-framerate" "60" "-video_size"
+                                       (format "%sx%s" frame-width frame-height)
+                                       "-i" ":0.0" (concat videos-dir "/" file-name)))))))))
+
+        (defun configure-xorg-stop-screencast ()
+          "Stop the current screencast process."
+          (interactive)
+          (when configure-xorg-screencast-process
+            (ignore-errors
+              (interrupt-process configure-xorg-screencast-process)))
+          (setq configure-xorg-screencast-process nil))
+
+        (defun configure-xorg--toggle-xinput-device (device)
+          "Toggle active status of an X input DEVICE through xinput, such as 'Touchpad'."
+          (let* ((xinput-bin ,(file-append xinput "/bin/xinput"))
+                 (id (with-temp-buffer
+                       (call-process xinput-bin)
+                       (goto-char (point-min))
+                       (re-search-forward (rx (* any) (literal device) (* any) "id=" (group (+ num)) space (* any))
+                                          nil t)
+                       (match-string 1)))
+                 (is-enabled (with-temp-buffer
+                               (call-process xinput-bin nil nil nil "list-props" id)
+                               (goto-char (point-min))
+                               (re-search-forward (rx (* any) "Device Enabled (186):" (+ space) (group num) (* any))
+                                                  nil t)
+                               (match-string 1))))
+            (if (string= is-enabled "1")
+                (call-process xinput-bin nil nil nil "disable" id)
+              (call-process xinput-bin nil nil nil "enable" id))))
 
         (defun configure-xorg--toggle-lsusb-device (device)
-          "Toggle active status of lsusb devices, where DEVICE is a device name such as 'Camera' or 'Webcam'."
-          (let* ((buses (shell-command-to-string "lsusb"))
-                 (bus (progn
-                        (string-match (format "^.*ID[[:space:]]\\([[:alnum:]]+:[[:alnum:]]+\\).*%s.*" device) buses)
-                        (match-string 1 buses)))
+          "Toggle active status of lsusb DEVICE, such as 'Camera' or 'Webcam'."
+          (let* ((bus (with-temp-buffer
+                        (call-process ,(file-append usbutils "/bin/lsusb"))
+                        (goto-char (point-min))
+                        (re-search-forward (rx bol (* any) "ID" space (group (+ alnum) ":" (+ alnum))
+                                               (* any) (literal device) (* any))
+                                           nil t)
+                        (match-string 1)))
                  (product-id (cadr (split-string bus ":")))
-                 (devices (directory-files "/sys/bus/usb/devices" nil ".*[[:digit:]]-[[:digit:]]$"))
+                 (devices (directory-files "/sys/bus/usb/devices" nil (rx (* any) num "-" num eol)))
                  (device-mapping
                   (with-temp-buffer
                     (let (value)
@@ -107,10 +175,12 @@
         (defun configure-xorg-call-slock ()
           "Invoke a Slock process."
           (interactive)
-          (call-process ,(file-append slock "/bin/slock")))
+          (call-process (executable-find "slock")))
 
         ,@(if (get-value 'emacs-exwm config)
-              '((exwm-input-set-key (kbd "s-l") 'configure-xorg-call-slock))
+              '((exwm-input-set-key (kbd "s-p") 'configure-xorg-take-screenshot)
+                (exwm-input-set-key (kbd "s-v") 'configure-xorg-record-screencast)
+                (exwm-input-set-key (kbd "s-l") 'configure-xorg-call-slock))
               '()))
       #:elisp-packages (list emacs-hexrgb)
       #:summary "Helpers for Xorg"
