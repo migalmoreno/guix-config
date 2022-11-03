@@ -99,7 +99,7 @@
     '((define-configuration prompt-buffer
         ((mouse-support-p nil))))
     #:extra-bindings
-    '("C-x v" 'query-selection-in-search-engine))
+    '("C-c s" 'query-selection-in-search-engine))
    (feature-nyxt-emacs)
    (feature-nyxt-blocker)
    (feature-emacs-pdf-tools)
@@ -531,8 +531,8 @@
         (format-close-button status)))
       (:div :id "url"
        (:raw
-        (format-status-load-status buffer)
-        (format-status-url buffer)))
+        (format-status-load-status status)
+        (format-status-url status)))
       (:div :id "modes"
             :title (nyxt::modes-string buffer)
        (:raw (format-status-modes status)))))
