@@ -140,7 +140,6 @@
    (feature-emacs-vertico)
    (feature-emacs-tempel)
    (feature-emacs-files)
-   (feature-emacs-window)
    (feature-emacs-ibuffer)
    (feature-emacs-emms)
    (feature-emacs-image)
@@ -812,11 +811,16 @@
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
    (feature-emacs-exwm
-    #:window-configuration
-    '(("Nyxt"
-       (exwm-workspace-move-window 2)
-       (exwm-input-set-local-simulation-keys nil)
-       (exwm-layout-hide-mode-line))))
+    #:window-configurations
+    '(((string= exwm-class-name "Nyxt")
+       char-mode t
+       workspace 2
+       simulation-keys nil
+       (exwm-layout-hide-mode-line))
+      ((string= exwm-instance-name "emacs") char-mode t)))
+   (feature-emacs-exwm-run-on-tty
+    #:emacs-exwm-tty-number 1)
+   (feature-emacs-window)
    (feature-emacs-pulseaudio-control
     #:emacs-pulseaudio-control ((@ (conses packages emacs-xyz) emacs-pulseaudio-control-next)))
    (feature-xdg
