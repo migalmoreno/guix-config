@@ -29,7 +29,7 @@
    (id id)
    (fqda user)
    (type type)
-   (pass-cmd (or pass-cmd (format #f "pass show mail/~a | head -1" id)))))
+   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
 
 (define (mail-lst id fqda urls)
   "Make a simple mailing list."
@@ -83,7 +83,7 @@ is not provided, use all the mail accounts."
                   (tls . #f)
                   (tlsOptions . ((rejectUnauthorized . #t)))
                   (username . ,(mail-account-fqda mail-acc))
-                  (password . ,(mail-account-get-pass-cmd mail-acc))
+                  (password . ,(getenv "MAIL_PERSONAL_PASSWORD"))
                   (xoauth2 . #f)
                   (alias . ,(mail-account-id mail-acc))
                   (trigger . 20)
