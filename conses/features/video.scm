@@ -76,199 +76,199 @@
        f-name
        config
        `((eval-when-compile
-          (require 'mpv))
-         (require 'cl-lib)
+           (require 'mpv)
+           (require 'cl-lib))
          (cl-defun configure-mpv-play-url (url &key (force-private-p nil) (audio-only nil) (repeat nil))
-                   "Prompt for video quality before calling `mpv-start' on URL.
+           "Prompt for video quality before calling `mpv-start' on URL.
 If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
 as defined in `configure-browse-url-mappings'.  You can additionally specify whether
 to play the file as AUDIO-ONLY and if to REPEAT it by default."
-                   (interactive "sURI: ")
-                   (let* ((formats
-                           (mapcar (lambda (format)
-                                     (let* ((format-res (string-match (rx (+ num) "x" (group (+ num)))
-                                                                      (car format)))
-                                            (res-height (and format-res (match-string 1 (car format)))))
-                                       (if res-height
-                                           (list
-                                            (format "%s | %s" res-height (cl-second format))
-                                            (format "best[height<=%s]"
-                                                    res-height))
-                                           (list
-                                            (format "%s | %s" (car format) (cl-second format))
-                                            (format "best[ext=%s]" (cl-second format))))))
-                                   (configure-ytdl--list-stream-formats url)))
-                          (selected-format (and formats
-                                                (alist-get
-                                                 (completing-read "Resolution: "
-                                                                  (lambda (string pred action)
-                                                                    (if (eq action 'metadata)
-                                                                        `(metadata
-                                                                          ,(cons 'display-sort-function 'identity))
-                                                                        (complete-with-action action formats string pred))))
-                                                 formats nil nil 'equal)))
-                          (extra-args (split-string
-                                       (concat
-                                        (when formats (format "--ytdl-format=%s" selected-format))
-                                        (when audio-only " --video=no")
-                                        (when repeat " --loop-file=inf")))))
-                     (when force-private-p
-                       (setq url (configure-browse-url--transform-host url)))
-                     (if (mpv-get-property "playlist")
-                         (pcase (completing-read "Play or Enqueue: " '("Play" "Enqueue"))
-                                ("Play" (apply 'mpv-start url extra-args))
-                                ("Enqueue" (apply 'mpv-playlist-append-url url extra-args)))
-                         (apply 'mpv-start url extra-args))))
+           (interactive "sURI: ")
+           (let* ((formats
+                   (mapcar (lambda (format)
+                             (let* ((format-res (string-match (rx (+ num) "x" (group (+ num)))
+                                                              (car format)))
+                                    (res-height (and format-res (match-string 1 (car format)))))
+                               (if res-height
+                                   (list
+                                    (format "%s | %s" res-height (cl-second format))
+                                    (format "best[height<=%s]"
+                                            res-height))
+                                 (list
+                                  (format "%s | %s" (car format) (cl-second format))
+                                  (format "best[ext=%s]" (cl-second format))))))
+                           (configure-ytdl--list-stream-formats url)))
+                  (selected-format (and formats
+                                        (alist-get
+                                         (completing-read "Resolution: "
+                                                          (lambda (string pred action)
+                                                            (if (eq action 'metadata)
+                                                                `(metadata
+                                                                  ,(cons 'display-sort-function 'identity))
+                                                              (complete-with-action action formats string pred))))
+                                         formats nil nil 'equal)))
+                  (extra-args (split-string
+                               (concat
+                                (when formats (format "--ytdl-format=%s" selected-format))
+                                (when audio-only " --video=no")
+                                (when repeat " --loop-file=inf")))))
+             (when force-private-p
+               (setq url (configure-browse-url--transform-host url)))
+             (if (mpv-get-property "playlist")
+                 (pcase (completing-read "Play or Enqueue: " '("Play" "Enqueue"))
+                   ("Play" (apply 'mpv-start url extra-args))
+                   ("Enqueue" (apply 'mpv-playlist-append-url url extra-args)))
+               (apply 'mpv-start url extra-args))))
 
          (defun configure-mpv-kill ()
-                "Kill the mpv process unless this is not currently `emms-player-mpv-proc'."
-                (interactive)
-                (when (equal mpv--process
-                             emms-player-mpv-proc)
-                  (emms-stop))
-                (when mpv--queue
-                  (tq-close mpv--queue))
-                (when (and (mpv-live-p)
-                           (not (equal mpv--process
-                                       emms-player-mpv-proc)))
-                  (kill-process mpv--process))
-                (with-timeout
-                 (0.5 (error "Failed to kill mpv"))
-                 (while (and (mpv-live-p)
-                             (not (equal mpv--process
-                                         emms-player-mpv-proc)))
-                   (sleep-for 0.05)))
-                (setq mpv--process nil)
-                (setq mpv--queue nil)
-                (run-hooks 'mpv-finished-hook))
+           "Kill the mpv process unless this is not currently `emms-player-mpv-proc'."
+           (interactive)
+           (when (equal mpv--process
+                        emms-player-mpv-proc)
+             (emms-stop))
+           (when mpv--queue
+             (tq-close mpv--queue))
+           (when (and (mpv-live-p)
+                      (not (equal mpv--process
+                                  emms-player-mpv-proc)))
+             (kill-process mpv--process))
+           (with-timeout
+               (0.5 (error "Failed to kill mpv"))
+             (while (and (mpv-live-p)
+                         (not (equal mpv--process
+                                     emms-player-mpv-proc)))
+               (sleep-for 0.05)))
+           (setq mpv--process nil)
+           (setq mpv--queue nil)
+           (run-hooks 'mpv-finished-hook))
 
          (defun configure-mpv-download ()
-                "Download current mpv playback via `ytdl'."
-                (interactive)
-                (if-let ((download-type (completing-read "Download type: " '("Music" "Video")))
-                         (track (mpv-get-property "path"))
-                         (title (mpv-get-property "media-title")))
-                        (ytdl--download-async
-                         track
-                         (expand-file-name title (if (string= download-type "Music")
-                                                     ytdl-music-folder
-                                                     ytdl-video-folder))
-                         (if (string= download-type "Music")
-                             ytdl-music-extra-args
-                             ytdl-video-extra-args)
-                         'ignore
-                         download-type)
-                        (error "`mpv' is not currently active")))
+           "Download current mpv playback via `ytdl'."
+           (interactive)
+           (if-let ((download-type (completing-read "Download type: " '("Music" "Video")))
+                    (track (mpv-get-property "path"))
+                    (title (mpv-get-property "media-title")))
+               (ytdl--download-async
+                track
+                (expand-file-name title (if (string= download-type "Music")
+                                            ytdl-music-folder
+                                          ytdl-video-folder))
+                (if (string= download-type "Music")
+                    ytdl-music-extra-args
+                  ytdl-video-extra-args)
+                'ignore
+                download-type)
+             (error "`mpv' is not currently active")))
 
          (defun configure-mpv-store-link ()
-                "Store a link to an mpv track."
-                (when (and (mpv-live-p)
-                           (not (equal (mpv--with-json
-                                        (mpv-get-property "video"))
-                                       'false))
-                           (string-match "mpv:" (buffer-name (current-buffer))))
-                  (let ((url (mpv-get-property "path"))
-                        (title (mpv-get-property "media-title")))
-                    (org-link-store-props
-                     :type "mpv"
-                     :link url
-                     :description title))))
+           "Store a link to an mpv track."
+           (when (and (mpv-live-p)
+                      (not (equal (mpv--with-json
+                                   (mpv-get-property "video"))
+                                  'false))
+                      (string-match "mpv:" (buffer-name (current-buffer))))
+             (let ((url (mpv-get-property "path"))
+                   (title (mpv-get-property "media-title")))
+               (org-link-store-props
+                :type "mpv"
+                :link url
+                :description title))))
 
          (defun configure-mpv-capture ()
-                "Store and capture the current mpv playback link."
-                (interactive)
-                (with-current-buffer
-                 (car (cl-remove-if-not (lambda (buffer)
-                                          (string-match "mpv:" (buffer-name buffer)))
-                                        (buffer-list)))
-                 (org-store-link t t)
-                 (org-capture nil "tv")))
+           "Store and capture the current mpv playback link."
+           (interactive)
+           (with-current-buffer
+               (car (cl-remove-if-not (lambda (buffer)
+                                        (string-match "mpv:" (buffer-name buffer)))
+                                      (buffer-list)))
+             (org-store-link t t)
+             (org-capture nil "tv")))
 
          (cl-defun configure-mpv-play-url-other-window (url &rest args &key &allow-other-keys)
-                   "Launch an mpv process for URL and ARGS in another window."
-                   (interactive "sURI: ")
-                   (apply 'configure-mpv-play-url url args)
-                   (switch-to-buffer-other-window (current-buffer)))
+           "Launch an mpv process for URL and ARGS in another window."
+           (interactive "sURI: ")
+           (apply 'configure-mpv-play-url url args)
+           (switch-to-buffer-other-window (current-buffer)))
 
          (defun configure-mpv-seek-start ()
-                "Seek to the start of the current MPV stream."
-                (interactive)
-                (mpv-seek 0))
+           "Seek to the start of the current MPV stream."
+           (interactive)
+           (mpv-seek 0))
 
          (defun configure-mpv-connect-to-emms-on-startup (data)
-                "Connect to the EMMS process when mpv is started with DATA."
-                (interactive)
-                (when (string= (alist-get 'event data) "start-file")
-                  (configure-mpv-connect-to-emms-proc)))
+           "Connect to the EMMS process when mpv is started with DATA."
+           (interactive)
+           (when (string= (alist-get 'event data) "start-file")
+             (configure-mpv-connect-to-emms-proc)))
 
          (defun configure-mpv-connect-to-emms-proc ()
-                "Connect to a running EMMS MPV process."
-                (interactive)
-                (setq mpv-playing-time-string "")
+           "Connect to a running EMMS MPV process."
+           (interactive)
+           (setq mpv-playing-time-string "")
+           (when (not (equal mpv--process
+                             emms-player-mpv-proc))
+             (mpv-kill))
+           (setq mpv--process emms-player-mpv-proc)
+           (set-process-query-on-exit-flag mpv--process nil)
+           (set-process-sentinel
+            mpv--process
+            (lambda (p _e)
+              (when (memq (process-status p) '(exit signal))
                 (when (not (equal mpv--process
                                   emms-player-mpv-proc))
                   (mpv-kill))
-                (setq mpv--process emms-player-mpv-proc)
-                (set-process-query-on-exit-flag mpv--process nil)
-                (set-process-sentinel
-                 mpv--process
-                 (lambda (p _e)
-                   (when (memq (process-status p) '(exit signal))
-                     (when (not (equal mpv--process
-                                       emms-player-mpv-proc))
-                       (mpv-kill))
-                     (run-hooks 'mpv-on-exit-hook))))
-                (unless mpv--queue
-                  (setq mpv--queue (tq-create (make-network-process
-                                               :name "emms-mpv-socket"
-                                               :family 'local
-                                               :service emms-player-mpv-ipc-socket
-                                               :coding '(utf-8 . utf-8)
-                                               :noquery t
-                                               :filter 'emms-player-mpv-ipc-filter
-                                               :sentinel 'emms-player-mpv-ipc-sentinel)))
-                  (set-process-filter
-                   (tq-process mpv--queue)
-                   (lambda (_proc string)
-                     (ignore-errors
-                      (mpv--tq-filter mpv--queue string)))))
-                (run-hooks 'mpv-on-start-hook)
-                (run-hooks 'mpv-started-hook)
-                (when (equal mpv--process
-                             emms-player-mpv-proc)
-                  (mpv-display-mode-line))
-                t)
+                (run-hooks 'mpv-on-exit-hook))))
+           (unless mpv--queue
+             (setq mpv--queue (tq-create (make-network-process
+                                          :name "emms-mpv-socket"
+                                          :family 'local
+                                          :service emms-player-mpv-ipc-socket
+                                          :coding '(utf-8 . utf-8)
+                                          :noquery t
+                                          :filter 'emms-player-mpv-ipc-filter
+                                          :sentinel 'emms-player-mpv-ipc-sentinel)))
+             (set-process-filter
+              (tq-process mpv--queue)
+              (lambda (_proc string)
+                (ignore-errors
+                  (mpv--tq-filter mpv--queue string)))))
+           (run-hooks 'mpv-on-start-hook)
+           (run-hooks 'mpv-started-hook)
+           (when (equal mpv--process
+                        emms-player-mpv-proc)
+             (mpv-display-mode-line))
+           t)
 
          (defun configure-mpv-playlist-shuffle ()
-                "Toggle the shuffle state for the current playlist."
-                (interactive)
-                (mpv-run-command "playlist-shuffle"))
+           "Toggle the shuffle state for the current playlist."
+           (interactive)
+           (mpv-run-command "playlist-shuffle"))
 
          (defun configure-mpv-kill-url (original-p)
-                "Copy the URL in the current mpv stream to the system clibpoard.
+           "Copy the URL in the current mpv stream to the system clibpoard.
 If ORIGINAL-P, ensure the original service URL is killed rather than a
 proxy url as per `configure-browse-url-mappings'."
-                (interactive
-                 (list
-                  (yes-or-no-p "Copy original URL?")))
-                (when-let* ((title (mpv-get-property "media-title"))
-                            (url (mpv-get-property "path"))
-                            (original-url (if original-p
-                                              (configure-browse-url--transform-host url)
-                                              (configure-browse-url--transform-host url :alt-p nil))))
-                           (kill-new original-url)
-                           (message (format "Copied \"%s\" to the system clipboard" title))))
+           (interactive
+            (list
+             (yes-or-no-p "Copy original URL?")))
+           (when-let* ((title (mpv-get-property "media-title"))
+                       (url (mpv-get-property "path"))
+                       (original-url (if original-p
+                                         (configure-browse-url--transform-host url)
+                                       (configure-browse-url--transform-host url :alt-p nil))))
+             (kill-new original-url)
+             (message (format "Copied \"%s\" to the system clipboard" title))))
 
          (defun configure-mpv-set-transient-map ()
-                "Set a transient map for transient MPV commands."
-                (interactive)
-                (set-transient-map
-                 (let ((map (make-sparse-keymap)))
-                   (define-key map "b" 'mpv-seek-backward)
-                   (define-key map "f" 'mpv-seek-forward)
-                   (define-key map "p" 'mpv-pause)
-                   map)
-                 t))
+           "Set a transient map for transient MPV commands."
+           (interactive)
+           (set-transient-map
+            (let ((map (make-sparse-keymap)))
+              (define-key map "b" 'mpv-seek-backward)
+              (define-key map "f" 'mpv-seek-forward)
+              (define-key map "p" 'mpv-pause)
+              map)
+            t))
 
          (advice-add 'mpv-kill :override 'configure-mpv-kill)
          (with-eval-after-load 'org
@@ -285,7 +285,7 @@ proxy url as per `configure-browse-url-mappings'."
            (define-key map "mP" 'mpv-chapter-prev)
            (define-key map "mq" 'mpv-quit)
            (define-key map "mR" 'mpv-set-ab-loop)
-           (define-key map (kbd "mSPC") 'mpv-pause)
+           (define-key map (kbd "m SPC") 'mpv-pause)
            (define-key map "mr" 'mpv-toggle-loop)
            (define-key map "mv" 'mpv-toggle-video)
            (define-key map "m\r" 'configure-mpv-play-url)
@@ -302,7 +302,7 @@ proxy url as per `configure-browse-url-mappings'."
            (setq mpv-seek-step 3)
            ,@(if (get-value 'emacs-all-the-icons config)
                  '((eval-when-compile
-                    (require 'all-the-icons))
+                     (require 'all-the-icons))
                    (with-eval-after-load 'all-the-icons
                      (setq mpv-prev-entry-indicator
                            (all-the-icons-material "skip_previous" :v-adjust -0.1 :height 1))
@@ -312,10 +312,10 @@ proxy url as per `configure-browse-url-mappings'."
                            (all-the-icons-material "pause" :v-adjust -0.14 :height 1))
                      (setq mpv-resume-indicator
                            (all-the-icons-material "play_arrow" :v-adjust -0.14 :height 1))))
-                 '()))
+               '()))
          ,@(if (get-value 'emacs-embark config)
                `((eval-when-compile
-                  (require 'embark))
+                   (require 'embark))
                  (with-eval-after-load 'embark
                    (define-key embark-url-map "v" 'configure-mpv-play-url)
                    (embark-define-keymap embark-mpv-chapter-actions
@@ -327,7 +327,7 @@ proxy url as per `configure-browse-url-mappings'."
                      "Keymap for actions on mpv playlist entries."
                      ("d" mpv-remove-playlist-entry))
                    (add-to-list 'embark-keymap-alist '(mpv-file . embark-mpv-file-actions))))
-               '()))
+             '()))
        #:elisp-packages (append
                          (list emacs-mpv)
                          (if (get-value 'emacs-embark config)
