@@ -68,60 +68,56 @@
    (default-value (home-unclutter-configuration))
    (description "Sets up an unclutter daemon.")))
 
-(define %default-xorg-modules
-  ;; Default list of modules loaded by the server.  When multiple drivers
-  ;; match, the first one in the list is loaded.
-  (list xf86-input-libinput
-        ;; Libinput is the new thing and is recommended over evdev/synaptics:
-        ;; <http://who-t.blogspot.fr/2015/01/xf86-input-libinput-compatibility-with.html>.
-        ))
+(define %default-xorg-modules (list xf86-input-libinput))
 
 (define %default-xorg-fonts
-  ;; Default list of fonts available to the X server.
   (list (file-append font-alias "/share/fonts/X11/75dpi")
         (file-append font-alias "/share/fonts/X11/100dpi")
         (file-append font-alias "/share/fonts/X11/misc")
         (file-append font-alias "/share/fonts/X11/cyrillic")
-        (file-append font-misc-misc               ;default fonts for xterm
-                     "/share/fonts/X11/misc")
+        (file-append font-misc-misc "/share/fonts/X11/misc")
         (file-append font-adobe75dpi "/share/fonts/X11/75dpi")))
 
-(define %default-xorg-server-arguments
-  ;; Default command-line arguments for X.
-  '("-nolisten" "tcp"))
+(define %default-xorg-server-arguments '("-nolisten" "tcp"))
 
 (define-record-type* <xorg-configuration>
   xorg-configuration make-xorg-configuration
   xorg-configuration?
-  (modules          xorg-configuration-modules    ;list of file-like
-                    (thunked)
-                    ;; filter out modules not supported on current system
-                    (default (filter
-                              (lambda (p)
-                                (member (%current-system)
-                                        (package-supported-systems p)))
-                              %default-xorg-modules)))
-  (fonts            xorg-configuration-fonts      ;list of packges
-                    (default %default-xorg-fonts))
-  (drivers          xorg-configuration-drivers    ;list of strings
-                    (default '()))
-  (resolutions      xorg-configuration-resolutions ;list of tuples
-                    (default '()))
-  (keyboard-layout  xorg-configuration-keyboard-layout ;#f | <keyboard-layout>
-                    (default #f))
-  (extra-config     xorg-configuration-extra-config ;list of strings
-                    (default '()))
-  (server           xorg-configuration-server     ;file-like
-                    (default xorg-server))
-  (server-arguments xorg-configuration-server-arguments ;list of strings
-                    (default %default-xorg-server-arguments)))
+  (modules
+   xorg-configuration-modules
+   (thunked)
+   (default (filter
+             (lambda (p)
+               (member (%current-system)
+                       (package-supported-systems p)))
+             %default-xorg-modules)))
+  (fonts
+   xorg-configuration-fonts
+   (default %default-xorg-fonts))
+  (drivers
+   xorg-configuration-drivers
+   (default '()))
+  (resolutions
+   xorg-configuration-resolutions
+   (default '()))
+  (keyboard-layout
+   xorg-configuration-keyboard-layout
+   (default #f))
+  (extra-config
+   xorg-configuration-extra-config
+   (default '()))
+  (server
+   xorg-configuration-server
+   (default xorg-server))
+  (server-arguments
+   xorg-configuration-server-arguments
+   (default %default-xorg-server-arguments)))
 
 (define (xorg-configuration->file config)
   "Compute an Xorg configuration file corresponding to CONFIG, an
 <xorg-configuration> record."
   (let ((xorg-server (xorg-configuration-server config)))
     (define all-modules
-      ;; 'xorg-server' provides 'fbdevhw.so' etc.
       (append (xorg-configuration-modules config)
               (list xorg-server)))
 
@@ -165,27 +161,21 @@ Section \"InputClass\"
   MatchIsKeyboard \"on\"
   Option \"XkbLayout\" " (object->string layout)
   (if variant
-      (string-append "  Option \"XkbVariant\" \""
-                     variant "\"")
+      (string-append "  Option \"XkbVariant\" \"" variant "\"")
       "")
   (if model
-      (string-append "  Option \"XkbModel\" \""
-                     model "\"")
+      (string-append "  Option \"XkbModel\" \"" model "\"")
       "")
   (match options
-    (()
-     "")
-    (_
-     (string-append "  Option \"XkbOptions\" \""
-                    (string-join options ",") "\""))) "
+    (() "")
+    (_ (string-append "  Option \"XkbOptions\" \""
+                      (string-join options ",") "\""))) "
 
   MatchDevicePath \"/dev/input/event*\"
   Driver \"evdev\"
 EndSection\n"))
 
               (define (expand modules)
-                ;; Append to MODULES the relevant /lib/xorg/modules
-                ;; sub-directories.
                 (append-map (lambda (module)
                               (filter-map (lambda (directory)
                                             (let ((full (string-append module
@@ -203,12 +193,8 @@ EndSection\n"))
                           (format port "  FontPath \"~a\"~%" font))
                         '#$(xorg-configuration-fonts config))
               (for-each (lambda (module)
-                          (format port
-                                  "  ModulePath \"~a\"~%"
-                                  module))
+                          (format port "  ModulePath \"~a\"~%" module))
                         (append (expand '#$all-modules)
-
-                                ;; For fbdevhw.so and so on.
                                 (list #$(file-append xorg-server
                                                      "/lib/xorg/modules"))))
               (display "EndSection\n" port)
@@ -216,7 +202,6 @@ EndSection\n"))
 Section \"ServerFlags\"
   Option \"AllowMouseOpenFail\" \"on\"
 EndSection\n" port)
-
               (display (string-join (map device-section drivers) "\n")
                        port)
               (newline port)
@@ -227,13 +212,12 @@ EndSection\n" port)
                         "\n")
                        port)
               (newline port)
-
-              (let ((layout  #$(and=> (xorg-configuration-keyboard-layout config)
-                                      keyboard-layout-name))
+              (let ((layout #$(and=> (xorg-configuration-keyboard-layout config)
+                                     keyboard-layout-name))
                     (variant #$(and=> (xorg-configuration-keyboard-layout config)
                                       keyboard-layout-variant))
-                    (model   #$(and=> (xorg-configuration-keyboard-layout config)
-                                      keyboard-layout-model))
+                    (model #$(and=> (xorg-configuration-keyboard-layout config)
+                                    keyboard-layout-model))
                     (options '#$(and=> (xorg-configuration-keyboard-layout config)
                                        keyboard-layout-options)))
                 (when layout
@@ -278,11 +262,9 @@ in @var{modules}."
 given @var{config}.  The resulting script should be used in place of
 @code{/usr/bin/X}."
   (define exp
-    ;; Write a small wrapper around the X server.
     #~(begin
         (setenv "XORG_DRI_DRIVER_PATH" (string-append #$mesa "/lib/dri"))
         (setenv "XKB_BINDIR" (string-append #$xkbcomp "/bin"))
-
         (let ((xinit #$(file-append xinit "/bin/xinit"))
               (X (string-append #$(xorg-configuration-server config) "/bin/X")))
           (apply execl xinit xinit
@@ -304,26 +286,19 @@ given @var{config}.  The resulting script should be used in place of
   "Return a @code{startx} script in which the modules, fonts, etc. specified
 in @var{config}, are available.  The result should be used in place of
 @code{startx}."
-  (define X
-    (xorg-wrapper xinitrc config))
+  (define X (xorg-wrapper xinitrc config))
+  #~(apply execl #$X #$X
+           "-logverbose" "-verbose" "-terminate"
+           #$@(xorg-configuration-server-arguments config)
+           (cdr (command-line))))
 
-  (define exp
-    ;; Write a small wrapper around the X server.
-    #~(apply execl #$X #$X ;; Second #$X is for argv[0].
-             "-logverbose" "-verbose" "-terminate"
-             #$@(xorg-configuration-server-arguments config)
-             (cdr (command-line))))
-
-  exp)
-
-(define* (xinitrc #:key wm)
-  "Return a xinitrc script that starts xorg with the specified WM."
+(define* (xinitrc #:key wm args)
+  "Return a xinitrc script that starts xorg with the specified WM and ARGS."
   (define builder
     (let* ((name (package-name wm))
-           (args (match name
-                   ((or "emacs-native-comp" "emacs" "emacs-next")
-                    (list (file-append wm "/bin/emacs") "-mm" "--debug-init"))
-                   (_ (list name)))))
-      #~(system* #$@args)))
-
+           (command (match name
+                      ((or "emacs-native-comp" "emacs" "emacs-next")
+                       (file-append wm "/bin/emacs"))
+                      (_ name))))
+      #~(system* #$command #$@args)))
   (program-file "xinitrc" builder))
