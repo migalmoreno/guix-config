@@ -1144,8 +1144,7 @@ operate on buffers like Dired."
                     ,(title (current-buffer))
                     t))
                  (echo "Starting to play ~a in EMMS" url)))
-             (define-key *rde-keymap*
-               "M-c e" 'emms-source-track))))
+             (define-key *rde-keymap* "C-c e" 'emms-source-track))))
          '())))
 
   (feature
@@ -1466,8 +1465,7 @@ operate on buffers like Dired."
                            ,(title (current-buffer))))))
                    (bookmark-set)))
                (echo "Bookmark stored"))
-             (define-key *rde-keymap*
-               "M-c r" 'save-as-emacs-bookmark))))
+             (define-key *rde-keymap* "C-c r" 'save-as-emacs-bookmark))))
          '())))
 
   (feature
@@ -1965,8 +1963,7 @@ and organizer for Emacs."
                (eval-in-emacs
                 '(nyxt-capture "tb"))
                (echo "Org link successfully stored and captured"))
-             (define-key *rde-keymap*
-               "M-c c" 'org-capture))))
+             (define-key *rde-keymap* "C-c c" 'org-capture))))
          '())))
 
   (feature
@@ -2108,8 +2105,7 @@ and organizer for Emacs."
                "Store and capture the current page as an Org Roam node."
                (eval-in-emacs
                 '(nyxt-capture "w" :roam-p t)))
-             (define-key *rde-keymap*
-               "M-c n" 'org-roam-capture))))
+             (define-key *rde-keymap* "C-c n" 'org-roam-capture))))
          '())))
 
   (feature
