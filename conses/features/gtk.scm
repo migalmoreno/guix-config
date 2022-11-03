@@ -9,7 +9,12 @@
   #:use-module (gnu packages gnome-xyz)
   #:use-module (guix records)
   #:use-module (srfi srfi-9)
-  #:export (feature-gtk))
+  #:export (feature-gtk
+            icon-theme
+            make-icon-theme
+            icon-theme?
+            icon-theme-name
+            icon-theme-package))
 
 (define-record-type* <icon-theme> icon-theme
   make-icon-theme icon-theme?
