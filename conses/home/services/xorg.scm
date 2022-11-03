@@ -37,7 +37,7 @@
    (shepherd-service
     (provision '(unclutter))
     (requirement '())
-    (stop #~(make-kill-destructor))
+    (one-shot? #t)
     (start #~(make-forkexec-constructor
               (list
                #$(file-append
