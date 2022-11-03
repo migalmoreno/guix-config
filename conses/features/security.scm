@@ -4,6 +4,7 @@
   #:use-module (rde features predicates)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home-services state)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages password-utils)
   #:use-module (gnu home-services password-utils)
@@ -32,6 +33,13 @@
               (home-password-store-configuration
                (package password-store)
                (directory password-store-directory)))
+     (simple-service
+      'password-store-directory-state
+      home-state-service-type
+      (list
+       (state-git
+        password-store-directory
+        remote-password-store-url)))
      (simple-service
       'home-password-packages
       home-profile-service-type
