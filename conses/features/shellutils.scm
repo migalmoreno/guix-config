@@ -48,7 +48,8 @@ use_guix_shell() {
      (rde-elisp-configuration-service
       f-name
       config
-      `((add-hook 'after-init-hook 'envrc-global-mode)
+      `((with-eval-after-load 'envrc-autoloads
+          (envrc-global-mode))
         (with-eval-after-load 'envrc
           (define-key envrc-mode-map (kbd "C-c E") 'envrc-command-map)))
       #:elisp-packages (list emacs-envrc))))
