@@ -182,7 +182,6 @@ is not provided, use all the mail accounts."
           "Message mode tweaks."
           :group 'configure)
 
-        ,#~";;;###autoload"
         (defun configure-message-add-gcc-header ()
           "Prompt for a Gcc header from `configure-gnus-topic-alist'.
 This will allow a message to be stored in the right directory
@@ -202,7 +201,6 @@ but it won't appear on the right Maildir directory."
                                                 (car groups))))))
             (error "Gnus is not running.  No GCC header will be inserted")))
 
-        ,#~";;;###autoload"
         (define-minor-mode configure-message-mode
           "Tweak the appearance of `message-mode' buffers."
           :global t :group 'configure-message
@@ -378,7 +376,6 @@ is not provided, use all the mail accounts."
                                   (cdr topic))
                                 configure-gnus-topic-alist)))
 
-        ,#~";;;###autoload"
         (defun configure-gnus-get-article-participants ()
           "Retrieve the participants from the current article."
           (when (gnus-alive-p)
@@ -392,13 +389,11 @@ is not provided, use all the mail accounts."
                  (split-string (message-fetch-field "to") ", ")))
                ", "))))
 
-        ,#~";;;###autoload"
         (defun configure-gnus-shr-browse-url-new-window ()
           "When using shr, open links in a new window."
           (interactive)
           (shr-browse-url nil nil t))
 
-        ,#~";;;###autoload"
         (define-minor-mode configure-gnus-topic-mode
           "Apply Gnus topic settings declaratively and subscribe to groups."
           :global t :group 'configure-gnus
