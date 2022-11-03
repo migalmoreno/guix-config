@@ -24,7 +24,7 @@
 
 
 ;;;
-;;; EXWM
+;;; EXWM.
 ;;;
 
 (define* (feature-emacs-exwm
@@ -55,8 +55,8 @@
           (require 'cl-lib))
         (defvar configure-exwm-default-output nil
           "The name of the default RandR output.")
-        (defvar configure-exwm-docked-output nil
-          "The name of the external display RandR output.")
+        (defvar configure-exwm-secondary-output nil
+          "The name of the secondary RandR output.")
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               `((defvar configure-exwm-buffer-source
@@ -77,7 +77,7 @@
           (set-frame-parameter frame 'tab-bar-lines 0))
 
         (defun configure-exwm--docked-p ()
-          "Return non-nil if RanR has currently more than one output connected."
+          "Return non-nil if RandR has currently more than one output connected."
           (let ((xrandr-output-regexp (rx "\n" bol (group (+ any)) " connected")))
             (with-temp-buffer
               (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
@@ -87,7 +87,7 @@
               (forward-line)
               (prog1
                   (null (not (re-search-forward xrandr-output-regexp nil 'noerror)))
-                (setq configure-exwm-docked-output (match-string 1))))))
+                (setq configure-exwm-secondary-output (match-string 1))))))
 
         (defun configure-exwm-apply-display-settings ()
           "Apply the corresponding display settings after EXWM is enabled."
@@ -98,7 +98,7 @@
                       (fontaine-set-preset 'docked)
                     (fontaine-set-preset 'headless)))
                 '())
-          (cl-loop for i from 0 upto exwm-workspace-number
+          (cl-loop for i from 0 upto (- exwm-workspace-number 1)
                    do (progn
                         (exwm-workspace-switch-create i)
                         (set-frame-parameter (selected-frame) 'internal-border-width
@@ -156,27 +156,30 @@
           (when change-res-p
             (remove-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output))
           (let ((resolution (and change-res-p (configure-exwm-get-resolution)))
-                (xrandr-monitor-regexp "\n .* \\([^ \n]+\\)"))
+                (secondary-output-regexp (rx "\n" blank (+ any) blank (group (+ nonl)))))
             (if (not (configure-exwm--docked-p))
                 (progn
-                  (apply 'configure-exwm--invoke-xrandr `("--output" ,configure-exwm-default-output
-                                                          ,@(if resolution
-                                                                `("--mode" ,resolution)
-                                                              '("--auto"))))
+                 (apply 'configure-exwm--invoke-xrandr
+                        "--output" configure-exwm-default-output
+                        (if resolution
+                            (list "--mode" resolution)
+                          (list "--auto")))
                   (with-temp-buffer
                     (call-process ,(file-append xrandr "/bin/xrandr") nil t nil "--listactivemonitors")
                     (goto-char (point-min))
                     (while (not (eobp))
-                      (when (and (re-search-forward xrandr-monitor-regexp nil 'noerror)
+                      (when (and (re-search-forward secondary-output-regexp nil 'noerror)
                                  (not (string= (match-string 1) configure-exwm-default-output)))
                         (call-process ,(file-append xrandr "/bin/xrandr")
                                       nil nil nil "--output" (match-string 1) "--auto")))))
-              (apply 'configure-exwm--invoke-xrandr `("--output" ,configure-exwm-docked-output "--primary"
-                                                      ,@(if resolution
-                                                            `("--mode" ,resolution)
-                                                          '("--auto"))
-                                                      "--output" ,configure-exwm-default-output "--off"))
-              (setq exwm-randr-workspace-monitor-plist (list 0 configure-exwm-docked-output)))))
+              (apply 'configure-exwm--invoke-xrandr
+                     "--output" configure-exwm-secondary-output "--primary"
+                     (append
+                      (if resolution
+                         (list "--mode" resolution)
+                        (list "--auto"))
+                      (list "--output" configure-exwm-default-output "--off")))
+              (setq exwm-randr-workspace-monitor-plist (list 0 configure-exwm-secondary-output)))))
 
         (add-hook 'exwm-init-hook 'configure-exwm-apply-display-settings)
         (add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
@@ -213,8 +216,7 @@
                                   (exwm-workspace-switch ,i))))
                        (number-sequence 0 exwm-workspace-number))))
         ,#~"
-(setq exwm-input-prefix-keys
-      (append exwm-input-prefix-keys '(?\\M-s ?\\s-e)))
+(setq exwm-input-prefix-keys (append exwm-input-prefix-keys '(?\\M-s ?\\s-e)))
 (setq exwm-input-simulation-keys
       `(([?\\C-b] . [left])
         ([?\\C-f] . [right])
@@ -252,7 +254,7 @@ on-the-fly, and set up the initial workspace configuration.")))
 
 
 ;;;
-;;; emacs-exwm-run-on-tty
+;;; emacs-exwm-run-on-tty.
 ;;;
 
 (define %default-xorg-libinput-configuration
@@ -280,12 +282,14 @@ EndSection")
           (emacs-exwm-tty-number 2)
           (xorg-libinput-configuration
            %default-xorg-libinput-configuration)
-          (extra-xorg-config '()))
+          (extra-xorg-config '())
+          (launch-arguments '()))
   "Launch EXWM on a specified TTY upon user login and
 automatically switch to EXWM-TTY-NUMBER on boot."
   (ensure-pred tty-number? emacs-exwm-tty-number)
   (ensure-pred string? xorg-libinput-configuration)
   (ensure-pred list? extra-xorg-config)
+  (ensure-pred list? launch-arguments)
 
   (define (get-home-services config)
     "Return home services related to EXWM run on TTY."
@@ -304,7 +308,7 @@ automatically switch to EXWM-TTY-NUMBER on boot."
                     #$(program-file
                        "exwm-start"
                        (xorg-start-command
-                        (xinitrc #:wm (get-value 'emacs config))
+                        (xinitrc #:wm (get-value 'emacs config) #:args launch-arguments)
                         (xorg-configuration
                          (keyboard-layout (get-value 'keyboard-layout config))
                          (extra-config
