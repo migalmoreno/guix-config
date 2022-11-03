@@ -6,7 +6,7 @@ HOST := $(shell hostname)
 USER := $(shell whoami)
 
 .PHONY: all
-all: pull upgrade init home home/% system system/% build/home/% build/system/% deploy/% iso
+all: pull upgrade home system iso
 
 pull:
 	guix pull --allow-downgrades -C channels-lock
