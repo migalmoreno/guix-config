@@ -36,7 +36,7 @@
   (list
    (shepherd-service
     (provision '(unclutter))
-    (requirement '(dbus))
+    (requirement '())
     (stop #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
               (list

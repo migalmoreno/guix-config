@@ -170,5 +170,4 @@
      "nasm" "gcc-toolchain" "autoconf")
     #:home-packages
     (strings->packages
-     "maim" "slop" "ddcutil"
-     "light" "xclip"))))
+     "ddcutil" "light" "xclip"))))
