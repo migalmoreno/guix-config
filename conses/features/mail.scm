@@ -23,13 +23,13 @@
             mail-lst
             mail-directory-fn))
 
-(define (mail-acc id user type)
+(define* (mail-acc id user type #:optional pass-cmd)
   "Make a simple mail account."
   (mail-account
    (id id)
    (fqda user)
    (type type)
-   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
+   (pass-cmd (or pass-cmd (format #f "pass show mail/~a | head -1" id)))))
 
 (define (mail-lst id fqda urls)
   "Make a simple mailing list."
@@ -59,6 +59,8 @@ is not provided, use all the mail accounts."
 
   (define (get-home-services config)
     "Return home services related to goimapnotify."
+    (require-value 'mail-accounts config)
+
     (define mail-accounts
       (if mail-account-ids
           (filter (lambda (x)
@@ -81,7 +83,7 @@ is not provided, use all the mail accounts."
                   (tls . #f)
                   (tlsOptions . ((rejectUnauthorized . #t)))
                   (username . ,(mail-account-fqda mail-acc))
-                  (passwordCmd . ,(mail-account-get-pass-cmd mail-acc))
+                  (password . ,(mail-account-get-pass-cmd mail-acc))
                   (xoauth2 . #f)
                   (alias . ,(mail-account-id mail-acc))
                   (trigger . 20)
