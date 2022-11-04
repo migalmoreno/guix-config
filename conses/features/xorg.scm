@@ -178,9 +178,10 @@
           (call-process (executable-find "slock")))
 
         ,@(if (get-value 'emacs-exwm config)
-              '((exwm-input-set-key (kbd "s-p") 'configure-xorg-take-screenshot)
-                (exwm-input-set-key (kbd "s-v") 'configure-xorg-record-screencast)
-                (exwm-input-set-key (kbd "s-l") 'configure-xorg-call-slock))
+              '((with-eval-after-load 'exwm-autoloads
+                  (exwm-input-set-key (kbd "s-p") 'configure-xorg-take-screenshot)
+                  (exwm-input-set-key (kbd "s-v") 'configure-xorg-record-screencast)
+                  (exwm-input-set-key (kbd "s-l") 'configure-xorg-call-slock)))
               '()))
       #:elisp-packages (list emacs-hexrgb)
       #:summary "Helpers for Xorg"

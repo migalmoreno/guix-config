@@ -292,13 +292,8 @@ in @var{config}, are available.  The result should be used in place of
            #$@(xorg-configuration-server-arguments config)
            (cdr (command-line))))
 
-(define* (xinitrc #:key wm args)
-  "Return a xinitrc script that starts xorg with the specified WM and ARGS."
-  (define builder
-    (let* ((name (package-name wm))
-           (command (match name
-                      ((or "emacs-native-comp" "emacs" "emacs-next")
-                       (file-append wm "/bin/emacs"))
-                      (_ name))))
-      #~(system* #$command #$@args)))
-  (program-file "xinitrc" builder))
+(define* (xinitrc #:key command args)
+  "Return a xinitrc script that starts xorg with the specified COMMAND and ARGS."
+  (program-file
+   "xinitrc"
+   #~(system* #$command #$@args)))
