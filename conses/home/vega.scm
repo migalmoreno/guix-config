@@ -29,6 +29,7 @@
   #:use-module (conses features web)
   #:use-module (conses features xorg)
   #:use-module (rde packages)
+  #:use-module (rde features wm)
   #:use-module (rde features ssh)
   #:use-module (rde features xdg)
   #:use-module (rde features base)
@@ -64,7 +65,10 @@
    (feature-bluetooth)
    (feature-manpages)
    (feature-emacs
-    #:default-application-launcher? #t)
+    #:default-application-launcher? #t
+    #:emacs-server-mode? #f
+    #:extra-init-el
+    '((add-hook 'after-init-hook 'server-start)))
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
     #:ssh-keys '(("A23B61B2897F524D3D3410E1180423144F1DDB4E"))
@@ -165,6 +169,20 @@
       ("twitter.com" . ("^nitter.*" . "nitter.namazso.eu"))
       ("imgur.com" . ("^imgin.*" . "imgin.voidnet."))
       ("medium.com" . ("^scribe.*" . "scribe.rip"))))
+   (feature-emacs-exwm
+    #:window-configurations
+    '(((string= exwm-class-name "Nyxt")
+       char-mode t
+       workspace 1
+       simulation-keys nil
+       (exwm-layout-hide-mode-line))
+      ((string= exwm-instance-name "emacs") char-mode t)))
+   (feature-emacs-exwm-run-on-tty
+    #:emacs-exwm-tty-number 1
+    #:launch-arguments '("-mm" "--debug-init"))
+   (feature-emacs-window)
+   (feature-emacs-pulseaudio-control
+    #:emacs-pulseaudio-control ((@ (conses packages emacs-xyz) emacs-pulseaudio-control-next)))
    (feature-emacs-org
     #:org-capture-templates
     '(("t" "Tasks/Projects")
@@ -588,7 +606,7 @@
        :font-family "Iosevka"
        :cut (make-instance 'tailor:cut))))
    (feature-nyxt-nx-router
-    #:media-enabled? #f
+    #:media-enabled? #t
     #:routes
     '((router:make-route
        (match-regex "https://(www.)?insta.*")
@@ -810,19 +828,6 @@
     #:music-dl-args '("-q" "-x" "--add-metadata" "--audio-format" "mp3")
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
-   (feature-emacs-exwm
-    #:window-configurations
-    '(((string= exwm-class-name "Nyxt")
-       char-mode t
-       workspace 2
-       simulation-keys nil
-       (exwm-layout-hide-mode-line))
-      ((string= exwm-instance-name "emacs") char-mode t)))
-   (feature-emacs-exwm-run-on-tty
-    #:emacs-exwm-tty-number 1)
-   (feature-emacs-window)
-   (feature-emacs-pulseaudio-control
-    #:emacs-pulseaudio-control ((@ (conses packages emacs-xyz) emacs-pulseaudio-control-next)))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
@@ -837,4 +842,5 @@
    (feature-pipewire)
    (feature-emacs-cursor)
    (feature-xorg)
-   (feature-qemu)))
+   (feature-qemu)
+   (feature-bash)))
