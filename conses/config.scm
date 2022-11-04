@@ -1,14 +1,16 @@
 (define-module (conses config)
   #:use-module (conses system)
+  #:use-module (conses deploy)
   #:use-module (rde features)
-  #:use-module (gnu system)
-  #:use-module (gnu system file-systems)
   #:use-module (gnu machine)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
+  #:use-module (gnu system)
+  #:use-module (gnu system file-systems)
   #:use-module (nongnu packages linux)
   #:use-module (guix records)
-  #:use-module (ice-9 match))
+  #:use-module (ice-9 match)
+  #:export (dispatcher))
 
 (define* (dispatcher
           #:key
@@ -21,7 +23,7 @@
           (initial-os %initial-os)
           (first-run? (not (nil? (getenv "RDE_FIRST_RUN"))))
           (pretty-print? #f))
-  "Dispatch a configuration depending on a set of targets."
+  "Dispatch a configuration based on a set of targets."
   (ensure-pred string? user)
   (ensure-pred string? system)
   (ensure-pred string? target)
@@ -39,7 +41,7 @@
 
   (define %home-features (mod-ref home-submodule user '%home-features '()))
   (define %system-features (mod-ref system-submodule system '%system-features '()))
-  (define %deployment (mod-ref deploy-submodule system '%machine))
+  (define %deploy-machine (mod-ref deploy-submodule system '%machine %initial-machine))
 
   (define %config
     (rde-config
@@ -60,12 +62,11 @@
        (operating-system-user-kernel-arguments initial-os)))
      (issue (operating-system-issue initial-os))))
 
-  (define %machines
-    (when %deployment
-      (list
-       (machine
-        (inherit %deployment)
-        (operating-system %os)))))
+  (define %machine
+    (list
+     (machine
+      (inherit %deploy-machine)
+      (operating-system %os))))
 
   (when pretty-print?
     (pretty-print-rde-config %config))
@@ -73,7 +74,7 @@
   (match target
     ("home" %he)
     ("system" %os)
-    ("deploy" %machines)
+    ("deploy" %machine)
     (_ %he)))
 
 (dispatcher)
