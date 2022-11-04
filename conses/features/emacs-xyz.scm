@@ -464,8 +464,8 @@ themes for Emacs."
         (autoload 'savehist-mode "savehist")
         (savehist-mode)
         (with-eval-after-load 'savehist
-          (savehist-save)
           (setq savehist-file (expand-file-name "emacs/history" (or (xdg-cache-home) "~/.cache")))
+          (add-hook 'after-init-hook 'savehist-save)
           (setq history-length 1000)
           (setq history-delete-duplicates t))
         (require 'orderless)
@@ -566,7 +566,7 @@ themes for Emacs."
           (setq consult-narrow-key (kbd "C-="))
           (setq consult-widen-key (kbd "C--"))
           (consult-customize
-           consult--source-buffer consult-ripgrep consult-buffer
+           consult--source-buffer consult-buffer
            consult-bookmark consult--source-bookmark
            consult-recent-file consult--source-recent-file
            consult--source-project-buffer
@@ -876,7 +876,7 @@ on the current project."
             (load custom-file)))
         (recentf-mode)
         (with-eval-after-load 'recentf
-          (recentf-save-list)
+          (add-hook 'after-init-hook 'recentf-save-list)
           (setq recent-save-file (expand-file-name "emacs/recentf" (or (xdg-cache-home) "~/.cache"))))
         (global-auto-revert-mode)
         (with-eval-after-load 'autorevert
@@ -909,9 +909,9 @@ on the current project."
         (window-divider-mode)
         (winner-mode)
         ,@(if (get-value 'emacs-exwm config)
-              '((with-eval-after-load 'exwm
+              '((with-eval-after-load 'exwm-autoloads
                   (exwm-input-set-key (kbd "M-o") 'ace-window)))
-              '((define-key global-map (kbd "M-o" 'ace-window))))
+              '((define-key global-map (kbd "M-o")  'ace-window)))
         (with-eval-after-load 'ace-window
           (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
           (setq aw-background nil)
@@ -1930,7 +1930,8 @@ and organizer for Emacs."
                '((require 'ol)
                  (org-link-set-parameters
                   "nyxt"
-                  :store 'nyxt-store-link)))
+                  :store 'nyxt-store-link))
+               '())
          (with-eval-after-load 'ox
            (setq org-export-with-date nil)
            (setq org-export-with-author nil)
