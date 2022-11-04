@@ -9,8 +9,8 @@
   #:use-module (guix git-download))
 
 (define-public nyxt-next
-  (let ((commit "df86d95a62d5a5f03b2744092945f47f7631a449")
-        (revision "2"))
+  (let ((commit "cba29f9714e0f0914887c0db7a0363ae087f91e9")
+        (revision "1"))
     (package
       (inherit nyxt)
       (version (git-version "3" revision commit))
@@ -23,7 +23,7 @@
          (file-name (git-file-name "nyxt" version))
          (sha256
           (base32
-           "1j6im0ybnkji67l3swgqamwqgf1az4j54nijpf4r8bh6r1b30hgn"))))
+           "0ancmbqpkzlnwp4g2f7gfwdpcb3mk8wsfrwsm87i168h8kn6bnj4"))))
       (native-inputs
        (modify-inputs (package-native-inputs nyxt)
          (prepend pkg-config)))
