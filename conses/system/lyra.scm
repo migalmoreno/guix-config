@@ -82,8 +82,7 @@
       'home-custom-environment-variables
       home-environment-variables-service-type
       '(("GPG_TTY" . "$(tty)")
-        ("LESSHISTFILE" . "-")
-        ("HISTFILE" . "$XDG_CACHE_HOME/.bash_history"))))
+        ("LESSHISTFILE" . "-"))))
     #:system-services
     (list
      (simple-service
