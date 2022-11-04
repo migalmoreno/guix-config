@@ -58,7 +58,7 @@
                 (make-instance 'configure-status-buffer)))
         (defmethod disable ((mode configure-status-mode) &key)
           (setf (status-buffer (current-window))
-                (make-instance 'configure-buffer)))
+                (make-instance 'configure-status-buffer)))
         (define-configuration status-buffer
           ((glyph-mode-presentation-p ,(if glyphs? 't 'nil))
            (height ,height)))))))
