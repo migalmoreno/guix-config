@@ -57,8 +57,7 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((eval-when-compile
-         (require 'cl-lib))
+      `((require 'cl-seq)
         (require 'configure-rde-keymaps)
         (defgroup configure-slack nil
           "Utilities for slack.el, the Emacs Slack client."
