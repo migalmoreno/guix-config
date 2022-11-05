@@ -232,6 +232,7 @@ daemon for Matrix clients."
                                     't
                                   'nil)))
                   (get-value 'matrix-accounts config))))
+        (add-hook 'ement-room-compose-hook 'ement-room-compose-org)
         (with-eval-after-load 'ement
           (let ((map ement-room-mode-map))
             (define-key map "c" 'ement-room-compose-message)
