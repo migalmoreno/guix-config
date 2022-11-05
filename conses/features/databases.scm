@@ -25,7 +25,9 @@
     "Return system services related to PostgreSQL."
     (append
      (list
-      (service postgresql-service-type))
+      (service postgresql-service-type
+               (postgresql-configuration
+                (postgresql postgresql))))
      (if postgresql-roles
          (list
           (service postgresql-role-service-type
