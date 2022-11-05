@@ -101,7 +101,9 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'cl-lib)
+      `((require 'xdg)
+        (eval-when-compile
+         (require 'cl-macs))
         (defun configure-fonts--build-emojis ()
           "Create an emoji list by looping over the corresponding range of characters."
           (delete
