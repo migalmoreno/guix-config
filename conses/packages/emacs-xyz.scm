@@ -10,9 +10,7 @@
   #:use-module (guix build utils)
   #:use-module (guix build-system)
   #:use-module (guix build-system emacs)
-  #:use-module ((guix licenses) #:prefix license:)
-  #:export (emacs-mpv-next
-            emacs-pulseaudio-control-next))
+  #:use-module ((guix licenses) #:prefix license:))
 
 (define-public emacs-al-scheme
   (package
@@ -71,7 +69,7 @@ fetches weather information based on your location or on a location set in
 The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}.")
     (license license:gpl3+)))
 
-(define-public emacs-display-wttr-local
+(define-public emacs-display-wttr-next
   (package
     (inherit emacs-display-wttr)
    (source
@@ -166,51 +164,25 @@ and easily switch to and manipulate them.")
 IPC interface.")
     (license license:gpl3+)))
 
-(define* (emacs-mpv-next
-          #:key
-          (local? #t))
-  (let ((commit "")
-        (revision "0"))
-    (package
-      (inherit emacs-mpv)
-      (version (if local? "0.1" (git-version "0" revision commit)))
-      (source
-       (if local?
-           (local-file
-            (string-append (dirname (dirname %project-root))
-                           "/elisp/mpv")
-            #:recursive? #t)
-           (origin
-             (method git-fetch)
-             (uri
-              (git-reference
-               (url "https://github.com/efimerspan/mpv")
-               (commit commit)))
-             (file-name (git-file-name (package-name emacs-mpv) version))
-             (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))))))
+(define-public emacs-mpv-next
+  (package
+   (inherit emacs-mpv)
+   (version "0.1")
+   (source
+    (local-file
+     (string-append (dirname (dirname %project-root))
+                    "/elisp/mpv")
+     #:recursive? #t))))
 
-(define* (emacs-pulseaudio-control-next
-          #:key
-          (local? #t))
-  (let ((commit "22f54ae7282b37eaec0231a21e60213a5dbc7172")
-        (revision "0"))
-    (package
-      (inherit emacs-pulseaudio-control)
-      (version (if local? "0.1" (git-version "0" revision commit)))
-      (source
-       (if local?
-           (local-file
-            (string-append (dirname (dirname %project-root))
-                           "/elisp/pulseaudio-control")
-            #:recursive? #t)
-           (origin
-             (method git-fetch)
-             (uri
-              (git-reference
-               (url "https://github.com/efimerspan/pulseaudio-control")
-               (commit commit)))
-             (file-name (git-file-name (package-name emacs-pulseaudio-control) version))
-             (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))))))
+(define-public emacs-pulseaudio-control-next
+  (package
+   (inherit emacs-pulseaudio-control)
+   (version "0.1")
+   (source
+    (local-file
+     (string-append (dirname (dirname %project-root))
+                    "/elisp/pulseaudio-control")
+     #:recursive? #t))))
 
 (define-public emacs-circadian
   (package
@@ -505,7 +477,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
 
 (define-public emacs-nyxt
-  (let ((commit "209f2166db7df830104b3afd97ec44a6cb064e89")
+  (let ((commit "aeb8c04f3a8e120ed12f77c7ed2b18e794f91b0b")
         (revision "0"))
     (package
       (name "emacs-nyxt")
@@ -519,7 +491,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0lx20x7nsv0x6dp4n22kg8i6akqs2bdlfrmpqvzk57j9h61cbp3a"))))
+          (base32 "1rm63k35ahbzq6f3i8kiar17gkwi4c81g3yvmncqnsbvbhkgrr77"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-sly))
@@ -527,3 +499,21 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (synopsis "Interact with Nyxt from Emacs.")
       (description "nyxt.el consists of custom logic to interact with Nyxt from Emacs.")
       (license license:gpl3+))))
+
+(define-public emacs-dashboard-next
+  (let ((commit "554dc6fac1362dd6b66318c8250eea8bd63aa92f")
+        (revision "0"))
+    (package
+      (inherit emacs-dashboard)
+      (name "emacs-dashboard-next")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri
+          (git-reference
+           (url "https://github.com/emacs-dashboard/emacs-dashboard")
+           (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "00jbjryi6m6ah7ylf1w965n4zndm5l54jkfkhjd2y3vxyr706hr8")))))))
