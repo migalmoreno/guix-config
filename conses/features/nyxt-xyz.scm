@@ -8,11 +8,15 @@
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 rdelim)
   #:use-module (guix gexp)
   #:export (feature-nyxt-status
+            feature-nyxt-prompt
             feature-nyxt-emacs
+            feature-nyxt-mosaic
             feature-nyxt-userscript
             feature-nyxt-blocker
+            feature-nyxt-hint
             feature-nyxt-nx-tailor
             feature-nyxt-nx-router
             feature-nyxt-nx-search-engines))
@@ -21,11 +25,19 @@
           #:key
           (height 24)
           (glyphs? #f)
-          (status-buffer-layout '()))
+          (format-status #f)
+          (format-status-buttons #f)
+          (format-status-load-status #f)
+          (format-status-url #f)
+          (format-status-tabs #f))
   "Configure Nyxt's status buffer and status area."
   (ensure-pred integer? height)
   (ensure-pred boolean? glyphs?)
-  (ensure-pred lisp-config? status-buffer-layout)
+  (ensure-pred maybe-list? format-status)
+  (ensure-pred maybe-list? format-status-buttons)
+  (ensure-pred maybe-list? format-status-load-status)
+  (ensure-pred maybe-list? format-status-url)
+  (ensure-pred maybe-list? format-status-tabs)
 
   (define nyxt-f-name 'status)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
@@ -36,32 +48,183 @@
      (rde-nyxt-configuration-service
       nyxt-f-name
       config
-      `((define-class configure-status-buffer (status-buffer) ())
-        (defmethod format-close-button ((status configure-status-buffer))
-          "Buttons used for the custom status buffer."
-          (declare (ignorable status))
+      `(,@(if (get-value 'nyxt-nx-tailor config)
+              '((define-configuration status-buffer
+                  ((style
+                    (tailor:with-style 'status-buffer
+                      ("#container"
+                       :height "100%"
+                       :width "100%"
+                       :background theme:primary
+                       :font-family theme:font-family
+                       :align-items "center"
+                       :padding "0 5px"
+                       :box-sizing "border-box")
+                      ("#controls"
+                       :background "inherit"
+                       :flex-basis "auto")
+                      ("#controls button"
+                       :color theme:on-background)
+                      (".arrow-right, .arrow-left"
+                       :clip-path "none"
+                       :margin-right 0)
+                      ("#url"
+                       :background "inherit"
+                       :color theme:on-background
+                       :font-weight "bold"
+                       :padding-left "5px"
+                       :flex-basis "auto"
+                       :display "flex"
+                       :align-items "center")
+                      ("#url button"
+                       :white-space "nowrap"
+                       :text-overflow "ellipsis"
+                       :overflow "hidden")
+                      ("#modes"
+                       :background "inherit"
+                       :padding-left "5px")))))
+                (define-configuration window
+                  ((message-buffer-style
+                    (tailor:with-style 'window
+                      (body
+                       :color theme:on-background
+                       :background theme:background
+                       :font-family theme:font-family
+                       :overflow-x "hidden"))))))
+            '())
+
+        (defmethod format-status-back-button ((status status-buffer))
           (spinneret:with-html-string
-              (:div :id "buttons"
-                    (:button :type "button"
-                             :title "Close Buffer"
-                             :onclick (ps:ps (nyxt/ps:lisp-eval
-                                              (:title "close current buffer" :buffer status)
-                                              (nyxt:delete-current-buffer)))
-                             "🞫"))))
-        (defmethod format-status ((status configure-status-buffer))
-          (let ((buffer (current-buffer (window status))))
-            (spinneret:with-html-string ,status-buffer-layout)))
-        (define-mode configure-status-mode ()
-          "Apply a custom status buffer.")
-        (defmethod enable ((mode configure-status-mode) &key)
-          (setf (status-buffer (current-window))
-                (make-instance 'configure-status-buffer)))
-        (defmethod disable ((mode configure-status-mode) &key)
-          (setf (status-buffer (current-window))
-                (make-instance 'configure-status-buffer)))
+            (:button :type "button" :class "button"
+                     :title "Backwards"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "history-backwards" :buffer status)
+                                      (nyxt/history-mode:history-backwards))) "⊲")))
+        (defmethod format-status-reload-button ((status status-buffer))
+          (spinneret:with-html-string
+            (:button :type "button" :class "button"
+                     :title "Reload"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "reload" :buffer status)
+                                      (nyxt:reload-current-buffer))) "↺")))
+        (defmethod format-status-forwards-button ((status status-buffer))
+          (spinneret:with-html-string
+            (:button :type "button" :class "button"
+                     :title "Forwards"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "history-forwards" :buffer status)
+                                      (nyxt/history-mode:history-forwards))) "⊳")))
+        (defmethod format-status-execute-button ((status status-buffer))
+          (spinneret:with-html-string
+            (:button :type "button" :class "button"
+                     :title "Execute"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "execute-command" :buffer status)
+                                      (nyxt:execute-command))) "≡")))
+        (defmethod format-status-close-button ((status status-buffer))
+          (spinneret:with-html-string
+            (:button :type "button" :class "button"
+                     :title "Close Buffer"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "close current buffer" :buffer status)
+                                      (nyxt:delete-current-buffer))) "🞫")))
+        (defmethod format-status-switch-buffer-button ((status status-buffer))
+          (spinneret:with-html-string
+            (:button :type "button" :class "button"
+                     :title "Switch Buffers"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "switch current buffer" :buffer status)
+                                      (nyxt:switch-buffer))) "◱")))
+        ,@(if format-status-buttons
+              `((defmethod format-status-buttons :around ((status status-buffer))
+                  (spinneret:with-html-string
+                    ,@format-status-buttons)))
+              '())
+        ,@(if format-status-load-status
+              `((defmethod format-status-load-status :around ((status status-buffer))
+                  (spinneret:with-html-string
+                    ,@format-status-load-status)))
+              '())
+        ,@(if format-status-url
+              `((defmethod format-status-url :around ((status status-buffer))
+                  (spinneret:with-html-string
+                    ,@format-status-url)))
+              '())
+        ,@(if format-status-tabs
+              `((defmethod format-status-tabs :around ((status status-buffer))
+                  (spinneret:with-html-string
+                    ,@format-status-tabs)))
+              '())
+        ,@(if format-status
+              `((defmethod format-status :around ((status status-buffer))
+                  (let ((buffer (current-buffer (window status))))
+                    (spinneret:with-html-string ,@format-status))))
+              '())
+        ,@(if glyphs?
+              '((define-configuration nyxt/blocker-mode:blocker-mode ((glyph "⨂")))
+                (define-configuration nyxt/user-script-mode:user-script-mode ((glyph "★"))))
+              '())
         (define-configuration status-buffer
           ((glyph-mode-presentation-p ,(if glyphs? 't 'nil))
            (height ,height)))))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . #t)))
+   (home-services-getter get-home-services)))
+
+(define* (feature-nyxt-prompt
+          #:key
+          (mouse-support? #t))
+  "Configure the Nyxt prompt-buffer."
+  (ensure-pred boolean? mouse-support?)
+
+  (define nyxt-f-name 'prompt)
+  (define f-name (symbol-append 'nyxt- nyxt-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to the Nyxt prompt buffer."
+    (list
+     (rde-nyxt-configuration-service
+      nyxt-f-name
+      config
+      `((define-configuration prompt-buffer
+          (,@(append
+              `((mouse-support-p ,(if mouse-support? 't 'nil)))
+              (if (get-value 'nyxt-nx-tailor config)
+                  '((style (tailor:with-style 'prompt-buffer
+                             (* :font-family theme:font-family)
+                             ("#prompt-area"
+                              :background theme:background
+                              :color theme:on-secondary)
+                             ("#prompt"
+                              :padding-left "15px")
+                             ("#input"
+                              :background theme:background)
+                             (".source"
+                              :margin 0)
+                             (".source-name"
+                              :background theme:background
+                              :color theme:on-primary
+                              :font-style "italic"
+                              :padding "5px 15px")
+                             (".source-content"
+                              :border-collapse "collapse"
+                              :margin-left 0)
+                             (".source-content td"
+                              :padding "5px 15px"
+                              :text-overflow "ellipsis")
+                             (".source-content th"
+                              :padding "5px 15px"
+                              :background theme:background
+                              :font-weight "bold")
+                             ("#selection"
+                              :background (str:concat theme:primary "E6")
+                              :color theme:on-background)
+                             (.marked
+                              :background theme:accent
+                              :color theme:on-accent))))
+                  '()))))))))
 
   (feature
    (name f-name)
@@ -96,7 +259,7 @@
             (uiop:run-program
              (list "emacsclient" "-e" s-exps-string))))
 
-        (define-configuration web-buffer
+        (define-configuration (web-buffer prompt-buffer nyxt/editor-mode:editor-buffer)
           ((default-modes `(nyxt/emacs-mode:emacs-mode ,@%slot-value%))))))
      (rde-elisp-configuration-service
       nyxt-f-name
@@ -126,14 +289,34 @@
              ((not (null? startup-flags))
               `((setq nyxt-startup-flags ',startup-flags)))
              (else '())))
-        (autoload 'nyxt-default-keybindings "nyxt")
-        (nyxt-default-keybindings))
+        (with-eval-after-load 'nyxt-autoloads
+          (nyxt-default-keybindings)))
       #:elisp-packages (list emacs-nyxt))))
 
   (feature
    (name f-name)
    (values `((,f-name . #t)
              (emacs-nyxt . ,emacs-nyxt)))
+   (home-services-getter get-home-services)))
+
+(define* (feature-nyxt-mosaic)
+  "Configure nx-mosaic, an extensible and configurable new-buffer page for Nyxt."
+
+  (define nyxt-f-name 'mosaic)
+  (define f-name (symbol-append 'nyxt- nyxt-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to nx-mosaic."
+    (list
+     (rde-nyxt-configuration-service
+      nyxt-f-name
+      config
+      `(())
+      #:lisp-packages '(nx-mosaic))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . #t)))
    (home-services-getter get-home-services)))
 
 (define* (feature-nyxt-userscript
@@ -153,7 +336,7 @@
      (rde-nyxt-configuration-service
       nyxt-f-name
       config
-      `((define-configuration buffer
+      `((define-configuration web-buffer
           ((default-modes `(nyxt/user-script-mode:user-script-mode ,@%slot-value%))))
         (define-configuration nyxt/user-script-mode:user-script-mode
           ((nyxt/user-script-mode:user-styles (list ,@userstyles))
@@ -193,125 +376,38 @@
    (values `((,f-name . #t)))
    (home-services-getter get-home-services)))
 
-(define (%default-cut config)
-  "Build a default cut for nx-tailor with CONFIG."
-  (define font-sans (font-name (get-value 'font-sans config)))
+(define* (feature-nyxt-hint
+          #:key
+          (hints-alphabet "asdfghjklqwertyuiop"))
+  "Configure hint-mode for quicker link navigation in Nyxt."
+  (ensure-pred string? hints-alphabet)
 
-  `(define-configuration tailor:cut
-     ((tailor:name "rde")
-      (tailor:prompt
-       '((* :font-family theme:font-family)
-         ("#prompt-modes"
-          :display "none")
-         ("#prompt-area"
-          :background-color theme:secondary
-          :color theme:on-secondary)
-         ("#input"
-          :background-color theme:secondary
-          :color theme:on-background)
-         (".source-content"
-          :border "none"
-          :border-collapse collapse)
-         (".source-name"
-          :background-color theme:background
-          :color theme:on-background
-          :font-style "italic")
-         (".source-content th"
-          :padding-left "0"
-          :background-color theme:background
-          :font-weight "bold")
-         (".source-content td"
-          :padding "0 2px")
-         ("#selection"
-          :font-weight "bold"
-          :background-color theme:secondary
-          :color theme:on-background)))
-      (tailor:buffer
-       '(("*, body, div, section, input"
-          :font-family theme:font-family
-          :background-color theme:background
-          :color theme:on-background)
-         ("h1,h2,h3,h4,h5,h6"
-          :font-family ,font-sans
-          :color (tailor:make-important theme:primary))
-         ("p,td,dt,button,a,a:link"
-          :font-family ,font-sans
-          :color theme:on-background)
-         (pre
-          :font-family theme:font-family
-          :color theme:on-background
-          :background-color (tailor:make-important theme:background))
-         (".button, .button:hover , .button:visited, .button:active"
-          :background-color theme:secondary
-          :border-color (if (theme:dark-p theme:theme)
-                            theme:on-secondary
-                            theme:on-background)
-          :color theme:on-background)
-         (code
-          :font-family theme:font-family
-          :color (tailor:make-important theme:on-background)
-          :background-color (tailor:make-important theme:secondary))))
-      (tailor:status
-       '((body
-          :font-family theme:font-family
-          :height "100%"
-          :width "100%"
-          :line-height "30px"
-          :display "flex"
-          :flex-direction "column"
-          :background theme:secondary
-          :flex-wrap "wrap")
-         ("#container"
-          :display "flex"
-          :height "100%"
-          :width "100%"
-          :line-height "30px"
-          :justify-content "space-between"
-          :align-items "center")
-         ("#buttons"
-          :display "flex"
-          :align-items "center"
-          :justify-content "center"
-          :line-height "20px"
-          :height "100%")
-         ("#url"
-          :font-weight "bold"
-          :max-width "60%"
-          :padding-right "0"
-          :padding-left "5px"
-          :text-overflow "ellipsis"
-          :background-color theme:secondary
-          :color theme:on-background
-          :box-sizing "border-box"
-          :z-index "auto")
-         ("#tabs, #controls" :display "none")
-         ("#modes"
-          :padding-right "2px"
-          :background-color theme:secondary
-          :box-sizing "border-box"
-          :color theme:on-background
-          :display "flex"
-          :justify-contents "flex-end"
-          :z-index "auto")
-         (.button
-          :color theme:on-background)))
-      (tailor:message
-       '((body
-          :color theme:on-background
-          :background-color theme:background
-          :font-family theme:font-family))))))
+  (define nyxt-f-name 'hint)
+  (define f-name (symbol-append 'nyxt- nyxt-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to hint-mode."
+    (list
+     (rde-nyxt-configuration-service
+      nyxt-f-name
+      config
+      `((define-configuration nyxt/hint-mode:hint-mode
+          ((nyxt/hint-mode:hints-alphabet ,hints-alphabet)))))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . #t)))
+   (home-services-getter get-home-services)))
 
 (define* (feature-nyxt-nx-tailor
           #:key
-          (auto-theme? #t)
+          (auto? #t)
           (dark-theme? #f)
-          (default-cut %default-cut)
           (themes '())
           (main-themes #f))
   "Configure nx-tailor, a Nyxt theme manager."
-  (ensure-pred maybe-symbol? auto-theme?)
+  (ensure-pred maybe-symbol? auto?)
   (ensure-pred boolean? dark-theme?)
-  (ensure-pred procedure? default-cut)
   (ensure-pred lisp-config? themes)
   (ensure-pred maybe-pair-or-string? main-themes)
 
@@ -320,18 +416,53 @@
 
   (define (get-home-services config)
     "Return home services related to nx-tailor."
+    (define system-timezone (let* ((port (open-input-file "/etc/timezone"))
+                                   (res (read-line port)))
+                              (close-port port)
+                              res))
+    (define timezone (get-value 'timezone config system-timezone))
+    (define font-sans (and=> (get-value 'font-sans config) font-name))
+
     (list
      (rde-nyxt-configuration-service
       nyxt-f-name
       config
       `((local-time:reread-timezone-repository)
         (setf local-time:*default-timezone*
-              (local-time:find-timezone-by-location-name ,(get-value 'timezone config)))
-        ,(default-cut config)
+              (local-time:find-timezone-by-location-name ,timezone))
+        (define-configuration web-buffer
+          ((style
+            (tailor:with-style 'web-buffer
+              ("*, body, div, section, input"
+               :font-family theme:font-family
+               :background-color theme:background
+               :color theme:on-background)
+              ("h1,h2,h3,h4,h5,h6"
+               :color theme:on-secondary
+               :font-family ,font-sans)
+              ("p, td , dt, button, .button, a, a:link"
+               :font-family ,font-sans
+               :color theme:on-background)
+              ("button, .button"
+               :padding "10px")
+              (pre
+               :font-family theme:font-family
+               :color theme:on-background
+               :background theme:background)
+              (code
+               :font-family theme:font-family
+               :color theme:on-background
+               :background (if (theme:dark-p theme:theme)
+                               theme:secondary
+                               theme:primary))))))
         (define-configuration web-buffer
           ((default-modes `(tailor:tailor-mode ,@%slot-value%))))
+        (define-configuration nyxt/repl-mode:repl-mode
+          ((style (tailor:with-style 'nyxt/repl-mode:repl-mode
+                    (.input-buffer
+                     :color theme:on-background)))))
         (define-configuration tailor:tailor-mode
-          ((tailor:auto-p ,(match auto-theme?
+          ((tailor:auto-p ,(match auto?
                              ((? symbol? e) e)
                              (#t 't)
                              (#f 'nil)))
@@ -361,7 +492,8 @@ search engines for Nyxt."
       nyxt-f-name
       config
       `((define-configuration buffer
-          ((search-engines
+          ((search-always-auto-complete-p nil)
+           (search-engines
             (append %slot-value% (list ,@engines))))))
       #:lisp-packages '(nx-search-engines))))
 
@@ -427,13 +559,13 @@ search engines for Nyxt."
           (setf (url buffer) (router:trace-url (url buffer)))
           (call-next-method buffer))
 
-        (define-configuration web-buffer
-          ((default-modes `(router:router-mode ,@%slot-value%))))
         (define-configuration router:router-mode
           ((router:enforce-p t)
            (router:media-enabled-p ,(if media-enabled? 't 'nil))
            (router:banner-p t)
-           (router:routes (list ,@routes)))))
+           (router:routes (list ,@routes))))
+        (define-configuration web-buffer
+          ((default-modes `(router:router-mode ,@%slot-value%)))))
       #:lisp-packages '(nx-router))))
 
   (feature
