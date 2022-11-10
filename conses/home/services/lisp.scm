@@ -46,7 +46,7 @@ The list of expressions will be interposed with \n and everything will end up in
                      ".lisp"))
           (field-obj (car (filter-fields field))))
       (optional (not (null? ((configuration-field-getter field-obj) config)))
-                `(,filename
+                `(,(string-append "." filename)
                   ,(mixed-text-file
                     filename
                     (serialize-field field))))))
