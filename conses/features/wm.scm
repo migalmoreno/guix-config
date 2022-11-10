@@ -12,6 +12,7 @@
   #:use-module (guix packages)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
+  #:use-module (gnu services configuration)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages emacs)
@@ -52,7 +53,7 @@
       emacs-f-name
       config
       `((eval-when-compile
-          (require 'cl-lib))
+          (require 'cl-macs))
         (defgroup configure-exwm nil
           "Helpers for EXWM."
           :group 'configure)
@@ -92,7 +93,6 @@
           "Apply the corresponding display settings after EXWM is enabled."
           (interactive)
           ;; TODO: Remove once I figure out how to invoke user services after Xorg is launched
-          (call-process ,(file-append xset "/bin/xset") nil nil nil "-dpms" "s" "off")
           (call-process ,(file-append xsetroot "/bin/xsetroot") nil nil nil "-cursor_name" "left_ptr")
           (start-process "unclutter" nil ,(file-append unclutter "/bin/unclutter") "-display" ":0")
           ,@(if (get-value 'emacs-fontaine config)
@@ -107,8 +107,11 @@
                         (set-frame-parameter (selected-frame) 'internal-border-width
                                              ,(get-value 'emacs-margin config)))
                    finally (progn
-                             (exwm-workspace-switch-create 0)
-                             (add-hook 'after-make-frame-functions 'configure-exwm--disable-tab-bar))))
+                            (exwm-workspace-switch-create 0)
+                            ,@(if (get-value 'emacs-dashboard config)
+                                  '((configure-dashboard-open))
+                                  '())
+                            (add-hook 'after-make-frame-functions 'configure-exwm--disable-tab-bar))))
 
         (defun configure-exwm-shorten-buffer-name ()
           "Shorten EXWM buffer names to be more discernible."
@@ -123,9 +126,8 @@
           "Call `xrandr' with the supplied ARGS."
           (apply 'start-process "xrandr" nil ,(file-append xrandr "/bin/xrandr") args))
 
-        (defun configure-exwm-get-resolution ()
+        (defun configure-exwm--get-resolution ()
           "Prompt the user for a list of available resolutions."
-          (interactive)
           (with-temp-buffer
             (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
             (goto-char (point-min))
@@ -152,7 +154,7 @@
           "Change the resolution of the primary RandR output."
           (interactive)
           (configure-exwm-automatic-output-mode -1)
-          (when-let ((resolution (configure-exwm-get-resolution))
+          (when-let ((resolution (configure-exwm--get-resolution))
                      (outputs (configure-exwm--get-outputs)))
             (set-process-sentinel
              (if (listp outputs)
@@ -161,7 +163,7 @@
                (configure-exwm--call-xrandr "--output" outputs "--mode" resolution))
              (lambda (_process event)
                (when (string= event "finished\n")
-                 (configure-exwm-automatic-output-mode 1))))))
+                 (configure-exwm-automatic-output-mode))))))
 
         (defun configure-exwm-update-output ()
           "Update RandR output configuration."
@@ -216,28 +218,27 @@
                                   (interactive)
                                   (exwm-workspace-switch ,i))))
                        (number-sequence 0 ,workspace-number))))
-        ,@(if (string= (package-name (get-value 'default-application-launcher? config))
+        ,@(if (string= (or (and=> (get-value 'default-application-launcher? config) package-name) "")
                        "emacs-app-launcher")
               '((with-eval-after-load 'exwm-autoloads
                   (exwm-input-set-key (kbd "s-SPC") 'app-launcher-run-app)))
               '())
-        ,#~"
-(with-eval-after-load 'exwm
-  (setq exwm-input-prefix-keys (append exwm-input-prefix-keys '(?\\M-s ?\\s-e)))
-  (setq exwm-input-simulation-keys
-        `(([?\\C-b] . [left])
-          ([?\\C-f] . [right])
-          ([?\\C-p] . [up])
-          ([?\\C-n] . [down])
-          ([?\\C-a] . [home])
-          ([?\\C-e] . [end])
-          ([?\\M-v] . [prior])
-          ([?\\C-v] . [next])
-          ([?\\C-d] . [delete])
-          ([?\\C-k] . [S-end delete]))))"
         (with-eval-after-load 'exwm-autoloads
           (exwm-enable))
         (with-eval-after-load 'exwm
+          (setq exwm-input-prefix-keys (append exwm-input-prefix-keys `(,(kbd "M-s") ,(kbd "s-e"))))
+          (setq exwm-input-simulation-keys
+                (list
+                 (cons (kbd "C-b") (kbd "<left>"))
+                 (cons (kbd "C-f") (kbd "<right>"))
+                 (cons (kbd "C-p") (kbd "<up>"))
+                 (cons (kbd "C-n") (kbd "<down>"))
+                 (cons (kbd "C-a") (kbd "<home>"))
+                 (cons (kbd "C-e") (kbd "<end>"))
+                 (cons (kbd "M-v") (kbd "<prior>"))
+                 (cons (kbd "C-v") (kbd "<next>"))
+                 (cons (kbd "C-d") (kbd "<delete>"))
+                 (cons (kbd "C-k") (kbd "<S-end> <delete>"))))
           (setq exwm-layout-show-all-buffers nil)
           (setq exwm-workspace-number ,workspace-number)
           (setq exwm-workspace-show-all-buffers nil)
@@ -248,8 +249,9 @@
           (setq exwm-floating-border-width ,floating-window-border-width)
           (setq exwm-manage-configurations ',window-configurations)
           (require 'exwm-randr)
-          (add-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output)
-          (exwm-randr-enable)))
+          (exwm-randr-enable)
+          (configure-exwm-update-output)
+          (add-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output)))
       #:elisp-packages (append
                         (list emacs-exwm)
                         (if (get-value 'emacs-fontaine config)
@@ -275,7 +277,6 @@ on-the-fly, and set up the initial workspace configuration.")))
   Driver \"libinput\"
   MatchDevicePath \"/dev/input/event*\"
   MatchIsTouchpad \"on\"
-
   Option \"Tapping\" \"on\"
   Option \"TappingDrag\" \"on\"
   Option \"DisableWhileTyping\" \"on\"
@@ -321,9 +322,10 @@ automatically switch to EXWM-TTY-NUMBER on boot."
                      (xorg-configuration
                       (keyboard-layout (get-value 'keyboard-layout config))
                       (extra-config
-                       (append
-                        (list xorg-libinput-configuration)
-                        extra-xorg-config))))))))))
+                       (interpose
+                        (append
+                         (list xorg-libinput-configuration)
+                         extra-xorg-config)))))))))))
 
   (define (get-system-services _)
     "Return system services related to EXWM run on TTY."
