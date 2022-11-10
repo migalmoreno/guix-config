@@ -13,6 +13,9 @@
 (define-public (maybe-number? x)
   (or (number? x) (not x)))
 
+(define-public (number-or-list? x)
+  (or (number? x) (list? x)))
+
 (define-public (maybe-pair-or-string? x)
   (or (pair? x) (string? x) (not x)))
 
