@@ -67,7 +67,8 @@
           (development-path "~/local/share/projects/nyxt")
           (extra-config-lisp '())
           (auto-mode-rules '())
-          (extra-bindings '()))
+          (extra-bindings '())
+          (default-new-buffer-url "nyxt:new"))
   "Configure the Nyxt browser."
   (ensure-pred file-like? nyxt)
   (ensure-pred boolean? default-browser?)
@@ -78,6 +79,7 @@
   (ensure-pred lisp-config? extra-config-lisp)
   (ensure-pred lisp-config? auto-mode-rules)
   (ensure-pred list? extra-bindings)
+  (ensure-pred string? default-new-buffer-url)
 
   (define f-name 'nyxt)
 
@@ -121,13 +123,14 @@
       (rde-nyxt-configuration-service
        'rde-nyxt
        config
-       `((let ((sbcl-init (merge-pathnames ".sbclrc" (user-homedir-pathname))))
-           (when (probe-file sbcl-init)
-             (load sbcl-init)))
+       `(,@(if (get-value 'lisp config)
+               '((let ((sbcl-init (merge-pathnames ".sbclrc" (user-homedir-pathname))))
+                   (when (probe-file sbcl-init)
+                     (load sbcl-init))))
+               '())
          (asdf:ensure-source-registry)
          (reset-asdf-registries)
          (use-nyxt-package-nicknames)
-         (local-time:reread-timezone-repository)
          (defvar *rde-keymap* (make-keymap "rde-map"))
          (define-key *rde-keymap* ,@extra-bindings)
          (defmethod files:resolve ((profile nyxt-profile) (file nyxt:history-file))
@@ -141,13 +144,14 @@
          (define-configuration document-buffer
            ((smooth-scrolling t)
             (scroll-distance 150)))
+         (define-configuration web-buffer
+           ((download-engine :renderer)))
          (define-configuration buffer
            ((default-modes `(rde-keymap-mode ,@%slot-value%))))
          (define-configuration browser
            ((default-cookie-policy ,default-cookie-policy)
-            (restore-session-on-startup-p nil)))
-         (define-configuration nyxt/hint-mode:hint-mode
-           ((nyxt/hint-mode:hints-alphabet "asdfghjklqwertyuiop")))))
+            (restore-session-on-startup-p nil)
+            (default-new-buffer-url (quri:uri ,default-new-buffer-url))))))
       (service
        home-nyxt-service-type
        (home-nyxt-configuration
