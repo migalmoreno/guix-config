@@ -37,7 +37,7 @@
               (home-lisp-configuration
                (lisp lisp)
                (sbclrc-lisp
-                `((require "asdf")
+                `((require :asdf)
                   (let ((guix-profile (format nil "~a/.guix-home/profile/lib/" (uiop:getenv "HOME"))))
                     (when (and (probe-file guix-profile)
                                (ignore-errors (asdf:load-system "cffi")))
@@ -116,7 +116,6 @@
       f-name
       config
       `((require 'sly)
-
         (defgroup configure-lisp nil
           "Lisp tools and extensions."
           :group 'configure)
@@ -168,8 +167,13 @@
           (setq sly-enable-evaluate-in-emacs t)
           (setq sly-keep-buffers-on-connection-close nil))
         (with-eval-after-load 'sly-mrepl
-          (define-key sly-mrepl-mode-map (kbd "C-M-q") 'indent-sexp)
+          (define-key lisp-mode-map (kbd "C-c C-z") 'sly-mrepl)
           (let ((map sly-mode-map))
+            (define-key map (kbd "C-c C-b") 'sly-eval-buffer)
+            (define-key map (kbd "C-c C-q") 'sly-interrupt))
+          (let ((map sly-mrepl-mode-map))
+            (define-key map (kbd "C-M-q") 'indent-sexp)
+            (define-key map (kbd "C-c C-z") 'sly-switch-to-most-recent)
             (define-key map (kbd "C-c M-n") 'sly-mrepl-next-prompt)
             (define-key map (kbd "C-c M-p") 'sly-mrepl-previous-prompt))
           (setq sly-mrepl-history-file-name (expand-file-name "emacs/sly-mrepl-history" (xdg-cache-home)))
