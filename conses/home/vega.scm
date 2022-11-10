@@ -46,7 +46,8 @@
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu system keyboard)
-  #:use-module (gnu packages emacs))
+  #:use-module (gnu packages emacs)
+  #:use-module (guix gexp))
 
 (define-public %home-features
   (list
@@ -65,10 +66,37 @@
    (feature-bluetooth)
    (feature-manpages)
    (feature-emacs
-    #:default-application-launcher? #t
+    #:default-application-launcher? #f
     #:emacs-server-mode? #f
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))
+   (feature-fonts)
+   (feature-emacs-all-the-icons)
+   (feature-emacs-completion
+    #:consult-initial-narrowing? #t)
+   (feature-emacs-exwm
+    #:window-configurations
+    '(((string= exwm-class-name "Nyxt")
+       char-mode t
+       workspace 1
+       simulation-keys nil
+       (exwm-layout-hide-mode-line))
+      ((string= exwm-instance-name "emacs")
+       char-mode t)
+      ((string= exwm-class-name "emulator")
+       floating t)))
+   (feature-emacs-exwm-run-on-tty
+    #:emacs-exwm-tty-number 1
+    #:launch-arguments '("-mm" "--debug-init")
+    #:extra-xorg-config
+    (list
+     "Section \"Monitor\"
+  Identifier \"DP-3\"
+  Option \"DPMS\" \"false\"
+EndSection
+Section \"ServerFlags\"
+  Option \"BlankTime\" \"0\"
+EndSection"))
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
     #:ssh-keys '(("A23B61B2897F524D3D3410E1180423144F1DDB4E"))
@@ -86,9 +114,6 @@
                          dired-mode eshell-mode magit-status-mode
                          diary-mode magit-diff-mode text-mode
                          pass-view-mode erc-mode))
-   (feature-emacs-all-the-icons)
-   (feature-emacs-completion
-    #:consult-initial-narrowing? #t)
    (feature-direnv)
    (feature-compile)
    (feature-password-store
@@ -97,19 +122,47 @@
    (feature-nyxt
     #:default-browser? #t
     #:default-cookie-policy ':no-third-party
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:auto-mode-rules
     '((((match-host "wikipedia.org") :included (nyxt/style-mode:dark-mode))))
-    #:extra-config-lisp
-    '((define-configuration prompt-buffer
-        ((mouse-support-p nil))))
     #:extra-bindings
     '("C-c s" 'query-selection-in-search-engine))
+   (feature-nyxt-mosaic)
+   (feature-nyxt-nx-tailor
+    #:auto? #f
+    #:dark-theme? #t
+    #:themes
+    '((tailor:make-theme
+       'modus-operandi
+       :background-color "white"
+       :on-background-color "black"
+       :primary-color "#e5e5e5"
+       :on-primary-color "black"
+       :secondary-color "#005a5f"
+       :on-secondary-color "black"
+       :accent-color "#0000c0"
+       :on-accent-color "white"
+       :font-family "Iosevka")
+      (tailor:make-theme
+       'modus-vivendi
+       :dark-p t
+       :background-color "black"
+       :on-background-color "white"
+       :primary-color "#212121"
+       :on-primary-color "#a8a8a8"
+       :secondary-color "#100f10"
+       :on-secondary-color "#6ae4b9"
+       :accent-color "#00bcff"
+       :on-accent-color "black"
+       :font-family "Iosevka")))
+   (feature-nyxt-prompt
+    #:mouse-support? #f)
+   (feature-nyxt-hint)
    (feature-nyxt-emacs)
    (feature-nyxt-blocker)
    (feature-emacs-pdf-tools)
-   (feature-fonts)
    (feature-mpv
-    #:emacs-mpv ((@ (conses packages emacs-xyz) emacs-mpv-next))
+    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next)
     #:extra-mpv-conf
     `((border . no)
       (volume . 100)
@@ -153,12 +206,41 @@
    (feature-emacs-calendar
     #:week-numbers? #t)
    (feature-emacs-bookmark)
-   (feature-emacs-dashboard)
+   (feature-emacs-dashboard
+    #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
+    #:logo-title "Welcome to GNU/Emacs"
+    #:item-generators '((recents . dashboard-insert-recents)
+                        (bookmarks . dashboard-insert-bookmarks)
+                        (agenda . dashboard-insert-agenda)
+                        (registers . dashboard-insert-registers)
+                        (projects . dashboard-insert-projects))
+    #:items '((recents . 7)
+              (bookmarks . 7)
+              (agenda . 7)
+              (projects . 7))
+    #:navigator-buttons '((("☆" "Calendar" "Show calendar"
+                            (lambda
+                                (&rest _)
+                              (calendar))
+                            'diary "[" "]")))
+    #:banner (file-append
+              (@ (conses packages misc) gnu-meditate-logo)
+              "/meditate.png")
+    #:banner-max-height 320
+    #:banner-max-width 240
+    #:path-max-length 50
+    #:bookmarks-show-base? #f
+    #:path-style 'truncate-beginning
+    #:set-heading-icons? #t
+    #:set-file-icons? #f
+    #:set-footer? #f
+    #:set-init-info? #f)
    (feature-emacs-spelling
     #:spelling-program (@ (gnu packages aspell) aspell)
     #:spelling-dictionaries (strings->packages "aspell-dict-en")
     #:flyspell-hooks
     '(org-mode-hook bibtex-mode-hook)
+    #:flyspell-prog-hooks '()
     #:ispell-standard-dictionary "en_US")
    (feature-emacs-markdown)
    (feature-emacs-browse-url
@@ -169,20 +251,9 @@
       ("twitter.com" . ("^nitter.*" . "nitter.namazso.eu"))
       ("imgur.com" . ("^imgin.*" . "imgin.voidnet."))
       ("medium.com" . ("^scribe.*" . "scribe.rip"))))
-   (feature-emacs-exwm
-    #:window-configurations
-    '(((string= exwm-class-name "Nyxt")
-       char-mode t
-       workspace 1
-       simulation-keys nil
-       (exwm-layout-hide-mode-line))
-      ((string= exwm-instance-name "emacs") char-mode t)))
-   (feature-emacs-exwm-run-on-tty
-    #:emacs-exwm-tty-number 1
-    #:launch-arguments '("-mm" "--debug-init"))
    (feature-emacs-window)
    (feature-emacs-pulseaudio-control
-    #:emacs-pulseaudio-control ((@ (conses packages emacs-xyz) emacs-pulseaudio-control-next)))
+    #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
    (feature-emacs-org
     #:org-capture-templates
     '(("t" "Tasks/Projects")
@@ -246,7 +317,7 @@
       ("e" "Programming Concept" plain
        ,(string-append
          "#+begin_src %^{Language|elisp|lisp|scheme"
-         "|clojure|ocaml|javascript}\n%?\n#+end_src\n")
+         "|clojure|ocaml|js}\n%?\n#+end_src\n")
        :if-new (file+head
                 "%<%Y%m%d%H%M%S>-${slug}.org"
                 ,(string-append
@@ -330,7 +401,7 @@
    (feature-emacs-tramp)
    (feature-emacs-battery)
    (feature-emacs-display-wttr
-    #:emacs-display-wttr (@ (conses packages emacs-xyz) emacs-display-wttr-local))
+    #:emacs-display-wttr (@ (conses packages emacs-xyz) emacs-display-wttr-next))
    (feature-emacs-tab-bar
     #:modules-left
     '((make-configure-tab-bar-module
@@ -401,7 +472,7 @@
       (nick (getenv "IRC_LIBERA_NICK")))
      (irc-account
       (id 'oftc)
-      (network "oftc.net")
+      (network "irc.oftc.net")
       (nick (getenv "IRC_OFTC_NICK")))))
    (feature-emacs-erc
     #:autojoin-channels-alist
@@ -542,18 +613,26 @@
    (feature-nyxt-status
     #:height 30
     #:glyphs? #t
-    #:status-buffer-layout
-    '(:div :id "container"
-      (:div :id "controls"
-       (:raw
-        (format-close-button status)))
-      (:div :id "url"
-       (:raw
-        (format-status-load-status status)
-        (format-status-url status)))
-      (:div :id "modes"
-            :title (nyxt::modes-string buffer)
-       (:raw (format-status-modes status)))))
+    #:format-status-buttons
+    '((:raw
+       (format-status-back-button status)
+       (format-status-reload-button status)
+       (format-status-forwards-button status)
+       (format-status-close-button status)
+       (format-status-switch-buffer-button status)
+       (format-status-execute-button status)))
+    #:format-status
+    '((:div :id "container"
+       (:div :id "controls"
+        (:raw (format-status-buttons status)))
+       (:div :id "url"
+        (:raw
+         (format-status-load-status status)
+         (format-status-url status)))
+       (:div :id "modes"
+             :title (nyxt::modes-string buffer)
+        (:raw
+         (format-status-modes status))))))
    (feature-nyxt-userscript
     #:userstyles
     '((make-instance
@@ -578,33 +657,6 @@
                  :display "none !important")
                 ("img[class*=avatar]"
                  :visibility "hidden"))))))
-   (feature-nyxt-nx-tailor
-    #:auto-theme? #f
-    #:dark-theme? #t
-    #:themes
-    '((tailor:make-theme
-       "modus-operandi"
-       :background-color "white"
-       :on-background-color "black"
-       :primary-color "#093060"
-       :secondary-color "#dfdfdf"
-       :on-secondary-color "black"
-       :accent-color "#8f0075"
-       :on-accent-color "#005a5f"
-       :font-family "Iosevka"
-       :cut (make-instance 'tailor:cut))
-      (tailor:make-theme
-       "modus-vivendi"
-       :dark-p t
-       :background-color "black"
-       :on-background-color "white"
-       :primary-color "#c6eaff"
-       :secondary-color "#323232"
-       :on-secondary-color "#a8a8a8"
-       :accent-color "#afafef"
-       :on-accent-color "#a8a8a8"
-       :font-family "Iosevka"
-       :cut (make-instance 'tailor:cut))))
    (feature-nyxt-nx-router
     #:media-enabled? #t
     #:routes
@@ -662,8 +714,7 @@
       (router:make-route
        (match-domain "youtube.com" "youtu.be")
        :original "www.youtube.com"
-       :redirect "invidio.xamh.de"
-       :instances 'make-invidious-instances
+       :redirect "invidious.snopyta.org"
        :blocklist '(:path (:starts "/c/")))
       (router:make-route
        (match-domain "medium.com")
@@ -711,15 +762,13 @@
        :base-search-url "https://libgen.gs/index.php?req=~a")
       (engines:google
        :shortcut "go"
-       :completion-function nil
        :safe-search nil
        :results-number 50
        :new-window t)
       (engines:peertube
        :shortcut "pt")
       (engines:invidious
-       :shortcut "yt"
-       :completion-function nil)
+       :shortcut "yt")
       (engines:lemmy
        :shortcut "le")
       (engines:discourse
@@ -769,7 +818,6 @@
       (engines:whoogle
        :shortcut "who"
        :base-search-url "http://localhost:5000/search?q=~a"
-       :completion-function nil
        :theme :system
        :alternatives nil
        :lang-results :english
@@ -799,7 +847,12 @@
         (host "cygnus")
         (options
          `((host-name . ,(getenv "CYGNUS_IP"))
-           (user . "root"))))))))
+           (user . "root"))))
+       (ssh-host
+        (host "hydri")
+        (options
+         `((host-name . ,(getenv "HYDRI_IP"))
+           (user . "user"))))))))
    (feature-forge-settings
     #:forge-accounts
     (list
