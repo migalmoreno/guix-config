@@ -88,7 +88,7 @@
   (ensure-pred maybe-number? fringes)
   (ensure-pred number? mode-line-padding)
   (ensure-pred number? header-line-padding)
-  (ensure-pred number? tab-bar-padding)
+  (ensure-pred number-or-list? tab-bar-padding)
   (ensure-pred boolean? header-line-as-mode-line?)
 
   (define emacs-f-name 'appearance)
@@ -206,7 +206,8 @@
         (with-eval-after-load 'mouse
           (setq mouse-yank-at-point nil))
         (with-eval-after-load 'mwheel
-          (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+          (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
+                                              ((control) . 1)))
           (setq mouse-wheel-progressive-speed nil)
           (setq mouse-wheel-follow-mouse t)
           (setq scroll-conservatively 100)
@@ -316,18 +317,18 @@ themes for Emacs."
 
         ,@(if (get-value 'nyxt config)
               '((require 'nyxt)
-                (defun configure-modus-themes-change-nyxt-theme (&optional theme)
-                  "Switch theme in Nyxt according to current system theme or THEME."
+                (defun configure-modus-themes-load-nyxt-theme (&optional theme)
+                  "Load theme in Nyxt according to current system theme or THEME."
                   (interactive)
                   (when nyxt-process
                     (if (or (and theme (configure-modus-themes--dark-theme-p theme))
                             (configure-modus-themes--dark-theme-p))
-                        (nyxt-change-theme "modus-vivendi")
-                        (nyxt-change-theme "modus-operandi"))))
-                (add-hook 'modus-themes-after-load-theme-hook 'configure-modus-themes-change-nyxt-theme))
+                        (nyxt-load-theme 'modus-vivendi)
+                        (nyxt-load-theme 'modus-operandi))))
+                (add-hook 'modus-themes-after-load-theme-hook 'configure-modus-themes-load-nyxt-theme))
               '())
 
-        (setq configure-modus-themes-tab-bar-padding ,tab-bar-padding)
+
         (setq configure-modus-themes-header-line-padding ,header-line-padding)
         ,@(map (lambda (hook)
                  `(add-hook 'modus-themes-after-load-theme-hook ',hook))
@@ -413,8 +414,9 @@ themes for Emacs."
                    (not (find-font (font-spec :name "all-the-icons"))))
           (all-the-icons-install-fonts t))
         (with-eval-after-load 'all-the-icons
-          (setq all-the-icons-scale-factor 1)
-          (setq all-the-icons-default-adjust 0)))
+          (setq all-the-icons-scale-factor 1.0)
+          (setq all-the-icons-default-adjust 0)
+          (setq all-the-icons-octicon-scale-factor 0.9)))
       #:elisp-packages (list emacs-all-the-icons))))
 
   (feature
@@ -775,8 +777,8 @@ on the current project."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'cl-lib)
-        (require 'consult)
+      `((eval-when-compile
+         (require 'cl-lib))
         (defgroup configure-project nil
           "Custom `project.el' enhancements."
           :group 'configure)
@@ -976,6 +978,9 @@ operate on buffers like Dired."
        'home-audio-packages
        home-profile-service-type
        (list atomicparsley))
+      (emacs-xdg-service
+       emacs-f-name "Emacs (Client) [audio:]" #~""
+       #:default-for '(audio/mp4 audio/mpeg))
       (rde-elisp-configuration-service
        emacs-f-name
        config
@@ -1172,40 +1177,42 @@ operate on buffers like Dired."
       emacs-f-name
       config
       `((with-eval-after-load 'pulseaudio-control-autoloads
-          (pulseaudio-control-default-keybindings)
-          (pulseaudio-control-display-mode))
+          (pulseaudio-control-default-keybindings))
         ,@(if (get-value 'emacs-exwm config)
               '((with-eval-after-load 'exwm
-                  (exwm-input-set-key (kbd "s-<next>") 'pulseaudio-control-decrease-volume)
-                  (exwm-input-set-key (kbd "s-<prior>") 'pulseaudio-control-increase-volume)))
+                  (exwm-input-set-key (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
+                  (exwm-input-set-key (kbd "s-<prior>") 'pulseaudio-control-increase-sink-volume)))
               '())
-        (autoload 'pulseaudio-control-display-mode "pulseaudio-control")
-        (pulseaudio-control-display-mode)
         (with-eval-after-load 'pulseaudio-control
           (define-key pulseaudio-control-map "L" 'pulseaudio-control-toggle-sink-input-mute-by-index)
           ,@(if (get-value 'emacs-all-the-icons config)
                 '((eval-when-compile
                    (require 'all-the-icons))
                   (with-eval-after-load 'all-the-icons
-                    (setq pulseaudio-control-sink-mute-string
-                          (all-the-icons-material "volume_off" :v-adjust -0.15 :height 1))
-                    (setq pulseaudio-control-sink-volume-strings
-                          (list
-                           (all-the-icons-material "volume_mute" :v-adjust -0.15 :height 1)
-                           (all-the-icons-material "volume_down" :v-adjust -0.15 :height 1)
-                           (all-the-icons-material "volume_up" :v-adjust -0.15 :height 1)))
-                    (setq pulseaudio-control-source-mute-string
-                          (all-the-icons-material "mic_off" :v-adjust -0.15 :height 1))
-                    (setq pulseaudio-control-source-active-string
-                          (all-the-icons-material "mic" :v-adjust -0.15 :height 1))))
+                    (let ((all-the-icons-default-adjust -0.15))
+                      (setq pulseaudio-control-sink-mute-string
+                            (all-the-icons-material "volume_off" :height 1))
+                      (setq pulseaudio-control-sink-volume-strings
+                            (list
+                             (all-the-icons-material "volume_mute" :height 1)
+                             (all-the-icons-material "volume_down" :height 1)
+                             (all-the-icons-material "volume_up" :height 1)))
+                      (setq pulseaudio-control-source-mute-string
+                            (all-the-icons-material "mic_off" :height 1))
+                      (setq pulseaudio-control-source-volume-strings
+                            (list
+                             (all-the-icons-material "mic_none" :height 1)
+                             (all-the-icons-material "mic" :height 1))))))
                 '())
           (setq pulseaudio-control-pactl-path ,pactl)
           (setq pulseaudio-control--volume-maximum '(("percent" . 100)
                                                      ("decibels" . 10)
                                                      ("raw" . 98000)))
           (setq pulseaudio-control-volume-step ,volume-step)
-          (setq pulseaudio-control-use-default-sink t)
-          (setq pulseaudio-control-volume-verbose nil)))
+          (setq pulseaudio-control-volume-verbose nil)
+          (pulseaudio-control-default-sink-mode)
+          (pulseaudio-control-default-source-mode)
+          (pulseaudio-control-display-mode)))
       #:elisp-packages (append (list emacs-pulseaudio-control)
                                (if (get-value 'emacs-all-the-icons config)
                                    (list (get-value 'emacs-all-the-icons config))
@@ -1475,8 +1482,71 @@ operate on buffers like Dired."
 
 (define* (feature-emacs-dashboard
           #:key
-          (emacs-dashboard emacs-dashboard))
+          (emacs-dashboard emacs-dashboard)
+          (page-separator "\n\n")
+          (logo-title "Welcome to Emacs!")
+          (center-content? #t)
+          (set-init-info? #t)
+          (init-info #f)
+          (items #f)
+          (item-generators #f)
+          (item-shortcuts #f)
+          (item-names #f)
+          (set-heading-icons? #f)
+          (heading-icons #f)
+          (set-file-icons? #f)
+          (navigator-buttons #f)
+          (banner (file-append emacs-dashboard
+                               "share/emacs/site-lisp/"
+                               (package-name emacs-dashboard)
+                               (package-version emacs-dashboard)
+                               "/banners/emacs.png"))
+          (banner-max-height 0)
+          (banner-max-width 0)
+          (org-agenda-weekly? #t)
+          (org-agenda-prefix-format #f)
+          (set-footer? #t)
+          (footer #f)
+          (footer-messages #f)
+          (footer-icon #f)
+          (bookmarks-show-base? #f)
+          (recentf-show-base? #f)
+          (projects-backend 'project-el)
+          (projects-show-base? #f)
+          (path-style #f)
+          (path-max-length 70)
+          (path-shorten-string "..."))
   "Configure Emacs Dashboard, an extensible startup screen."
+  (ensure-pred file-like? emacs-dashboard)
+  (ensure-pred string? page-separator)
+  (ensure-pred string? logo-title)
+  (ensure-pred boolean? center-content?)
+  (ensure-pred boolean? set-init-info?)
+  (ensure-pred maybe-string? init-info)
+  (ensure-pred maybe-list? items)
+  (ensure-pred maybe-list? item-generators)
+  (ensure-pred maybe-list? item-shortcuts)
+  (ensure-pred maybe-list? item-names)
+  (ensure-pred boolean? set-heading-icons?)
+  (ensure-pred maybe-list? heading-icons)
+  (ensure-pred boolean? set-file-icons?)
+  (ensure-pred maybe-list? navigator-buttons)
+  (ensure-pred file-like-or-path? banner)
+  (ensure-pred number? banner-max-height)
+  (ensure-pred number? banner-max-width)
+  (ensure-pred boolean? org-agenda-weekly?)
+  (ensure-pred maybe-string? org-agenda-prefix-format)
+  (ensure-pred boolean? set-footer?)
+  (ensure-pred maybe-string? footer)
+  (ensure-pred maybe-list? footer-messages)
+  (ensure-pred maybe-string? footer-icon)
+  (ensure-pred boolean? bookmarks-show-base?)
+  (ensure-pred boolean? recentf-show-base?)
+  (ensure-pred symbol? projects-backend)
+  (ensure-pred boolean? projects-show-base?)
+  (ensure-pred maybe-symbol? path-style)
+  (ensure-pred integer? path-max-length)
+  (ensure-pred string? path-shorten-string)
 
   (define emacs-f-name 'dashboard)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -1486,10 +1556,8 @@ operate on buffers like Dired."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((eval-when-compile
-          (require 'dashboard))
-        (require 'configure-rde-keymaps)
-
+      `((require 'configure-rde-keymaps)
+        (require 'dashboard)
         (defun configure-dashboard-open ()
           "Jump to a dashboard buffer, creating one if it doesn't exist."
           (interactive)
@@ -1499,30 +1567,77 @@ operate on buffers like Dired."
             (dashboard-insert-startupify-lists)
             (dashboard-refresh-buffer)))
 
-        (autoload 'configure-dashboard-open "dashboard")
         (define-key rde-app-map "h" 'configure-dashboard-open)
         (with-eval-after-load 'dashboard
-          (setq dashboard-banner-logo-title "Welcome to Emacs")
-          (setq dashboard-startup-banner 'logo)
-          (setq dashboard-center-content t)
-          (setq dashboard-show-shortcuts nil)
-          (setq dashboard-set-heading-icons t)
-          (setq dashboard-set-file-icons t)
-          (setq dashboard-set-footer nil)
-          (setq dashboard-week-agenda t)
-          (setq dashboard-page-separator "\n\n")
+          (setq dashboard-set-file-icons ,(if set-file-icons? 't 'nil))
+          (setq dashboard-projects-backend ',projects-backend)
+          (setq dashboard-projects-show-base ,(if projects-show-base? 't 'nil))
+          (setq dashboard-bookmarks-show-base ,(if bookmarks-show-base? 't 'nil))
+          (setq dashboard-recentf-show-base ,(if recentf-show-base? 't 'nil))
+          (setq dashboard-center-content ,(if center-content? 't 'nil))
+          ,@(if set-init-info?
+                (if init-info
+                    `((setq dashboard-init-info ,init-info))
+                    '())
+                '((setq dashboard-set-init-info nil)))
+          ,@(if (get-value 'emacs-advanced-user? config)
+                '((setq dashboard-show-shortcuts nil))
+                '())
+          (setq dashboard-page-separator ,page-separator)
+          ,@(if (and (get-value 'emacs-org-agenda config)
+                     org-agenda-weekly?)
+                '((setq dashboard-week-agenda t))
+                '())
+          (setq dashboard-banner-logo-title ,logo-title)
+          ,@(if banner
+                `((setq dashboard-startup-banner ,banner)
+                  (setq dashboard-image-banner-max-height ,banner-max-height)
+                  (setq dashboard-image-banner-max-width ,banner-max-width))
+                '())
+          ,@(if items
+                `((setq dashboard-items ',items))
+                '())
+          ,@(if item-generators
+                `((setq dashboard-item-generators ',item-generators))
+                '())
+          ,@(if item-shortcuts
+                `((setq dashboard-item-generators ',item-shortcuts))
+                '())
+          ,@(if item-names
+                `((setq dashboard-item-generators ',item-names))
+                '())
+          (setq dashboard-set-heading-icons ,(if set-heading-icons? 't 'nil))
+          ,@(if heading-icons
+                `((setq dashboard-heading-icons ',heading-icons))
+                '())
+          ,@(if navigator-buttons
+                `((setq dashboard-set-navigator t)
+                  (setq dashboard-navigator-buttons ',navigator-buttons))
+                '())
           (setq dashboard-agenda-release-buffers t)
-          (setq dashboard-banner-logo-png
-                ,(file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png"))
-          (setq dashboard-item-generators '((recents . dashboard-insert-recents)
-                                            (bookmarks . dashboard-insert-bookmarks)
-                                            (agenda . dashboard-insert-agenda)
-                                            (registers . dashboard-insert-registers)))
-          (setq dashboard-items '((recents . 5)
-                                  (bookmarks . 5)
-                                  (agenda . 15)))))
-      #:elisp-packages (list emacs-dashboard
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+          ,@(if org-agenda-prefix-format
+                `((setq dashboard-agenda-prefix-format ,org-agenda-prefix-format))
+                '())
+          ,@(if set-footer?
+                (append
+                 (if footer
+                     `((setq dashboard-footer ,footer))
+                     '())
+                 (if footer-messages
+                     `((setq dashboard-footer-messages ',footer-messages))
+                     '())
+                 (if footer-icon
+                     `((setq dashboard-footer-icon ,footer-icon))
+                     '()))
+                `((setq dashboard-set-footer nil)))
+          (setq dashboard-path-max-length ,path-max-length)
+          (setq dashboard-path-shorten-string ,path-shorten-string)
+          ,@(if path-style
+                `((setq dashboard-path-style ',path-style))
+                '())))
+      #:elisp-packages (list
+                        emacs-dashboard
+                        (get-value 'emacs-configure-rde-keymaps config)))))
 
   (feature
    (name f-name)
@@ -1695,7 +1810,8 @@ and organizer for Emacs."
       (rde-elisp-configuration-service
        emacs-f-name
        config
-       `((require 'cl-lib)
+       `((eval-when-compile
+          (require 'cl-macs))
          (defgroup configure-org nil
            "Extensions for basic Org mode features."
            :group 'configure)
@@ -1807,10 +1923,10 @@ and organizer for Emacs."
            (define-key map "l" 'org-store-link)
            (define-key map "c" 'org-capture))
          (with-eval-after-load 'org
-           (dolist
-               (module '(org-indent org-tempo
-                                    org-habit org-crypt
-                                    org-protocol org-timer))
+           (dolist (module '(org-indent
+                             org-tempo
+                             org-habit org-crypt
+                             org-protocol org-timer))
              (add-to-list 'org-modules module))
            (add-to-list
             'display-buffer-alist
@@ -2177,6 +2293,7 @@ and organizer for Emacs."
           ,@(if org-agenda-files
                 `((setq org-agenda-files ',org-agenda-files))
                 '())
+          (setq org-agenda-sticky t)
           (setq org-agenda-tags-column 0)
           (setq org-agenda-block-separator ?-)
           (setq org-agenda-time-grid '((daily today require-timed)
@@ -3378,6 +3495,7 @@ language for GNU Emacs."
             (define-key map (kbd "C-x C-e") 'pp-eval-last-sexp)
             (define-key map (kbd "M-:") 'pp-eval-expression)
             (define-key map (kbd "C-c C-m") 'pp-macroexpand-last-sexp)
+            (define-key map (kbd "C-c C-b") 'eval-buffer)
             ,@(if (get-value 'emacs-embark config)
                   '((define-key map (kbd "C-c C-c") 'embark-pp-eval-defun))
                   '())))
