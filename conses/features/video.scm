@@ -378,11 +378,9 @@ from YouTube and various other sites."
 
   (define (get-home-services config)
     "Return home services related to youtube-dl."
+    (define yt-dlp (file-append yt-dlp "/bin/yt-dlp"))
+
     (list
-     (simple-service
-      'home-youtube-dl-profile-service
-      home-profile-service-type
-      (list yt-dlp ffmpeg))
      (rde-elisp-configuration-service
       f-name
       config
@@ -390,7 +388,7 @@ from YouTube and various other sites."
         (defun configure-ytdl--list-stream-formats (url)
           "List all available formats for the stream with URL with yt-dlp."
           (with-temp-buffer
-            (call-process (executable-find "yt-dlp") nil t nil "--list-formats" url)
+            (call-process ,yt-dlp nil t nil "--list-formats" url)
             (goto-char (point-min))
             (let ((formats
                    (cl-loop while (not (eobp))
@@ -411,7 +409,7 @@ from YouTube and various other sites."
         (define-key rde-app-map "y" 'ytdl-show-list)
         (with-eval-after-load 'ytdl
           (define-key ytdl--dl-list-mode-map "a" 'ytdl-download)
-          (setq ytdl-command ,(file-append yt-dlp "/bin/yt-dlp"))
+          (setq ytdl-command ,yt-dlp)
           (setq ytdl-download-folder ,download-dir)
           (setq ytdl-music-folder ,music-dir)
           (setq ytdl-video-folder ,video-dir)
