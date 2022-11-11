@@ -330,6 +330,7 @@ themes for Emacs."
 
 
         (setq configure-modus-themes-header-line-padding ,header-line-padding)
+        (setq configure-modus-themes-tab-bar-padding ,tab-bar-padding)
         ,@(map (lambda (hook)
                  `(add-hook 'modus-themes-after-load-theme-hook ',hook))
                (append
