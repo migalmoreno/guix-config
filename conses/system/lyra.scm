@@ -57,7 +57,8 @@
    (feature-kernel
     #:kernel %default-kernel
     #:firmware (list linux-firmware sof-firmware)
-    #:kernel-loadable-modules (list ddcci-driver-linux))
+    #:kernel-loadable-modules (list ddcci-driver-linux
+                                    v4l2loopback-linux-module))
    (feature-host-info
     #:host-name "lyra"
     #:timezone %default-timezone)
@@ -104,7 +105,12 @@
       `(("modprobe.d/ddcci.conf"
          ,(plain-file
            "ddcci.conf"
-           "options ddcci dyndbg delay=120"))))
+           (string-append "options ddcci dyndbg delay=120" "\n"
+                          "options ddcci-backlight dyndbg")))
+        ("modprobe.d/v4l2loopback.conf"
+         ,(plain-file
+           "v4l2loopback.conf"
+           "options v4l2loopback exclusive_caps=1 max_buffers=2 video_nr=-1"))))
      (service openssh-service-type
               (openssh-configuration
                (openssh openssh-sans-x)
@@ -165,7 +171,7 @@
     #:system-packages
     (strings->packages
      "emacs-no-x" "git" "curl" "make"
-     "wireguard-tools" "binutils"
+     "wireguard-tools" "binutils" "v4l-utils"
      "nasm" "gcc-toolchain" "autoconf")
     #:home-packages
     (strings->packages
