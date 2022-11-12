@@ -83,7 +83,7 @@
        (exwm-layout-hide-mode-line))
       ((string= exwm-instance-name "emacs")
        char-mode t)
-      ((string= exwm-class-name "emulator")
+      ((string-match "Android Emulator" exwm-title)
        floating t)))
    (feature-emacs-exwm-run-on-tty
     #:emacs-exwm-tty-number 1
@@ -513,7 +513,17 @@ EndSection"))
     #:default-input-method "spanish-keyboard")
    (feature-lisp
     #:extra-packages
-    (strings->packages "sbcl-prove"))
+    (strings->packages "sbcl-prove")
+    #:extra-source-registry-entries
+    `(("common-lisp/source-registry.conf.d/10-projects.conf"
+       ,(plain-file "10-projects.conf"
+                    (format #f "(:tree \"~a/src/projects\")" (getenv "HOME"))))
+      ("common-lisp/source-registry.conf.d/20-cl-repositories.conf"
+       ,(plain-file "20-cl-repositories.conf"
+                    (format #f "(:tree \"~a/src/cl/\")" (getenv "HOME"))))
+      ("common-lisp/source-registry.conf.d/30-nyxt-repositories.conf"
+       ,(plain-file "30-nyxt-repositories.conf"
+                    (format #f "(:tree \"~a/src/nyxt/\")" (getenv "HOME"))))))
    (feature-mail-settings
     #:mail-accounts
     (list
@@ -618,9 +628,7 @@ EndSection"))
        (format-status-back-button status)
        (format-status-reload-button status)
        (format-status-forwards-button status)
-       (format-status-close-button status)
-       (format-status-switch-buffer-button status)
-       (format-status-execute-button status)))
+       (format-status-close-button status)))
     #:format-status
     '((:div :id "container"
        (:div :id "controls"
@@ -849,7 +857,12 @@ EndSection"))
          `((host-name . ,(getenv "CYGNUS_IP"))
            (user . "root"))))
        (ssh-host
-        (host "hydri")
+        (host "hydri-usb")
+        (options
+         `((host-name . "172.16.42.1")
+           (user . "user"))))
+       (ssh-host
+        (host "hydri-wlan")
         (options
          `((host-name . ,(getenv "HYDRI_IP"))
            (user . "user"))))))))
