@@ -88,7 +88,7 @@
   (ensure-pred maybe-number? fringes)
   (ensure-pred number? mode-line-padding)
   (ensure-pred number? header-line-padding)
-  (ensure-pred number-or-list? tab-bar-padding)
+  (ensure-pred number? tab-bar-padding)
   (ensure-pred boolean? header-line-as-mode-line?)
 
   (define emacs-f-name 'appearance)
@@ -979,92 +979,90 @@ operate on buffers like Dired."
        'home-audio-packages
        home-profile-service-type
        (list atomicparsley))
-      (emacs-xdg-service
-       emacs-f-name "Emacs (Client) [audio:]" #~""
-       #:default-for '(audio/mp4 audio/mpeg))
       (rde-elisp-configuration-service
        emacs-f-name
        config
-       `((require 'emms)
+       `((eval-when-compile
+          (require 'emms))
          (require 'emms-player-mpv)
          (require 'emms-browser)
          (require 'ytdl)
 
          (defun configure-emms-download-track ()
-                "Download EMMS track at point using `ytdl'."
-                (interactive)
-                (emms-playlist-ensure-playlist-buffer)
-                (with-current-emms-playlist
-                 (let* ((download-type (completing-read "Download type: " '("Music" "Video")))
-                        (track (emms-playlist-track-at))
-                        (title (emms-track-get track 'info-title))
-                        (source (emms-track-get track 'name)))
-                   (if (equal (emms-track-get track 'type) 'url)
-                       (ytdl--download-async
-                        source
-                        (expand-file-name title (if (string= download-type "Music")
-                                                    ytdl-music-folder
-                                                    ytdl-video-folder))
-                        (if (string= download-type "Music")
-                            ytdl-music-extra-args
-                            ytdl-video-extra-args)
-                        'ignore
-                        download-type)
-                       (error "Track `%s' is not a remote track to download" title)))))
+           "Download EMMS track at point using `ytdl'."
+           (interactive)
+           (emms-playlist-ensure-playlist-buffer)
+           (with-current-emms-playlist
+             (let* ((download-type (completing-read "Download type: " '("Music" "Video")))
+                    (track (emms-playlist-track-at))
+                    (title (emms-track-get track 'info-title))
+                    (source (emms-track-get track 'name)))
+               (if (equal (emms-track-get track 'type) 'url)
+                   (ytdl--download-async
+                    source
+                    (expand-file-name title (if (string= download-type "Music")
+                                                ytdl-music-folder
+                                              ytdl-video-folder))
+                    (if (string= download-type "Music")
+                        ytdl-music-extra-args
+                      ytdl-video-extra-args)
+                    'ignore
+                    download-type)
+                 (error "Track `%s' is not a remote track to download" title)))))
 
          (defun configure-emms-library-load ()
-                "Load an EMMS playlist with local music files and move to it."
-                (interactive)
-                (ignore-errors
-                 (if (not emms-playlist-buffer)
-                     (progn
-                      (emms-add-directory-tree ,emms-media-dir)
-                      (emms-playlist-mode-go))
-                     (with-current-emms-playlist
-                      (unless (emms-playlist-selected-track)
-                        (emms-add-directory-tree ,emms-media-dir))
-                      (emms-playlist-mode-go)))))
+           "Load an EMMS playlist with local music files and move to it."
+           (interactive)
+           (ignore-errors
+             (if (not emms-playlist-buffer)
+                 (progn
+                   (emms-add-directory-tree ,emms-media-dir)
+                   (emms-playlist-mode-go))
+               (with-current-emms-playlist
+                 (unless (emms-playlist-selected-track)
+                   (emms-add-directory-tree ,emms-media-dir))
+                 (emms-playlist-mode-go)))))
 
          (defun configure-emms-source-track (url title &optional length play)
-                "Append and/or PLAY track with URL, TITLE, and LENGTH to the current EMMS playlist."
-                (interactive "sURL: \nsTitle: \nP")
-                (if length
-                    (emms-add-configure-emms-track url title length)
-                    (emms-add-configure-emms-track url title nil))
-                (when play
-                  (emms-stop)
-                  (emms-playlist-current-select-last)
-                  (emms-start)))
+           "Append and/or PLAY track with URL, TITLE, and LENGTH to the current EMMS playlist."
+           (interactive "sURL: \nsTitle: \nP")
+           (if length
+               (emms-add-configure-emms-track url title length)
+             (emms-add-configure-emms-track url title nil))
+           (when play
+             (emms-stop)
+             (emms-playlist-current-select-last)
+             (emms-start)))
 
          (defun configure-emms-toggle-random-repeat ()
-                "Toggle both the random and repeat state for the current EMMS playlist."
-                (interactive)
-                (emms-toggle-random-playlist)
-                (if (and emms-repeat-track emms-random-playlist)
-                    (progn
-                     (setq emms-repeat-track nil)
-                     (message "Will play the tracks randomly and repeat the current track"))
-                    (setq emms-repeat-track t)
-                    (message "Will play the tracks sequentially and repeat the current track")))
+           "Toggle both the random and repeat state for the current EMMS playlist."
+           (interactive)
+           (emms-toggle-random-playlist)
+           (if (and emms-repeat-track emms-random-playlist)
+               (progn
+                 (setq emms-repeat-track nil)
+                 (message "Will play the tracks randomly and repeat the current track"))
+             (setq emms-repeat-track t)
+             (message "Will play the tracks sequentially and repeat the current track")))
 
          (defun configure-emms-seek-to-beginning ()
-                "Seek to beginning of current EMMS track."
-                (interactive)
-                (emms-seek-to 0))
+           "Seek to beginning of current EMMS track."
+           (interactive)
+           (emms-seek-to 0))
 
          (defun configure-emms-next ()
-                "Move to the next track depending on the current playlist state."
-                (interactive)
-                (if emms-random-playlist
-                    (emms-random)
-                    (emms-next)))
+           "Move to the next track depending on the current playlist state."
+           (interactive)
+           (if emms-random-playlist
+               (emms-random)
+             (emms-next)))
 
          (defun configure-emms-previous ()
-                "Move to the previous track depending on the current playlist state."
-                (interactive)
-                (if emms-random-playlist
-                    (emms-random)
-                    (emms-next)))
+           "Move to the previous track depending on the current playlist state."
+           (interactive)
+           (if emms-random-playlist
+               (emms-random)
+             (emms-next)))
 
          (define-emms-source configure-emms-track (url title &optional length)
            (let ((emms-track (emms-track 'url url)))
@@ -1127,7 +1125,11 @@ operate on buffers like Dired."
            (setq emms-browser-thumbnail-small-size 64)
            (setq emms-browser-thumbnail-medium-size 128)
            (setq emms-mode-line-icon-enabled-p nil)
-           (add-to-list 'emms-player-mpv-parameters "--ytdl-format=best")))
+           ,@(if (get-value 'mpv config)
+                 '((setq emms-player-list '(emms-player-mpv))
+                   (add-to-list 'emms-player-mpv-parameters "--ytdl-format=best")
+                   (add-to-list 'emms-player-mpv-parameters "--force-window=no"))
+                 '())))
        #:elisp-packages (append
                          (if (get-value 'emacs-ytdl config)
                              (list (get-value 'emacs-ytdl config))
@@ -2627,8 +2629,8 @@ built-in help that provides much more contextual information."
           "URL mapping alist.
 It has the form (SERVICE . PRIVATE-MAPPING) where SERVICE is the hostname of
 a media service and PRIVATE-MAPPING is a cons pair of (REGEX . PRIVATE-HOST)
-where REGEX is what should match the alternative front-end and PRIVATE-HOST is
-the preferred instance to rewrite urls to."
+where REGEX is what should match the alternative service URL and PRIVATE-HOST
+is the preferred host of the alternative service to rewrite urls to."
           :type 'list
           :group 'configure-browse-url)
 
@@ -2930,7 +2932,7 @@ tool for Emacs."
                 while (not (eobp))
                 when (re-search-forward
                       (rx bol (* space) "Host" space
-                          (group (+ (any "a-z" "A-Z" "0-9" "_.%-*"))))
+                          (group (+ (any "a-z" "A-Z" "0-9" "_.%*" "-"))))
                       (point-at-eol) t)
                 collect (match-string 1)
                 unless (> (skip-chars-forward "\t") 0)
@@ -2986,9 +2988,9 @@ tool for Emacs."
           (configure-tramp-run 'file 'find-file))
 
         (let ((map mode-specific-map))
-          (define-key map "Ff" 'configure-tramp-find-file)
-          (define-key map "Fd" 'configure-tramp-dired)
-          (define-key map "Fs" 'configure-tramp-shell))
+          (define-key map "rf" 'configure-tramp-find-file)
+          (define-key map "rd" 'configure-tramp-dired)
+          (define-key map "rs" 'configure-tramp-shell))
         (with-eval-after-load 'tramp
           (setq tramp-verbose 1)
           (setq tramp-default-method ,default-method)
@@ -3465,7 +3467,7 @@ Regexps with visual feedback."
       emacs-f-name
       config
       `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "R" 're-builder)
+        (define-key rde-app-map "r" 're-builder)
         (with-eval-after-load 're-builder
           (setq reb-re-syntax ',re-syntax)
           (setq reb-blink-delay 0)
