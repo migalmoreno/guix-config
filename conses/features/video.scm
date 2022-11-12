@@ -51,7 +51,7 @@
         (default
          '((video/mp4 . mpv.desktop)
            (video/mkv . mpv.desktop)
-           (audio/mp3 . mpv.desktop)))))
+           (audio/mpeg . mpv.desktop)))))
       (service home-mpv-service-type
                (home-mpv-configuration
                 (package mpv)
@@ -78,42 +78,19 @@
        `((eval-when-compile
            (require 'mpv)
            (require 'cl-lib))
-         (cl-defun configure-mpv-play-url (url &key (force-private-p nil) (audio-only nil) (repeat nil))
-           "Prompt for video quality before calling `mpv-start' on URL.
-If FORCE-PRIVATE-P, ensure to use a privacy-friendly alternative of URL
-as defined in `configure-browse-url-mappings'.  You can additionally specify whether
-to play the file as AUDIO-ONLY and if to REPEAT it by default."
+         (cl-defun configure-mpv-play-url (url &key (audio nil) (repeat nil) (formats t))
+           "Play URL with `mpv-start'.
+If PRIVATE, use a private alternative of URL as defined in
+`configure-browse-url-mappings'.
+You can specify whether to play the file as AUDIO, if you want to be
+prompted for FORMATS and if to REPEAT the file."
            (interactive "sURI: ")
-           (let* ((formats
-                   (mapcar (lambda (format)
-                             (let* ((format-res (string-match (rx (+ num) "x" (group (+ num)))
-                                                              (car format)))
-                                    (res-height (and format-res (match-string 1 (car format)))))
-                               (if res-height
-                                   (list
-                                    (format "%s | %s" res-height (cl-second format))
-                                    (format "best[height<=%s]"
-                                            res-height))
-                                 (list
-                                  (format "%s | %s" (car format) (cl-second format))
-                                  (format "best[ext=%s]" (cl-second format))))))
-                           (configure-ytdl--list-stream-formats url)))
-                  (selected-format (and formats
-                                        (alist-get
-                                         (completing-read "Resolution: "
-                                                          (lambda (string pred action)
-                                                            (if (eq action 'metadata)
-                                                                `(metadata
-                                                                  ,(cons 'display-sort-function 'identity))
-                                                              (complete-with-action action formats string pred))))
-                                         formats nil nil 'equal)))
+           (let* ((format (ytdl-select-format url))
                   (extra-args (split-string
                                (concat
-                                (when formats (format "--ytdl-format=%s" selected-format))
-                                (when audio-only " --video=no")
+                                (when formats (format "--ytdl-format=%s" format))
+                                (when audio " --video=no")
                                 (when repeat " --loop-file=inf")))))
-             (when force-private-p
-               (setq url (configure-browse-url--transform-host url)))
              (if (mpv-get-property "playlist")
                  (pcase (completing-read "Play or Enqueue: " '("Play" "Enqueue"))
                    ("Play" (apply 'mpv-start url extra-args))
@@ -145,20 +122,16 @@ to play the file as AUDIO-ONLY and if to REPEAT it by default."
          (defun configure-mpv-download ()
            "Download current mpv playback via `ytdl'."
            (interactive)
-           (if-let ((download-type (completing-read "Download type: " '("Music" "Video")))
-                    (track (mpv-get-property "path"))
-                    (title (mpv-get-property "media-title")))
+           (if-let* ((dl-type (ytdl--get-download-type))
+                     (track (mpv-get-property "path"))
+                     (title (mpv-get-property "media-title")))
                (ytdl--download-async
                 track
-                (expand-file-name title (if (string= download-type "Music")
-                                            ytdl-music-folder
-                                          ytdl-video-folder))
-                (if (string= download-type "Music")
-                    ytdl-music-extra-args
-                  ytdl-video-extra-args)
+                (expand-file-name title (nth 1 dl-type))
+                (nth 2 dl-type)
                 'ignore
-                download-type)
-             (error "`mpv' is not currently active")))
+                (car dl-type))
+             (error "mpv is not currently active")))
 
          (defun configure-mpv-store-link ()
            "Store a link to an mpv track."
@@ -367,7 +340,8 @@ proxy url as per `configure-browse-url-mappings'."
   "Configure youtube-dl, a command-line program to download videos
 from YouTube and various other sites."
   (ensure-pred any-package? youtube-dl)
-  (ensure-pred any-package? emacs-ytdl)
+  (ensure-pred file-like? ffmpeg)
+  (ensure-pred file-like? emacs-ytdl)
   (ensure-pred path? download-dir)
   (ensure-pred path? music-dir)
   (ensure-pred path? video-dir)
@@ -378,34 +352,14 @@ from YouTube and various other sites."
 
   (define (get-home-services config)
     "Return home services related to youtube-dl."
-    (define yt-dlp (file-append yt-dlp "/bin/yt-dlp"))
+    (define yt-dlp (file-append youtube-dl "/bin/yt-dlp"))
+    (define ffmpeg-bin (file-append ffmpeg "/bin/ffmpeg"))
 
     (list
      (rde-elisp-configuration-service
       f-name
       config
       `((require 'configure-rde-keymaps)
-        (defun configure-ytdl--list-stream-formats (url)
-          "List all available formats for the stream with URL with yt-dlp."
-          (with-temp-buffer
-            (call-process ,yt-dlp nil t nil "--list-formats" url)
-            (goto-char (point-min))
-            (let ((formats
-                   (cl-loop while (not (eobp))
-                            do (forward-line 1)
-                            when (re-search-forward
-                                  (rx bol (+ digit) (+ blank) (group (+ alphanumeric)) (+ blank)
-                                      (group (+ alphanumeric) (? blank) (+ alphanumeric))
-                                      (+ blank) (group (+ alphanumeric)))
-                                  (point-at-eol) t)
-                            collect (list (match-string 2)
-                                          (match-string 1))))
-                  result)
-              (dolist (fmt formats result)
-                (unless (member fmt result)
-                  (push fmt result)))
-              result)))
-
         (define-key rde-app-map "y" 'ytdl-show-list)
         (with-eval-after-load 'ytdl
           (define-key ytdl--dl-list-mode-map "a" 'ytdl-download)
@@ -414,8 +368,10 @@ from YouTube and various other sites."
           (setq ytdl-music-folder ,music-dir)
           (setq ytdl-video-folder ,video-dir)
           (setq ytdl-mode-line nil)
-          (setq ytdl-music-extra-args ',music-dl-args)
-          (setq ytdl-video-extra-args ',video-dl-args)))
+          (setq ytdl-music-extra-args
+                (list ,@music-dl-args "--ffmpeg-location" ,ffmpeg-bin))
+          (setq ytdl-video-extra-args
+                (list ,@video-dl-args "--ffmpeg-location" ,ffmpeg-bin))))
       #:elisp-packages (list emacs-ytdl
                              (get-value 'emacs-configure-rde-keymaps config)))))
 
