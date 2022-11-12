@@ -22,11 +22,13 @@
           (lisp sbcl)
           (extra-sbclrc '())
           (extra-slynk '())
-          (extra-packages '()))
+          (extra-packages '())
+          (extra-source-registry-entries '()))
   (ensure-pred any-package? lisp)
   (ensure-pred lisp-config? extra-sbclrc)
   (ensure-pred lisp-config? extra-slynk)
   (ensure-pred list-of-packages? extra-packages)
+  (ensure-pred list? extra-source-registry-entries)
 
   (define f-name 'lisp)
 
@@ -55,17 +57,7 @@
      (simple-service
       'home-lisp-xdg-configuration-files-service
       home-xdg-configuration-files-service-type
-      `(("common-lisp/source-registry.conf.d/10-personal-lisp.conf"
-         ,(plain-file "10-personal-lisp.conf"
-                      (format #f "(:tree \"~a/src/\")" (get-value 'home-directory config))))
-        ("common-lisp/source-registry.conf.d/20-guix-profile-cl.conf"
-         ,(plain-file "20-guix-profile-cl.conf"
-                      (format #f "(:tree \"~a/.guix-home/profile/share/common-lisp/source/\")"
-                              (get-value 'home-directory config))))
-        ("common-lisp/source-registry.conf.d/30-guix-profile-emacs.conf"
-         ,(plain-file "30-guix-profile-emacs.conf"
-                      (format #f "(:tree \"~a/.guix-home/profile/share/emacs/site-lisp/\")"
-                              (get-value 'home-directory config))))))
+      extra-source-registry-entries)
      (simple-service
       'home-lisp-profile-service
       home-profile-service-type
