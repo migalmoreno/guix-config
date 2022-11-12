@@ -55,12 +55,7 @@
      (simple-service
       'home-android-environment-variables
       home-environment-variables-service-type
-      `(("ANDROID_HOME" . "$XDG_DATA_HOME/android")
-        ("ANDROID_USER_HOME" . "$XDG_DATA_HOME/android")
-        ("ANDROID_SDK_HOME" . "$XDG_DATA_HOME/android")
-        ("ANDROID_EMULATOR_HOME" . "$XDG_DATA_HOME/android/emulator")
-        ("ANDROID_AVD_HOME" . "$XDG_DATA_HOME/android/avd")
-        ("ADB_VENDOR_KEYS" . "$XDG_CONFIG_HOME/android/adb")))))
+      `(("ADB_VENDOR_KEYS" . "$XDG_CONFIG_HOME/android/adb")))))
 
   (feature
    (name 'android)
