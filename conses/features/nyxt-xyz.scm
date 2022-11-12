@@ -199,6 +199,8 @@
                               :color theme:on-secondary)
                              ("#prompt"
                               :padding-left "15px")
+                             ("#prompt-modes"
+                              :padding-right "10px")
                              ("#input"
                               :background theme:background)
                              (".source"
