@@ -1,9 +1,18 @@
 (define-module (conses home hydri)
   #:use-module (conses utils)
+  #:use-module (conses features irc)
+  #:use-module (conses features lisp)
   #:use-module (conses features xorg)
   #:use-module (conses features emacs)
+  #:use-module (conses features scheme)
+  #:use-module (conses features matrix)
   #:use-module (conses features security)
+  #:use-module (conses features nyxt-xyz)
+  #:use-module (conses features messaging)
+  #:use-module (conses features fontutils)
+  #:use-module (conses features bluetooth)
   #:use-module (conses features emacs-xyz)
+  #:use-module (conses features bittorrent)
   #:use-module (conses features shellutils)
   #:use-module (conses features web-browsers)
   #:use-module (conses features version-control)
@@ -32,10 +41,11 @@
      "make" "nss-certs"))
    (feature-fonts)
    (feature-emacs #:emacs emacs-next-pgtk)
-   ;; (feature-gtk
-   ;;  #:gtk-theme (lambda (config)
-   ;;                `((.phosh-topbar-clock
-   ;;                   ((margin-left . 125px))))))
+   (feature-gtk
+    #:dark-theme? #t
+    #:gtk-theme (lambda (config)
+                  `((.phosh-topbar-clock
+                     ((margin-left . 125px))))))
    (feature-emacs-all-the-icons)
    (feature-emacs-completion)
    (feature-gnupg
@@ -92,39 +102,23 @@
       ("N" . "script-message osc-visibility never")
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))
    (feature-emacs-emms)
+   (feature-emacs-bluetooth)
+   (feature-nyxt-prompt)
+   (feature-nyxt-mosaic)
    (feature-nyxt-status
     #:status-buffer-layout
     #:height 30
     '(:div :id "container"
       (:div :id "controls"
        (:raw
-        (format-close-button status)))))
-   (feature-nyxt-userscript
-    #:userstyles
-    '((make-instance
-       'nyxt/user-script-mode:user-style
-       :include '("https://github.com/*"
-                  "https://gist.github.com/*")
-       :code (cl-css:css
-              `((,(str:join "," '("#dashboard .body"
-                                  ".js-inline-dashboard-render"
-                                  ".js-feed-item-component"
-                                  ".js-yearly-contributions"
-                                  ".js-profile-editable-area div .mb-3"
-                                  ".starring-container"
-                                  "#js-contribution-activity"
-                                  "#year-list-container"
-                                  "a[href$=watchers]"
-                                  "a[href$=stargazers]"
-                                  "a[href$=followers]"
-                                  "a[href$=following]"
-                                  "a[href$=achievements]"
-                                  "[action*=follow]"))
-                 :display "none !important")
-                ("img[class*=avatar]"
-                 :visibility "hidden"))))))
+        (format-status-back-button status)
+        (format-status-reload-button status)
+        (format-status-forwards-button status)
+        (format-status-close-button status)
+        (format-status-switch-buffer-button sttatus)
+        (format-status-execute-button status)))))
    (feature-nyxt-nx-tailor
-    #:auto-theme? #f
+    #:auto? #f
     #:dark-theme? #t
     #:themes
     '((tailor:make-theme
@@ -184,7 +178,7 @@
                    (eval-in-emacs
                     `(configure-mpv-play-url
                       ,(quri:render-uri (url data))
-                      :audio-only t :repeat t))))
+                      :audio-only t :repeat t :formats nil))))
       (router:make-route
        (match-regex "https://gfycat.com/.*"
                     "https://streamable.com/.*"
@@ -235,9 +229,6 @@
        :show-examples t
        :show-word-frequencies t
        :show-sense-numbers t)
-      (engines:github
-       :shortcut "gh"
-       :object :advanced)
       (engines:startpage
        :shortcut "sp")
       (engines:sourcehut
@@ -253,43 +244,19 @@
        :shortcut "go"
        :completion-function nil
        :safe-search nil
+       :lang-ui :english
        :results-number 50
        :new-window t)
       (engines:peertube
        :shortcut "pt")
       (engines:invidious
        :shortcut "yt"
+       :base-search-url "https://invidio.xamh.de/search?q=~a"
        :completion-function nil)
       (engines:lemmy
        :shortcut "le")
-      (engines:discourse
-       :shortcut "ae")
-      (engines:discourse
-       :shortcut "cv"
-       :fallback-url (quri:uri "https://clojureverse.org")
-       :base-search-url "https://clojureverse.org/search?q=~a")
-      (engines:discourse
-       :shortcut "oc"
-       :fallback-url (quri:uri "https://discuss.ocaml.org")
-       :base-search-url "https://discuss.ocaml.org/search?q=~a")
-      (engines:discourse
-       :shortcut "or"
-       :fallback-url (quri:uri "https://org-roam.discourse.group")
-       :base-search-url "https://org-roam.discourse.group/search?q=~a")
-      (engines:discourse
-       :shortcut "pc"
-       :fallback-url (quri:uri "https://community.penpot.app/latest")
-       :base-search-url "https://community.penpot.app/search?q=~a")
       (engines:meetup
        :shortcut "me")
-      (engines:gitea
-       :shortcut "gi")
-      (engines:gitea-users
-       :shortcut "giu")
-      (engines:teddit
-       :shortcut "re"
-       :fallback-url (quri:uri "https://teddit.namazso.eu")
-       :base-search-url "https://teddit.namazso.eu/search?q=~a")
       (engines:hacker-news
        :shortcut "hn"
        :fallback-url (quri:uri "https://news.ycombinator.com")
@@ -298,21 +265,10 @@
        :shortcut "lo")
       (make-instance
        'search-engine
-       :shortcut "clj"
-       :search-url "https://clojars.org/search?q=~a"
-       :fallback-url "https://clojars.org")
-      (make-instance
-       'search-engine
        :shortcut "to"
        :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
-       :fallback-url "https://torrents-csv.ml")
-      (engines:google
-       :shortcut "go"
-       :completion-function nil
-       :lang-ui :english
-       :new-window t)))
+       :fallback-url "https://torrents-csv.ml")))
    (feature-emacs-files)
-   ;; (feature-desktop-services)
    (feature-emacs-cursor)
    (feature-direnv)
    (feature-emacs-dired)
@@ -332,19 +288,68 @@
       (forge 'sourcehut)
       (username (getenv "USERNAME"))
       (email (getenv "SOURCEHUT_EMAIL"))
-      (token (getenv "SOURCEHUT_TOKEN")))
-     (forge-account
-      (id 'gh)
-      (forge 'github)
-      (username (getenv "GITHUB_USER"))
-      (email (getenv "GITHUB_EMAIL"))
-      (token (getenv "GITHUB_TOKEN")))))
+      (token (getenv "SOURCEHUT_TOKEN")))))
    (feature-git
     #:primary-forge-account-id 'sh
-    #:sign-commits? #t
-    #:global-ignores '("**/.direnv"
-                       "node_modules"
-                       "*.elc"
-                       ".log"))
+    #:sign-commits? #t)
+   (feature-matrix-settings
+    #:homeserver (string-append "https://matrix." (getenv "DOMAIN"))
+    #:matrix-accounts
+    (list
+     (matrix-account
+      (id (getenv "MATRIX_USER"))
+      (homeserver (string-append "matrix." (getenv "DOMAIN")))
+      (local? #t))))
+   (feature-pantalaimon)
+   (feature-irc-settings
+    #:irc-accounts
+    (list
+     (irc-account
+      (id 'srht)
+      (network "chat.sr.ht")
+      (bouncer? #t)
+      (nick (getenv "IRC_BOUNCER_NICK")))
+     (irc-account
+      (id 'libera)
+      (network "irc.libera.chat")
+      (nick (getenv "IRC_LIBERA_NICK")))
+     (irc-account
+      (id 'oftc)
+      (network "irc.oftc.net")
+      (nick (getenv "IRC_OFTC_NICK")))))
+   (feature-emacs-erc
+    #:autojoin-channels-alist
+    '((Libera.Chat
+       "#nyxt" "#emacs" "#org-mode" "#guix" "#ocaml"
+       "#clojure" "#commonlisp" "#scheme" "#tropin")
+      (OFTC "#postmarketos" "#mobian")))
+   (feature-slack-settings
+    #:slack-accounts
+    (list
+     (slack-account
+      (workspace (getenv "SLACK_WORKSPACE"))
+      (token (getenv "SLACK_TOKEN"))
+      (cookie (getenv "SLACK_COOKIE")))))
+   (feature-emacs-slack)
+   (feature-emacs-telega)
+   (feature-emacs-ement)
+   (feature-emacs-corfu #:corfu-doc? #t)
+   (feature-emacs-comint)
+   (feature-emacs-shell)
+   (feature-emacs-eshell)
    (feature-compile)
-   (feature-password-store)))
+   (feature-password-store
+    #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
+   (feature-guile)
+   (feature-emacs-smartparens)
+   (feature-lisp
+    #:extra-source-registry-entries
+    `(("common-lisp/source-registry.conf.d/10-projects.conf"
+       ,(plain-file "10-projects.conf"
+                    (format #f "(:tree \"~a/src/projects\")" (getenv "HOME"))))
+      ("common-lisp/source-registry.conf.d/20-cl-repositories.conf"
+       ,(plain-file "20-cl-repositories.conf"
+                    (format #f "(:tree \"~a/src/cl/\")" (getenv "HOME"))))
+      ("common-lisp/source-registry.conf.d/30-nyxt-repositories.conf"
+       ,(plain-file "30-nyxt-repositories.conf"
+                    (format #f "(:tree \"~a/src/nyxt/\")" (getenv "HOME"))))))))
