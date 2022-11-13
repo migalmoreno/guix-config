@@ -62,9 +62,10 @@
                        :box-sizing "border-box")
                       ("#controls"
                        :background "inherit"
-                       :flex-basis "auto")
+                       :box-sizing "border-box")
                       ("#controls button"
-                       :color theme:on-background)
+                       :color theme:on-background
+                       :padding "3px")
                       (".arrow-right, .arrow-left"
                        :clip-path "none"
                        :margin-right 0)
@@ -73,16 +74,18 @@
                        :color theme:on-background
                        :font-weight "bold"
                        :padding-left "5px"
-                       :flex-basis "auto"
                        :display "flex"
-                       :align-items "center")
+                       :align-items "center"
+                       :flex-grow "6"
+                       :flex-shrink "3")
                       ("#url button"
                        :white-space "nowrap"
                        :text-overflow "ellipsis"
                        :overflow "hidden")
                       ("#modes"
                        :background "inherit"
-                       :padding-left "5px")))))
+                       :padding-left "5px"
+                       :flex-grow "1")))))
                 (define-configuration window
                   ((message-buffer-style
                     (tailor:with-style 'window
