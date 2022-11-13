@@ -39,6 +39,8 @@
     #:home-packages
     (strings->packages
      "make" "nss-certs"))
+   (feature-proxy
+    #:youtube-proxy "https://invidio.xahm.de")
    (feature-fonts)
    (feature-emacs #:emacs emacs-next-pgtk)
    (feature-gtk
@@ -69,7 +71,8 @@
    (feature-nyxt-emacs)
    (feature-youtube-dl
     #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
-    #:music-dl-args '("-q" "-x" "--add-metadata" "--audio-format" "mp3")
+    #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
+                      "--compat-options" "all")
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
    (feature-mpv
@@ -103,20 +106,6 @@
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))
    (feature-emacs-emms)
    (feature-emacs-bluetooth)
-   (feature-nyxt-prompt)
-   (feature-nyxt-mosaic)
-   (feature-nyxt-status
-    #:status-buffer-layout
-    #:height 30
-    '(:div :id "container"
-      (:div :id "controls"
-       (:raw
-        (format-status-back-button status)
-        (format-status-reload-button status)
-        (format-status-forwards-button status)
-        (format-status-close-button status)
-        (format-status-switch-buffer-button sttatus)
-        (format-status-execute-button status)))))
    (feature-nyxt-nx-tailor
     #:auto? #f
     #:dark-theme? #t
@@ -144,86 +133,47 @@
        :on-accent-color "#a8a8a8"
        :font-family "Iosevka"
        :cut (make-instance 'tailor:cut))))
+   (feature-nyxt-prompt)
+   (feature-nyxt-mosaic)
+   (feature-nyxt-status
+    #:height 30
+    #:glyphs? #t
+    #:format-status-buttons
+    '((:raw
+       (format-status-back-button status)
+       (format-status-reload-button status)
+       (format-status-forwards-button status)
+       (format-status-close-button status)
+       (format-status-switch-buffer-button sttatus)
+       (format-status-execute-button status)))
+    #:format-status
+    '((:div :id "container"
+       (:div :id "controls"
+        (:raw (format-status-buttons status)))
+       (:div :id "url"
+        (:raw
+         (format-status-load-status status)
+         (format-status-url status))))))
    (feature-nyxt-nx-router
     #:media-enabled? #t
-    #:routes
+    #:extra-routes
     '((router:make-route
-       (match-regex "https://(www.)?insta.*")
-       :original "www.instagram.com"
-       :redirect (make-instance
-                  'router:redirect
-                  :to "www.picuki.com"
-                  :rules '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
-                           ("/media/" . "/p/"))))
-      (router:make-route
-       (match-domain "tiktok.com")
-       :original "www.tiktok.com"
-       :redirect (make-instance
-                  'router:redirect
-                  :to "tok.artemislena.eu"
-                  :rules '(("/@placeholder/video/" . (not "/" "/@"))))
-       :blocklist '(:path (:contains (not "video"))))
-      (router:make-route
-       (match-domain "reddit.com")
-       :original "www.reddit.com"
-       :redirect "teddit.namazso.eu"
-       :instances 'make-teddit-instances
-       :blocklist (make-instance
-                   'router:blocklist
-                   :rules '(:contains (not "/comments/" "/wiki/"))))
-      (router:make-route
        (match-regex ".*/watch\\?.*v=.*")
        :redirect "www.youtube.com"
-       :external (lambda (data)
-                   (eval-in-emacs
-                    `(configure-mpv-play-url
-                      ,(quri:render-uri (url data))
-                      :audio-only t :repeat t :formats nil))))
+       :external (lambda (req)
+                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
       (router:make-route
-       (match-regex "https://gfycat.com/.*"
-                    "https://streamable.com/.*"
-                    "https://.*/videos/watch/.*"
-                    ".*cloudfront.*master.m3u8")
-       :external (lambda (data)
-                   (eval-in-emacs
-                    `(configure-mpv-play-url
-                      ,(quri:render-uri (url data))))))
+       (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
+                    "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
+       :external (lambda (req)
+                   (play-video-mpv (url req) :formats nil)))
       (router:make-route
        (match-scheme "magnet")
-       :external (lambda (data)
+       :external (lambda (req)
                    (eval-in-emacs
-                    `(transmission-add ,(quri:render-uri (url data))))))
-      (router:make-route
-       (match-domain "youtube.com" "youtu.be")
-       :original "www.youtube.com"
-       :redirect "invidio.xamh.de"
-       :instances 'make-invidious-instances
-       :blocklist '(:path (:starts "/c/")))
-      (router:make-route
-       (match-domain "medium.com")
-       :original "www.medium.com"
-       :redirect "scribe.rip"
-       :instances 'make-scribe-instances)
-      (router:make-route
-       (match-domain "imgur.com")
-       :original "imgur.com"
-       :redirect "imgin.voidnet.tech")
-      (router:make-route
-       (match-domain "quora.com")
-       :original "www.quora.com"
-       :redirect "quora.vern.cc")
-      (router:make-route
-       (match-domain "lemmy.ml")
-       :blocklist '(:path (:starts ("/u/" "/c"))))
-      (router:make-route
-       (match-domain "twitter.com")
-       :original "www.twitter.com"
-       :redirect (make-instance
-                  'router:redirect
-                  :to "farside.link"
-                  :rules '(("/nitter/" . "/"))))))
+                    `(transmission-add ,(quri:render-uri (url req))))))))
    (feature-nyxt-nx-search-engines
-    #:engines
+    #:extra-engines
     '((engines:wordnet
        :shortcut "wn"
        :show-examples t
@@ -240,19 +190,8 @@
        :object :files
        :fallback-url (quri:uri "http://libgen.gs")
        :base-search-url "https://libgen.gs/index.php?req=~a")
-      (engines:google
-       :shortcut "go"
-       :completion-function nil
-       :safe-search nil
-       :lang-ui :english
-       :results-number 50
-       :new-window t)
       (engines:peertube
        :shortcut "pt")
-      (engines:invidious
-       :shortcut "yt"
-       :base-search-url "https://invidio.xamh.de/search?q=~a"
-       :completion-function nil)
       (engines:lemmy
        :shortcut "le")
       (engines:meetup
@@ -267,7 +206,13 @@
        'search-engine
        :shortcut "to"
        :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
-       :fallback-url "https://torrents-csv.ml")))
+       :fallback-url "https://torrents-csv.ml")
+      (engines:google
+       :shortcut "go"
+       :safe-search nil
+       :lang-ui :english
+       :results-number 50
+       :new-window t)))
    (feature-emacs-files)
    (feature-emacs-cursor)
    (feature-direnv)
