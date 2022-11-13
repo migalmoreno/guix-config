@@ -30,8 +30,8 @@
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((autoload 'fdroid-default-keybindings "fdroid")
-        (fdroid-default-keybindings)
+      `((with-eval-after-load 'fdroid-autoloads
+          (fdroid-default-keybindings))
         (with-eval-after-load 'fdroid
           (setq fdroid-log-events t)
           (setq fdroid-sans-device t)))
