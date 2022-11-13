@@ -2608,9 +2608,9 @@ built-in help that provides much more contextual information."
 
 (define* (feature-emacs-browse-url
           #:key
-          (url-mappings '()))
-  "Configure the browse-url library in Emacs to load URLs in browsers.."
-  (ensure-pred elisp-config? url-mappings)
+          (extra-url-mappings '()))
+  "Configure the browse-url library in Emacs to load URLs in browsers."
+  (ensure-pred elisp-config? extra-url-mappings)
 
   (define emacs-f-name 'browse-url)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -2637,7 +2637,7 @@ is the preferred host of the alternative service to rewrite urls to."
         (cl-defun configure-browse-url--transform-host (url &key (alt t))
           "Transform URL to its currently set proxy in `configure-browse-url-mappings'.
 If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
-          (string-match (rx (+ any) "//" (group (+ (not "/")))) url)
+          (string-match (rx (group (+ any) "://" (+ (not "/"))) (+ any)) url)
           (if-let* ((service-url (match-string 1 url))
                     (mapping (if alt
                                  (cl-rassoc service-url configure-browse-url-mappings
@@ -2709,7 +2709,17 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
           (let ((link (configure-browse-url--transform-host url)))
             (apply fun link args)))
 
-        (setq configure-browse-url-mappings ',url-mappings)
+        (setq configure-browse-url-mappings
+              (append
+               ',(if (get-value 'proxy config)
+                     `(("https://www.youtube.com" . ("^invidio.*" . ,(get-value 'youtube-proxy config)))
+                       ("https://www.reddit.com" . ("^teddit.*" . ,(get-value 'reddit-proxy config)))
+                       ("https://quora.com" . ("^quora.*" . ,(get-value 'quora-proxy config)))
+                       ("https://twitter.com" . ("^nitter.*" . ,(get-value 'twitter-proxy config)))
+                       ("https://imgur.com" . ("^imgin.*" . ,(get-value 'imgur-proxy config)))
+                       ("https://medium.com" . ("^scribe.*" . ,(get-value 'medium-proxy config))))
+                     '())
+               ,extra-url-mappings))
         (advice-add 'browse-url-xdg-open :around 'configure-browse-url-add-scheme)
         (with-eval-after-load 'browse-url
           (setq browse-url-browser-function 'browse-url-xdg-open))))))
