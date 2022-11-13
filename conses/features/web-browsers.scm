@@ -20,7 +20,8 @@
   #:use-module (ice-9 ftw)
   #:export (rde-nyxt-configuration-service
             feature-nyxt
-            feature-ungoogled-chromium))
+            feature-ungoogled-chromium
+            feature-proxy))
 
 
 ;;;
@@ -244,3 +245,23 @@
    (name 'chromium)
    (values `((ungoogled-chromium . ,ungoogled-chromium)))
    (home-services-getter get-home-services)))
+
+(define* (feature-proxy
+          #:key
+          (youtube-proxy "https://invidious.snopyta.org")
+          (reddit-proxy "https://teddit.net")
+          (instagram-proxy "https://iganony.com")
+          (quora-proxy "https://quora.vern.cc")
+          (google-proxy "https://search.sethforprivacy.com")
+          (imgur-proxy "https://imgin.voidnet.tech")
+          (medium-proxy "https://scribe.rip")
+          (twitter-proxy "https://nitter.namazso.eu")
+          (tiktok-proxy "https://tok.artemislena.eu"))
+
+  (feature
+   (name 'proxy)
+   (values (append
+            `((proxy . #t))
+            (make-feature-values
+             youtube-proxy reddit-proxy instagram-proxy quora-proxy
+             google-proxy imgur-proxy medium-proxy twitter-proxy tiktok-proxy)))))
