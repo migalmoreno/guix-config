@@ -60,6 +60,10 @@
     #:emacs-advanced-user? #t)
    (feature-gtk
     #:dark-theme? #t)
+   (feature-proxy
+    #:google-proxy "http://localhost:5000"
+    #:youtube-proxy "https://invidio.xamh.de"
+    #:reddit-proxy "https://teddit.namazso.eu")
    (feature-android)
    (feature-emacs-fdroid)
    (feature-transmission)
@@ -123,8 +127,6 @@ EndSection"))
     #:default-browser? #t
     #:default-cookie-policy ':no-third-party
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
-    #:auto-mode-rules
-    '((((match-host "wikipedia.org") :included (nyxt/style-mode:dark-mode))))
     #:extra-bindings
     '("C-c s" 'query-selection-in-search-engine))
    (feature-nyxt-mosaic)
@@ -219,13 +221,9 @@ EndSection"))
               (agenda . 7)
               (projects . 7))
     #:navigator-buttons '((("☆" "Calendar" "Show calendar"
-                            (lambda
-                                (&rest _)
-                              (calendar))
-                            'diary "[" "]")))
-    #:banner (file-append
-              (@ (conses packages misc) gnu-meditate-logo)
-              "/meditate.png")
+                            (lambda (&rest _)
+                              (calendar)) 'diary "[" "]")))
+    #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
     #:banner-max-height 320
     #:banner-max-width 240
     #:path-max-length 50
@@ -243,14 +241,7 @@ EndSection"))
     #:flyspell-prog-hooks '()
     #:ispell-standard-dictionary "en_US")
    (feature-emacs-markdown)
-   (feature-emacs-browse-url
-    #:url-mappings
-    `(("www.youtube.com" . ("^invidio.*" . "invidious.namazso.eu"))
-      ("www.reddit.com" . ("^teddit.*" . "teddit.namazso.eu"))
-      ("quora.com" . ("^quora.*" . "quora.vern.cc"))
-      ("twitter.com" . ("^nitter.*" . "nitter.namazso.eu"))
-      ("imgur.com" . ("^imgin.*" . "imgin.voidnet."))
-      ("medium.com" . ("^scribe.*" . "scribe.rip"))))
+   (feature-emacs-browse-url)
    (feature-emacs-window)
    (feature-emacs-pulseaudio-control
     #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
@@ -515,15 +506,9 @@ EndSection"))
     #:extra-packages
     (strings->packages "sbcl-prove")
     #:extra-source-registry-entries
-    `(("common-lisp/source-registry.conf.d/10-projects.conf"
-       ,(plain-file "10-projects.conf"
-                    (format #f "(:tree \"~a/src/projects\")" (getenv "HOME"))))
-      ("common-lisp/source-registry.conf.d/20-cl-repositories.conf"
-       ,(plain-file "20-cl-repositories.conf"
-                    (format #f "(:tree \"~a/src/cl/\")" (getenv "HOME"))))
-      ("common-lisp/source-registry.conf.d/30-nyxt-repositories.conf"
-       ,(plain-file "30-nyxt-repositories.conf"
-                    (format #f "(:tree \"~a/src/nyxt/\")" (getenv "HOME"))))))
+    `(("common-lisp/source-registry.conf.d/10-home.conf"
+       ,(plain-file "10-home.conf"
+                    (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))
    (feature-mail-settings
     #:mail-accounts
     (list
@@ -667,88 +652,24 @@ EndSection"))
                  :visibility "hidden"))))))
    (feature-nyxt-nx-router
     #:media-enabled? #t
-    #:routes
+    #:extra-routes
     '((router:make-route
-       (match-regex "https://(www.)?insta.*")
-       :original "www.instagram.com"
-       :redirect (make-instance
-                  'router:redirect
-                  :to "www.picuki.com"
-                  :rules '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
-                           ("/media/" . "/p/"))))
-      (router:make-route
-       (match-domain "tiktok.com")
-       :original "www.tiktok.com"
-       :redirect (make-instance
-                  'router:redirect
-                  :to "tok.artemislena.eu"
-                  :rules '(("/@placeholder/video/" . (not "/" "/@"))))
-       :blocklist '(:path (:contains (not "video"))))
-      (router:make-route
-       (match-domain "reddit.com")
-       :original "www.reddit.com"
-       :redirect "teddit.namazso.eu"
-       :instances 'make-teddit-instances
-       :blocklist (make-instance
-                   'router:blocklist
-                   :rules '(:contains (not "/comments/" "/wiki/"))))
-      (router:make-route
-       (match-regex "https://whoogle.*"
-                    "https://.*google.com/search.*")
-       :original (quri:uri "https://www.google.com")
-       :redirect (quri:uri "http://localhost:5000"))
-      (router:make-route
        (match-regex ".*/watch\\?.*v=.*")
        :redirect "www.youtube.com"
-       :external (lambda (data)
-                   (eval-in-emacs
-                    `(configure-mpv-play-url
-                      ,(quri:render-uri (url data))
-                      :audio-only t :repeat t))))
+       :external (lambda (req)
+                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
       (router:make-route
-       (match-regex "https://gfycat.com/.*"
-                    "https://streamable.com/.*"
-                    "https://.*/videos/watch/.*"
-                    ".*cloudfront.*master.m3u8")
-       :external (lambda (data)
-                   (eval-in-emacs
-                    `(configure-mpv-play-url
-                      ,(quri:render-uri (url data))))))
+       (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
+                    "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
+       :external (lambda (req)
+                   (play-video-mpv (url req) :formats nil)))
       (router:make-route
        (match-scheme "magnet")
-       :external (lambda (data)
+       :external (lambda (req)
                    (eval-in-emacs
-                    `(transmission-add ,(quri:render-uri (url data))))))
-      (router:make-route
-       (match-domain "youtube.com" "youtu.be")
-       :original "www.youtube.com"
-       :redirect "invidious.snopyta.org"
-       :blocklist '(:path (:starts "/c/")))
-      (router:make-route
-       (match-domain "medium.com")
-       :original "www.medium.com"
-       :redirect "scribe.rip"
-       :instances 'make-scribe-instances)
-      (router:make-route
-       (match-domain "imgur.com")
-       :original "imgur.com"
-       :redirect "imgin.voidnet.tech")
-      (router:make-route
-       (match-domain "quora.com")
-       :original "www.quora.com"
-       :redirect "quora.vern.cc")
-      (router:make-route
-       (match-domain "lemmy.ml")
-       :blocklist '(:path (:starts ("/u/" "/c"))))
-      (router:make-route
-       (match-domain "twitter.com")
-       :original "www.twitter.com"
-       :redirect (make-instance
-                  'router:redirect
-                  :to "farside.link"
-                  :rules '(("/nitter/" . "/"))))))
+                    `(transmission-add ,(quri:render-uri (url req))))))))
    (feature-nyxt-nx-search-engines
-    #:engines
+    #:extra-engines
     '((engines:wordnet
        :shortcut "wn"
        :show-examples t
@@ -775,8 +696,6 @@ EndSection"))
        :new-window t)
       (engines:peertube
        :shortcut "pt")
-      (engines:invidious
-       :shortcut "yt")
       (engines:lemmy
        :shortcut "le")
       (engines:discourse
@@ -803,10 +722,6 @@ EndSection"))
        :shortcut "gi")
       (engines:gitea-users
        :shortcut "giu")
-      (engines:teddit
-       :shortcut "re"
-       :fallback-url (quri:uri "https://teddit.namazso.eu")
-       :base-search-url "https://teddit.namazso.eu/search?q=~a")
       (engines:hacker-news
        :shortcut "hn"
        :fallback-url (quri:uri "https://news.ycombinator.com")
@@ -825,6 +740,7 @@ EndSection"))
        :fallback-url "https://torrents-csv.ml")
       (engines:whoogle
        :shortcut "who"
+       :fallback-url (quri:uri "http://localhost:5000")
        :base-search-url "http://localhost:5000/search?q=~a"
        :theme :system
        :alternatives nil
@@ -891,7 +807,8 @@ EndSection"))
                        ".log"))
    (feature-youtube-dl
     #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
-    #:music-dl-args '("-q" "-x" "--add-metadata" "--audio-format" "mp3")
+    #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
+                      "--compat-options" "all")
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
    (feature-xdg
