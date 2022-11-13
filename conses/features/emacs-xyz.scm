@@ -1711,7 +1711,7 @@ operate on buffers like Dired."
                  '())
            (setq flyspell-issue-welcome-flag nil)
            (setq flyspell-issue-message-flag nil)
-           (define-key rde-app-map "W" 'dictionary-search)
+           (define-key rde-app-map "w" 'dictionary-search)
            (with-eval-after-load 'dictionary
              (setq dictionary-server ,dictionary-server))))
        #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config))))))
