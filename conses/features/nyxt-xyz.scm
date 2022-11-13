@@ -259,7 +259,8 @@
                                              `(progn ,@s-exps) :case :downcase))))
             (format *error-output* "Sending to Emacs:~%~a~%" s-exps-string)
             (uiop:run-program
-             (list "emacsclient" "-e" s-exps-string))))
+             (list "emacsclient" "-e" s-exps-string)
+             :output '(:string :stripped t))))
 
         (define-configuration (web-buffer prompt-buffer nyxt/editor-mode:editor-buffer)
           ((default-modes `(nyxt/emacs-mode:emacs-mode ,@%slot-value%))))))

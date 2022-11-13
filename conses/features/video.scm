@@ -78,24 +78,25 @@
        `((eval-when-compile
            (require 'mpv)
            (require 'cl-lib))
-         (cl-defun configure-mpv-play-url (url &key (audio nil) (repeat nil) (formats t))
+         (cl-defun configure-mpv-play-url (url &key (audio nil) (repeat nil) (formats t) (select t) (playlist nil))
            "Play URL with `mpv-start'.
-If PRIVATE, use a private alternative of URL as defined in
-`configure-browse-url-mappings'.
-You can specify whether to play the file as AUDIO, if you want to be
-prompted for FORMATS and if to REPEAT the file."
+You can specify whether to PLAY the file as AUDIO, if you want to be
+prompted for FORMATS, to REPEAT the file, manually SELECT what to do with the file,
+and whether to add the file to the current PLAYLIST."
            (interactive "sURI: ")
-           (let* ((format (ytdl-select-format url))
+           (let* ((format (and formats (ytdl-select-format url)))
                   (extra-args (split-string
                                (concat
-                                (when formats (format "--ytdl-format=%s" format))
-                                (when audio " --video=no")
-                                (when repeat " --loop-file=inf")))))
-             (if (mpv-get-property "playlist")
+                                (format "--ytdl-format=%s" (or format "best"))
+                                (and audio " --video=no")
+                                (and repeat " --loop-file=inf")))))
+             (if (and select (mpv-get-property "playlist"))
                  (pcase (completing-read "Play or Enqueue: " '("Play" "Enqueue"))
                    ("Play" (apply 'mpv-start url extra-args))
                    ("Enqueue" (apply 'mpv-playlist-append-url url extra-args)))
-               (apply 'mpv-start url extra-args))))
+               (if (and playlist (mpv-get-property "playlist"))
+                   (apply 'mpv-playlist-append-url url extra-args)
+                 (apply 'mpv-start url extra-args)))))
 
          (defun configure-mpv-kill ()
            "Kill the mpv process unless this is not currently `emms-player-mpv-proc'."
@@ -127,8 +128,8 @@ prompted for FORMATS and if to REPEAT the file."
                      (title (mpv-get-property "media-title")))
                (ytdl--download-async
                 track
-                (expand-file-name title (nth 1 dl-type))
-                (nth 2 dl-type)
+                (expand-file-name title (ytdl--eval-field (nth 1 dl-type)))
+                (ytdl--eval-list (ytdl--eval-field (nth 2 dl-type)))
                 'ignore
                 (car dl-type))
              (error "mpv is not currently active")))
@@ -314,12 +315,24 @@ proxy url as per `configure-browse-url-mappings'."
           (rde-nyxt-configuration-service
            f-name
            config
-           '((define-command play-video-in-current-page (&optional (buffer (current-buffer)))
-               "Play video in the currently open buffer."
-               (let ((url (render-url (url buffer))))
+           '((defun play-video-mpv (url &rest extra-args &key &allow-other-keys)
+               "Play stream from URL with EXTRA-ARGS in an Emacs-controlled mpv process."
+               (let* ((nyxt::*interactive-p* t)
+                      (url (render-url (quri:uri url)))
+                      (playlist (null (member (eval-in-emacs '(mpv-get-property "playlist"))
+                                              '("nil" "[]") :test 'string=)))
+                      (play-or-enqueue (when playlist
+                                         (nyxt:prompt1
+                                          :prompt "Select"
+                                          :sources (make-instance 'prompter:yes-no-source
+                                                                  :constructor '("Play" "Enqueue")))))
+                      (res (and play-or-enqueue (string= play-or-enqueue "Enqueue"))))
                  (eval-in-emacs
-                  `(configure-mpv-play-url ,url))))
-             (define-key *rde-keymap* "C-c v" 'play-video-in-current-page))))
+                  `(apply 'configure-mpv-play-url ,url :select nil :playlist ,res ',extra-args))))
+             (define-command play-video-mpv-current-buffer (&optional (buffer (current-buffer)))
+               "Play contents of BUFFER in an Emacs-controlled mpv process."
+               (play-video-mpv (render-url (url buffer))))
+             (define-key *rde-keymap* "C-c v" 'play-video-mpv-current-buffer))))
          '())))
 
   (feature
