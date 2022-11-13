@@ -483,10 +483,14 @@
 
 (define* (feature-nyxt-nx-search-engines
           #:key
-          (engines '()))
+          (extra-engines '())
+          (auto-complete? #f)
+          (auto-complete-non-prefix? #f))
   "Configure nx-search-engines, a collection of easy-to-setup
 search engines for Nyxt."
-  (ensure-pred lisp-config? engines)
+  (ensure-pred lisp-config? extra-engines)
+  (ensure-pred boolean? auto-complete?)
+  (ensure-pred boolean? auto-complete-non-prefix?)
 
   (define nyxt-f-name 'nx-search-engines)
   (define f-name (symbol-append 'nyxt nyxt-f-name))
@@ -498,9 +502,42 @@ search engines for Nyxt."
       nyxt-f-name
       config
       `((define-configuration buffer
-          ((search-always-auto-complete-p nil)
+          ((search-auto-complete-p ,(if auto-complete? 't 'nil))
+           (search-always-auto-complete-p ,(if auto-complete? 't 'nil))
            (search-engines
-            (append %slot-value% (list ,@engines))))))
+            (append
+             %slot-value%
+             (list
+              ,@(if (get-value 'proxy config)
+                    `((engines:whoogle
+                       :shortcut "who"
+                       :fallback-url
+                       (quri:uri ,(get-value 'google-proxy config))
+                       :base-search-url
+                       ,(string-append (get-value 'google-proxy config)
+                                       "/search?q=~a")
+                       :theme :system
+                       :alternatives nil
+                       :lang-results :english
+                       :lang-ui :english
+                       :view-image t
+                       :no-javascript t
+                       :new-tab t)
+                      (engines:invidious
+                       :shortcut "yt"
+                       :fallback-url
+                       (quri:uri ,(get-value 'youtube-proxy config))
+                       :base-search-url
+                       ,(string-append (get-value 'youtube-proxy config)
+                                       "/search?q=~a"))
+                      (engines:teddit
+                       :shortcut "re"
+                       :fallback-url
+                       (quri:uri ,(get-value 'reddit-proxy config))
+                       :base-search-url
+                       ,(string-append (get-value 'reddit-proxy config))))
+                    '())
+              ,@extra-engines))))))
       #:lisp-packages '(nx-search-engines))))
 
   (feature
@@ -511,10 +548,10 @@ search engines for Nyxt."
 (define* (feature-nyxt-nx-router
           #:key
           (media-enabled? #t)
-          (routes '()))
+          (extra-routes '()))
   "Configure nx-router, a URL routing extension for Nyxt."
   (ensure-pred boolean? media-enabled?)
-  (ensure-pred lisp-config? routes)
+  (ensure-pred lisp-config? extra-routes)
 
   (define nyxt-f-name 'nx-router)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
@@ -569,7 +606,60 @@ search engines for Nyxt."
           ((router:enforce-p t)
            (router:media-enabled-p ,(if media-enabled? 't 'nil))
            (router:banner-p t)
-           (router:routes (list ,@routes))))
+           (router:routes
+            (list
+             ,@extra-routes
+             ,@(if (get-value 'proxy config)
+                   `((router:make-route
+                      (match-regex "https://(www.)?insta.*")
+                      :original "www.instagram.com"
+                      :redirect (make-instance
+                                 'router:redirect
+                                 :to (quri:uri ,(get-value 'instagram-proxy config))
+                                 :rules '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
+                                          ("/media/" . "/p/"))))
+                     (router:make-route
+                      (match-domain "tiktok.com")
+                      :original "www.tiktok.com"
+                      :redirect (make-instance
+                                 'router:redirect
+                                 :to (quri:uri ,(get-value 'tiktok-proxy config))
+                                 :rules '(("/@placeholder/video/" . (not "/" "/@")))))
+                     (router:make-route
+                      (match-domain "youtube.com" "youtu.be")
+                      :original "www.youtube.com"
+                      :redirect (quri:uri ,(get-value 'youtube-proxy config)))
+                     (router:make-route
+                      (match-domain "quora.com")
+                      :original "www.quora.com"
+                      :redirect (quri:uri ,(get-value 'quora-proxy config)))
+                     (router:make-route
+                      (match-domain "imgur.com")
+                      :original "imgur.com"
+                      :redirect (quri:uri ,(get-value 'imgur-proxy config)))
+                     (router:make-route
+                      (match-domain "medium.com")
+                      :original "www.medium.com"
+                      :redirect (quri:uri ,(get-value 'medium-proxy config))
+                      :instances 'make-scribe-instances)
+                     (router:make-route
+                      (match-domain "twitter.com")
+                      :original "www.twitter.com"
+                      :redirect (quri:uri ,(get-value 'twitter-proxy config)))
+                     (router:make-route
+                      (match-domain "reddit.com")
+                      :original "www.reddit.com"
+                      :redirect (quri:uri ,(get-value 'reddit-proxy config))
+                      :instances 'make-teddit-instances
+                      :blocklist (make-instance
+                                  'router:blocklist
+                                  :rules '(:contains (not "/comments/" "/wiki/"))))
+                     (router:make-route
+                      (match-regex "https://whoogle.*"
+                                   "https://.*google.com/search.*")
+                      :original (quri:uri "https://www.google.com")
+                      :redirect (quri:uri ,(get-value 'google-proxy config))))
+                   '())))))
         (define-configuration web-buffer
           ((default-modes `(router:router-mode ,@%slot-value%)))))
       #:lisp-packages '(nx-router))))
