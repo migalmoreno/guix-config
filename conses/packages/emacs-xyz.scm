@@ -69,7 +69,7 @@ fetches weather information based on your location or on a location set in
 The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}.")
     (license license:gpl3+)))
 
-(define-public emacs-display-wttr-next
+(define-public emacs-display-wttr-next-local
   (package
     (inherit emacs-display-wttr)
    (source
@@ -79,9 +79,25 @@ The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}
      #:recursive? #t))))
 
 (define-public emacs-ytdl-next
+  (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
+        (branch "add-format-selection"))
+    (package
+      (inherit emacs-ytdl)
+      (name "emacs-ytdl-next")
+      (version (git-version "0" branch commit))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://gitlab.com/fleetime/ytdl")
+                      (commit commit)))
+                (file-name (git-file-name name version))
+                (sha256
+                 (base32 "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
+
+(define-public emacs-ytdl-next-local
   (package
     (inherit emacs-ytdl)
-    (name "emacs-ytdl-next")
+    (name "emacs-ytdl-next-local")
    (source
     (local-file
      (string-append (dirname (dirname %project-root))
@@ -165,8 +181,25 @@ IPC interface.")
     (license license:gpl3+)))
 
 (define-public emacs-mpv-next
+  (let ((commit "3c5260fb0151601bd096be7a11079d8d39552f56")
+        (branch "feature-add-mode-line-display-modes"))
+    (package
+     (inherit emacs-mpv)
+     (name "emacs-mpv-next")
+     (version (git-version "0" branch commit))
+     (source (origin
+               (method git-fetch)
+               (uri (git-reference
+                     (url "https://github.com/efimerspan/mpv.el")
+                     (commit commit)))
+               (file-name (git-file-name name version))
+               (sha256
+                (base32 "1s79nxbb8a26xf013vxxvijg0apnfzhwlbji349jyzdg5d6myp25")))))))
+
+(define-public emacs-mpv-next-local
   (package
    (inherit emacs-mpv)
+   (name "emacs-mpv-next-local")
    (version "0.1")
    (source
     (local-file
@@ -176,13 +209,14 @@ IPC interface.")
 
 (define-public emacs-pulseaudio-control-next
   (package
-   (inherit emacs-pulseaudio-control)
-   (version "0.1")
-   (source
-    (local-file
-     (string-append (dirname (dirname %project-root))
-                    "/elisp/pulseaudio-control")
-     #:recursive? #t))))
+    (inherit emacs-pulseaudio-control)
+    (name "emacs-pulseaudio-control-next")
+    (version "0.1")
+    (source
+     (local-file
+      (string-append (dirname (dirname %project-root))
+                     "/elisp/pulseaudio-control")
+      #:recursive? #t))))
 
 (define-public emacs-circadian
   (package
