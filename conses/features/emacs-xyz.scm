@@ -533,7 +533,8 @@ themes for Emacs."
                                                             (derived-mode-p (car mode))))
                                                         buffer-mode-assoc))))))
                     (when key
-                      (setq unread-command-events (append unread-command-events (list key 32)))))))
+                      (setq unread-command-events (append unread-command-events (list key 32))))))
+                (add-hook 'minibuffer-setup-hook 'configure-completion-initial-narrow))
               '())
 
         (defun configure-completion-crm-indicator (args)
@@ -555,15 +556,15 @@ themes for Emacs."
         (define-key goto-map "i"  'consult-imenu)
         (define-key goto-map "g" 'consult-goto-line)
         (define-key search-map "r" 'consult-ripgrep)
-        (define-key search-map "f" 'consult-find)
+        (define-key search-map "s" 'consult-find)
         (define-key search-map "l" 'consult-line)
         (define-key search-map "L" 'consult-line-multi)
+        (define-key search-map "f" 'consult-recent-file)
         (define-key ctl-x-map "b" 'consult-buffer)
         (define-key help-map "a" 'consult-apropos)
         (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
         (define-key isearch-mode-map (kbd "M-s e") 'consult-isearch-history)
         (define-key minibuffer-mode-map (kbd "C-c C-r") 'consult-history)
-        (add-hook 'minibuffer-setup-hook 'configure-completion-initial-narrow)
         (with-eval-after-load 'consult
           (setq consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
           (setq consult-narrow-key (kbd "C-="))
