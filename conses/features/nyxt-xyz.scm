@@ -609,7 +609,64 @@ search engines for Nyxt."
            (router:routes
             (list
              ,@extra-routes
-             ,@(if (get-value 'proxy config)
+             ,@(if (get-value 'tiktok-proxy config)
+                   `((router:make-route
+                      (match-domain "tiktok.com")
+                      :original "www.tiktok.com"
+                      :redirect (make-instance
+                                 'router:redirect
+                                 :to (quri:uri ,(get-value 'tiktok-proxy config))
+                                 :rules '(("/@placeholder/video/" . (not "/" "/@"))))))
+                   '())
+             ,@(if (get-value 'youtube-proxy config)
+                   `((router:make-route
+                      (match-domain "youtube.com" "youtu.be")
+                      :original "www.youtube.com"
+                      :redirect (quri:uri ,(get-value 'youtube-proxy config))))
+                   '())
+             ,@(if (get-value 'quora-proxy config)
+                   `((router:make-route
+                      (match-domain "quora.com")
+                      :original "www.quora.com"
+                      :redirect (quri:uri ,(get-value 'quora-proxy config))))
+                   '())
+             ,@(if (get-value 'imgur-proxy config)
+                   `((router:make-route
+                      (match-domain "imgur.com")
+                      :original "imgur.com"
+                      :redirect (quri:uri ,(get-value 'imgur-proxy config))))
+                   '())
+             ,@(if (get-value 'medium-proxy config)
+                   `((router:make-route
+                      (match-domain "medium.com")
+                      :original "www.medium.com"
+                      :redirect (quri:uri ,(get-value 'medium-proxy config))
+                      :instances 'make-scribe-instances))
+                   '())
+             ,@(if (get-value 'twitter-proxy config)
+                   `((router:make-route
+                      (match-domain "twitter.com")
+                      :original "www.twitter.com"
+                      :redirect (quri:uri ,(get-value 'twitter-proxy config))))
+                   '())
+             ,@(if (get-value 'reddit-proxy config)
+                   `((router:make-route
+                      (match-domain "reddit.com")
+                      :original "www.reddit.com"
+                      :redirect (quri:uri ,(get-value 'reddit-proxy config))
+                      :instances 'make-teddit-instances
+                      :blocklist (make-instance
+                                  'router:blocklist
+                                  :rules '(:contains (not "/comments/" "/wiki/")))))
+                   '())
+             ,@(if (get-value 'google-proxy config)
+                   `((router:make-route
+                      (match-regex "https://whoogle.*"
+                                   "https://.*google.com/search.*")
+                      :original (quri:uri "https://www.google.com")
+                      :redirect (quri:uri ,(get-value 'google-proxy config))))
+                   '())
+             ,@(if (get-value 'instagram-proxy config)
                    `((router:make-route
                       (match-regex "https://(www.)?insta.*")
                       :original "www.instagram.com"
@@ -617,48 +674,7 @@ search engines for Nyxt."
                                  'router:redirect
                                  :to (quri:uri ,(get-value 'instagram-proxy config))
                                  :rules '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
-                                          ("/media/" . "/p/"))))
-                     (router:make-route
-                      (match-domain "tiktok.com")
-                      :original "www.tiktok.com"
-                      :redirect (make-instance
-                                 'router:redirect
-                                 :to (quri:uri ,(get-value 'tiktok-proxy config))
-                                 :rules '(("/@placeholder/video/" . (not "/" "/@")))))
-                     (router:make-route
-                      (match-domain "youtube.com" "youtu.be")
-                      :original "www.youtube.com"
-                      :redirect (quri:uri ,(get-value 'youtube-proxy config)))
-                     (router:make-route
-                      (match-domain "quora.com")
-                      :original "www.quora.com"
-                      :redirect (quri:uri ,(get-value 'quora-proxy config)))
-                     (router:make-route
-                      (match-domain "imgur.com")
-                      :original "imgur.com"
-                      :redirect (quri:uri ,(get-value 'imgur-proxy config)))
-                     (router:make-route
-                      (match-domain "medium.com")
-                      :original "www.medium.com"
-                      :redirect (quri:uri ,(get-value 'medium-proxy config))
-                      :instances 'make-scribe-instances)
-                     (router:make-route
-                      (match-domain "twitter.com")
-                      :original "www.twitter.com"
-                      :redirect (quri:uri ,(get-value 'twitter-proxy config)))
-                     (router:make-route
-                      (match-domain "reddit.com")
-                      :original "www.reddit.com"
-                      :redirect (quri:uri ,(get-value 'reddit-proxy config))
-                      :instances 'make-teddit-instances
-                      :blocklist (make-instance
-                                  'router:blocklist
-                                  :rules '(:contains (not "/comments/" "/wiki/"))))
-                     (router:make-route
-                      (match-regex "https://whoogle.*"
-                                   "https://.*google.com/search.*")
-                      :original (quri:uri "https://www.google.com")
-                      :redirect (quri:uri ,(get-value 'google-proxy config))))
+                                          ("/media/" . "/p/")))))
                    '())))))
         (define-configuration web-buffer
           ((default-modes `(router:router-mode ,@%slot-value%)))))
