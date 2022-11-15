@@ -315,7 +315,7 @@ themes for Emacs."
                 (add-hook 'modus-themes-after-load-theme-hook 'configure-modus-themes-change-mpv-theme))
               '())
 
-        ,@(if (get-value 'nyxt config)
+        ,@(if (get-value 'nyxt-emacs config)
               '((require 'nyxt)
                 (defun configure-modus-themes-load-nyxt-theme (&optional theme)
                   "Load theme in Nyxt according to current system theme or THEME."
