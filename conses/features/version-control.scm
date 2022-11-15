@@ -176,11 +176,12 @@
     (define full-name (forge-account-full-name main-account))
     (define email (forge-account-email main-account))
     (define gpg-sign-key (or git-gpg-sign-key (get-value 'gpg-primary-key config)))
-    (define github-user (forge-account-username
-                         (car (filter (lambda (forge-acc)
-                                        (equal? (forge-account-forge forge-acc)
-                                                'github))
-                                      (get-value 'forge-accounts config)))))
+    (define github-user (let ((gh-account (filter (lambda (forge-acc)
+                                                    (equal? (forge-account-forge forge-acc)
+                                                            'github))
+                                                  (get-value 'forge-accounts config))))
+                          (unless (nil? gh-account)
+                            (forge-account-username (car gh-account)))))
 
     (append
      (list
@@ -197,15 +198,18 @@
                     ((name . ,full-name)
                      (email . ,email)
                      ,@(if sign-commits?
-                           `((signing-key . ,gpg-sign-key)))))
+                           `((signing-key . ,gpg-sign-key))
+                           '())))
                    (sendemail
                     ((annotate . "yes")
                      (cc . ,email)
                      (thread . #f)))
                    (commit
                     ((gpg-sign . #t)))
-                   (github
-                    ((user . ,github-user)))))
+                   ,@(if (and github-user (not (unspecified? github-user)))
+                         `((github
+                            ((user . ,github-user))))
+                         '())))
                 (ignore global-ignores)))
       (rde-elisp-configuration-service
        f-name
