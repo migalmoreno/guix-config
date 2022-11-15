@@ -278,13 +278,13 @@ proxy url as per `configure-browse-url-mappings'."
                  '((eval-when-compile
                      (require 'all-the-icons))
                    (with-eval-after-load 'all-the-icons
-                     (setq mpv-prev-entry-indicator
+                     (setq mpv-display-prev-file-indicator
                            (all-the-icons-material "skip_previous" :v-adjust -0.1 :height 1))
-                     (setq mpv-next-entry-indicator
+                     (setq mpv-display-next-file-indicator
                            (all-the-icons-material "skip_next" :v-adjust -0.1 :height 1))
-                     (setq mpv-pause-indicator
+                     (setq mpv-display-pause-indicator
                            (all-the-icons-material "pause" :v-adjust -0.14 :height 1))
-                     (setq mpv-resume-indicator
+                     (setq mpv-display-resume-indicator
                            (all-the-icons-material "play_arrow" :v-adjust -0.14 :height 1))))
                '()))
          ,@(if (get-value 'emacs-embark config)
