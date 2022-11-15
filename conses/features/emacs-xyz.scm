@@ -2814,7 +2814,7 @@ parts of buffers to pastebin-like services."
       emacs-f-name
       config
       `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "w" 'world-clock)
+        (define-key rde-app-map "C" 'world-clock)
         (setq display-time-default-load-average nil)
         (setq display-time-load-average-threshold 0)
         (setq display-time-day-and-date t)
