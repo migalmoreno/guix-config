@@ -1,11 +1,12 @@
 (define-module (conses home hydri)
   #:use-module (conses utils)
   #:use-module (conses features irc)
+  #:use-module (conses features gtk)
   #:use-module (conses features lisp)
   #:use-module (conses features xorg)
   #:use-module (conses features emacs)
+  #:use-module (conses features video)
   #:use-module (conses features scheme)
-  #:use-module (conses features matrix)
   #:use-module (conses features security)
   #:use-module (conses features nyxt-xyz)
   #:use-module (conses features messaging)
@@ -21,7 +22,8 @@
   #:use-module (rde features gnupg)
   #:use-module (gnu services)
   #:use-module (gnu home services)
-  #:use-module (gnu packages emacs))
+  #:use-module (gnu packages emacs)
+  #:use-module (guix gexp))
 
 (define-public %hydri-signing-key
   (project-file "conses/keys/hydri.pub"))
@@ -40,16 +42,22 @@
     (strings->packages
      "make" "nss-certs"))
    (feature-proxy
-    #:youtube-proxy "https://invidio.xahm.de")
+    #:youtube-proxy "https://invidio.xamh.de"
+    #:google-proxy #f)
    (feature-fonts)
-   (feature-emacs #:emacs emacs-next-pgtk)
+   (feature-emacs
+    #:emacs emacs-next-pgtk
+    #:emacs-server-mode? #t
+    #:extra-init-el
+    '((add-hook 'after-init-hook 'server-start)))
    (feature-gtk
     #:dark-theme? #t
-    #:gtk-theme (lambda (config)
+    #:gtk-theme (lambda _
                   `((.phosh-topbar-clock
                      ((margin-left . 125px))))))
    (feature-emacs-all-the-icons)
-   (feature-emacs-completion)
+   (feature-emacs-completion
+    #:consult-initial-narrowing? #t)
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
     #:ssh-keys '(("A23B61B2897F524D3D3410E1180423144F1DDB4E"))
@@ -58,16 +66,10 @@
     #:gpg-agent-extra-config
     '((no-greeting . #t)
       (allow-preset-passphrase . #t)))
-   (feature-custom-services
-    #:home-services
-    (list
-     (simple-service
-      'home-custom-environment-variables
-      home-environment-variables-service-type
-      '(("GPG_TTY" . "$(tty)")
-        ("LESSHISTFILE" . "-")))))
    (feature-nyxt
-    #:default-browser? #t)
+    #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gtk)
+    #:default-browser? #t
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic")
    (feature-nyxt-emacs)
    (feature-youtube-dl
     #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
@@ -76,7 +78,7 @@
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
    (feature-mpv
-    #:emacs-mpv ((@ (conses packages emacs-xyz) emacs-mpv-next))
+    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next)
     #:extra-mpv-conf
     `((border . no)
       (volume . 100)
@@ -104,35 +106,58 @@
       ("n" . "script-message osc-visibility always")
       ("N" . "script-message osc-visibility never")
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))
+   (feature-emacs-tab-bar
+    #:modules-center
+    (make-configure-tab-bar-module
+     :id 'mpv-string
+     :label 'mpv-mode-line-string)
+    (make-configure-tab-bar-module
+     :id 'mpv-prev
+     :label 'mpv-prev-button
+     :help "Previous playlist entry"
+     :action 'mpv-playlist-prev)
+    (make-configure-tab-bar-module
+     :id 'mpv-toggle
+     :label 'mpv-toggle-button
+     :help "Toggle playback"
+     :action 'mpv-pause)
+    (make-configure-tab-bar-module
+     :id 'mpv-next
+     :label 'mpv-next-button
+     :help "Next playlist entry"
+     :action 'mpv-playlist-next)
+    (make-configure-tab-bar-module
+     :id 'mpv-playing-time
+     :label 'mpv-playing-time-string))
    (feature-emacs-emms)
-   (feature-emacs-bluetooth)
+   (feature-bluetooth)
    (feature-nyxt-nx-tailor
     #:auto? #f
     #:dark-theme? #t
     #:themes
     '((tailor:make-theme
-       "modus-operandi"
+       'modus-operandi
        :background-color "white"
        :on-background-color "black"
-       :primary-color "#093060"
-       :secondary-color "#dfdfdf"
+       :primary-color "#e5e5e5"
+       :on-primary-color "black"
+       :secondary-color "#005a5f"
        :on-secondary-color "black"
-       :accent-color "#8f0075"
-       :on-accent-color "#005a5f"
-       :font-family "Iosevka"
-       :cut (make-instance 'tailor:cut))
+       :accent-color "#0000c0"
+       :on-accent-color "white"
+       :font-family "Iosevka")
       (tailor:make-theme
-       "modus-vivendi"
+       'modus-vivendi
        :dark-p t
        :background-color "black"
        :on-background-color "white"
-       :primary-color "#c6eaff"
-       :secondary-color "#323232"
-       :on-secondary-color "#a8a8a8"
-       :accent-color "#afafef"
-       :on-accent-color "#a8a8a8"
-       :font-family "Iosevka"
-       :cut (make-instance 'tailor:cut))))
+       :primary-color "#212121"
+       :on-primary-color "#a8a8a8"
+       :secondary-color "#100f10"
+       :on-secondary-color "#6ae4b9"
+       :accent-color "#00bcff"
+       :on-accent-color "black"
+       :font-family "Iosevka")))
    (feature-nyxt-prompt)
    (feature-nyxt-mosaic)
    (feature-nyxt-status
@@ -237,15 +262,6 @@
    (feature-git
     #:primary-forge-account-id 'sh
     #:sign-commits? #t)
-   (feature-matrix-settings
-    #:homeserver (string-append "https://matrix." (getenv "DOMAIN"))
-    #:matrix-accounts
-    (list
-     (matrix-account
-      (id (getenv "MATRIX_USER"))
-      (homeserver (string-append "matrix." (getenv "DOMAIN")))
-      (local? #t))))
-   (feature-pantalaimon)
    (feature-irc-settings
     #:irc-accounts
     (list
@@ -277,7 +293,6 @@
       (cookie (getenv "SLACK_COOKIE")))))
    (feature-emacs-slack)
    (feature-emacs-telega)
-   (feature-emacs-ement)
    (feature-emacs-corfu #:corfu-doc? #t)
    (feature-emacs-comint)
    (feature-emacs-shell)
@@ -289,12 +304,5 @@
    (feature-emacs-smartparens)
    (feature-lisp
     #:extra-source-registry-entries
-    `(("common-lisp/source-registry.conf.d/10-projects.conf"
-       ,(plain-file "10-projects.conf"
-                    (format #f "(:tree \"~a/src/projects\")" (getenv "HOME"))))
-      ("common-lisp/source-registry.conf.d/20-cl-repositories.conf"
-       ,(plain-file "20-cl-repositories.conf"
-                    (format #f "(:tree \"~a/src/cl/\")" (getenv "HOME"))))
-      ("common-lisp/source-registry.conf.d/30-nyxt-repositories.conf"
-       ,(plain-file "30-nyxt-repositories.conf"
-                    (format #f "(:tree \"~a/src/nyxt/\")" (getenv "HOME"))))))))
+    `(("common-lisp/source-registry.conf.d/10-home.conf"
+       ,(plain-file "10-home.conf" (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))))
