@@ -125,7 +125,6 @@ EndSection"))
    (feature-clojure)
    (feature-nyxt
     #:default-browser? #t
-    #:default-cookie-policy ':no-third-party
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:extra-bindings
     '("C-c s" 'query-selection-in-search-engine))
@@ -164,7 +163,7 @@ EndSection"))
    (feature-nyxt-blocker)
    (feature-emacs-pdf-tools)
    (feature-mpv
-    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next)
+    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next-local)
     #:extra-mpv-conf
     `((border . no)
       (volume . 100)
@@ -214,16 +213,15 @@ EndSection"))
     #:item-generators '((recents . dashboard-insert-recents)
                         (bookmarks . dashboard-insert-bookmarks)
                         (agenda . dashboard-insert-agenda)
-                        (registers . dashboard-insert-registers)
-                        (projects . dashboard-insert-projects))
-    #:items '((recents . 7)
+                        (registers . dashboard-insert-registers))
+    #:items '((agenda . 7)
               (bookmarks . 7)
-              (agenda . 7)
-              (projects . 7))
+              (recents . 7))
     #:navigator-buttons '((("☆" "Calendar" "Show calendar"
                             (lambda (&rest _)
-                              (calendar)) 'diary "[" "]")))
+                              (calendar)) diary "[" "]")))
     #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
+    #:org-agenda-prefix-format "%?-12:c"
     #:banner-max-height 320
     #:banner-max-width 240
     #:path-max-length 50
@@ -386,7 +384,8 @@ EndSection"))
     '(("Europe/London" "London")
       ("Europe/Madrid" "Madrid")
       ("Europe/Moscow" "Moscow")
-      ("America/New_York" "New York")))
+      ("America/New_York" "New York")
+      ("Australia/Sydney" "Sydney")))
    (feature-emacs-dired)
    (feature-emacs-calc)
    (feature-emacs-tramp)
@@ -761,7 +760,7 @@ EndSection"))
     (home-ssh-configuration
      (default-host "*")
      (default-options
-      '((ControlPersist . "4h")
+      '((control-persist . "4h")
         (TCPKeepAlive . "no")
         (ServerAliveInterval . 30)
         (ServerAliveCountMax . 5)))
@@ -806,7 +805,7 @@ EndSection"))
                        "*.elc"
                        ".log"))
    (feature-youtube-dl
-    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
+    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next-local)
     #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
                       "--compat-options" "all")
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
