@@ -12,12 +12,15 @@
 (define-public (list-of-postgresql-roles? lst)
   (and (list? lst) (every postgresql-role? lst)))
 
+(define-public (maybe-list-of-postgresql-roles? x)
+  (or (list-of-postgresql-roles? x) (not x)))
+
 (define* (feature-postgresql
           #:key
           (postgresql postgresql)
           (postgresql-roles #f))
   (ensure-pred any-package? postgresql)
-  (ensure-pred list-of-postgresql-roles? postgresql-roles)
+  (ensure-pred maybe-list-of-postgresql-roles? postgresql-roles)
 
   (define f-name 'postgresql)
 
