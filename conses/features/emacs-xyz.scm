@@ -915,7 +915,7 @@ on the current project."
         ,@(if (get-value 'emacs-exwm config)
               '((with-eval-after-load 'exwm-autoloads
                   (exwm-input-set-key (kbd "M-o") 'ace-window)))
-              '((define-key global-map (kbd "M-o")  'ace-window)))
+              '((define-key global-map (kbd "M-o") 'ace-window)))
         (with-eval-after-load 'ace-window
           (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
           (setq aw-background nil)
@@ -1339,7 +1339,7 @@ operate on buffers like Dired."
           (force-mode-line-update t))
 
         (with-eval-after-load 'ednc-autoloads
-          (add-hook 'after-init-hook 'ednc-mode))
+          (ednc-mode))
         (add-hook 'ednc-notification-presentation-functions 'configure-ednc-update-notifications)
         (with-eval-after-load 'notifications
           ,@(if notifications-icon
@@ -2712,28 +2712,29 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
 
         (setq configure-browse-url-mappings
               (append
-               ',(if (get-value 'youtube-proxy config)
-                     `("https://www.youtube.com" . ("^invidio.*" . ,(get-value 'youtube-proxy config)))
-                     '())
-               ',(if (get-value 'reddit-proxy config)
-                     `("https://www.reddit.com" . ("^teddit.*" . ,(get-value 'reddit-proxy config)))
-                     '())
-               ',(if (get-value 'quora-proxy config)
-                     `("https://quora.com" . ("^quora.*" . ,(get-value 'quora-proxy config)))
-                     '())
-               ',(if (get-value 'twitter-proxy config)
-                     `("https://twitter.com" . ("^nitter.*" . ,(get-value 'twitter-proxy config)))
-                     '())
-               ',(if (get-value 'imgur-proxy config)
-                     `("https://imgur.com" . ("^imgin.*" . ,(get-value 'imgur-proxy config)))
-                     '())
-               ',(if (get-value 'google-proxy config)
-                     `("https://www.google.com" . ("^whoogle.*" . ,(get-value 'google-proxy config)))
-                     '())
-               ',(if (get-value 'medium-proxy config)
-                     `("https://medium.com" . ("^scribe.*" . ,(get-value 'medium-proxy config)))
-                     '())
-               ,extra-url-mappings))
+               (list
+                ,@(if (get-value 'youtube-proxy config)
+                      `((cons "https://www.youtube.com" (cons "^invidio.*" ,(get-value 'youtube-proxy config))))
+                      '())
+                ,@(if (get-value 'reddit-proxy config)
+                      `((cons "https://www.reddit.com" (cons "^teddit.*" ,(get-value 'reddit-proxy config))))
+                      '())
+                ,@(if (get-value 'quora-proxy config)
+                      `((cons "https://quora.com" (cons "^quora.*" ,(get-value 'quora-proxy config))))
+                      '())
+                ,@(if (get-value 'twitter-proxy config)
+                      `((cons "https://twitter.com" (cons "^nitter.*" ,(get-value 'twitter-proxy config))))
+                      '())
+                ,@(if (get-value 'imgur-proxy config)
+                      `((cons "https://imgur.com" (cons "^imgin.*" ,(get-value 'imgur-proxy config))))
+                      '())
+                ,@(if (get-value 'google-proxy config)
+                      `((cons "https://www.google.com" (cons "^whoogle.*" ,(get-value 'google-proxy config))))
+                      '())
+                ,@(if (get-value 'medium-proxy config)
+                      `((cons "https://medium.com" (cons "^scribe.*" ,(get-value 'medium-proxy config))))
+                      '()))
+               ',extra-url-mappings))
         (advice-add 'browse-url-xdg-open :around 'configure-browse-url-add-scheme)
         (with-eval-after-load 'browse-url
           (setq browse-url-browser-function 'browse-url-xdg-open))))))
