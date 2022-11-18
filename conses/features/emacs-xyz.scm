@@ -1339,8 +1339,9 @@ operate on buffers like Dired."
           (force-mode-line-update t))
 
         (with-eval-after-load 'ednc-autoloads
-          (ednc-mode))
+          (add-hook 'after-init-hook 'ednc-mode))
         (add-hook 'ednc-notification-presentation-functions 'configure-ednc-update-notifications)
+        (add-hook 'ednc-notification-presentation-functions 'ednc--update-log-buffer)
         (with-eval-after-load 'notifications
           ,@(if notifications-icon
                 `((setq notifications-application-icon ,notifications-icon))
