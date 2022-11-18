@@ -29,13 +29,13 @@
 (define-public whoogle-search
   (package
     (name "whoogle-search")
-    (version "0.7.3")
+    (version "0.7.4")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "whoogle-search" version))
        (sha256
-        (base32 "04bvxwsjqqjn2w3q6zgsh8an45jqx077pdkkvq2y3lq5w56rxkc7"))))
+        (base32 "04laag4jx9r7jy1hpzfp7nmv354yvqs2ljj08krzghif4bjb99b1"))))
     (build-system python-build-system)
     (arguments
      (list
