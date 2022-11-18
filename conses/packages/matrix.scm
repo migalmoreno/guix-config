@@ -46,7 +46,15 @@
        (replace "python-matrix-synapse-ldap3" python-matrix-synapse-ldap3-next)
        (replace "python-urllib3" python-urllib3-next)
        (replace "python-requests" python-requests-next)
-       (replace "python-pysaml2" python-pysaml2-next)))))
+       (replace "python-pysaml2" python-pysaml2-next)
+       (replace "python-jsonschema" python-jsonschema-next)))))
+
+(define-public pantalaimon-next
+  (package
+    (inherit pantalaimon)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs pantalaimon)
+       (replace "python-keyring" python-keyring-next)))))
 
 (define-public mautrix-whatsapp
   (package
