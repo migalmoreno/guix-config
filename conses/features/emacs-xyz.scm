@@ -1894,7 +1894,7 @@ and organizer for Emacs."
 
          (define-minor-mode configure-org-minimal-mode
            "Provide a minimal interface to Org mode."
-           :global t :group 'configure-org
+           :group 'configure-org
            (if configure-org-minimal-mode
                (progn
                  (corfu-mode -1)
