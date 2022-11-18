@@ -6,6 +6,8 @@
                                (setq-local geiser-guile-load-path (cons project-root geiser-guile-load-path))))))
                  (eval . (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share/guile/site/3.0"))
                  (eval . (add-to-list 'geiser-guile-load-path "~/src/guix/guix/"))
+                 (eval . (add-to-list 'geiser-guile-load-path "~/src/guix/rde/"))
+                 (eval . (add-to-list 'geiser-guile-load-path "~/src/guix/nonguix/"))
                  (eval . (put 'with-eval-after-load 'scheme-indent-function 1))
                  (eval . (put 'dolist 'scheme-indent-function 1))
                  (eval . (put 'embark-define-keymap 'scheme-indent-function 1)))))
