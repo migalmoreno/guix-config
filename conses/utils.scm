@@ -4,9 +4,6 @@
   #:use-module (srfi srfi-1)
   #:export (project-file))
 
-(define-public (alist? lst)
-  (every pair? lst))
-
 (define-public (maybe-symbol? x)
   (or (symbol? x) (not x)))
 
