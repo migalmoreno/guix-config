@@ -184,28 +184,6 @@ number of characters and @code{?} matches on any one character.")
 JSON for human readability , or to compact JSON for smaller payloads.")
     (license license:expat)))
 
-(define-public go-github-com-gorilla-websocket
-  (package
-    (name "go-github-com-gorilla-websocket")
-    (version "1.5.0")
-    (source
-     (origin
-       (method git-fetch)
-       (uri
-        (git-reference
-         (url "https://github.com/gorilla/websocket")
-         (commit (string-append "v" version))))
-       (file-name (git-file-name name version))
-       (sha256
-        (base32 "1xrr6snvs9g1nzxxg05w4i4pq6k1xjljl5mvavd838qc468n118i"))))
-    (build-system go-build-system)
-    (arguments
-     '(#:import-path "github.com/gorilla/websocket"))
-    (home-page "https://github.com/gorilla/websocket")
-    (synopsis "A fast, well-tested and widely used WebSocket implementation for Go.")
-    (description "Gorilla WebSocket is a Go implementation of the WebSocket protocol.")
-    (license license:bsd-2)))
-
 (define-public go-google-golang-org-protobuf-proto
   (package
     (name "go-google-golang-org-protobuf-proto")
