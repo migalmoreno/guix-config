@@ -61,7 +61,7 @@
         (with-eval-after-load 'epg-config
           (setq epg-pinentry-mode 'loopback))
         (with-eval-after-load 'pinentry-autoloads
-          (pinentry-start))
+          (add-hook 'after-init-hook 'pinentry-start))
         (with-eval-after-load 'password-cache
           (setq password-cache t)
           (setq password-cache-expiry (* 60 10)))
