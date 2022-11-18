@@ -69,7 +69,7 @@ fetches weather information based on your location or on a location set in
 The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}.")
     (license license:gpl3+)))
 
-(define-public emacs-display-wttr-next-local
+(define-public emacs-display-wttr-next
   (package
     (inherit emacs-display-wttr)
    (source
@@ -210,7 +210,6 @@ IPC interface.")
 (define-public emacs-pulseaudio-control-next
   (package
     (inherit emacs-pulseaudio-control)
-    (name "emacs-pulseaudio-control-next")
     (version "0.1")
     (source
      (local-file
