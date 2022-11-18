@@ -24,27 +24,21 @@
   (package
     (inherit synapse)
     (name "synapse-next")
-    (version "1.61.0")
+    (version "1.62.0")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "matrix-synapse" version))
        (sha256
-        (base32 "0gzrqmjnr0vsyigviw9a1vrywqhlax6bf66r5vbfwhgf3rnjyiml"))))
+        (base32 "0y0kx79dwhnywmf4ijhn5zmawmi3xcxm02wwvqm422f5blxqg1np"))))
     (arguments
-     `(#:tests? #f
-       #:phases
-       (modify-phases %standard-phases
-         (add-after 'unpack 'loosen-requirements
-           (lambda _
-             (substitute* "setup.py"
-               (("matrix-common>=1.1.0,<1.2.0")
-                "matrix_common")))))))
+     `(#:tests? #f))
     (propagated-inputs
      (modify-inputs (package-propagated-inputs synapse)
        (append python-matrix-common
-                python-ijson
-                python-cryptography-next)
+               python-ijson
+               python-cryptography-next)
+       (replace "python-twisted" python-twisted-next)
        (replace "python-pyopenssl" python-pyopenssl-next)
        (replace "python-service-identity" python-service-identity-next)
        (replace "python-txacme" python-txacme-next)
