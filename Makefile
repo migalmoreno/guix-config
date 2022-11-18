@@ -17,7 +17,7 @@ upgrade:
 	$(CHANNELS-LOCK) upgrade
 
 init/%:
-	RDE_TARGET=system RDE_SYSTEM=$* RDE_FIRST_RUN=true $(CHANNELS-LOCK) init -L . $(CONFIG) /mnt
+	RDE_TARGET=system RDE_SYSTEM=$* RDE_HE_IN_OS=true $(CHANNELS-LOCK) init -L . $(CONFIG) /mnt
 
 home: home/${USER}
 
@@ -35,8 +35,13 @@ build/home/%:
 build/system/%:
 	RDE_TARGET=system RDE_SYSTEM=$* $(CHANNELS-LOCK) system build -L . $(CONFIG)
 
+build/%:
+	RDE_TARGET=system $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )RDE_USER=$(word 3, $(subst /, ,$@)) \
+	RDE_SYSTEM=$(word 2, $(subst /, ,$@)) $(CHANNELS-LOCK) system build -L . $(CONFIG)
+
 deploy/%:
-	RDE_TARGET=deploy RDE_SYSTEM=$* $(CHANNELS-LOCK) deploy -L . $(CONFIG)
+	RDE_TARGET=deploy $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )RDE_USER=$(word 3, $(subst /, ,$@)) \
+	RDE_SYSTEM=$(word 2, $(subst /, ,$@)) $(CHANNELS-LOCK) deploy -L . $(CONFIG)
 
 iso:
 	RDE_TARGET=system RDE_SYSTEM=iso $(CHANNELS-LOCK) system -L . image -t iso9660 $(CONFIG)
