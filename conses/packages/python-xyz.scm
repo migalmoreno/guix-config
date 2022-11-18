@@ -19,6 +19,52 @@
   #:use-module (guix build-system python)
   #:use-module ((guix licenses) #:prefix license:))
 
+(define-public python-incremental-next
+  (package
+    (inherit python-incremental)
+    (name "python-incremental-next")
+    (version "21.3.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "incremental" version))
+       (sha256
+        (base32
+         "0mvgbmsnv1c8ziydw41jjkivc0zcqyzli7frcpvbkxj8zxddxx82"))))))
+
+(define-public python-twisted-next
+  (package
+    (inherit python-twisted)
+    (name "python-twisted-next")
+    (version "22.10.0")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "Twisted" version ".tar.gz"))
+              (sha256
+               (base32
+                "0cad5n7h8nd0nyl865sn8l4ja0mkwbx9n41cnkklcpsgm50bvb1j"))))
+    (arguments
+     (list
+      #:tests? #f
+      #:phases
+      #~(modify-phases %standard-phases
+          (add-after 'unpack 'adjust-for-older-attrs
+            (lambda _
+              (substitute* (find-files "." "\\.py$")
+                (("from attrs\\b")
+                 "from attr")))))))
+    (native-inputs
+     (list
+      python-wheel))
+    (inputs
+     (list (list python "tk")))
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-twisted)
+       (append python-typing-extensions python-bcrypt
+               python-attrs
+               python-cryptography-next python-pyasn1)
+       (replace "python-incremental" python-incremental-next)))))
+
 (define-public python-clickgen
   (package
     (name "python-clickgen")
@@ -74,13 +120,13 @@ using industry standard OAuth2 and OpenID Connect.")
 (define-public python-matrix-common
   (package
     (name"python-matrix-common")
-    (version "1.2.0")
+    (version "1.2.1")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "matrix_common" version))
        (sha256
-        (base32 "1bgdhzvqs51z079zjszhd5xqb100mbr5w8gpxs9z31r5xmi5nw7a"))))
+        (base32 "0lrqzb6s57fxp0kwffdqnkr2pj9aia459cv1b95b55dxlq1cz7d9"))))
     (build-system python-build-system)
     (arguments
      (list #:phases
@@ -187,10 +233,21 @@ using industry standard OAuth2 and OpenID Connect.")
 (define-public python-treq-next
   (package
     (inherit python-treq)
+    (name "python-treq-next")
+    (version "20.9.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "treq" version))
+       (sha256
+        (base32
+         "18kdk11d84lyxj6dz183nblc6c6r4rj1hk0lpsyiykzgbakjrkc3"))))
     (propagated-inputs
      (modify-inputs (package-propagated-inputs python-treq)
        (replace "python-requests" python-requests-next)
-       (replace "python-service-identity" python-service-identity-next)))))
+       (replace "python-twisted" python-twisted-next)
+       (replace "python-service-identity" python-service-identity-next)
+       (replace "python-incremental" python-incremental-next)))))
 
 (define-public python-matrix-synapse-ldap3-next
   (package
@@ -228,3 +285,17 @@ using industry standard OAuth2 and OpenID Connect.")
     (propagated-inputs
      (modify-inputs (package-propagated-inputs python-flask-session)
        (replace "python-flask" python-flask-next)))))
+
+(define-public python-secretstorage-next
+  (package
+    (inherit python-secretstorage)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-secretstorage)
+       (replace "python-cryptography" python-cryptography-next)))))
+
+(define-public python-keyring-next
+  (package
+    (inherit python-keyring)
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs python-keyring)
+       (replace "python-secretstorage" python-secretstorage-next)))))
