@@ -108,9 +108,6 @@
                                              ,(get-value 'emacs-margin config)))
                    finally (progn
                             (exwm-workspace-switch-create 0)
-                            ,@(if (get-value 'emacs-dashboard config)
-                                  '((configure-dashboard-open))
-                                  '())
                             (add-hook 'after-make-frame-functions 'configure-exwm--disable-tab-bar))))
 
         (defun configure-exwm-shorten-buffer-name ()
