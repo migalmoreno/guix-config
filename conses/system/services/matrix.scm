@@ -276,7 +276,7 @@ in plain sight.")
    "Whether to add end-to-bridge encryption support.")
   (data-directory
    (string "/var/lib/mautrix-whatsapp")
-   "Indicates the path where data such as the registration and database files should be stored.")
+   "The path where data such as the registration and database files should be stored.")
   (log-directory
    (string "/var/log/mautrix-whatsapp")
    "The directory for @code{mautrix-whatsapp} log files.")
@@ -324,8 +324,8 @@ configuration to be placed under @file{config.yaml}. See more settings in
     '()))
 
 (define (mautrix-whatsapp-fill-defaults config)
-  "Returns a list of configuration strings from the fields that need to be filled in
-@code{mautrix-whatsapp-configuration}. Useful for later serialization."
+  "Return a list of configuration strings from the fields that need to be filled in
+@code{mautrix-whatsapp-configuration}. Used for serialization."
   (serialize-yaml-config
    `((homeserver . ((address . ,(mautrix-whatsapp-configuration-address config))
                     (domain . ,(mautrix-whatsapp-configuration-domain config))))
@@ -411,14 +411,17 @@ configuration to be placed under @file{config.yaml}. See more settings in
     (requirement '(synapse))
     (start #~(make-forkexec-constructor
               (list
-               (string-append #$(mautrix-whatsapp-configuration-mautrix-whatsapp config)
-                              "/bin/mautrix-whatsapp")
-               "--config="
-               (string-append #$(mautrix-whatsapp-configuration-data-directory config)
-                              "/config.yaml")
-               "--registration="
-               (string-append #$(mautrix-whatsapp-configuration-data-directory config)
-                              "/registration.yaml"))
+               (string-append
+                #$(mautrix-whatsapp-configuration-mautrix-whatsapp config)
+                "/bin/mautrix-whatsapp")
+               (string-append
+                "--config="
+                #$(mautrix-whatsapp-configuration-data-directory config)
+                "/config.yaml")
+               (string-append
+                "--registration="
+                #$(mautrix-whatsapp-configuration-data-directory config)
+                "/registration.yaml"))
               #:user "mautrix-whatsapp"
               #:group "mautrix-whatsapp"
               #:log-file "/var/log/mautrix-whatsapp/mautrix-whatsapp.log"))
