@@ -97,12 +97,8 @@ configuration to be placed under @file{homeserver.yaml}. See more settings in
                     #$(synapse-configuration-data-directory config))
               #:log-file "/var/log/matrix-synapse.log"
               #:environment-variables
-              (append (list "SSL_CERT_DIR=/etc/ssl/certs"
-                            "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt")
-                      (remove (lambda (str)
-                                (or (string-prefix? "SSL_CERT_DIR=" str)
-                                    (string-prefix? "SSL_CERT_FILE=" str)))
-                              (environ)))))
+              (list "SSL_CERT_DIR=/etc/ssl/certs"
+                    "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt")))
     (stop #~(make-kill-destructor)))))
 
 (define (synapse-fill-defaults config)
