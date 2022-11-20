@@ -1,4 +1,5 @@
 (define-module (conses features matrix)
+  #:use-module (conses features web)
   #:use-module (conses utils)
   #:use-module (conses home services matrix)
   #:use-module (conses system services matrix)
@@ -8,6 +9,7 @@
   #:use-module (rde features predicates)
   #:use-module (gnu services)
   #:use-module (gnu services web)
+  #:use-module (gnu services certbot)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu packages emacs-xyz)
@@ -38,6 +40,9 @@ of @code{\"@username:example.com\"}, for instance.")
 (define (list-of-matrix-accounts? lst)
   (and (list? lst) (not (null? lst)) (every matrix-account? lst)))
 
+(define (maybe-list-of-matrix-accounts? x)
+  (or (list-of-matrix-accounts? x) (not x)))
+
 (define* (feature-matrix-settings
           #:key
           (homeserver "https://matrix.org")
@@ -45,7 +50,7 @@ of @code{\"@username:example.com\"}, for instance.")
           (synapse-configuration (synapse-configuration))
           (mautrix-whatsapp-configuration (mautrix-whatsapp-configuration)))
   (ensure-pred string? homeserver)
-  (ensure-pred list-of-matrix-accounts? matrix-accounts)
+  (ensure-pred maybe-list-of-matrix-accounts? matrix-accounts)
   (ensure-pred synapse-configuration? synapse-configuration)
   (ensure-pred mautrix-whatsapp-configuration? mautrix-whatsapp-configuration)
 
@@ -159,6 +164,7 @@ daemon for Matrix clients."
   (define (get-home-services config)
     "Return home services related to Ement."
     (require-value 'matrix-accounts config)
+    (define homeserver (get-value 'matrix-homeserver config))
 
     (list
      (rde-elisp-configuration-service
@@ -167,16 +173,13 @@ daemon for Matrix clients."
       `((eval-when-compile
           (require 'ement))
         (require 'configure-rde-keymaps)
-
         (defgroup configure-ement nil
           "Utilities for Ement, the Emacs Matrix client."
           :group 'configure)
-
         (defcustom configure-ement-users '()
           "A list of `configure-ement-user' structs that hold Matrix accounts."
-          :type 'list
+          :type '(repeat configure-ement-user)
           :group 'configure-ement)
-
         (cl-defstruct configure-ement-user
           "An Ement user."
           id homeserver local-p)
@@ -217,7 +220,9 @@ daemon for Matrix clients."
              :user-id (configure-ement-user-id user)
              :password (auth-source-pick-first-password :host homeserver)
              :uri-prefix (if (configure-ement-user-local-p user)
-                             "http://localhost:8009"
+                             ,(if (get-value 'pantalaimon config)
+                                  "http://localhost:8009"
+                                  homeserver)
                            homeserver))))
 
         (define-key rde-app-map "e" 'configure-ement-connect)
