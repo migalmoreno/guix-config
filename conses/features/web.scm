@@ -7,24 +7,44 @@
   #:use-module (rde features predicates)
   #:use-module (gnu services)
   #:use-module (gnu services web)
+  #:use-module (gnu services certbot)
   #:use-module (gnu packages web)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
-  #:export (feature-nginx
+  #:export (feature-web-settings
+            feature-nginx
             feature-certbot
             feature-whoogle))
+
+(define-public %nginx-deploy-hook
+  (program-file
+   "nginx-deploy-hook"
+   #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
+       (kill pid SIGHUP))))
+
+(define-public %letsencrypt-acme-challenge
+  (nginx-location-configuration
+   (uri "/.well-known")
+   (body '("root /srv/http;"))))
+
+(define* (feature-web-settings
+          #:key domain)
+  (ensure-pred string? domain)
+
+  (feature
+   (name 'web-settings)
+   (values `((web-settings . #t)
+             (domain . ,domain)))))
 
 (define* (feature-nginx
           #:key
           (nginx nginx)
-          (webdav? #f)
-          domain)
+          (webdav? #f))
   "Configure nginx, an advanced load balancer, web server, and
 reverse proxy."
   (ensure-pred any-package? nginx)
   (ensure-pred boolean? webdav?)
-  (ensure-pred string? domain)
 
   (define f-name 'nginx)
 
