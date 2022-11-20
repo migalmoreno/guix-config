@@ -6,6 +6,7 @@
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
   #:use-module (gnu services)
+  #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu home services xdg)
   #:use-module (gnu home-services video)
@@ -57,9 +58,7 @@
                 (package mpv)
                 (default-options
                  `((script . ,(file-append mpv-mpris "/lib/mpris.so"))
-                   (background . ,(if gtk-light-theme? "#ffffff" "#000000"))
                    (osd-font . ,font-sans-serif)
-                   (osd-color . ,(if gtk-light-theme? "#323232" "#ffffff"))
                    (sub-font . ,font-sans-serif)
                    ,@extra-mpv-conf))
                 (bindings
