@@ -2,47 +2,37 @@
   #:use-module (conses utils)
   #:use-module (conses system)
   #:use-module (conses system lyra)
+  #:use-module (conses system services matrix)
   #:use-module (conses packages web)
+  #:use-module (conses packages matrix)
+  #:use-module (conses features web)
   #:use-module (conses features matrix)
-  #:use-module (conses features postgresql)
+  #:use-module (conses features databases)
   #:use-module (rde features base)
   #:use-module (rde features system)
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
   #:use-module (gnu services)
+  #:use-module (gnu services base)
   #:use-module (gnu services ssh)
   #:use-module (gnu services networking)
   #:use-module (gnu services certbot)
   #:use-module (gnu bootloader)
+  #:use-module (gnu bootloader grub)
   #:use-module (gnu packages ssh)
-  #:use-module (guix gexp)
-  #:export (%system-features))
+  #:use-module (guix gexp))
 
-(define %system-features
-  (define %domain (getenv "DOMAIN"))
+(define %domain (getenv "DOMAIN"))
 
+(define-public %system-features
   (list
-   (feature-kernel
-    #:kernel %default-kernel
-    #:firmware (list linux-firmware))
    (feature-host-info
-    #:host-info "cygnus"
+    #:host-name "cygnus"
     #:timezone %default-timezone)
    (feature-base-services
     #:guix-authorized-keys
     (list %lyra-signing-key))
-   (feature-postgresql)
-   (feature-custom-services
-    #:system-services
-    (list
-     (service dhcp-client-service-type)
-     (service openssh-service-type
-              (openssh-configuration
-               (openssh openssh-sans-x)
-               (password-authentication? #f)
-               (permit-root-login 'prohibit-password)
-               (authorized-keys `(("root" %lyra-ssh-key)))))))
    (feature-bootloader
     #:bootloader-configuration
     (bootloader-configuration
@@ -61,11 +51,25 @@
     (list
      (swap-space
       (target (file-system-label "swap")))))
-   (feature-nginx
-    #:nginx nginx-with-dav
+   (feature-custom-services
+    #:system-services
+    (list
+     (service dhcp-client-service-type)
+     (service openssh-service-type
+              (openssh-configuration
+               (openssh openssh-sans-x)
+               (password-authentication? #f)
+               (permit-root-login 'prohibit-password)
+               (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
+                                  ("deneb" ,%default-ssh-key)))))))
+   (feature-web-settings
     #:domain %domain)
+   (feature-postgresql)
+   (feature-nginx
+    #:nginx nginx-with-dav)
    (feature-certbot
-    #:email (string-append "contact@" %domain))
+    #:email (getenv "MAIL_PERSONAL_MAIL"))
+   (feature-whoogle)
    (feature-matrix-settings
     #:homeserver (string-append "https://matrix." %domain)
     #:synapse-configuration

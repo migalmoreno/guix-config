@@ -7,6 +7,7 @@
   #:use-module (conses features emacs)
   #:use-module (conses features video)
   #:use-module (conses features scheme)
+  #:use-module (conses features matrix)
   #:use-module (conses features security)
   #:use-module (conses features nyxt-xyz)
   #:use-module (conses features messaging)
@@ -22,6 +23,7 @@
   #:use-module (rde features gnupg)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home services shepherd)
   #:use-module (gnu packages emacs)
   #:use-module (guix gexp))
 
@@ -31,7 +33,7 @@
 (define-public %home-features
   (list
    (feature-user-info
-    #:user-name "user"
+    #:user-name "hydri"
     #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
     #:email (getenv "MAIL_PERSONAL_EMAIL")
     #:user-groups '("wheel" "netdev" "audio" "video")
@@ -40,10 +42,26 @@
    (feature-base-packages
     #:home-packages
     (strings->packages
-     "make" "nss-certs"))
+     "make" "nss-certs" "seahorse"))
+   (feature-custom-services
+    #:home-services
+    (list
+     (simple-service
+      'run-syncthing-on-userspace
+      home-shepherd-service-type
+      (list
+       (shepherd-service
+        (provision '(syncthing))
+        (documentation "Run syncthing.")
+        (start #~(make-forkexec-constructor
+                  (list #$(file-append (@ (gnu packages syncthing) syncthing) "/bin/syncthing")
+                        "-no-browser"
+                        "-no-restart")))
+        (respawn? #f)
+        (stop #~(make-kill-destructor)))))))
    (feature-proxy
     #:youtube-proxy "https://invidio.xamh.de"
-    #:google-proxy #f)
+    #:google-proxy (string-append "https://whoogle." (getenv "DOMAIN")))
    (feature-fonts)
    (feature-emacs
     #:emacs emacs-next-pgtk
@@ -60,14 +78,14 @@
     #:consult-initial-narrowing? #t)
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
-    #:ssh-keys '(("A23B61B2897F524D3D3410E1180423144F1DDB4E"))
+    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
     #:pinentry-flavor 'emacs
     #:default-ttl 34560000
     #:gpg-agent-extra-config
     '((no-greeting . #t)
       (allow-preset-passphrase . #t)))
    (feature-nyxt
-    #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gtk)
+    #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic")
    (feature-nyxt-emacs)
@@ -108,27 +126,27 @@
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))
    (feature-emacs-tab-bar
     #:modules-center
-    (make-configure-tab-bar-module
-     :id 'mpv-string
-     :label 'mpv-mode-line-string)
-    (make-configure-tab-bar-module
-     :id 'mpv-prev
-     :label 'mpv-prev-button
-     :help "Previous playlist entry"
-     :action 'mpv-playlist-prev)
-    (make-configure-tab-bar-module
-     :id 'mpv-toggle
-     :label 'mpv-toggle-button
-     :help "Toggle playback"
-     :action 'mpv-pause)
-    (make-configure-tab-bar-module
-     :id 'mpv-next
-     :label 'mpv-next-button
-     :help "Next playlist entry"
-     :action 'mpv-playlist-next)
-    (make-configure-tab-bar-module
-     :id 'mpv-playing-time
-     :label 'mpv-playing-time-string))
+    '((make-configure-tab-bar-module
+       :id 'mpv-string
+       :label 'mpv-mode-line-string)
+      (make-configure-tab-bar-module
+       :id 'mpv-prev
+       :label 'mpv-prev-button
+       :help "Previous playlist entry"
+       :action 'mpv-playlist-prev)
+      (make-configure-tab-bar-module
+       :id 'mpv-toggle
+       :label 'mpv-toggle-button
+       :help "Toggle playback"
+       :action 'mpv-pause)
+      (make-configure-tab-bar-module
+       :id 'mpv-next
+       :label 'mpv-next-button
+       :help "Next playlist entry"
+       :action 'mpv-playlist-next)
+      (make-configure-tab-bar-module
+       :id 'mpv-playing-time
+       :label 'mpv-playing-time-string)))
    (feature-emacs-emms)
    (feature-bluetooth)
    (feature-nyxt-nx-tailor
@@ -248,6 +266,7 @@
    (feature-emacs-vertico)
    (feature-emacs-window)
    (feature-emacs-appearance
+    #:header-line-as-mode-line? #f
     #:auto-theme? #f
     #:margin 0)
    (feature-forge-settings
@@ -284,6 +303,15 @@
        "#nyxt" "#emacs" "#org-mode" "#guix" "#ocaml"
        "#clojure" "#commonlisp" "#scheme" "#tropin")
       (OFTC "#postmarketos" "#mobian")))
+   (feature-matrix-settings
+    #:homeserver (string-append "https://pantalaimon." (getenv "DOMAIN"))
+    #:matrix-accounts
+    (list
+     (matrix-account
+      (id (getenv "MATRIX_USER"))
+      (homeserver (string-append "matrix." (getenv "DOMAIN")))
+      (local? #t))))
+   (feature-emacs-ement)
    (feature-slack-settings
     #:slack-accounts
     (list

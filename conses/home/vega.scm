@@ -39,6 +39,7 @@
   #:use-module (rde features linux)
   #:use-module (rde features shells)
   #:use-module (rde features docker)
+  #:use-module (rde features terminals)
   #:use-module (rde features virtualization)
   #:use-module ((rde features emacs-xyz) #:select (feature-emacs-keycast
                                                    feature-emacs-eglot))
@@ -78,6 +79,7 @@
    (feature-emacs-all-the-icons)
    (feature-emacs-completion
     #:consult-initial-narrowing? #t)
+   (feature-vterm)
    (feature-emacs-exwm
     #:window-configurations
     '(((string= exwm-class-name "Nyxt")
@@ -103,12 +105,9 @@ Section \"ServerFlags\"
 EndSection"))
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
-    #:ssh-keys '(("A23B61B2897F524D3D3410E1180423144F1DDB4E"))
+    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
     #:pinentry-flavor 'emacs
-    #:default-ttl 34560000
-    #:gpg-agent-extra-config
-    '((no-greeting . #t)
-      (allow-preset-passphrase . #t)))
+    #:default-ttl 34560000)
    (feature-emacs-project)
    (feature-emacs-appearance
     #:auto-theme? #f)
@@ -163,6 +162,7 @@ EndSection"))
    (feature-nyxt-blocker)
    (feature-emacs-pdf-tools)
    (feature-mpv
+    #:mpv (@ (conses packages video) mpv-34)
     #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next-local)
     #:extra-mpv-conf
     `((border . no)
@@ -467,7 +467,7 @@ EndSection"))
    (feature-emacs-erc
     #:autojoin-channels-alist
     '((Libera.Chat
-       "#nyxt" "#emacs" "#org-mode" "#guix" "#ocaml"
+       "#nyxt" "#emacs" "#org-mode" "#guix" "#nonguix" "#ocaml"
        "#clojure" "#commonlisp" "#scheme" "#tropin")
       (OFTC "#postmarketos" "#mobian")))
    (feature-slack-settings
@@ -595,14 +595,13 @@ EndSection"))
    (feature-emacs-smtpmail)
    (feature-desktop-services)
    (feature-matrix-settings
-    #:homeserver (string-append "https://matrix." (getenv "DOMAIN"))
+    #:homeserver (string-append "https://pantalaimon." (getenv "DOMAIN"))
     #:matrix-accounts
     (list
      (matrix-account
       (id (getenv "MATRIX_USER"))
       (homeserver (string-append "matrix." (getenv "DOMAIN")))
       (local? #t))))
-   (feature-pantalaimon)
    (feature-emacs-ement)
    (feature-nyxt-status
     #:height 30
@@ -658,12 +657,15 @@ EndSection"))
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil :audio t :repeat t)))
       (router:make-route
+       (match-regex "https://(m.)?soundcloud.com/.*/.*")
+       :external (lambda (req)
+                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
+      (router:make-route
        (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
                     "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil)))
-      (router:make-route
-       (match-scheme "magnet")
+      (router:make-route (match-scheme "magnet")
        :external (lambda (req)
                    (eval-in-emacs
                     `(transmission-add ,(quri:render-uri (url req))))))))
@@ -758,12 +760,6 @@ EndSection"))
    (feature-ssh
     #:ssh-configuration
     (home-ssh-configuration
-     (default-host "*")
-     (default-options
-      '((control-persist . "4h")
-        (TCPKeepAlive . "no")
-        (ServerAliveInterval . 30)
-        (ServerAliveCountMax . 5)))
      (extra-config
       (list
        (ssh-host
@@ -772,15 +768,20 @@ EndSection"))
          `((host-name . ,(getenv "CYGNUS_IP"))
            (user . "root"))))
        (ssh-host
+        (host "deneb")
+        (options
+         `((host-name . ,(getenv "CYGNUS_IP"))
+           (user . "deneb"))))
+       (ssh-host
         (host "hydri-usb")
         (options
          `((host-name . "172.16.42.1")
-           (user . "user"))))
+           (user . "hydri"))))
        (ssh-host
         (host "hydri-wlan")
         (options
          `((host-name . ,(getenv "HYDRI_IP"))
-           (user . "user"))))))))
+           (user . "hydri"))))))))
    (feature-forge-settings
     #:forge-accounts
     (list
