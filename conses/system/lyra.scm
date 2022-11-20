@@ -15,6 +15,7 @@
   #:use-module (gnu services xorg)
   #:use-module (gnu services linux)
   #:use-module (gnu services spice)
+  #:use-module (gnu services syncthing)
   #:use-module (gnu services databases)
   #:use-module (gnu services virtualization)
   #:use-module (gnu packages ssh)
@@ -32,14 +33,12 @@
   #:use-module (gnu home services)
   #:use-module (gnu home-services state)
   #:use-module (guix gexp)
-  #:use-module (nongnu packages linux)
-  #:use-module (ice-9 pretty-print)
-  #:export (%system-features))
+  #:use-module (nongnu packages linux))
 
 (define-public %lyra-ssh-key
   (plain-file
    "lyra.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDlnUi9eXsaUJtens4XUYpuPLjIthc8RwTl43wTjwHKl"))
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBN0KzBIzlhPkr3BhcuKt9ki6iYyMS97hpAEFIrNCa9O root@lyra\n"))
 
 (define-public %lyra-signing-key
   (project-file "conses/keys/lyra.pub"))
@@ -52,7 +51,7 @@
     (target "system-root")
     (type luks-device-mapping))))
 
-(define %system-features
+(define-public %system-features
   (list
    (feature-kernel
     #:kernel %default-kernel
@@ -93,6 +92,8 @@
        (user-group
         (name "spice")
         (system? #t))))
+     (service syncthing-service-type
+              (syncthing-configuration (user "vega")))
      (service spice-vdagent-service-type)
      (service virtlog-service-type)
      (service libvirt-service-type
