@@ -78,6 +78,10 @@
                        :align-items "center"
                        :flex-grow "6"
                        :flex-shrink "3")
+                      ("@media screen and (max-width: 768px)"
+                       ("body"
+                        :flex-grow "3"
+                        :flex-shrink "2"))
                       ("#url button"
                        :white-space "nowrap"
                        :text-overflow "ellipsis"
