@@ -66,8 +66,7 @@ of @code{\"@username:example.com\"}, for instance.")
           #:key
           (pantalaimon pantalaimon)
           (extra-config '()))
-  "Configure Pantalaimon, an E2EE-aware proxy
-daemon for Matrix clients."
+  "Configure Pantalaimon, an E2EE-aware proxy daemon for Matrix clients."
   (ensure-pred any-package? pantalaimon)
   (ensure-pred list? extra-config)
 
@@ -79,6 +78,7 @@ daemon for Matrix clients."
      (service
       home-pantalaimon-service-type
       (home-pantalaimon-configuration
+       (pantalaimon pantalaimon)
        (config
         `((Default
            ((log-level . debug)))
@@ -91,10 +91,51 @@ daemon for Matrix clients."
             (use-keyring . #f)))
           ,@extra-config))))))
 
+  (define (get-system-services config)
+    "Return system services related to Pantalaimon."
+    (define domain (get-value 'domain config))
+    (define letsencrypt-dir
+      (and domain (string-append "/etc/letsencrypt/live/pantalaimon." domain)))
+
+    (append
+     (if (get-value 'nginx config)
+         (list
+          (simple-service
+           'add-pantalaimon-nginx-configuration
+           nginx-service-type
+           (list
+            (nginx-server-configuration
+             (listen '("443 ssl http2"))
+             (server-name (list (string-append "pantalaimon." domain)))
+             (ssl-certificate (string-append letsencrypt-dir "/fullchain.pem"))
+             (ssl-certificate-key (string-append letsencrypt-dir "/privkey.pem"))
+             (locations
+              (list
+               (nginx-location-configuration
+                (uri "/")
+                (body
+                 (list "proxy_pass http://localhost:8009/;"
+                       "proxy_set_header X-Forwarded-For $remote_addr;"
+                       "proxy_set_header HOST $http_host;")))
+               %letsencrypt-acme-challenge))))))
+         '())
+     (if (get-value 'certbot config)
+         (list
+          (simple-service
+           'add-pantalaimon-ssl
+           certbot-service-type
+           (list
+            (certificate-configuration
+             (domains (list (string-append "pantalaimon." domain)))
+             (deploy-hook %nginx-deploy-hook)))))
+         '())
+     '()))
+
   (feature
    (name 'pantalaimon)
    (values `((pantalaimon . ,pantalaimon)))
-   (home-services-getter get-home-services)))
+   (home-services-getter get-home-services)
+   (system-services-getter get-system-services)))
 
 (define* (feature-synapse
           #:key
@@ -105,44 +146,55 @@ daemon for Matrix clients."
   (define (get-system-services config)
     "Return system services related to Synapse."
     (require-value 'matrix-settings config)
-    (define letsencrypt-dir "/etc/letsencrypt/live")
     (define homeserver (get-value 'matrix-homeserver config))
     (define server-name (string-drop homeserver (+ 1 (string-index-right homeserver #\/))))
     (define domain (string-drop server-name (+ 1 (string-index server-name #\.))))
-    (define synapse-configuration (get-value 'synapse-configuration config))
-    (define mautrix-whatsapp-configuration (get-value 'mautrix-whatsapp-configuration config))
+    (define letsencrypt-dir (and domain (string-append "/etc/letsencrypt/live/matrix." domain)))
 
     (append
      (list
-      (simple-service
-       'synapse-nginx-service
-       nginx-service-type
-       (list
-        (nginx-server-configuration
-         (listen '("443 ssl http2"
-                   "[::]:443 ssl http2"
-                   "8448 ssl http2 default_server"
-                   "[::]:8448 ssl http2 default_server"))
-         (server-name (list homeserver))
-         (ssl-certificate (string-append letsencrypt-dir "/" domain "/fullchain.pem"))
-         (ssl-certificate-key (string-append letsencrypt-dir "/" domain "/privkey.pem"))
-         (locations
-          (list
-           (nginx-location-configuration
-            (uri "~ ^(/_matrix|/_synapse/client)")
-            (body
-             (list "proxy_pass http://localhost:8008;"
-                   "proxy_set_header X-Forwarded-For $remote_addr;"
-                   "proxy_set_header X-Forwarded-Proto $scheme;"
-                   "proxy_set_header Host $host;"
-                   "client_max_body_size 50M;")))
-           (nginx-location-configuration
-            (uri "/.well-known")
-            (body '("root /srv/http;"))))))))
-      (service synapse-service-type synapse-configuration))
+      (service synapse-service-type
+               (get-value 'synapse-configuration config)))
      (if whatsapp-bridge?
          (list
-          (service mautrix-whatsapp-service-type mautrix-whatsapp-configuration))
+          (service mautrix-whatsapp-service-type (get-value 'mautrix-whatsapp-configuration config)))
+         '())
+     (if (get-value 'nginx config)
+         (list
+          (simple-service
+           'add-synapse-nginx-configuration
+           nginx-service-type
+           (list
+            (nginx-server-configuration
+             (listen '("443 ssl http2"
+                       "[::]:443 ssl http2"
+                       "8448 ssl http2 default_server"
+                       "[::]:8448 ssl http2 default_server"))
+             (server-name (list server-name))
+             (ssl-certificate (string-append letsencrypt-dir "/fullchain.pem"))
+             (ssl-certificate-key (string-append letsencrypt-dir "/privkey.pem"))
+             (locations
+              (list
+               (nginx-location-configuration
+                (uri "~ ^(/_matrix|/_synapse/client)")
+                (body
+                 (list "proxy_pass http://localhost:8008;"
+                       "proxy_set_header X-Forwarded-For $remote_addr;"
+                       "proxy_set_header X-Forwarded-Proto $scheme;"
+                       "proxy_set_header Host $host;"
+                       "client_max_body_size 50M;")))
+               %letsencrypt-acme-challenge))))))
+         '())
+     (if (get-value 'certbot config)
+         (list
+          (simple-service
+           'add-synapse-ssl
+           certbot-service-type
+           (list
+            (certificate-configuration
+             (name "matrix")
+             (domains (list server-name))
+             (deploy-hook %nginx-deploy-hook)))))
          '())))
 
   (feature
