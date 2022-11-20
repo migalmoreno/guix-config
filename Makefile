@@ -30,10 +30,10 @@ system/%:
 	RDE_TARGET=system RDE_SYSTEM=$* sudo -E $(CHANNELS-LOCK) system -L . reconfigure $(CONFIG)
 
 build/home/%:
-	RDE_TARGET=home RDE_USER=$* $(CHANNELS-LOCK) home build -L . $(CONFIG)
+	RDE_TARGET=home RDE_SYSTEM= RDE_USER=$* $(CHANNELS-LOCK) home build -L . $(CONFIG)
 
 build/system/%:
-	RDE_TARGET=system RDE_SYSTEM=$* $(CHANNELS-LOCK) system build -L . $(CONFIG)
+	RDE_TARGET=system RDE_SYSTEM=$* RDE_USER= $(CHANNELS-LOCK) system build -L . $(CONFIG)
 
 build/%:
 	RDE_TARGET=system $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )RDE_USER=$(word 3, $(subst /, ,$@)) \
