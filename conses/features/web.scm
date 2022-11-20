@@ -60,8 +60,9 @@ reverse proxy."
 
   (define (get-system-services config)
     "Return system services related to nginx."
+    (require-value 'domain config)
     (define domain (get-value 'domain config))
-    (define letsencrypt-dir "/etc/letsencrypt/live")
+    (define letsencrypt-dir (and domain (string-append "/etc/letsencrypt/live/" domain)))
 
     (list
      (service
@@ -74,14 +75,18 @@ reverse proxy."
           (listen '("443 ssl http2"))
           (server-name (list domain (string-append "www." domain)))
           (root (string-append "/srv/http/" domain))
-          (ssl-certificate (string-append letsencrypt-dir "/" domain "/fullchain.pem"))
-          (ssl-certificate-key (string-append letsencrypt-dir "/" domain "/privkey.pem"))
+          (ssl-certificate (string-append letsencrypt-dir "/fullchain.pem"))
+          (ssl-certificate-key (string-append letsencrypt-dir "/privkey.pem"))
           (locations
            (append
             (list
              (nginx-location-configuration
-              (uri "/.well-known")
-              (body '("root /srv/http;"))))
+              (uri "/.well-known/matrix/server")
+              (body
+               (list "default_type application/json;"
+                     (format #f "return 200 '{\"m.server\": \"matrix.~a:443\"}';" domain)
+                     "add_header Access-Control-Allow-Origin *;"))))
+            (list %letsencrypt-acme-challenge)
             (if webdav?
                 (list
                  (nginx-location-configuration
@@ -92,21 +97,11 @@ reverse proxy."
                          "dav_methods PUT DELETE MKCOL COPY MOVE;"
                          "create_full_put_path on;"
                          "dav_access group:rw all:r;"))))
-                '())
-            (if (get-value 'synapse config)
-                (list
-                 (nginx-location-configuration
-                  (uri "/.well-known/matrix/server")
-                  (body
-                   (list "default_type application/json;"
-                         (format #f "return 200 '{\"m.server\": \"matrix.~a:443\"}';" domain)
-                         "add_header Access-Control-Allow-Origin *;"))))
                 '()))))))))))
 
   (feature
    (name f-name)
-   (values `((,f-name . ,nginx)
-             (domain . ,domain)))
+   (values `((,f-name . ,nginx)))
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -119,6 +114,7 @@ reverse proxy."
 
   (define (get-system-services config)
     "Return system services related to Certbot."
+    (require-value 'domain config)
     (define domain (get-value 'domain config))
 
     (list
@@ -130,21 +126,8 @@ reverse proxy."
                (certificates
                 (list
                  (certificate-configuration
-                  (name domain)
-                  (domains `(,domain
-                             ,(string-append "wwww." domain)
-                             (when (get-value 'whoogle config)
-                               (string-append "whoogle." domain))
-                             (when (get-value 'synapse config)
-                               (let ((homeserver (get-value 'matrix-homeserver config)))
-                                 (string-drop
-                                  homeserver
-                                  (+ 1 (string-index-right homeserver #\/)))))))
-                  (deploy-hook
-                   (program-file
-                    "nginx-deploy-hook"
-                    #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
-                        (kill pid SIGHUP)))))))))))
+                  (domains (list domain (string-append "www." domain)))
+                  (deploy-hook %nginx-deploy-hook))))))))
 
   (feature
    (name 'certbot)
@@ -161,34 +144,44 @@ privacy respecting metaseach engine."
   (define (get-system-services config)
     "Return system services related to Whoogle."
     (define domain (get-value 'domain config))
-    (define letsencrypt-dir "/etc/letsencrypt/live")
+    (define letsencrypt-dir (and domain (string-append "/etc/letsencrypt/live/whoogle." domain)))
 
-    (list
-     (service whoogle-service-type
-              (whoogle-configuration
-                  (whoogle whoogle-search)))
-     (simple-service
-      'whoogle-nginx-service
-      nginx-service-type
-      (if (get-value 'nginx config)
-        (list
-         (nginx-server-configuration
-          (listen '("443 ssl http2"))
-          (server-name (list (string-append "whoogle." domain)))
-          (ssl-certificate (string-append letsencrypt-dir "/" domain "/fullchain.pem"))
-          (ssl-certificate-key (string-append letsencrypt-dir "/" domain "/privkey.pem"))
-          (locations
+    (append
+     (list
+      (service whoogle-service-type
+               (whoogle-configuration
+                (whoogle whoogle-search))))
+     (if (get-value 'nginx config)
+         (list
+          (simple-service
+           'add-whoogle-nginx-configuration
+           nginx-service-type
            (list
-            (nginx-location-configuration
-             (uri "/")
-             (body
-              (list "proxy_pass http://localhost:5000/;"
-                    "proxy_set_header X-Forwarded-For $remote_addr;"
-                    "proxy_set_header HOST $http_host;")))
-            (nginx-location-configuration
-             (uri "/.well-known")
-             (body '("root /srv/http;")))))))
-        '()))))
+            (nginx-server-configuration
+             (listen '("443 ssl http2"))
+             (server-name (list (string-append "whoogle." domain)))
+             (ssl-certificate (string-append letsencrypt-dir "/fullchain.pem"))
+             (ssl-certificate-key (string-append letsencrypt-dir "/privkey.pem"))
+             (locations
+              (list
+               (nginx-location-configuration
+                (uri "/")
+                (body
+                 (list "proxy_pass http://localhost:5000/;"
+                       "proxy_set_header X-Forwarded-For $remote_addr;"
+                       "proxy_set_header HOST $http_host;")))
+               %letsencrypt-acme-challenge))))))
+         '())
+     (if (get-value 'certbot config)
+         (list
+          (simple-service
+           'add-whoogle-ssl
+           certbot-service-type
+           (list
+            (certificate-configuration
+             (domains (list (string-append "whoogle." domain)))
+             (deploy-hook %nginx-deploy-hook)))))
+         '())))
 
   (feature
    (name 'whoogle)
