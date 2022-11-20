@@ -12,6 +12,11 @@
 (define-public %nonguix-signing-key
   (project-file "conses/keys/nonguix.pub"))
 
+(define-public %default-ssh-key
+  (plain-file
+   "conses.pub"
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN (none)\n"))
+
 (define-public %default-kernel linux)
 
 (define-public %default-timezone (getenv "TIMEZONE"))
@@ -34,10 +39,7 @@
     (bootloader (bootloader-configuration
                  (bootloader grub-efi-bootloader)
                  (targets '("/boot/efi"))))
-    (kernel %default-kernel)
     (kernel-arguments %default-kernel-arguments)
     (keyboard-layout %default-keyboard-layout)
-    (firmware (list linux-firmware))
-    (services '())
     (file-systems %base-file-systems)
     (issue "This is the GNU system. Welcome.\n")))
