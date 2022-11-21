@@ -3386,7 +3386,6 @@ implemented in Emacs Lisp."
         (autoload 'telega-root--buffer "telega")
         (setq telega-directory (expand-file-name "telega" user-emacs-directory))
         (with-eval-after-load 'telega
-          (define-key mode-specific-map "t" telega-prefix-map)
           (setq telega-completing-read-function 'completing-read)))
       #:elisp-packages (list emacs-telega
                              (get-value 'emacs-configure-rde-keymaps config)))))
