@@ -30,6 +30,11 @@
 (define-public %hydri-signing-key
   (project-file "conses/keys/hydri.pub"))
 
+(define-public %hydri-ssh-key
+  (plain-file
+   "hydri.pub"
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEmENg0a5QUgDrvvD/0KjZNskWuqch2JTbLJlUT6pJ6c\n"))
+
 (define-public %home-features
   (list
    (feature-user-info
