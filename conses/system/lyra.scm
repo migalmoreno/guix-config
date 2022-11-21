@@ -118,10 +118,7 @@
                (password-authentication? #f)
                (permit-root-login 'prohibit-password)
                (authorized-keys
-                `(("root"
-                   ,(plain-file
-                     "hydri.pub"
-                     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC28hXClkbu6VsaJT9XLlk7QzL2N0mmzVo7PRQV7KuGp"))))))
+                `(("root" ,%hydri-ssh-key)))))
      (service qemu-binfmt-service-type
               (qemu-binfmt-configuration
                (platforms (lookup-qemu-platforms "aarch64"))))
