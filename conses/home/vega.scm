@@ -503,7 +503,7 @@ EndSection"))
     #:default-input-method "spanish-keyboard")
    (feature-lisp
     #:extra-packages
-    (strings->packages "sbcl-prove")
+    (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk")
     #:extra-source-registry-entries
     `(("common-lisp/source-registry.conf.d/10-home.conf"
        ,(plain-file "10-home.conf"
@@ -765,22 +765,17 @@ EndSection"))
        (ssh-host
         (host "cygnus")
         (options
-         `((host-name . ,(getenv "CYGNUS_IP"))
+         `((host-name . ,(getenv "CYGNUS_HOST"))
            (user . "root"))))
        (ssh-host
         (host "deneb")
         (options
-         `((host-name . ,(getenv "CYGNUS_IP"))
+         `((host-name . ,(getenv "CYGNUS_HOST"))
            (user . "deneb"))))
        (ssh-host
-        (host "hydri-usb")
+        (host "hydri")
         (options
-         `((host-name . "172.16.42.1")
-           (user . "hydri"))))
-       (ssh-host
-        (host "hydri-wlan")
-        (options
-         `((host-name . ,(getenv "HYDRI_IP"))
+         `((host-name . ,(getenv "HYDRI_HOST"))
            (user . "hydri"))))))))
    (feature-forge-settings
     #:forge-accounts
