@@ -181,7 +181,7 @@ IPC interface.")
     (license license:gpl3+)))
 
 (define-public emacs-mpv-next
-  (let ((commit "3c5260fb0151601bd096be7a11079d8d39552f56")
+  (let ((commit "17e509d20132aba393c57c4cbd51c132a375cc53")
         (branch "feature-add-mode-line-display-modes"))
     (package
      (inherit emacs-mpv)
@@ -194,7 +194,7 @@ IPC interface.")
                      (commit commit)))
                (file-name (git-file-name name version))
                (sha256
-                (base32 "1s79nxbb8a26xf013vxxvijg0apnfzhwlbji349jyzdg5d6myp25")))))))
+                (base32 "0wvq76plbs9n3blfimj9jypnm59j35zyr7h95glrji6adqv2fw4a")))))))
 
 (define-public emacs-mpv-next-local
   (package
