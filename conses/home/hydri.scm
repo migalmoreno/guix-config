@@ -19,6 +19,7 @@
   #:use-module (conses features web-browsers)
   #:use-module (conses features version-control)
   #:use-module (rde packages)
+  #:use-module (rde features xdg)
   #:use-module (rde features base)
   #:use-module (rde features gnupg)
   #:use-module (gnu services)
@@ -33,7 +34,7 @@
 (define-public %hydri-ssh-key
   (plain-file
    "hydri.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEmENg0a5QUgDrvvD/0KjZNskWuqch2JTbLJlUT6pJ6c\n"))
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICqtb3b6t96P/wJgaf+SoZfv2aRa/ZgREO6LEmydnfyV\n"))
 
 (define-public %home-features
   (list
@@ -47,7 +48,19 @@
    (feature-base-packages
     #:home-packages
     (strings->packages
-     "make" "nss-certs" "seahorse"))
+     "make" "nss-certs" "seahorse" "gnome-contacts"
+     "chatty" "gnome-terminal"))
+   (feature-xdg
+    #:xdg-user-directories-configuration
+    (home-xdg-user-directories-configuration
+     (desktop "$HOME")
+     (documents "$HOME/documents")
+     (download "$HOME/downloads")
+     (music "$HOME/music")
+     (pictures "$HOME/pictures")
+     (publicshare "$HOME")
+     (videos "$HOME/videos")
+     (templates "$HOME")))
    (feature-custom-services
     #:home-services
     (list
@@ -75,9 +88,11 @@
     '((add-hook 'after-init-hook 'server-start)))
    (feature-gtk
     #:dark-theme? #t
-    #:gtk-theme (lambda _
-                  `((.phosh-topbar-clock
-                     ((margin-left . 125px))))))
+    #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
+    #:icon-theme (make-theme "Tango" (@ (gnu packages gnome) tango-icon-theme))
+    #:custom-gtk-theme (lambda _
+                         `((.phosh-topbar-clock
+                            ((margin-left . 125px))))))
    (feature-emacs-all-the-icons)
    (feature-emacs-completion
     #:consult-initial-narrowing? #t)
@@ -89,6 +104,8 @@
     #:gpg-agent-extra-config
     '((no-greeting . #t)
       (allow-preset-passphrase . #t)))
+   (feature-password-store
+    #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
    (feature-nyxt
     #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)
     #:default-browser? #t
@@ -131,6 +148,31 @@
       ("n" . "script-message osc-visibility always")
       ("N" . "script-message osc-visibility never")
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))
+   (feature-emacs-files)
+   (feature-emacs-cursor)
+   (feature-direnv)
+   (feature-emacs-dired)
+   (feature-emacs-browse-url)
+   (feature-emacs-modus-themes
+    #:dark? #t)
+   (feature-emacs-vertico)
+   (feature-emacs-window)
+   (feature-emacs-appearance
+    #:header-line-as-mode-line? #f
+    #:auto-theme? #f
+    #:margin 0)
+   (feature-forge-settings
+    #:forge-accounts
+    (list
+     (forge-account
+      (id 'sh)
+      (forge 'sourcehut)
+      (username (getenv "USERNAME"))
+      (email (getenv "SOURCEHUT_EMAIL"))
+      (token (getenv "SOURCEHUT_TOKEN")))))
+   (feature-git
+    #:primary-forge-account-id 'sh
+    #:sign-commits? #t)
    (feature-emacs-tab-bar
     #:modules-center
     '((make-configure-tab-bar-module
@@ -263,31 +305,6 @@
        :lang-ui :english
        :results-number 50
        :new-window t)))
-   (feature-emacs-files)
-   (feature-emacs-cursor)
-   (feature-direnv)
-   (feature-emacs-dired)
-   (feature-emacs-browse-url)
-   (feature-emacs-modus-themes
-    #:dark? #t)
-   (feature-emacs-vertico)
-   (feature-emacs-window)
-   (feature-emacs-appearance
-    #:header-line-as-mode-line? #f
-    #:auto-theme? #f
-    #:margin 0)
-   (feature-forge-settings
-    #:forge-accounts
-    (list
-     (forge-account
-      (id 'sh)
-      (forge 'sourcehut)
-      (username (getenv "USERNAME"))
-      (email (getenv "SOURCEHUT_EMAIL"))
-      (token (getenv "SOURCEHUT_TOKEN")))))
-   (feature-git
-    #:primary-forge-account-id 'sh
-    #:sign-commits? #t)
    (feature-irc-settings
     #:irc-accounts
     (list
@@ -333,8 +350,6 @@
    (feature-emacs-shell)
    (feature-emacs-eshell)
    (feature-compile)
-   (feature-password-store
-    #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
    (feature-guile)
    (feature-emacs-smartparens)
    (feature-lisp
