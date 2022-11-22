@@ -7,6 +7,9 @@
 (define-public (maybe-symbol? x)
   (or (symbol? x) (not x)))
 
+(define-public (maybe-procedure? x)
+  (or (procedure? x) (not x)))
+
 (define-public (maybe-number? x)
   (or (number? x) (not x)))
 
