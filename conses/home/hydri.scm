@@ -105,7 +105,9 @@
     #:extra-mpv-conf
     `((border . no)
       (volume . 100)
-      (screenshot-directory . ,(string-append (getenv "XDG_DATA_HOME") "/mpv/screenshots"))
+      (screenshot-directory . ,(string-append (or (getenv "XDG_DATA_HOME")
+                                                  "~/.local/share")
+                                              "/mpv/screenshots"))
       (autofit . 800x800)
       (osd-border-size . 2)
       (osd-bar . yes)
