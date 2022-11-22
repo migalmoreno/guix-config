@@ -39,13 +39,14 @@
 
   (append
    (if (home-gtk-configuration-default-cursor config)
-       `(".icons/default/index.theme"
-         ,(mixed-text-file
-           "index.theme"
-           (generic-serialize-ini-config
-            #:serialize-field serialize-field
-            #:fields `(("Icon Theme"
-                        ((Inherits . ,(home-gtk-configuration-default-cursor config))))))))
+       (list
+        `(".icons/default/index.theme"
+          ,(mixed-text-file
+            "index.theme"
+            (generic-serialize-ini-config
+             #:serialize-field serialize-field
+             #:fields `(("Icon Theme"
+                         ((Inherits . ,(home-gtk-configuration-default-cursor config)))))))))
        '())
    (list
     `(".config/gtk-3.0/settings.ini"

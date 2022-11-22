@@ -1,6 +1,8 @@
 (define-module (conses features gtk)
   #:use-module (conses features fontutils)
+  #:use-module (conses packages desktop)
   #:use-module (conses home services gtk)
+  #:use-module (conses utils)
   #:use-module (rde features)
   #:use-module (gnu services)
   #:use-module (gnu home services)
@@ -10,33 +12,34 @@
   #:use-module (guix records)
   #:use-module (srfi srfi-9)
   #:export (feature-gtk
-            icon-theme
-            make-icon-theme
-            icon-theme?
-            icon-theme-name
-            icon-theme-package))
+            theme
+            make-theme
+            theme?
+            theme-name
+            theme-package))
 
-(define-record-type* <icon-theme> icon-theme
-  make-icon-theme icon-theme?
-  (name icon-theme-name)
-  (package icon-theme-package))
+(define-record-type* <theme> theme
+  make-theme theme?
+  (name theme-name)
+  (package theme-package))
+
+(define (maybe-theme? x)
+  (or (theme? x) (not x)))
 
 (define* (feature-gtk
           #:key
-          (icon (icon-theme
-                 (name 'Papirus-Dark)
-                 (package papirus-icon-theme)))
-          ;; (cursor (icon-theme
-          ;;          :name 'Bibata
-          ;;          #:package bibata-cursor-theme))
+          (custom-gtk-theme %default-gtk-theme)
+          (gtk-theme (make-theme "Numix" numix-gtk-theme))
+          (icon-theme (make-theme "Papirus-Dark" papirus-icon-theme))
+          (cursor-theme (make-theme "Bibata-Modern-Classic" bibata-cursor-theme))
           (dark-theme? #f)
-          (extra-gtk-settings '())
-          (gtk-theme %default-gtk-theme))
+          (extra-gtk-settings '()))
   "Configure the GTK toolkit."
-  (ensure-pred icon-theme? icon)
-  ;; (ensure-pred icon-theme? cursor)
+  (ensure-pred maybe-procedure? custom-gtk-theme)
+  (ensure-pred maybe-theme? gtk-theme)
+  (ensure-pred maybe-theme? icon-theme)
+  (ensure-pred maybe-theme? cursor-theme)
   (ensure-pred list? extra-gtk-settings)
-  (ensure-pred procedure? gtk-theme)
 
   (define (get-home-services config)
     "Return home services related to GTK."
@@ -44,16 +47,32 @@
      (simple-service
       'home-gtk-profile-service
       home-profile-service-type
-      (list gsettings-desktop-schemas
-            ;; (icon-theme-package cursor)
-            (icon-theme-package icon)))
+      (append
+       (list gsettings-desktop-schemas)
+       (if gtk-theme
+           (list (theme-package gtk-theme))
+           '())
+       (if icon-theme
+           (list (theme-package icon-theme))
+           '())
+       (if cursor-theme
+           (list (theme-package cursor-theme))
+           '())))
      (service home-gtk-service-type
               (home-gtk-configuration
+               (default-cursor (and=> cursor-theme theme-name))
                (settings
                 `((Settings
-                   ((gtk-application-prefer-dark-theme . ,dark-theme?)
+                   (,@(if gtk-theme
+                          `((gtk-theme-name . ,(theme-name gtk-theme)))
+                          '())
+                    ,@(if icon-theme
+                          `((gtk-icon-theme-name . ,(theme-name icon-theme)))
+                          '())
+                    ,@(if cursor-theme
+                          `((gtk-cursor-theme-name . ,(theme-name cursor-theme)))
+                          '())
                     (gtk-cursor-blink . #f)
-                    ;; (gtk-cursor-theme-name . ,(theme-name cursor))
                     (gtk-cursor-theme-size . 16)
                     (gtk-decoration-layout . "")
                     (gtk-dialogs-use-header . #f)
@@ -62,8 +81,8 @@
                     (gtk-enable-input-feedback-sounds . #f)
                     (gtk-error-bell . #f)
                     (gtk-font-name . ,(font-specification (get-value 'font-monospace config)))
-                    (gtk-icon-theme-name . ,(icon-theme-name icon))
                     (gtk-overlay-scrolling . #t)
+                    (gtk-application-prefer-dark-theme . ,dark-theme?)
                     (gtk-recent-files-enabled . #f)
                     (gtk-shell-shows-app-menu . #f)
                     (gtk-shell-shows-desktop . #f)
@@ -74,15 +93,15 @@
                     (gtk-xft-hintstyle . hintfull)
                     (gtk-xft-rgba . none)
                     ,@extra-gtk-settings))))
-               (theme (gtk-theme config))))))
+               (theme (custom-gtk-theme config))))))
 
   (feature
    (name 'gtk)
    (values `((gtk . #t)
              (gtk-dark-theme? . ,dark-theme?)
-             (gtk-icon . ,icon)
-             ;; (gtk-cursor . ,cursor)
-             ))
+             (gtk-theme . ,gtk-theme)
+             (gtk-icon-theme . ,icon-theme)
+             (gtk-cursor-theme . ,cursor-theme)))
    (home-services-getter get-home-services)))
 
 (define (%default-gtk-theme config)
