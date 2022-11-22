@@ -212,9 +212,13 @@
               (home-xresources-configuration
                (package xrdb)
                (config
-                `((Xcursor.theme . ,(and=> (get-value 'gtk-cursor config) icon-theme-name))
-                  (Emacs.font . ,(and=> (get-value 'font-sans config) font-name))
-                  (Emacs.FontBackend . xft)
+                `(,@(if (get-value 'gtk-cursor-theme config)
+                        `((Xcursor.theme . ,(theme-name (get-value 'gtk-cursor-theme config))))
+                        '())
+                  ,@(if (and (get-value 'fonts config) (get-value 'emacs config))
+                        `((Emacs.font . ,(font-name (get-value 'font-sans config)))
+                          (Emacs.FontBackend . xft))
+                        '())
                   (Xcursor.size . 16)
                   (Xft.autohint . #t)
                   (Xft.antialias . #t)
