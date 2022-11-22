@@ -60,7 +60,8 @@
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-gtk
-    #:dark-theme? #t)
+    #:dark-theme? #t
+    #:gtk-theme #f)
    (feature-proxy
     #:google-proxy "http://localhost:5000"
     #:youtube-proxy "https://invidio.xamh.de"
