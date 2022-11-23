@@ -214,7 +214,18 @@
       (rde-elisp-configuration-service
        f-name
        config
-       `((define-key ctl-x-map "g" 'magit)
+       `((defun configure-git-email--get-current-project ()
+           "Return the path of the current project.
+Falls back to `default-directory'."
+           (let ((dir (or (and (bound-and-true-p projectile-known-projects)
+                               (projectile-project-root))
+                          (and (bound-and-true-p project-list-file)
+                               (car (last (project-current))))
+                          (vc-root-dir)
+                          default-directory)))
+             dir))
+         (advice-add 'git-email--get-current-project :override 'configure-git-email--get-current-project)
+         (define-key ctl-x-map "g" 'magit)
          (add-hook 'magit-mode-hook 'toggle-truncate-lines)
          ,@(if (get-value 'emacs-project config)
                '((define-key project-prefix-map "m" 'magit-status)
