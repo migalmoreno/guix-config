@@ -1658,8 +1658,8 @@ operate on buffers like Dired."
           #:key
           (spelling-program #f)
           (spelling-dictionaries '())
-          (flyspell-hooks '(org-mode-hook))
-          (flyspell-prog-hooks '(prog-mode-hook))
+          (flyspell-hooks #f)
+          (flyspell-prog-hooks #f)
           (ispell-program-name (and spelling-program
                                     (file-append
                                      spelling-program "/bin/"
@@ -1669,9 +1669,9 @@ operate on buffers like Dired."
           (dictionary-server "dict.org"))
   "Configure spell-checking features in Emacs."
   (ensure-pred maybe-file-like? spelling-program)
-  (ensure-pred maybe-list-of-file-likes? spelling-dictionaries)
-  (ensure-pred list? flyspell-hooks)
-  (ensure-pred list? flyspell-prog-hooks)
+  (ensure-pred list? spelling-dictionaries)
+  (ensure-pred maybe-list? flyspell-hooks)
+  (ensure-pred maybe-list? flyspell-prog-hooks)
   (ensure-pred file-like-or-path? ispell-program-name)
   (ensure-pred maybe-string? ispell-standard-dictionary)
   (ensure-pred maybe-path? ispell-personal-dictionary)
@@ -1695,12 +1695,16 @@ operate on buffers like Dired."
        emacs-f-name
        config
        `((require 'configure-rde-keymaps)
-         (mapcar (lambda (hook)
-                   (add-hook hook 'flyspell-mode))
-                 ',flyspell-hooks)
-         (mapcar (lambda (hook)
-                   (add-hook hook 'flyspell-prog-mode))
-                 ',flyspell-prog-hooks)
+         ,@(if flyspell-hooks
+               `((mapcar (lambda (hook)
+                           (add-hook hook 'flyspell-mode))
+                         ',flyspell-hooks))
+               '())
+         ,@(if flyspell-prog-hooks
+               `((mapcar (lambda (hook)
+                           (add-hook hook 'flyspell-prog-mode))
+                         ',flyspell-prog-hooks))
+               '())
          (with-eval-after-load 'flyspell
            ,@(if ispell-program-name
                  `((setq ispell-program-name ,ispell-program-name))
