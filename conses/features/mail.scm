@@ -349,15 +349,19 @@ but it won't appear on the right Maildir directory."
           (gnus-directory "~/.cache/gnus/News")
           (topic-alist #f)
           (topic-topology #f)
-          (mail-account-ids #f))
+          (mail-account-ids #f)
+          (message-archive-method #f)
+          (message-archive-group #f))
   "Configure the Gnus newsreader. If MAIL-ACCOUNT-IDS
 is not provided, use all the mail accounts."
   (ensure-pred maybe-list? posting-styles)
+  (ensure-pred path? gnus-directory)
   (ensure-pred maybe-list? group-parameters)
   (ensure-pred maybe-list? topic-alist)
   (ensure-pred maybe-list? topic-topology)
-  (ensure-pred path? gnus-directory)
   (ensure-pred maybe-list? mail-account-ids)
+  (ensure-pred maybe-list? message-archive-method)
+  (ensure-pred maybe-list? message-archive-group)
 
   (define emacs-f-name 'gnus)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -446,7 +450,6 @@ is not provided, use all the mail accounts."
                 `((setq gnus-novice-user nil))
               '())
           (setq gnus-interactive-exit nil)
-          (setq gnus-select-method '(nnnil))
           (setq gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date
                                              (not gnus-thread-sort-by-number)))
           (setq gnus-permanently-visible-groups "^nnmaildir")
@@ -486,6 +489,7 @@ is not provided, use all the mail accounts."
                                          (mail-account-fqda mail-acc)))))
                            mail-accounts))
                   ,@posting-styles))
+          (setq gnus-select-method '(nnnil))
           (setq gnus-secondary-select-methods
                 '(,@(if (get-value 'isync config)
                         (map (lambda (mail-acc)
@@ -521,8 +525,13 @@ is not provided, use all the mail accounts."
           (setq gnus-server-alist '(("archive" nnfolder "archive"
                                      (nnfolder-directory ,(string-append mail-dir "/archive"))
                                      (nnfolder-get-new-mail nil)
-                                     (nnfolder-inhibit-expiry t))))
-          (setq gnus-update-message-archive-method t))
+                                     (nnfolder-inhibit-expiry t)))))
+        (with-eval-after-load 'gnus-art
+          (setq gnus-visible-headers
+                '("^From:" "^To:" "^Cc:" "^Subject:" "^Newsgroups:" "^Date:"
+                  "Followup-To:" "Reply-To:" "^Organization:" "^X-Newsreader:"
+                  "^X-Mailer:" "^Message-ID:" "^In-Reply-To:"))
+          (setq gnus-sorted-header-list gnus-visible-headers))
         ,#~"(with-eval-after-load 'gnus-art
 (define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
 (define-key gnus-article-mode-map [remap shr-browse-url] #'configure-gnus-shr-browse-url-new-window))")
