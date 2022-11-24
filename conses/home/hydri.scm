@@ -48,8 +48,9 @@
    (feature-base-packages
     #:home-packages
     (strings->packages
-     "make" "nss-certs" "seahorse" "gnome-contacts"
-     "chatty" "gnome-terminal"))
+     "make" "nss-certs"
+     "seahorse" "gnome-contacts"
+     "chatty" "pinentry-tty" "portfolio"))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
@@ -83,7 +84,7 @@
    (feature-fonts)
    (feature-emacs
     #:emacs emacs-next-pgtk
-    #:emacs-server-mode? #t
+    #:emacs-server-mode? #f
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))
    (feature-gtk
@@ -259,11 +260,8 @@
                     "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil)))
-      (router:make-route
-       (match-scheme "magnet")
-       :external (lambda (req)
-                   (eval-in-emacs
-                    `(transmission-add ,(quri:render-uri (url req))))))))
+      (router:make-route (match-scheme "mailto" "magnet")
+                         :external "xdg-open ~a")))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet

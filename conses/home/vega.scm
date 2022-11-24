@@ -124,6 +124,7 @@ EndSection"))
     #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
    (feature-clojure)
    (feature-nyxt
+    #:autostart? #t
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:extra-bindings
@@ -237,7 +238,6 @@ EndSection"))
     #:spelling-dictionaries (strings->packages "aspell-dict-en")
     #:flyspell-hooks
     '(org-mode-hook bibtex-mode-hook)
-    #:flyspell-prog-hooks '()
     #:ispell-standard-dictionary "en_US")
    (feature-emacs-markdown)
    (feature-emacs-browse-url)
@@ -503,6 +503,7 @@ EndSection"))
     #:keyboard-layout %default-keyboard-layout
     #:default-input-method "spanish-keyboard")
    (feature-lisp
+    #:custom-sly-prompt? #t
     #:extra-packages
     (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk")
     #:extra-source-registry-entries
@@ -571,6 +572,8 @@ EndSection"))
       (("technology" visible nil))
       (("emacs" visible nil))
       (("guix" visible nil)))
+    #:message-archive-method '(nnmaildir "personal")
+    #:message-archive-group '((".*" "sent"))
     #:group-parameters
     '(("^nnmaildir"
        (display . 100)
@@ -578,7 +581,9 @@ EndSection"))
       ("^nntp"
        (display . 1000)))
     #:posting-styles
-    `(((header "to" ".*@lists.sr.ht")
+    `((".*"
+       (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
+      ((header "to" ".*@lists.sr.ht")
        (name ,(getenv "USERNAME"))
        (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
        (In-Reply-To make-message-in-reply-to)
@@ -591,9 +596,12 @@ EndSection"))
        (signature ,(string-append "Best regards,\n"
                                   (getenv "USERNAME")))
        (To configure-gnus-get-article-participants))))
-   (feature-emacs-message)
+   (feature-emacs-message
+    #:message-signature (string-append "Best regards,\n" (getenv "USERNAME")))
    (feature-emacs-org-mime)
-   (feature-emacs-smtpmail)
+   (feature-emacs-smtpmail
+    #:smtp-user (getenv "MAIL_PERSONAL_EMAIL")
+    #:smtp-server (getenv "MAIL_PERSONAL_HOST"))
    (feature-desktop-services)
    (feature-matrix-settings
     #:homeserver (string-append "https://pantalaimon." (getenv "DOMAIN"))
@@ -666,10 +674,8 @@ EndSection"))
                     "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil)))
-      (router:make-route (match-scheme "magnet")
-       :external (lambda (req)
-                   (eval-in-emacs
-                    `(transmission-add ,(quri:render-uri (url req))))))))
+      (router:make-route (match-scheme "mailto" "magnet")
+                         :external "xdg-open ~a")))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
