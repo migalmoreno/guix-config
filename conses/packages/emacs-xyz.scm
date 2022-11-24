@@ -217,7 +217,7 @@ IPC interface.")
                      "/elisp/pulseaudio-control")
       #:recursive? #t))))
 
-(define-public emacs-circadian
+(define-public emacs-circadian-next
   (package
     (name "emacs-circadian")
     (version "20181024.1256")
@@ -290,24 +290,6 @@ exchange rates backends.")
       (description "This package adds a Hydra extension that lets the user see their hydras in a
  posframe, allowing them to be centered in the Emacs frame.")
       (license license:gpl3+))))
-
-(define-public emacs-vertico-posframe
-  (package
-    (name "emacs-vertico-posframe")
-    (version "0.5.0")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://elpa.gnu.org/packages/vertico-posframe-" version ".tar"))
-       (sha256 (base32 "0xkazpyfdb9h6kpqwh06szy8m3019plkixgk9qsbx6h1h07klq3i"))))
-    (build-system emacs-build-system)
-    (propagated-inputs
-     (list emacs-posframe emacs-vertico))
-    (home-page "https://github.com/tumashu/vertico-posframe")
-    (synopsis "Vertico extension to show minibuffer candidates in a posframe.")
-    (description "vertico-posframe is a Vertico extension, which lets Vertico use posframe show its
-candidate menu.")
-    (license license:gpl3+)))
 
 (define-public emacs-capf-autosuggest
   (package
