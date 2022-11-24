@@ -64,11 +64,11 @@ black and completely white.")
                           (lambda _
                             (with-directory-excursion (string-append #$output
                                                                      "/bin")
-                              (rename-file "dev.tchx84.Portfolio" "portfolio"))))
+                              (symlink "dev.tchx84.Portfolio" "portfolio"))))
                         (add-after 'glib-or-gtk-wrap 'python-and-gi-wrap
                           (lambda* (#:key inputs outputs #:allow-other-keys)
                             (wrap-program (search-input-file outputs
-                                                             "bin/portfolio")
+                                                             "bin/dev.tchx84.Portfolio")
                               `("GUIX_PYTHONPATH" =
                                 (,(getenv "GUIX_PYTHONPATH") ,(python:site-packages
                                                                inputs
