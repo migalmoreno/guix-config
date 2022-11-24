@@ -7,7 +7,9 @@
   #:use-module (gnu packages lisp)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:export (home-lisp-configuration
+  #:export (lisp-config?
+            serialize-lisp-config
+            home-lisp-configuration
             home-lisp-service-type))
 
 (define-public lisp-config? sexp-config?)
@@ -28,7 +30,7 @@ The list of expressions will be interposed with \n and everything will end up in
 @file{slynk.lisp}.")
   (sbclrc-lisp
    (lisp-config '())
-   "As per @code{slynk-config}, but everything will be placed in @file{sbclrc.lisp}."))
+   "As per @code{slynk-lisp}, but everything will be placed in @file{sbclrc.lisp}."))
 
 (define (home-lisp-files-service config)
   (define (filter-fields field)
@@ -72,7 +74,7 @@ The list of expressions will be interposed with \n and everything will end up in
       home-files-service-type
       home-lisp-files-service)))
    (default-value (home-lisp-configuration))
-   (description "Configures Lisp-related settings.")))
+   (description "Configure Common Lisp-related tooling.")))
 
 (define (generate-home-lisp-documentation)
   (generate-documentation
