@@ -378,7 +378,7 @@ themes for Emacs."
             '()))
       #:elisp-packages (append
                          (if auto?
-                             (list emacs-circadian)
+                             (list emacs-circadian-next)
                            '())
                          (if (get-value 'emacs-nyxt config)
                              (list (get-value 'emacs-nyxt config))
@@ -534,7 +534,10 @@ themes for Emacs."
                                                         buffer-mode-assoc))))))
                     (when key
                       (setq unread-command-events (append unread-command-events (list key 32))))))
-                (add-hook 'minibuffer-setup-hook 'configure-completion-initial-narrow))
+                (add-hook 'minibuffer-setup-hook 'configure-completion-initial-narrow)
+                (with-eval-after-load 'consult
+                  (setq consult-narrow-key (kbd "C-="))
+                  (setq consult-widen-key (kbd "C--"))))
               '())
 
         (defun configure-completion-crm-indicator (args)
@@ -567,8 +570,6 @@ themes for Emacs."
         (define-key minibuffer-mode-map (kbd "C-c C-r") 'consult-history)
         (with-eval-after-load 'consult
           (setq consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
-          (setq consult-narrow-key (kbd "C-="))
-          (setq consult-widen-key (kbd "C--"))
           (consult-customize
            consult--source-buffer consult-buffer
            consult-bookmark consult--source-bookmark
@@ -3518,6 +3519,40 @@ language for GNU Emacs."
   (define (get-home-services config)
     "Return home services related to Emacs Lisp."
     (list
+     (simple-service
+      'elisp-tempel-templates
+      home-emacs-tempel-service-type
+      `(,#~"emacs-lisp-mode"
+           (lambda "(lambda (" p ")" n> r> ")")
+           (fun "(defun " p " (" p ")\n \"" p "\"" n> r> ")")
+           (var "(defvar " p "\n  \"" p "\")")
+           (cond "(cond" n "(" q "))" >)
+           (let "(let (" p ")" n> r> ")")
+           (let* "(let* (" p ")" n> r> ")")
+           (dolist "(dolist (" p ")" n> r> ")")
+           (autoload ";;;###autoload")
+           (pt "(point)")
+           (local "(defvar-local " p "\n \"" p "\")")
+           (const "(defconst " p "\n  \"" p "\")")
+           (custom "(defcustom " p "\n \"" p "\"" n> ":type '" p ")")
+           (face "(defface " p " '((t :inherit " p "))\n \"" p "\")")
+           (group "(defgroup " p " nil\n \"" p "\"" n> ":group '" p n> ":prefix \"" p "-\")")
+           (macro "(defmacro " p " (" p ")\n \"" p "\"" n> r> ")")
+           (alias "(defalias '" p " '" p ")")
+           (iflet "(if-let (" p ")" n> r> ")")
+           (whenlet "(when-let (" p ")" n> r> ")")
+           (iflet* "(if-let* (" p ")" n> r> ")")
+           (whenlet* "(when-let* (" p ")" n> r> ")")
+           (andlet "(and-let* (" p ")" n> r> ")")
+           (pcase "(pcase " (p "scrutinee") n "(" q "))" >)
+           (rec "(letrec (" p ")" n> r> ")")
+           (dotimes "(dotimes (" p ")" n> r> ")")
+           (loop "(cl-loop for " p " in " p " do" n> r> ")")
+           (command "(defun " p " (" p ")\n  \"" "\"" n> "(interactive" p ")" n> r> ")")
+           (advice "(defun " (p "adv" name) " (&rest app)" n> p n> "(apply app))" n>
+                   "(advice-add #'" (p "fun") " " (p ":around") " #'" (s name) ")")
+           (provide "(provide '" (file-name-base (or (buffer-file-name) (buffer-name))) ")" n
+                    ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name))) " ends here" n)))
      (rde-elisp-configuration-service
       emacs-f-name
       config
