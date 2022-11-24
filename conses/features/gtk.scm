@@ -93,7 +93,7 @@
                     (gtk-xft-hintstyle . hintfull)
                     (gtk-xft-rgba . none)
                     ,@extra-gtk-settings))))
-               (theme (custom-gtk-theme config))))))
+               (theme (and custom-gtk-theme (custom-gtk-theme config)))))))
 
   (feature
    (name 'gtk)

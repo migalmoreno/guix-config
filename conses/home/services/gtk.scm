@@ -14,14 +14,18 @@
 (define (maybe-string? x)
   (or (string? x) (not x)))
 
+(define (maybe-alist? x)
+  (or (alist? x) (not x)))
+
 (define-maybe/no-serialization maybe-string)
+(define-maybe/no-serialization maybe-alist)
 
 (define-configuration/no-serialization home-gtk-configuration
   (settings
    (alist '())
    "Alist of pairs that set GTK global settings.")
   (theme
-   (alist '())
+   (maybe-alist '())
    "List of CSS rules which set the GTK theme.")
   (default-cursor
    (maybe-string #f)
@@ -48,17 +52,21 @@
              #:fields `(("Icon Theme"
                          ((Inherits . ,(home-gtk-configuration-default-cursor config)))))))))
        '())
-   (list
-    `(".config/gtk-3.0/settings.ini"
-      ,(mixed-text-file
-        "settings.ini"
-        (generic-serialize-ini-config
-         #:serialize-field serialize-field
-         #:fields (home-gtk-configuration-settings config))))
-    `(".config/gtk-3.0/gtk.css"
-      ,(apply mixed-text-file
-              "gtk.css"
-              (serialize-css-config (home-gtk-configuration-theme config)))))))
+   (append
+    (list
+     `(".config/gtk-3.0/settings.ini"
+       ,(mixed-text-file
+         "settings.ini"
+         (generic-serialize-ini-config
+          #:serialize-field serialize-field
+          #:fields (home-gtk-configuration-settings config)))))
+    (if (home-gtk-configuration-theme config)
+        (list
+         `(".config/gtk-3.0/gtk.css"
+           ,(apply mixed-text-file
+                   "gtk.css"
+                   (serialize-css-config (home-gtk-configuration-theme config)))))
+        '()))))
 
 (define home-gtk-service-type
   (service-type
