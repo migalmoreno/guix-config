@@ -11,6 +11,7 @@
   #:use-module (gnu packages web)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu packages python-web)
   #:use-module (guix gexp)
   #:export (feature-web-settings
             feature-nginx
