@@ -426,10 +426,11 @@
 
   (define (get-home-services config)
     "Return home services related to nx-tailor."
-    (define system-timezone (let* ((port (open-input-file "/etc/timezone"))
-                                   (res (read-line port)))
-                              (close-port port)
-                              res))
+    (define system-timezone (when (file-exists? "/etc/timezone")
+                              (let* ((port (open-input-file "/etc/timezone"))
+                                     (res (read-line port)))
+                                (close-port port)
+                                res)))
     (define timezone (get-value 'timezone config system-timezone))
     (define font-sans (and=> (get-value 'font-sans config) font-name))
 
@@ -438,8 +439,10 @@
       nyxt-f-name
       config
       `((local-time:reread-timezone-repository)
-        (setf local-time:*default-timezone*
-              (local-time:find-timezone-by-location-name ,timezone))
+        ,@(if (and timezone (not (unspecified? timezone)))
+              `((setf local-time:*default-timezone*
+                      (local-time:find-timezone-by-location-name ,timezone)))
+              '())
         (define-configuration web-buffer
           ((style
             (tailor:with-style 'web-buffer
