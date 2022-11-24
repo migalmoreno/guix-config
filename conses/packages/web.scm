@@ -40,7 +40,6 @@
     (build-system python-build-system)
     (arguments
      (list #:tests? #f)) ;needs network
-    (native-inputs (list python-pytest python-pytest-socket))
     (propagated-inputs (list python-attrs
                              python-beautifulsoup4
                              python-cachelib
