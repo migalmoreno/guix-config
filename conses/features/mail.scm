@@ -171,6 +171,16 @@ is not provided, use all the mail accounts."
     (require-value 'full-name config)
 
     (list
+     (emacs-xdg-service
+      emacs-f-name
+      "Emacs (Client) [mailto:]"
+      #~(system*
+         #$(file-append (get-value 'emacs config) "/bin/emacsclient") "--eval"
+         (string-append
+          "\
+(progn
+ (browse-url-mail \"" (cadr (command-line)) "\"))"))
+      #:default-for '(x-scheme-handler/mailto))
      (simple-service
       'home-message-emacs-tempel-service
       home-emacs-tempel-service-type
