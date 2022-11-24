@@ -310,7 +310,8 @@ but it won't appear on the right Maildir directory."
 ;;; feature-emacs-smtpmail
 ;;;
 
-(define* (feature-emacs-smtpmail)
+(define* (feature-emacs-smtpmail
+          #:key smtp-server smtp-user)
   "Configure smtpmail, a simple mail protocol for sending mail from Emacs."
 
   (define emacs-f-name 'smtpmail)
@@ -323,9 +324,13 @@ but it won't appear on the right Maildir directory."
       emacs-f-name
       config
       `((with-eval-after-load 'smtpmail
+          (setq smtpmail-smtp-user ,smtp-user)
+          (setq smtpmail-smtp-service 587)
           (setq smtpmail-stream-type 'starttls)
           (setq smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail")
-          (setq smtpmail-debug-info t))))))
+          (setq smtpmail-debug-info t)
+          (setq smtpmail-smtp-server ,smtp-server)
+          (setq smtpmail-default-smtp-server ,smtp-server))))))
 
   (feature
    (name f-name)
