@@ -12,6 +12,7 @@
   #:use-module (gnu packages mail)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
+  #:use-module (ice-9 match)
   #:export (feature-goimapnotify
             feature-emacs-ebdb
             feature-emacs-gnus
@@ -125,6 +126,7 @@ is not provided, use all the mail accounts."
           (require 'ebdb-i18n)
           (require 'ebdb-vcard)
           (require 'ebdb-org)
+          (require 'ebdb-mua)
           (setq ebdb-sources (list ,@ebdb-sources))
           (setq ebdb-default-country nil)
           (setq ebdb-default-window-size 0.2)
@@ -152,11 +154,14 @@ is not provided, use all the mail accounts."
 (define (default-message-signature config)
   (format #f "Best regards,\n~a" (get-value 'full-name config)))
 
+(define-public (string-or-boolean-or-procedure? x)
+  (or (string? x) (boolean? x) (procedure? x)))
+
 (define* (feature-emacs-message
           #:key
           (message-signature default-message-signature))
   "Configure Message, the mail composition mode for Emacs."
-  (ensure-pred procedure? message-signature)
+  (ensure-pred string-or-boolean-or-procedure? message-signature)
 
   (define emacs-f-name 'message)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -218,6 +223,12 @@ but it won't appear on the right Maildir directory."
               '())
           (add-hook 'message-header-setup-hook 'configure-message-add-gcc-header)
           (setq message-kill-buffer-on-exit t)
+          (setq message-signature
+                ,(match message-signature
+                   ((? procedure? e) (e config))
+                   ((? string? e) e)
+                   (#f 'nil)
+                   (_ 't)))
           ,@(cond
              ((get-value 'msmtp config)
               `((setq sendmail-program ,(file-append (get-value 'msmtp config) "/bin/msmtp"))
@@ -431,13 +442,24 @@ is not provided, use all the mail accounts."
           (setq gnus-kill-files-directory "~/.cache/gnus/News/")
           (setq gnus-article-save-directory "~/.cache/gnus/News/")
           (setq gnus-large-newsgroup 100)
+          ,@(if message-archive-method
+                `((setq gnus-message-archive-method ',message-archive-method))
+                '())
+          ,@(if message-archive-group
+                `((setq gnus-message-archive-group ',message-archive-group))
+                '())
+          (setq gnus-update-message-archive-method t)
           (setq gnus-posting-styles
                 '(,@(if (get-value 'msmtp config)
                         '()
                       (map (lambda (mail-acc)
                              `(,(symbol->string (mail-account-id mail-acc))
                                (name ,(get-value 'full-name config))
-                               (signature ,((get-value 'message-signature config) config))
+                               (signature ,(match (get-value 'message-signature config)
+                                             ((? procedure? e) (e config))
+                                             ((? string? e) e)
+                                             (#f 'nil)
+                                             (_ 't)))
                                ("X-Message-SMTP-Method"
                                 ,(format #f "smtp ~a ~a ~a"
                                          (assoc-ref (assoc-ref %default-msmtp-provider-settings
