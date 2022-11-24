@@ -20,15 +20,19 @@
 (define* (feature-lisp
           #:key
           (lisp sbcl)
+          (emacs-sly emacs-sly)
           (extra-sbclrc '())
           (extra-slynk '())
           (extra-packages '())
-          (extra-source-registry-entries '()))
+          (extra-source-registry-entries '())
+          (custom-sly-prompt? #f))
   (ensure-pred any-package? lisp)
+  (ensure-pred file-like? emacs-sly)
   (ensure-pred lisp-config? extra-sbclrc)
   (ensure-pred lisp-config? extra-slynk)
   (ensure-pred list-of-packages? extra-packages)
   (ensure-pred list? extra-source-registry-entries)
+  (ensure-pred boolean? custom-sly-prompt?)
 
   (define f-name 'lisp)
 
@@ -68,50 +72,19 @@
       `(,#~"lisp-mode"
            (lambda "(lambda (" p ")" n> r> ")")
            (fun "(defun " p " (" p ")\n \"" p "\"" n> r> ")")
-           (var "(defvar " p "\n  \"" p "\")")
-           (cond "(cond" n "(" q "))" >)
-           (let "(let (" p ")" n> r> ")")
-           (let* "(let* (" p ")" n> r> ")")
-           (dolist "(dolist (" p ")" n> r> ")")
-           ,#~"emacs-lisp-mode"
-           (lambda "(lambda (" p ")" n> r> ")")
-           (fun "(defun " p " (" p ")\n \"" p "\"" n> r> ")")
-           (var "(defvar " p "\n  \"" p "\")")
-           (cond "(cond" n "(" q "))" >)
-           (let "(let (" p ")" n> r> ")")
-           (let* "(let* (" p ")" n> r> ")")
-           (dolist "(dolist (" p ")" n> r> ")")
-           (autoload ";;;###autoload")
-           (pt "(point)")
-           (local "(defvar-local " p "\n \"" p "\")")
-           (const "(defconst " p "\n  \"" p "\")")
-           (custom "(defcustom " p "\n \"" p "\"" n> ":type '" p ")")
-           (face "(defface " p " '((t :inherit " p "))\n \"" p "\")")
-           (group "(defgroup " p " nil\n \"" p "\"" n> ":group '" p n> ":prefix \"" p "-\")")
            (macro "(defmacro " p " (" p ")\n \"" p "\"" n> r> ")")
-           (alias "(defalias '" p " '" p ")")
-           (iflet "(if-let (" p ")" n> r> ")")
-           (whenlet "(when-let (" p ")" n> r> ")")
-           (iflet* "(if-let* (" p ")" n> r> ")")
-           (whenlet* "(when-let* (" p ")" n> r> ")")
-           (andlet "(and-let* (" p ")" n> r> ")")
-           (pcase "(pcase " (p "scrutinee") n "(" q "))" >)
-           (rec "(letrec (" p ")" n> r> ")")
-           (dotimes "(dotimes (" p ")" n> r> ")")
-           (loop "(cl-loop for " p " in " p " do" n> r> ")")
-           (command "(defnn " p " (" p ")\n  \"" "\"" n> "(interactive" p ")" n> r> ")")
-           (advice "(defun " (p "adv" name) " (&rest app)" n> p n> "(apply app))" n>
-                   "(advice-add #'" (p "fun") " " (p ":around") " #'" (s name) ")")
-           (provide "(provide '" (file-name-base (or (buffer-file-name) (buffer-name))) ")" n
-                    ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name))) " ends here" n)))
+           (var "(defvar " p "\n  \"" p "\")")
+           (param "(defparameter " p "\n  \"" p "\")")
+           (const "(defconstant " p "\n  \"" p "\")")
+           (cond "(cond" n "(" q "))" >)
+           (let "(let (" p ")" n> r> ")")
+           (let* "(let* (" p ")" n> r> ")")
+           (dolist "(dolist (" p ")" n> r> ")")
+           (loop "(loop for " p " in " p " do" n> r> ")")))
      (rde-elisp-configuration-service
       f-name
       config
       `((require 'sly)
-        (defgroup configure-lisp nil
-          "Lisp tools and extensions."
-          :group 'configure)
-
         (defun configure-lisp-sly-autoconnect ()
           "Start a SLY REPL unless an active connection is already present."
           (unless (sly-connected-p)
@@ -171,23 +144,19 @@
           (setq sly-mrepl-history-file-name (expand-file-name "emacs/sly-mrepl-history" (xdg-cache-home)))
           (setq sly-mrepl-prevent-duplicate-history t)
           (setq sly-mrepl-pop-sylvester nil)
-          (setq sly-mrepl-prompt-formatter 'configure-lisp-sly-custom-prompt))
+          ,@(if custom-sly-prompt?
+                '((setq sly-mrepl-prompt-formatter 'configure-lisp-sly-custom-prompt))
+                '()))
         (with-eval-after-load 'org
           (require 'ob-lisp)
           (add-to-list 'org-structure-template-alist '("li" . "src lisp")))
         (with-eval-after-load 'ob-lisp
           (setq org-babel-lisp-eval-fn 'sly-eval))
         (with-eval-after-load 'ob-core
-          (setq org-babel-default-header-args:lisp
-                '((:results . "scalar")))))
+          (setq org-babel-default-header-args:lisp '((:results . "scalar")))))
       #:elisp-packages (list emacs-sly)
       #:summary "Extensions for Lisp tooling"
-      #:commentary "Provide extensions for Common Lisp programming utilities.")
-     (rde-nyxt-configuration-service
-      f-name
-      config
-      `((unless nyxt::*run-from-repl-p*
-          (start-slynk))))))
+      #:commentary "Provide extensions for Common Lisp programming utilities.")))
 
   (feature
    (name f-name)
