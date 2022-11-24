@@ -5,6 +5,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages glib)
+  #:use-module (gnu packages gtk)
   #:use-module (guix packages)
   #:use-module (guix git-download)
   #:use-module (guix build-system meson)
@@ -12,6 +13,8 @@
 
 ;; TODO: sofia_sip
 ;; TODO: callaudiod
+;; TODO: libcall-ui
+
 (define-public calls
   (package
     (name "calls")
@@ -23,7 +26,7 @@
              (url "https://gitlab.gnome.org/GNOME/calls")
              (commit (string-append "v" version))))
        (sha256
-        (base32 "1dqjfpayycz8spxm0wapas494vsdf0crfq2hyacyif0q4scsy42p"))
+        (base32 "046g61a88vzw4baqh1fhdn7g3cpiyslgddvx1q3nacb60zf4n619"))
        (file-name (git-file-name name version))))
     (build-system meson-build-system)
     (native-inputs
