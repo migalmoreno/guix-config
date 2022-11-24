@@ -42,13 +42,12 @@
     #:user-name "hydri"
     #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
     #:email (getenv "MAIL_PERSONAL_EMAIL")
-    #:user-groups '("wheel" "netdev" "audio" "video")
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-base-packages
     #:home-packages
     (strings->packages
-     "make" "nss-certs"
+     "make" "nss-certs" "glibc-locales"
      "seahorse" "gnome-contacts"
      "chatty" "pinentry-tty" "portfolio"))
    (feature-xdg
@@ -101,10 +100,7 @@
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
     #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
     #:pinentry-flavor 'emacs
-    #:default-ttl 34560000
-    #:gpg-agent-extra-config
-    '((no-greeting . #t)
-      (allow-preset-passphrase . #t)))
+    #:default-ttl 34560000)
    (feature-password-store
     #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
    (feature-nyxt
@@ -229,7 +225,7 @@
    (feature-nyxt-prompt)
    (feature-nyxt-mosaic)
    (feature-nyxt-status
-    #:height 30
+    #:height 60
     #:glyphs? #t
     #:format-status-buttons
     '((:raw
@@ -237,7 +233,7 @@
        (format-status-reload-button status)
        (format-status-forwards-button status)
        (format-status-close-button status)
-       (format-status-switch-buffer-button sttatus)
+       (format-status-switch-buffer-button status)
        (format-status-execute-button status)))
     #:format-status
     '((:div :id "container"
