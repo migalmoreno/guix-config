@@ -69,7 +69,8 @@
           (extra-config-lisp '())
           (auto-mode-rules '())
           (extra-bindings '())
-          (default-new-buffer-url "nyxt:new"))
+          (default-new-buffer-url "nyxt:new")
+          (autostart? #f))
   "Configure the Nyxt browser."
   (ensure-pred file-like? nyxt)
   (ensure-pred boolean? default-browser?)
@@ -81,6 +82,7 @@
   (ensure-pred lisp-config? auto-mode-rules)
   (ensure-pred list? extra-bindings)
   (ensure-pred string? default-new-buffer-url)
+  (ensure-pred boolean? autostart?)
 
   (define f-name 'nyxt)
 
@@ -154,7 +156,11 @@
          (define-configuration browser
            ((default-cookie-policy ,default-cookie-policy)
             (restore-session-on-startup-p nil)
-            (default-new-buffer-url (quri:uri ,default-new-buffer-url))))))
+            (default-new-buffer-url (quri:uri ,default-new-buffer-url))))
+         ,@(if autostart?
+               '((unless nyxt::*run-from-repl-p*
+                   (start-slynk)))
+               '())))
       (service
        home-nyxt-service-type
        (home-nyxt-configuration
