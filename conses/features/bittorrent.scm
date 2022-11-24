@@ -23,6 +23,17 @@
   (define (get-home-services config)
     "Return home services related to Transmission."
     (list
+     (emacs-xdg-service
+      f-name
+      "Emacs (Client) [BitTorrent:]"
+      #~(system*
+         #$(file-append (get-value 'emacs config) "/bin/emacsclient") "--eval"
+         (string-append
+          "\
+(progn
+ (transmission-add \"" (cadr (command-line)) "\")
+ (revert-buffer))"))
+      #:default-for '(x-scheme-handler/magnet application/x-bittorrent))
      (service home-transmission-service-type
               (home-transmission-configuration
                (transmission transmission)))
