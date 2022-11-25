@@ -12,6 +12,7 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (ice-9 match)
   #:export (feature-emacs-appearance
             feature-emacs-whitespace
             feature-emacs-cursor
@@ -1486,6 +1487,9 @@ operate on buffers like Dired."
    (values `((,f-name . #t)))
    (home-services-getter get-home-services)))
 
+(define (file-like-or-path-or-boolean? x)
+  (or (boolean? x) (file-like-or-path? x)))
+
 (define* (feature-emacs-dashboard
           #:key
           (emacs-dashboard emacs-dashboard)
@@ -1502,11 +1506,7 @@ operate on buffers like Dired."
           (heading-icons #f)
           (set-file-icons? #f)
           (navigator-buttons #f)
-          (banner (file-append emacs-dashboard
-                               "share/emacs/site-lisp/"
-                               (package-name emacs-dashboard)
-                               (package-version emacs-dashboard)
-                               "/banners/emacs.png"))
+          (banner #f)
           (banner-max-height 0)
           (banner-max-width 0)
           (org-agenda-weekly? #t)
@@ -1537,7 +1537,7 @@ operate on buffers like Dired."
   (ensure-pred maybe-list? heading-icons)
   (ensure-pred boolean? set-file-icons?)
   (ensure-pred maybe-list? navigator-buttons)
-  (ensure-pred file-like-or-path? banner)
+  (ensure-pred file-like-or-path-or-boolean? banner)
   (ensure-pred number? banner-max-height)
   (ensure-pred number? banner-max-width)
   (ensure-pred boolean? org-agenda-weekly?)
@@ -1596,7 +1596,9 @@ operate on buffers like Dired."
                 '())
           (setq dashboard-banner-logo-title ,logo-title)
           ,@(if banner
-                `((setq dashboard-startup-banner ,banner)
+                `((setq dashboard-startup-banner ,(match banner
+                                                    (#t ':official)
+                                                    (e e)))
                   (setq dashboard-image-banner-max-height ,banner-max-height)
                   (setq dashboard-image-banner-max-width ,banner-max-width))
                 '())
