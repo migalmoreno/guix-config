@@ -245,6 +245,7 @@ EndSection"))
    (feature-emacs-pulseaudio-control
     #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
    (feature-emacs-org
+    #:document-converters? #t
     #:org-capture-templates
     '(("t" "Tasks/Projects")
       ("tt" "TODO Entry" entry (file+headline "~/documents/tasks.org" "TODOs")

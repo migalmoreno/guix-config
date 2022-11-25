@@ -1792,7 +1792,8 @@ operate on buffers like Dired."
           (org-archive-location (format #f "~a/archive.org::* From %s" org-directory))
           (emacs-org-modern emacs-org-modern-next)
           (org-modern? #t)
-          (org-indent? #t))
+          (org-indent? #t)
+          (document-converters? #f))
   "Configure Org Mode, the outline-based note management tool
 and organizer for Emacs."
   (ensure-pred path? org-directory)
@@ -1805,6 +1806,7 @@ and organizer for Emacs."
   (ensure-pred any-package? emacs-org-modern)
   (ensure-pred boolean? org-modern?)
   (ensure-pred boolean? org-indent?)
+  (ensure-pred boolean? document-converters?)
 
   (define emacs-f-name 'org)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -1814,11 +1816,14 @@ and organizer for Emacs."
     (define unoconv (@ (gnu packages libreoffice) unoconv))
 
     (append
+     (if document-converters?
+         (list
+          (simple-service
+           'emacs-org-profile-service
+           home-profile-service-type
+           (list unoconv)))
+         '())
      (list
-      (simple-service
-       'emacs-org-profile-service
-       home-profile-service-type
-       (list unoconv))
       (rde-elisp-configuration-service
        emacs-f-name
        config
