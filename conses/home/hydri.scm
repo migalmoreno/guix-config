@@ -47,9 +47,15 @@
    (feature-base-packages
     #:home-packages
     (strings->packages
-     "make" "nss-certs" "glibc-locales"
-     "seahorse" "gnome-contacts" "gnome-console"
-     "chatty" "pinentry-tty" "portfolio"))
+     "make"
+     "nss-certs"
+     "glibc-locales"
+     ;; "seahorse"
+     ;; "gnome-contacts"
+     "gnome-console"
+     "chatty"
+     "pinentry-tty"
+     "portfolio"))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
@@ -79,7 +85,7 @@
         (stop #~(make-kill-destructor)))))))
    (feature-proxy
     #:youtube-proxy "https://invidio.xamh.de"
-    #:google-proxy (string-append "https://whoogle." (getenv "DOMAIN")))
+    #:google-proxy #f)
    (feature-fonts)
    (feature-emacs
     #:emacs emacs-next-pgtk
@@ -89,7 +95,7 @@
    (feature-gtk
     #:dark-theme? #t
     #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
-    #:icon-theme (make-theme "Tango" (@ (gnu packages gnome) tango-icon-theme))
+    #:icon-theme (make-theme "Adwaita" (@ (gnu packages gnome) adwaita-icon-theme))
     #:custom-gtk-theme (lambda _
                          `((.phosh-topbar-clock
                             ((margin-left . 125px))))))
@@ -99,7 +105,7 @@
    (feature-gnupg
     #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
     #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
-    #:pinentry-flavor 'emacs
+    #:pinentry-flavor 'tty
     #:default-ttl 34560000)
    (feature-password-store
     #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
@@ -225,7 +231,7 @@
    (feature-nyxt-prompt)
    (feature-nyxt-mosaic)
    (feature-nyxt-status
-    #:height 60
+    #:height 40
     #:glyphs? #t
     #:format-status-buttons
     '((:raw
@@ -353,4 +359,122 @@
    (feature-lisp
     #:extra-source-registry-entries
     `(("common-lisp/source-registry.conf.d/10-home.conf"
-       ,(plain-file "10-home.conf" (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))))
+       ,(plain-file "10-home.conf" (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))
+   (feature-emacs-org
+    #:org-capture-templates
+    '(("t" "Tasks/Projects")
+      ("tt" "TODO Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
+       "* TODO %? %^G\n%U\n"
+       :empty-lines 1)
+      ("tl" "Linked Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
+       "* TODO %? %a %^G\n%U\n"
+       :immediate-finish 1)
+      ("tb" "Read It Later" entry (file+headline "~/documents/tasks.org" "Read It Later")
+       "* %a %^G"
+       :immediate-finish 1)
+      ("tv" "Watch It Later" entry (file+headline "~/documents/tasks.org" "Watch It Later")
+       "* %a %^G"
+       :immediate-finish 1)
+      ("th" "Habit Entry" entry (file+headline "~/documents/tasks.org" "Habits")
+       "* TODO %? %^G\nSCHEDULED:%^t\n:PROPERTIES:\n:STYLE: habit\n:END:"
+       :empty-lines 1)
+      ("tc" "Critical TODO Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
+       "* INTR %? %^G\n%U\n"
+       :empty-lines 1)
+      ("ts" "TODO Entry with Subtasks" entry (file+headline "~/documents/tasks.org" "TODOs")
+       "* TODO %? [/]\n- [ ]"
+       :empty-lines 1)
+      ("td" "Scheduled Task" entry (file+headline "~/documents/tasks.org" "TODOs")
+       "* TODO %?\nSCHEDULED: %^T"
+       :empty-lines 1))
+    #:org-priority-faces
+    '((?A . (:foreground "#FF665C" :weight bold))
+      (?B . (:foreground "#51AFEF"))
+      (?C . (:foreground "#4CA171")))
+    #:org-todo-keywords
+    '((sequence "TODO(t)" "NEXT(n)" "PROG(p)" "INTR(i)" "|" "DONE(d!)")
+      (sequence "GOING(g)" "|" "MISSED(m@)" "ATTENDED(a@)"))
+    #:org-todo-keyword-faces
+    '(("TODO" . "#ff665c")
+      ("NEXT" . "#FCCE7B")
+      ("PROG" . "#51afef")
+      ("INTR" . "#a991f1")
+      ("DONE" . "#7bc275"))
+    #:org-tag-alist
+    '((:startgroup)
+      (:endgroup)
+      ("work" . ?w)
+      ("emacs" . ?e)
+      ("project" . ?p)
+      ("linux" . ?l)
+      ("education" . ?d)
+      ("finance" . ?f)
+      ("guix" . ?g)
+      ("chore" . ?c)))
+   (feature-emacs-org-agenda
+    #:org-agenda-files
+    '("~/documents/tasks.org"))
+   (feature-emacs-org-roam
+    #:org-roam-directory "~/notes"
+    #:org-roam-dailies-directory "journal/"
+    #:org-roam-capture-templates
+    `(("d" "default" plain "%?"
+       :if-new (file+head
+                "%<%Y%m%d%H%M%S>-${slug}.org"
+                "#+title: ${title}\n#+filetags: :${Topic}:\n")
+       :unnarrowed t)
+      ("e" "Programming Concept" plain
+       ,(string-append
+         "#+begin_src %^{Language|elisp|lisp|scheme"
+         "|clojure|ocaml|js}\n%?\n#+end_src\n")
+       :if-new (file+head
+                "%<%Y%m%d%H%M%S>-${slug}.org"
+                ,(string-append
+                  ":PROPERTIES:\n:DATA_TYPE: "
+                  "%^{Data Type|Function|Method|Variable|Macro|Procedure}"
+                  "\n:END:\n#+title: ${title}\n#+filetags: :${Topic}:"))
+       :unnarrowed t)
+      ("r" "Referenced Concept" plain "%?"
+       :if-new (file+head
+                "%<%Y%m%d%H%M%S>-${slug}.org"
+                ,(string-append
+                  ":PROPERTIES:\n:ROAM_REFS: %^{Reference}\n:END:\n"
+                  "#+title: ${title}\n#+filetags: :${Topic}:"))
+       :unnarrowed t)
+      ("w" "Web Resource" plain "%?"
+       :if-new (file+head
+                "%<%Y%m%d%H%M%S>-${slug}.org"
+                ,(string-append
+                  ":PROPERTIES:\n:ROAM_REFS: %l\n:END:\n"
+                  "#+title: ${title}\n#+filetags: :${Topic}:"))
+       :unnarrowed t)
+      ("r" "Recipe" plain "* Ingredients\n- %?\n* Directions"
+       :if-new (file+head
+                "%<%Y%m%d%H%M%S>-${title}.org"
+                ,(string-append
+                  ":PROPERTIES:\n:ROAM_REFS: %l\n"
+                  ":MEAL_TYPE: %^{Meal Type|Lunch\|Breakfast|Appetizer|Dessert}"
+                  "\n:END:\n#+title: ${title}\n#+filetags: :cooking:"))
+       :unnarrowed t)
+      ("b" "Book" plain
+       "* Chapters\n%?"
+       :if-new (file+head
+                "%<%Y%M%d%H%M%S>-${slug}.org"
+                ,(string-append
+                  ":PROPERTIES:\n:AUTHOR: ${Author}\n:DATE: ${Date}\n"
+                  ":PUBLISHER: ${Publisher}\n:EDITION: ${Edition}\n:END:\n"
+                  "#+title: ${title}\n#+filetags: :${Topic}:"))
+       :unnarrowed t))
+    #:org-roam-dailies-capture-templates
+    '(("d" "default" entry
+       "* %<%I:%M %p>: %?"
+       :if-new (file+head "%<%Y-%m-%d>.org"
+                          "#+title: %<%Y-%m-d>\n"))))
+   (feature-emacs-time
+    #:timezones
+    '(("Europe/London" "London")
+      ("Europe/Madrid" "Madrid")
+      ("Europe/Moscow" "Moscow")
+      ("America/New_York" "New York")
+      ("Australia/Sydney" "Sydney")))
+   (feature-emacs-which-key)))
