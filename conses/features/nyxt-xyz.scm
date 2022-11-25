@@ -515,7 +515,7 @@ search engines for Nyxt."
             (append
              %slot-value%
              (list
-              ,@(if (get-value 'proxy config)
+              ,@(if (get-value 'google-proxy config)
                     `((engines:whoogle
                        :shortcut "who"
                        :fallback-url
@@ -529,15 +529,19 @@ search engines for Nyxt."
                        :lang-ui :english
                        :view-image t
                        :no-javascript t
-                       :new-tab t)
-                      (engines:invidious
+                       :new-tab t))
+                    '())
+              ,@(if (get-value 'youtube-proxy config)
+                    `((engines:invidious
                        :shortcut "yt"
                        :fallback-url
                        (quri:uri ,(get-value 'youtube-proxy config))
                        :base-search-url
                        ,(string-append (get-value 'youtube-proxy config)
-                                       "/search?q=~a"))
-                      (engines:teddit
+                                       "/search?q=~a")))
+                    '())
+              ,@(if (get-value 'reddit-proxy config)
+                    `((engines:teddit
                        :shortcut "re"
                        :fallback-url
                        (quri:uri ,(get-value 'reddit-proxy config))
