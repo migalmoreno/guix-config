@@ -79,7 +79,7 @@
                        :flex-grow "6"
                        :flex-shrink "3")
                       ("@media screen and (max-width: 768px)"
-                       ("body"
+                       ("#url"
                         :flex-grow "3"
                         :flex-shrink "2"))
                       ("#url button"
@@ -508,7 +508,7 @@ search engines for Nyxt."
      (rde-nyxt-configuration-service
       nyxt-f-name
       config
-      `((define-configuration buffer
+      `((define-configuration context-buffer
           ((search-auto-complete-p ,(if auto-complete? 't 'nil))
            (search-always-auto-complete-p ,(if auto-complete? 't 'nil))
            (search-engines
