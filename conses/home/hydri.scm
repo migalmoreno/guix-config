@@ -48,7 +48,7 @@
     #:home-packages
     (strings->packages
      "make" "nss-certs" "glibc-locales"
-     "seahorse" "gnome-contacts"
+     "seahorse" "gnome-contacts" "gnome-console"
      "chatty" "pinentry-tty" "portfolio"))
    (feature-xdg
     #:xdg-user-directories-configuration
@@ -249,6 +249,10 @@
     '((router:make-route
        (match-regex ".*/watch\\?.*v=.*")
        :redirect "www.youtube.com"
+       :external (lambda (req)
+                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
+      (router:make-route
+       (match-regex "https://(m.)?soundcloud.com/.*/.*")
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil :audio t :repeat t)))
       (router:make-route
