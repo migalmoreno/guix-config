@@ -34,7 +34,7 @@
 (define-public %hydri-ssh-key
   (plain-file
    "hydri.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9qhkk0r5Tos8xL7HmDIld6m0L5AvDe5jRUFoQHxpTM"))
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9qhkk0r5Tos8xL7HmDIld6m0L5AvDe5jRUFoQHxpTM\n"))
 
 (define-public %home-features
   (list
@@ -53,7 +53,8 @@
      ;; "seahorse"
      ;; "gnome-contacts"
      "gnome-console"
-     "chatty"
+     "calls"
+     ;; "chatty"
      "pinentry-tty"
      "portfolio"
      "pavucontrol"))
@@ -83,7 +84,11 @@
                         "-no-browser"
                         "-no-restart")))
         (respawn? #f)
-        (stop #~(make-kill-destructor)))))))
+        (stop #~(make-kill-destructor)))))
+     (simple-service
+      'home-custom-environment-variables
+      home-environment-variables-service-type
+      '(("GTK_THEME" . "postmarketos-oled")))))
    (feature-proxy
     #:youtube-proxy "https://invidio.xamh.de"
     #:google-proxy #f)
