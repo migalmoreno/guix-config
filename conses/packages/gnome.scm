@@ -32,7 +32,11 @@
               (file-name (git-file-name (package-name feedbackd) version))
               (sha256
                (base32
-                "1r6ficcmki2fr89m0nvi3z0xyzk87z1d4f9ljyyw5ayg48862lcp"))))))
+                "1r6ficcmki2fr89m0nvi3z0xyzk87z1d4f9ljyyw5ayg48862lcp"))))
+    (arguments
+     `(#:configure-flags
+       ;; Introspection data cannot currently be cross-compiled.
+       (list "-Dintrospection=disabled")))))
 
 (define-public sofia-sip
   (package
