@@ -55,7 +55,8 @@
      "gnome-console"
      "chatty"
      "pinentry-tty"
-     "portfolio"))
+     "portfolio"
+     "pavucontrol"))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
@@ -121,6 +122,7 @@
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
                       "--add-metadata" "--compat-options" "all"))
    (feature-mpv
+    #:mpv (@ (conses packages video) mpv-34)
     #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next)
     #:extra-mpv-conf
     `((border . no)
