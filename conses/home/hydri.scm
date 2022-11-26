@@ -50,14 +50,15 @@
      "make"
      "nss-certs"
      "glibc-locales"
-     ;; "seahorse"
+     "seahorse"
      ;; "gnome-contacts"
-     "gnome-console"
-     "calls"
      ;; "chatty"
+     ;; "calls"
+     "gnome-console"
      "pinentry-tty"
      "portfolio"
-     "pavucontrol"))
+     "pavucontrol"
+     "srain"))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
@@ -207,6 +208,7 @@
        :id 'mpv-playing-time
        :label 'mpv-playing-time-string)))
    (feature-emacs-emms)
+   (feature-transmission)
    (feature-bluetooth)
    (feature-nyxt-nx-tailor
     #:auto? #f
