@@ -64,7 +64,7 @@
                        :background "inherit"
                        :box-sizing "border-box")
                       ("#controls button"
-                       :color theme:on-background
+                       :color theme:on-primary
                        :padding "3px")
                       (".arrow-right, .arrow-left"
                        :clip-path "none"
@@ -78,10 +78,6 @@
                        :align-items "center"
                        :flex-grow "6"
                        :flex-shrink "3")
-                      ("@media screen and (max-width: 768px)"
-                       ("#url"
-                        :flex-grow "3"
-                        :flex-shrink "2"))
                       ("#url button"
                        :white-space "nowrap"
                        :text-overflow "ellipsis"
@@ -89,7 +85,30 @@
                       ("#modes"
                        :background "inherit"
                        :padding-left "5px"
-                       :flex-grow "1")))))
+                       :flex-grow "1")
+                      ("@media screen and (max-width: 768px)"
+                       ("#container"
+                        :padding "0 2px")
+                       ("#url"
+                        :flex-grow "3"
+                        :flex-shrink "2")
+                       ("#controls"
+                        :flex-basis "10em")
+                       ("#controls button"
+                        :border-color theme:secondary
+                        :padding "0 5px"
+                        :margin 0
+                        :border "1px solid")
+                       ("#controls button:not(:first-of-type):not(:last-of-type)"
+                        :border-width "1px 1px 1px 0px")
+                       ("#controls button:first-of-type"
+                        :border-width "1px"
+                        :border-style "solid"
+                        :border-radius "5px 0px 0px 5px")
+                       ("#controls button:last-of-type"
+                        :border-width "1px 1px 1px 0px"
+                        :border-style "solid"
+                        :border-radius "0px 5px 5px 0px"))))))
                 (define-configuration window
                   ((message-buffer-style
                     (tailor:with-style 'window
@@ -300,7 +319,9 @@
               `((setq nyxt-startup-flags ',startup-flags)))
              (else '())))
         (with-eval-after-load 'nyxt-autoloads
-          (nyxt-default-keybindings)))
+          (nyxt-default-keybindings))
+        (with-eval-after-load 'nyxt
+          (setq nyxt-autostart-delay 5)))
       #:elisp-packages (list emacs-nyxt))))
 
   (feature
@@ -467,7 +488,10 @@
                :color theme:on-background
                :background (if (theme:dark-p theme:theme)
                                theme:secondary
-                               theme:primary))))))
+                               theme:primary))
+              ("@media screen and (max-width: 768px)"
+               ("body"
+                :font-size "12px"))))))
         (define-configuration web-buffer
           ((default-modes `(tailor:tailor-mode ,@%slot-value%))))
         (define-configuration nyxt/repl-mode:repl-mode
