@@ -246,6 +246,7 @@
        (format-status-reload-button status)
        (format-status-forwards-button status)
        (format-status-close-button status)
+       (format-status-new-buffer-button status)
        (format-status-switch-buffer-button status)
        (format-status-execute-button status)))
     #:format-status

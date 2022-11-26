@@ -64,7 +64,7 @@
                        :background "inherit"
                        :box-sizing "border-box")
                       ("#controls button"
-                       :color theme:on-primary
+                       :color theme:on-background
                        :padding "3px")
                       (".arrow-right, .arrow-left"
                        :clip-path "none"
@@ -76,6 +76,7 @@
                        :padding-left "5px"
                        :display "flex"
                        :align-items "center"
+                       :box-sizing "border-box"
                        :flex-grow "6"
                        :flex-shrink "3")
                       ("#url button"
@@ -88,27 +89,31 @@
                        :flex-grow "1")
                       ("@media screen and (max-width: 768px)"
                        ("#container"
-                        :padding "0 2px")
+                        :padding "0 1px")
                        ("#url"
-                        :flex-grow "3"
+                        :flex-basis "5em"
+                        :flex-grow "2"
                         :flex-shrink "2")
                        ("#controls"
-                        :flex-basis "10em")
+                        :width "fit-content"
+                        :flex-basis "auto")
                        ("#controls button"
-                        :border-color theme:secondary
-                        :padding "0 5px"
+                        :padding "5px 10px"
                         :margin 0
-                        :border "1px solid")
+                        :border-color "#505050"
+                        :border-width "1px")
                        ("#controls button:not(:first-of-type):not(:last-of-type)"
-                        :border-width "1px 1px 1px 0px")
+                        :border-width "1px 1px 1px 0px"
+                        :border-style "solid"
+                        :border-color "#505050")
                        ("#controls button:first-of-type"
                         :border-width "1px"
                         :border-style "solid"
-                        :border-radius "5px 0px 0px 5px")
+                        :border-radius "3px 0px 0px 3px")
                        ("#controls button:last-of-type"
                         :border-width "1px 1px 1px 0px"
                         :border-style "solid"
-                        :border-radius "0px 5px 5px 0px"))))))
+                        :border-radius "0px 3px 3px 0px"))))))
                 (define-configuration window
                   ((message-buffer-style
                     (tailor:with-style 'window
@@ -161,6 +166,15 @@
                      :onclick (ps:ps (nyxt/ps:lisp-eval
                                       (:title "switch current buffer" :buffer status)
                                       (nyxt:switch-buffer))) "◱")))
+
+        (defmethod format-status-new-buffer-button ((status status-buffer))
+          (spinneret:with-html-string
+            (:button :type "button" :class "button"
+                     :title "New Buffer"
+                     :onclick (ps:ps (nyxt/ps:lisp-eval
+                                      (:title "new buffer" :buffer status)
+                                      (nyxt:set-url-new-buffer))) "🞣")))
+
         ,@(if format-status-buttons
               `((defmethod format-status-buttons :around ((status status-buffer))
                   (spinneret:with-html-string
