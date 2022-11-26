@@ -492,7 +492,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
 
 (define-public emacs-nyxt
-  (let ((commit "c2b506ac29084ea543948f5d711b49cc00b017ee")
+  (let ((commit "79054e233db04f1417e5a3e1bb8e13555909df92")
         (revision "0"))
     (package
       (name "emacs-nyxt")
@@ -506,7 +506,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0383bpnfx474jwqla6mn2gn7ayg7xfxf6c4a0b17lq1dnvw80gqa"))))
+          (base32 "1v4gpnp9qqqkgj7zk7dbn4w3y6bm1v3d909w0dx9dc3hx2jib0js"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-sly))
