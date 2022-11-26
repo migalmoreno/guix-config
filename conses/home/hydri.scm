@@ -34,7 +34,7 @@
 (define-public %hydri-ssh-key
   (plain-file
    "hydri.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICqtb3b6t96P/wJgaf+SoZfv2aRa/ZgREO6LEmydnfyV\n"))
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9qhkk0r5Tos8xL7HmDIld6m0L5AvDe5jRUFoQHxpTM"))
 
 (define-public %home-features
   (list
