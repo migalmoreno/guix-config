@@ -29,10 +29,7 @@
       #~(system*
          #$(file-append (get-value 'emacs config) "/bin/emacsclient") "--eval"
          (string-append
-          "\
-(progn
- (transmission-add \"" (cadr (command-line)) "\")
- (revert-buffer))"))
+          "(transmission-add \"" (cadr (command-line)) "\")"))
       #:default-for '(x-scheme-handler/magnet application/x-bittorrent))
      (service home-transmission-service-type
               (home-transmission-configuration
