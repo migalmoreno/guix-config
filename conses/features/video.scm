@@ -273,6 +273,7 @@ proxy url as per `configure-browse-url-mappings'."
          (advice-add 'mpv-start :around 'configure-browse-url-add-scheme)
          (with-eval-after-load 'mpv
            (setq mpv-seek-step 3)
+           (setq mpv-display-title-truncate-threshold 25)
            ,@(if (get-value 'emacs-all-the-icons config)
                  '((eval-when-compile
                      (require 'all-the-icons))
