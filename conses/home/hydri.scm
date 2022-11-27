@@ -276,8 +276,10 @@
                     "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil)))
-      (router:make-route (match-scheme "mailto" "magnet")
-                         :external "xdg-open ~s")))
+      (router:make-route (match-scheme "magnet")
+                         :external (lambda (req)
+                                     (eval-in-emacs
+                                      `(transmission-add ,(render-url (url req))))))))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
