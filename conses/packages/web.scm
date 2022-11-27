@@ -26,3 +26,23 @@
          ((#:configure-flags configure-flags)
           #~(cons* "--with-http_dav_module"
                    #$configure-flags))))))
+
+(define-public jellyfin
+  (package
+    (name "jellyfin")
+    (version "10.8.7")
+    (source
+     (origin
+       (method git-fetch)
+       (uri "https://github.com/jellyfin/jellyfin")
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "1pcq06m9kjd4ycr8prhdihma26hk3vdz5m6j020bf4pcv5jpg2hf"))))
+    (build-system trivial-build-system)
+    (build-inputs
+     (list dotnet))
+    (home-page "https://github.com/jellyfin/jellyfin")
+    (synopsis "Free Software Media System")
+    (description "Jellyfin is a Free Software Media System that
+puts you in control of managing and streaming your media.")
+    (license license:gpl2)))
