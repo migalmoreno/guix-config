@@ -142,6 +142,7 @@
       (osd-level . 0)
       (slang . en)
       (ytdl-raw-options . "ignore-config=,sub-lang=en,write-auto-sub=")
+      (sub-font-size . 35)
       (script-opts-add=osc-visibility . never)
       (script-opts-add=osc-windowcontrols . no))
     #:extra-bindings
