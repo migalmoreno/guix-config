@@ -676,7 +676,7 @@ EndSection"))
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil)))
       (router:make-route (match-scheme "mailto" "magnet")
-                         :external "xdg-open ~a")))
+                         :external "xdg-open ~s")))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
