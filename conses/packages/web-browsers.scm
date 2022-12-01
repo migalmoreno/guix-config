@@ -1,5 +1,4 @@
 (define-module (conses packages web-browsers)
-  #:use-module (gnu packages tls)
   #:use-module (gnu packages aspell)
   #:use-module (gnu packages lisp-xyz)
   #:use-module (gnu packages gstreamer)
