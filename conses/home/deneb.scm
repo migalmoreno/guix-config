@@ -16,4 +16,6 @@
     (modify-services (@@ (rde features base) %rde-desktop-system-services)
       (delete network-manager-service-type)))
    (feature-pantalaimon
-    #:pantalaimon pantalaimon-next)))
+    #:pantalaimon pantalaimon-next
+    #:ignore-device-verification? #t
+    #:ssl? #f)))
