@@ -13,7 +13,7 @@
   #:export (feature-nyxt-status
             feature-nyxt-prompt
             feature-nyxt-emacs
-            feature-nyxt-mosaic
+            feature-nyxt-nx-mosaic
             feature-nyxt-userscript
             feature-nyxt-blocker
             feature-nyxt-hint
@@ -275,9 +275,11 @@
 
 (define* (feature-nyxt-emacs
           #:key
-          (emacs-nyxt emacs-nyxt))
+          (emacs-nyxt emacs-nyxt)
+          (autostart-delay 0))
   "Configure integration with the GNU Emacs editor in Nyxt."
   (ensure-pred file-like? emacs-nyxt)
+  (ensure-pred integer? autostart-delay)
 
   (define nyxt-f-name 'emacs)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
@@ -285,7 +287,7 @@
   (define (get-home-services config)
     "Return home services related to the Emacs integration in Nyxt."
 
-    (define development? (get-value 'nyxt-development? config))
+    (define development? (get-value 'nyxt-development-version? config))
     (define startup-flags (get-value 'nyxt-startup-flags config))
 
     (list
@@ -313,29 +315,16 @@
                    'consult-bookmark-narrow
                    `(?n "Nyxt" ,'configure-browse-url-bookmark-jump))))
               '())
-        (with-eval-after-load 'nyxt
-          ,@(cond
-             ((and development? (null? startup-flags))
-              `((setq nyxt-path (executable-find "guix"))
-                (setq nyxt-startup-flags
-                      (when (file-exists-p
-                             (expand-file-name
-                              "nyxt-dev.desktop"
-                              (concat (xdg-data-home) "/applications/")))
-                        (thread-last
-                         (xdg-data-home)
-                         (format "%s/applications/nyxt-dev.desktop")
-                         (xdg-desktop-read-file)
-                         (gethash "Exec")
-                         (split-string)
-                         (cdr))))))
-             ((not (null? startup-flags))
-              `((setq nyxt-startup-flags ',startup-flags)))
-             (else '())))
         (with-eval-after-load 'nyxt-autoloads
           (nyxt-default-keybindings))
         (with-eval-after-load 'nyxt
-          (setq nyxt-autostart-delay 5)))
+          ,@(if development?
+                `((setq nyxt-path (executable-find "guix")))
+                '())
+          ,@(if (null? startup-flags)
+                '()
+                `((setq nyxt-startup-flags ',startup-flags)))
+          (setq nyxt-autostart-delay ,autostart-delay)))
       #:elisp-packages (list emacs-nyxt))))
 
   (feature
@@ -344,10 +333,10 @@
              (emacs-nyxt . ,emacs-nyxt)))
    (home-services-getter get-home-services)))
 
-(define* (feature-nyxt-mosaic)
+(define* (feature-nyxt-nx-mosaic)
   "Configure nx-mosaic, an extensible and configurable new-buffer page for Nyxt."
 
-  (define nyxt-f-name 'mosaic)
+  (define nyxt-f-name 'nx-mosaic)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
 
   (define (get-home-services config)
@@ -584,7 +573,8 @@ search engines for Nyxt."
                        :fallback-url
                        (quri:uri ,(get-value 'reddit-proxy config))
                        :base-search-url
-                       ,(string-append (get-value 'reddit-proxy config))))
+                       ,(string-append (get-value 'reddit-proxy config)
+                                       "/search?q=~a")))
                     '())
               ,@extra-engines))))))
       #:lisp-packages '(nx-search-engines))))
