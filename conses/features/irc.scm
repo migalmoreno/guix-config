@@ -46,9 +46,11 @@
 
 (define* (feature-emacs-erc
           #:key
-          (autojoin-channels-alist '()))
+          (autojoin-channels-alist '())
+          (erc-key "i"))
   "Configure the extensible IRC client for Emacs."
   (ensure-pred list? autojoin-channels-alist)
+  (ensure-pred string? erc-key)
 
   (define emacs-f-name 'erc)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -64,11 +66,10 @@
       `((require 'erc)
         (require 'erc-status-sidebar)
         (require 'configure-rde-keymaps)
-
         (defgroup configure-erc nil
           "Extra customizations for ERC."
           :group 'configure)
-
+        (cl-defstruct configure-erc-user id network nick bouncer-p)
         (defcustom configure-erc-users '()
           "A list of `configure-erc-user' structs that hold IRC accounts."
           :type 'list
@@ -87,15 +88,19 @@
                 (add-to-list 'configure-completion-initial-narrow-alist '(erc-mode . ?i)))
               '())
 
-        (cl-defstruct configure-erc-user
-          "An ERC user."
-          id network nick bouncer-p)
-
         (defun configure-erc-connect (user)
-          "Connect USER to IRC network via tls."
+          "Connect USER to irc network via tls."
           (interactive
-           (list (cl-find (intern (completing-read "User: " (mapcar 'configure-erc-user-id
-                                                                    configure-erc-users)))
+           (list (cl-find (intern (completing-read
+                                   "User: "
+                                   (lambda (string pred action)
+                                     (if (eq action 'metadata)
+                                         `(metadata
+                                           ,(cons 'display-sort-function 'identity))
+                                         (complete-with-action
+                                          action
+                                          (mapcar 'configure-erc-user-id configure-erc-users)
+                                          string pred)))))
                           configure-erc-users :key 'configure-erc-user-id)))
           (let ((network (configure-erc-user-network user))
                 (nick (configure-erc-user-nick user)))
@@ -154,7 +159,7 @@
           "Add left padding on the sidebar formatted channels list."
           (concat " " (funcall fun channame num-messages erc-face)))
 
-        (define-key rde-app-map "i" 'configure-erc-connect)
+        (define-key rde-app-map (kbd ,erc-key) 'configure-erc-connect)
         (setq configure-erc-users
               (list
                ,@(map
