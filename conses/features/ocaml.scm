@@ -86,23 +86,22 @@
        f-name
        config
        `((require 'configure-rde-keymaps)
-
          (defgroup configure-ocaml nil
-                   "General OCaml programming utilities."
-                   :group 'configure)
+           "General OCaml programming utilities."
+           :group 'configure)
 
          ,@(if opam?
                '((defun configure-ocaml-load-merlin ()
-                        "Set up `merlin-mode' for OCaml."
-                        (let ((opam-share (car (process-lines "opam" "var" "share"))))
-                          (when (and opam-share (file-directory-p opam-share))
-                            (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
+                   "Set up `merlin-mode' for OCaml."
+                   (let ((opam-share (car (process-lines "opam" "var" "share"))))
+                     (when (and opam-share (file-directory-p opam-share))
+                       (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
 
                  (defun configure-ocaml-set-environment ()
-                        "When using Opam, set its corresponding environment variables."
-                        (dolist (var (car (read-from-string
-                                           (shell-command-to-string "opam config env --sexp"))))
-                          (setenv (car var) (cadr var)))))
+                   "When using Opam, set its corresponding environment variables."
+                   (dolist (var (car (read-from-string
+                                      (shell-command-to-string "opam config env --sexp"))))
+                     (setenv (car var) (cadr var)))))
                '())
 
          (define-minor-mode configure-ocaml-mode
