@@ -17,20 +17,13 @@
    "List of strings that make up a @file{.ocamlinit} configuration."))
 
 (define (home-ocaml-files-service config)
-  (define (filter-fields field)
-    (filter-configuration-fields home-ocaml-configuration-fields
-                                 (list field)))
-
-  (filter
-   (compose not null?)
-   (list
-    (optional (not (null? (home-ocaml-configuration-config config)))
-              `("ocaml/init.ml"
-                ,(mixed-text-file
-                  "init-ml"
-                  #~(string-append
-                     #$@(interpose (home-ocaml-configuration-config config)
-                                   "\n" 'suffix))))))))
+  (when (not (null? (home-ocaml-configuration-config config)))
+    `(("ocaml/init.ml"
+       ,(mixed-text-file
+         "init-ml"
+         #~(string-append
+            #$@(interpose (home-ocaml-configuration-config config)
+                          "\n" 'suffix)))))))
 
 (define (home-ocaml-profile-service config)
   (list (home-ocaml-configuration-ocaml config)))
