@@ -74,7 +74,7 @@ The list of expressions will be interposed with \n and everything will end up in
       home-files-service-type
       home-lisp-files-service)))
    (default-value (home-lisp-configuration))
-   (description "Configure Common Lisp-related tooling.")))
+   (description "Configure Common Lisp related tooling.")))
 
 (define (generate-home-lisp-documentation)
   (generate-documentation
