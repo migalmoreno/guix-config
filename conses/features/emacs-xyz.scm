@@ -34,7 +34,6 @@
             feature-emacs-calendar
             feature-emacs-bookmark
             feature-emacs-dashboard
-            feature-emacs-spelling
             feature-emacs-markdown
             feature-emacs-org
             feature-emacs-org-roam
@@ -1656,85 +1655,6 @@ operate on buffers like Dired."
 ;;;
 ;;; Note-Taking
 ;;;
-
-(define* (feature-emacs-spelling
-          #:key
-          (spelling-program #f)
-          (spelling-dictionaries '())
-          (flyspell-hooks #f)
-          (flyspell-prog-hooks #f)
-          (ispell-program-name (and spelling-program
-                                    (file-append
-                                     spelling-program "/bin/"
-                                     (package-name spelling-program))))
-          (ispell-standard-dictionary #f)
-          (ispell-personal-dictionary #f)
-          (dictionary-server "dict.org"))
-  "Configure spell-checking features in Emacs."
-  (ensure-pred maybe-file-like? spelling-program)
-  (ensure-pred list? spelling-dictionaries)
-  (ensure-pred maybe-list? flyspell-hooks)
-  (ensure-pred maybe-list? flyspell-prog-hooks)
-  (ensure-pred file-like-or-path? ispell-program-name)
-  (ensure-pred maybe-string? ispell-standard-dictionary)
-  (ensure-pred maybe-path? ispell-personal-dictionary)
-
-  (define emacs-f-name 'spelling)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to spelling in Emacs."
-    (append
-     (if spelling-program
-         (list
-          (simple-service
-           'emacs-spelling-profile-service
-           home-profile-service-type
-           `(,spelling-program
-             ,@spelling-dictionaries)))
-         '())
-     (list
-      (rde-elisp-configuration-service
-       emacs-f-name
-       config
-       `((require 'configure-rde-keymaps)
-         ,@(if flyspell-hooks
-               `((mapcar (lambda (hook)
-                           (add-hook hook 'flyspell-mode))
-                         ',flyspell-hooks))
-               '())
-         ,@(if flyspell-prog-hooks
-               `((mapcar (lambda (hook)
-                           (add-hook hook 'flyspell-prog-mode))
-                         ',flyspell-prog-hooks))
-               '())
-         (with-eval-after-load 'flyspell
-           ,@(if ispell-program-name
-                 `((setq ispell-program-name ,ispell-program-name))
-                 '())
-           ,@(if ispell-standard-dictionary
-                 `((setq ispell-dictionary ,ispell-standard-dictionary))
-                 '())
-           ,@(if ispell-personal-dictionary
-                 `((setq ispell-personal-dictionary ,ispell-personal-dictionary))
-                 '())
-           (setq flyspell-issue-welcome-flag nil)
-           (setq flyspell-issue-message-flag nil)
-           (define-key rde-app-map "w" 'dictionary-search)
-           (with-eval-after-load 'dictionary
-             (setq dictionary-server ,dictionary-server))))
-       #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config))))))
-
-  (feature
-   (name f-name)
-   (values
-    (append
-      `((,f-name . #t))
-      (make-feature-values
-       spelling-program
-       spelling-dictionaries flyspell-hooks flyspell-prog-hooks
-       ispell-standard-dictionary ispell-personal-dictionary)))
-   (home-services-getter get-home-services)))
 
 (define* (feature-emacs-markdown
           #:key
