@@ -66,7 +66,7 @@
       home-shepherd-service-type
       home-unclutter-shepherd-service)))
    (default-value (home-unclutter-configuration))
-   (description "Sets up an unclutter daemon.")))
+   (description "Set up an unclutter daemon.")))
 
 (define %default-xorg-modules (list xf86-input-libinput))
 
