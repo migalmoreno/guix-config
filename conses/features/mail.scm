@@ -105,10 +105,12 @@ is not provided, use all the mail accounts."
 (define* (feature-emacs-ebdb
           #:key
           (emacs-ebdb emacs-ebdb)
-          (ebdb-sources (list "~/documents/contacts")))
+          (ebdb-sources (list "~/documents/contacts"))
+          (ebdb-popup-size 0.4))
   "Configure the EBDB contact management package for Emacs."
   (ensure-pred any-package? emacs-ebdb)
   (ensure-pred list-of-strings? ebdb-sources)
+  (ensure-pred number? ebdb-popup-size)
 
   (define emacs-f-name 'ebdb)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -129,7 +131,7 @@ is not provided, use all the mail accounts."
           (require 'ebdb-mua)
           (setq ebdb-sources (list ,@ebdb-sources))
           (setq ebdb-default-country nil)
-          (setq ebdb-default-window-size 0.2)
+          (setq ebdb-default-window-size ,ebdb-popup-size)
           (setq ebdb-dedicated-window 'ebdb)
           (setq ebdb-mail-avoid-redundancy t)
           (setq ebdb-complete-mail 'capf)
