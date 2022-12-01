@@ -16,17 +16,18 @@
 
 (define-configuration/no-serialization slack-account
   (workspace
-   (maybe-string #f)
+   (string #f)
    "The Slack workspace to authenticate with. It should take the subdomain
 of the complete host, as in @code{clojurians} for @code{\"clojurians.slack.com\"}.")
   (token
-   (maybe-string #f)
-   "The API token for your Slack account. See @url{https://github.com/yuya373/emacs-slack}
-for how to retrieve it.")
+   (string #f)
+   "The API token for your Slack account. See
+@uref{https://github.com/yuya373/emacs-slack#how-to-get-token-and-cookie} for how to retrieve it.")
   (cookie
    (maybe-string #f)
-   "The browser cookie used when retrieving your API token. See @url{https://github.com/yuya373/emacs-slack}
-for instructions on how to retrieve it. Note this is only needed for tokens that start with @code{xoxc}."))
+   "The browser cookie used when retrieving your API token. See
+@uref{https://github.com/yuya373/emacs-slack#how-to-get-token-and-cookie} for instructions on
+how to retrieve it. This is only needed for tokens that start with @code{xoxc}."))
 
 (define (list-of-slack-accounts? lst)
   (and (list? lst) (not (null? lst)) (every slack-account? lst)))
@@ -44,9 +45,11 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
 
 (define* (feature-emacs-slack
           #:key
-          (emacs-slack emacs-slack))
+          (emacs-slack emacs-slack)
+          (slack-key "s"))
   "Configure the Slack.el Emacs client."
   (ensure-pred file-like? emacs-slack)
+  (ensure-pred string? slack-key)
 
   (define emacs-f-name 'slack)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -62,11 +65,14 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
         (defgroup configure-slack nil
           "Utilities for slack.el, the Emacs Slack client."
           :group 'configure)
-
+        (cl-defstruct configure-slack-team workspace token cookie)
         (defcustom configure-slack-teams '()
-          "A list of `configure-slack-team' structs that hold Slack accounts."
-          :type 'list
+          "List of `configure-slack-team' structs that hold Slack accounts."
+          :type '(repeat configure-slack-team)
           :group 'configure-slack)
+        (defvar rde-slack-map nil
+          "Map to bind `slack' commands under.")
+        (define-prefix-command 'rde-slack-map)
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-slack-buffer-source
@@ -84,10 +90,6 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
                 (add-to-list 'configure-completion-initial-narrow-alist '(slack-message-buffer-mode . ?s))
                 (add-to-list 'configure-completion-initial-narrow-alist '(slack-thread-message-buffer-mode . ?s)))
               '())
-
-        (cl-defstruct configure-slack-team
-          "A Slack team."
-          workspace token cookie)
 
         (defun configure-slack-connect (team)
           "Connect to Slack TEAM with personal credentials."
@@ -108,16 +110,17 @@ for instructions on how to retrieve it. Note this is only needed for tokens that
                     `(make-configure-slack-team
                       :workspace ,(slack-account-workspace slack-acc)
                       :token ,(slack-account-token slack-acc)
-                      :cookie ,(slack-account-cookie slack-acc)))
+                      :cookie ,(or (slack-account-cookie slack-acc) 'nil)))
                   (get-value 'slack-accounts config))))
-        (define-key rde-app-map "s" 'configure-slack-connect)
         (with-eval-after-load 'slack
           (setq slack-buffer-emojify t)
           (setq slack-prefer-current-team t)
           (setq slack-buffer-function 'switch-to-buffer)
-          (let ((map mode-specific-map))
-            (define-key map "ss" 'slack-channel-select)
-            (define-key map "st" 'slack-change-current-team))
+          (define-key rde-app-map (kbd ,slack-key) 'rde-slack-map)
+          (let ((map rde-slack-map))
+            (define-key map "c" 'configure-slack-connect)
+            (define-key map "s" 'slack-channel-select)
+            (define-key map "t" 'slack-change-current-team))
           (set-face-attribute 'slack-preview-face nil :background 'unspecified)))
       #:elisp-packages (list emacs-slack
                              (get-value 'emacs-configure-rde-keymaps config)))))
