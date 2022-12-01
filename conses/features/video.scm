@@ -349,7 +349,8 @@ proxy url as per `configure-browse-url-mappings'."
           (music-dir "~/music")
           (video-dir "~/videos")
           (music-dl-args '())
-          (video-dl-args '()))
+          (video-dl-args '())
+          (youtube-dl-key "y"))
   "Configure youtube-dl, a command-line program to download videos
 from YouTube and various other sites."
   (ensure-pred any-package? youtube-dl)
@@ -360,6 +361,7 @@ from YouTube and various other sites."
   (ensure-pred path? video-dir)
   (ensure-pred list? music-dl-args)
   (ensure-pred list? video-dl-args)
+  (ensure-pred string? youtube-dl-key)
 
   (define f-name 'youtube-dl)
 
@@ -373,7 +375,7 @@ from YouTube and various other sites."
       f-name
       config
       `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "y" 'ytdl-show-list)
+        (define-key rde-app-map (kbd ,youtube-dl-key) 'ytdl-show-list)
         (with-eval-after-load 'ytdl
           (define-key ytdl--dl-list-mode-map "a" 'ytdl-download)
           (setq ytdl-command ,yt-dlp)
