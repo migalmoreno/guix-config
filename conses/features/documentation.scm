@@ -11,9 +11,13 @@
 
 (define* (feature-manpages
           #:key
-          (pager #f))
+          (pager #f)
+          (man-key "M")
+          (woman-key "W"))
   "Configure tooling to read manual pages."
- (ensure-pred maybe-file-like? pager)
+  (ensure-pred maybe-file-like? pager)
+  (ensure-pred string? man-key)
+  (ensure-pred string? woman-key)
 
   (define f-name 'manpages)
 
@@ -30,11 +34,10 @@
       `((require 'configure-rde-keymaps)
         (add-hook 'woman-mode-hook 'toggle-truncate-lines)
         (let ((map rde-app-map))
-          (define-key map "W" 'woman)
-          (define-key map "M" 'man)
-          ,@(if (get-value 'emacs-consult config)
-                `((define-key map "dM" 'consult-man))
-                '())))
+          (define-key map (kbd ,woman-key) 'woman)
+          (define-key map (kbd ,man-key) ',(if (get-value 'emacs-consult config)
+                                               'consult-man
+                                               'man))))
       #:elisp-packages (list
                         (get-value 'emacs-configure-rde-keymaps config)))))
 
