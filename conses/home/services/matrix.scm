@@ -1,17 +1,14 @@
 (define-module (conses home services matrix)
-  #:use-module (gnu packages)
-  #:use-module (gnu packages matrix)
-  #:use-module (gnu services)
-  #:use-module (gnu services shepherd)
-  #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
-  #:use-module (gnu home-services-utils)
+  #:use-module (gnu services configuration)
+  #:use-module (gnu services shepherd)
+  #:use-module (gnu packages matrix)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (ice-9 match)
-  #:export (home-pantalaimon-service-type
-            home-pantalaimon-configuration))
+  #:use-module (rde serializers ini)
+  #:export (home-pantalaimon-configuration
+            home-pantalaimon-service-type))
 
 (define-configuration/no-serialization home-pantalaimon-configuration
   (pantalaimon
@@ -39,24 +36,11 @@
     (stop #~(make-kill-destructor)))))
 
 (define (home-pantalaimon-files-service config)
-  (define (uglify-term term)
-    (let ((str (maybe-object->string term)))
-      (apply string-append (map string-capitalize (string-split str #\-)))))
-
-  (define (serialize-field key val)
-    (let ((name (uglify-term key))
-          (value (cond
-                  ((boolean? val) (boolean->true-or-false val #t))
-                  (else val))))
-      (format #f "~a = ~a\n" name value)))
-
   (list
    `("pantalaimon/pantalaimon.conf"
-     ,(mixed-text-file
-       "pantalaimon.conf"
-       (generic-serialize-ini-config
-        #:serialize-field serialize-field
-        #:fields (home-pantalaimon-configuration-config config))))))
+     ,(apply mixed-text-file
+             "pantalaimon.conf"
+             (serialize-ini-config (home-pantalaimon-configuration-config config))))))
 
 (define (home-pantalaimon-profile-service config)
   (list (home-pantalaimon-configuration-pantalaimon config)))
