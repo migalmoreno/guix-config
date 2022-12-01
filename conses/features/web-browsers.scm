@@ -1,6 +1,4 @@
 (define-module (conses features web-browsers)
-  #:use-module (conses utils)
-  #:use-module (conses packages emacs-xyz)
   #:use-module (conses packages web-browsers)
   #:use-module (conses home services lisp)
   #:use-module (conses home services web-browsers)
@@ -11,13 +9,9 @@
   #:use-module (gnu home services)
   #:use-module (gnu home services xdg)
   #:use-module (gnu packages chromium)
-  #:use-module (gnu packages emacs-xyz)
-  #:use-module (gnu packages gstreamer)
-  #:use-module (gnu packages web-browsers)
   #:use-module (gnu packages browser-extensions)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (ice-9 ftw)
   #:export (rde-nyxt-configuration-service
             feature-nyxt
             feature-ungoogled-chromium
@@ -58,31 +52,55 @@
                                  :components (,#$filename)))))
                          #\newline)))))))
 
+
+;;;
+;;; nyxt.
+;;;
+
 (define* (feature-nyxt
           #:key
           (nyxt nyxt-next)
           (default-browser? #f)
-          (development? #f)
+          (development-version? #f)
           (startup-flags '())
           (default-cookie-policy ':no-third-party)
-          (development-path "~/local/share/projects/nyxt")
           (extra-config-lisp '())
           (auto-mode-rules '())
           (extra-bindings '())
           (default-new-buffer-url "nyxt:new")
-          (autostart? #f))
-  "Configure the Nyxt browser."
+          (autostart-slynk? #f)
+          (smooth-scrolling? #f)
+          (scroll-distance 50)
+          (download-engine ':renderer)
+          (temporary-history? #f)
+          (restore-session? #t))
+  "Set up Nyxt, the hacker's power browser.
+DEFAULT-COOKIE-POLICY is either `:always' (accept all cookies),
+`:never' (reject all cookies), and `:no-third-party (only accept
+the current site's cookies)'.
+DEFAULT-NEW-BUFFER-URL is the default new page URL you'll be prompted with
+at browser startup if RESTORE-SESSION? is #f, otherwise you'll be shown the
+last-accessed page.
+You can control Nyxt remotely via a Lisp REPL if you set AUTOSTART-SLYNK to #t
+and you connect to the underlying Lisp image at port `*slynk-port*' (by default 4006).
+If you set TEMPORARY-HISTORY? to #t, your history will be recorded in
+`nyxt-temporary-directory' (by default /tmp).
+Use EXTRA-CONFIG-LISP for additional general settings, and consult Nyxt's manual
+page, accessible via the command `manual' (C-h r), to discover more functionalities."
   (ensure-pred file-like? nyxt)
   (ensure-pred boolean? default-browser?)
-  (ensure-pred boolean? development?)
+  (ensure-pred boolean? development-version?)
   (ensure-pred list? startup-flags)
   (ensure-pred symbol? default-cookie-policy)
-  (ensure-pred path? development-path)
   (ensure-pred lisp-config? extra-config-lisp)
   (ensure-pred lisp-config? auto-mode-rules)
   (ensure-pred list? extra-bindings)
   (ensure-pred string? default-new-buffer-url)
-  (ensure-pred boolean? autostart?)
+  (ensure-pred boolean? autostart-slynk?)
+  (ensure-pred boolean? smooth-scrolling?)
+  (ensure-pred integer? scroll-distance)
+  (ensure-pred boolean? temporary-history?)
+  (ensure-pred boolean? restore-session?)
 
   (define f-name 'nyxt)
 
@@ -94,35 +112,17 @@
           (simple-service
            'home-nyxt-environment-variables-service
            home-environment-variables-service-type
-           `(("BROWSER" . ,(file-append nyxt "/bin/nyxt")))))
-         '())
-     (if development?
-         (list
+           `(("BROWSER" . ,(file-append nyxt "/bin/nyxt"))))
           (simple-service
-           'home-xdg-desktop-entries
+           'home-nyxt-xdg-mime-applications-service
            home-xdg-mime-applications-service-type
            (home-xdg-mime-applications-configuration
-            (desktop-entries
-             (let ((nyxt-file (format #f "~a/build-scripts/nyxt.scm" development-path)))
-               (list
-                (xdg-desktop-entry
-                 (file "nyxt-dev")
-                 (name "Nyxt Development")
-                 (type 'application)
-                 (config
-                  `((exec . ,(format #f "guix shell -D -f ~a -- ~a" nyxt-file
-                                     (string-append ((compose dirname dirname) nyxt-file) "/nyxt")))
-                    (comment . "Be Productive"))))))))))
+            (default
+             '((x-scheme-handler/http . nyxt.desktop)
+               (x-scheme-handler/https . nyxt.desktop)
+               (x-scheme-handler/about . nyxt.desktop))))))
          '())
      (list
-      (simple-service
-       'home-nyxt-xdg-mime-applications-service
-       home-xdg-mime-applications-service-type
-       (home-xdg-mime-applications-configuration
-        (default
-         '((x-scheme-handler/http . nyxt.desktop)
-           (x-scheme-handler/https . nyxt.desktop)
-           (x-scheme-handler/about . nyxt.desktop)))))
       (rde-nyxt-configuration-service
        'rde-nyxt
        config
@@ -138,26 +138,32 @@
          ,@(if (nil? extra-bindings)
                '()
                `((define-key *rde-keymap* ,@extra-bindings)))
-         (defmethod files:resolve ((profile nyxt-profile) (file nyxt:history-file))
-           "Store history in a temporary directory."
-           (sera:path-join (nfiles:expand (make-instance 'nyxt-temporary-directory))
-                           (uiop:relativize-pathname-directory (call-next-method))))
+         ,@(if temporary-history?
+               '((defmethod files:resolve ((profile nyxt-profile) (file nyxt:history-file))
+                   "Store history in a temporary directory."
+                   (sera:path-join (nfiles:expand (make-instance 'nyxt-temporary-directory))
+                                   (uiop:relativize-pathname-directory (call-next-method)))))
+               '())
          (define-mode rde-keymap-mode ()
            "Dummy mode to apply key bindings in `*rde-keymap*.'"
            ((keyscheme-map (keymaps:make-keyscheme-map keyscheme:emacs *rde-keymap*))
             (visible-in-status-p nil)))
          (define-configuration document-buffer
-           ((smooth-scrolling t)
-            (scroll-distance 150)))
+           ((smooth-scrolling ,(if smooth-scrolling? 't 'nil))
+            (scroll-distance ,scroll-distance)))
          (define-configuration web-buffer
-           ((download-engine :renderer)))
-         (define-configuration buffer
-           ((default-modes `(rde-keymap-mode ,@%slot-value%))))
+           ((default-modes (append
+                            '(rde-keymap-mode)
+                            ',(if (not (nil? auto-mode-rules)) '(nyxt/auto-mode:auto-mode) '())
+                            %slot-value%))
+            (download-engine ',download-engine)))
+         (define-configuration nyxt/auto-mode:auto-mode
+           ((nyxt/auto-mode:prompt-on-mode-toggle t)))
          (define-configuration browser
            ((default-cookie-policy ,default-cookie-policy)
-            (restore-session-on-startup-p nil)
+            (restore-session-on-startup-p ,(if temporary-history? 't 'nil))
             (default-new-buffer-url (quri:uri ,default-new-buffer-url))))
-         ,@(if autostart?
+         ,@(if autostart-slynk?
                '((unless nyxt::*run-from-repl-p*
                    (start-slynk)))
                '())))
@@ -175,7 +181,7 @@
   (feature
    (name f-name)
    (values `((,f-name . ,nyxt)
-             (nyxt-development? . ,development?)
+             (nyxt-development-version? . ,development-version?)
              (nyxt-startup-flags . ,startup-flags)))
    (home-services-getter get-home-services)))
 
