@@ -208,6 +208,22 @@ IPC interface.")
      #:recursive? #t))))
 
 (define-public emacs-pulseaudio-control-next
+  (let ((commit "2c939a0789b9a0f5e3691704afde512ada9c73f4")
+        (revision "0"))
+    (package
+      (inherit emacs-pulseaudio-control)
+      (name "emacs-pulseaudio-control-next")
+      (version (git-version "0" revision commit))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/flexibeast/pulseaudio-control")
+                      (commit commit)))
+                (file-name (git-file-name name version))
+                (sha256
+                 (base32 "18avxnpsriil91abx553201mignj9flqik73i5wmvhhi3z4jycff")))))))
+
+(define-public emacs-pulseaudio-control-next-local
   (package
     (inherit emacs-pulseaudio-control)
     (version "0.1")
@@ -492,7 +508,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
 
 (define-public emacs-nyxt
-  (let ((commit "79054e233db04f1417e5a3e1bb8e13555909df92")
+  (let ((commit "c3e4717676c6b45b37aff3ceaf357e5e5b4adc18")
         (revision "0"))
     (package
       (name "emacs-nyxt")
@@ -506,7 +522,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "1v4gpnp9qqqkgj7zk7dbn4w3y6bm1v3d909w0dx9dc3hx2jib0js"))))
+          (base32 "1qbgqx0izsb5xy3nak57wsv21yi42bajya2hfldz39d5yv19pm2k"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-sly))
