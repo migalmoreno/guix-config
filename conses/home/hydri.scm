@@ -239,7 +239,7 @@
        :on-accent-color "black"
        :font-family "Iosevka")))
    (feature-nyxt-prompt)
-   (feature-nyxt-mosaic)
+   (feature-nyxt-nx-mosaic)
    (feature-nyxt-status
     #:height 40
     #:glyphs? #t
