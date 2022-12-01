@@ -6,6 +6,7 @@
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
   #:use-module (rde serializers elisp)
+  #:use-module (rde packages)
   #:use-module (rde home services emacs-xyz)
   #:use-module (gnu services)
   #:use-module (gnu home services)
@@ -460,12 +461,13 @@ themes for Emacs."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'consult)
+      `((require 'xdg)
+        (require 'consult)
         (defgroup configure-completion nil
           "Tweaks to the built-in Emacs completion via `consult'."
           :group 'configure)
         (autoload 'savehist-mode "savehist")
-        (savehist-mode)
+        (add-hook 'after-init-hook 'savehist-mode)
         (with-eval-after-load 'savehist
           (setq savehist-file (expand-file-name "emacs/history" (or (xdg-cache-home) "~/.cache")))
           (add-hook 'after-init-hook 'savehist-save)
@@ -879,7 +881,7 @@ on the current project."
           (setq custom-safe-themes t)
           (when (file-exists-p custom-file)
             (load custom-file)))
-        (recentf-mode)
+        (add-hook 'after-init-hook 'recentf-mode)
         (with-eval-after-load 'recentf
           (add-hook 'after-init-hook 'recentf-save-list)
           (setq recent-save-file (expand-file-name "emacs/recentf" (or (xdg-cache-home) "~/.cache"))))
@@ -986,8 +988,6 @@ operate on buffers like Dired."
        config
        `((eval-when-compile
           (require 'emms))
-         (require 'emms-player-mpv)
-         (require 'emms-browser)
          (require 'ytdl)
 
          (defun configure-emms-download-track ()
@@ -1074,9 +1074,7 @@ operate on buffers like Dired."
              (emms-playlist-insert-track emms-track)))
 
          (let ((map mode-specific-map))
-           (define-key map "emw" 'emms-smart-browse)
-           (define-key map "eb" 'emms-seek-backward)
-           (define-key map "ef" 'emms-seek-forward)
+           (define-key map "eb" 'emms-browser)
            (define-key map "eh" 'emms-history-save)
            (define-key map "eq" 'emms-stop)
            (define-key map "es" 'emms-toggle-random-playlist)
@@ -1091,9 +1089,11 @@ operate on buffers like Dired."
          (with-eval-after-load 'emms
            (require 'emms-setup)
            (require ',emms-info-method)
+           (require 'emms-browser)
            (emms-all)
            (emms-default-players)
            (emms-toggle-random-playlist)
+           (emms-smart-browse)
            (define-key emms-playlist-mode-map "m" 'configure-emms-download-track)
            (define-key dired-mode-map "e" 'emms-play-dired)
            (emms-browser-make-filter
@@ -1117,6 +1117,7 @@ operate on buffers like Dired."
                  (info-albumartist . "--albumArtist")
                  (info-composer . "--composer")))))
            (setq emms-playlist-buffer-name "*Music*")
+           (setq emms-history-file (expand-file-name "emacs/emms-history" (or (xdg-cache-home) "~/.cache")))
            (setq emms-seek-seconds 15)
            (setq emms-source-file-default-directory ,emms-media-dir)
            (setq emms-playlist-mode-center-when-go t)
@@ -1128,7 +1129,8 @@ operate on buffers like Dired."
            (setq emms-browser-thumbnail-medium-size 128)
            (setq emms-mode-line-icon-enabled-p nil)
            ,@(if (get-value 'mpv config)
-                 '((setq emms-player-list '(emms-player-mpv))
+                 '((require 'emms-player-mpv)
+                   (setq emms-player-list '(emms-player-mpv))
                    (add-to-list 'emms-player-mpv-parameters "--ytdl-format=best")
                    (add-to-list 'emms-player-mpv-parameters "--force-window=no"))
                  '())))
@@ -1298,10 +1300,12 @@ operate on buffers like Dired."
 (define* (feature-emacs-ednc
           #:key
           (emacs-ednc emacs-ednc)
-          (notifications-icon #f))
+          (notifications-icon #f)
+          (ednc-key "E"))
   "Configure the Emacs Desktop Notification Center (EDNC)."
   (ensure-pred any-package? emacs-ednc)
   (ensure-pred maybe-path? notifications-icon)
+  (ensure-pred string? ednc-key)
 
   (define emacs-f-name 'ednc)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -1312,7 +1316,10 @@ operate on buffers like Dired."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defun configure-ednc--notify ()
+      `((defvar rde-ednc-map nil
+           "Map to bind `ednc' commands under.")
+        (define-prefix-command 'rde-ednc-map)
+        (defun configure-ednc--notify ()
           "Display the latest EDNC notification."
           (when (ednc-notifications)
             (ednc-format-notification (car (ednc-notifications)))))
@@ -1347,10 +1354,11 @@ operate on buffers like Dired."
           ,@(if notifications-icon
                 `((setq notifications-application-icon ,notifications-icon))
                 '()))
-        (let ((map mode-specific-map))
-          (define-key map "dc" 'configure-ednc-close-last-notification)
-          (define-key map "dl" 'configure-ednc-show-notification-log)
-          (define-key map "dd" 'configure-ednc-close-all-notifications)))
+        (define-key rde-app-map (kbd ,ednc-key) 'rde-ednc-map)
+        (let ((map rde-ednc-map))
+          (define-key map "c" 'configure-ednc-close-last-notification)
+          (define-key map "l" 'configure-ednc-show-notification-log)
+          (define-key map "d" 'configure-ednc-close-all-notifications)))
       #:elisp-packages (list emacs-ednc))))
 
   (feature
@@ -2465,9 +2473,9 @@ custom themeing.")))
           #:key
           (idle-delay 1)
           (min-height 1))
-  "Configure the which-key Emacs package. MIN-HEIGHT can be
-used to adjust the height of the popup and IDLE-DELAY to control
-the delay after which the popup is shown."
+  "Configure the which-key Emacs package.
+MIN-HEIGHT can be used to adjust the height of the popup.
+IDLE-DELAY controls the delay after which the popup is shown."
   (ensure-pred integer? idle-delay)
   (ensure-pred integer? min-height)
 
@@ -2734,9 +2742,24 @@ parts of buffers to pastebin-like services."
 
 (define* (feature-emacs-time
           #:key
-          (timezones #f))
-  "Configure time.el, an Emacs library to display the time."
+          (timezones #f)
+          (world-clock-key "C")
+          (world-clock-time-format "%R %Z")
+          (display-time? #f)
+          (display-time-24hr-format? #f)
+          (display-time-date? #f))
+  "Configure time.el, an Emacs library to display the time.
+You can change the format of the entries presented in `world-clock'
+with WOLRD-CLOCK-TIME-FORMAT.
+If you want time to be displayed in the mode line, set DISPLAY-TIME?
+to #t, and accordingly set its appearance with DISPLAY-TIME-24HR-FORMAT?
+and DISPLAY-TIME-WITH-DATE?."
   (ensure-pred maybe-list? timezones)
+  (ensure-pred string? world-clock-key)
+  (ensure-pred string? world-clock-time-format)
+  (ensure-pred boolean? display-time?)
+  (ensure-pred boolean? display-time-24hr-format?)
+  (ensure-pred boolean? display-time-date?)
 
   (define emacs-f-name 'time)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -2747,17 +2770,25 @@ parts of buffers to pastebin-like services."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "C" 'world-clock)
+      `((eval-when-compile
+         '(require 'time))
+        (require 'configure-rde-keymaps)
+        (define-key rde-app-map (kbd ,world-clock-key) 'world-clock)
+        (setq display-time-world-time-format ,world-clock-time-format)
         (setq display-time-default-load-average nil)
         (setq display-time-load-average-threshold 0)
-        (setq display-time-day-and-date t)
-        (setq display-time-24hr-format t)
+        ,@(if display-time-date?
+              '((setq display-time-day-and-date t))
+              '())
+        ,@(if display-time-24hr-format?
+              '((setq display-time-24hr-format t))
+              '())
         ,@(if timezones
               `((setq world-clock-list ',timezones))
               '())
-        (setq display-time-world-time-format "%R %Z")
-        (display-time-mode))
+        ,@(if display-time?
+              '((display-time-mode))
+              '()))
       #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config)))))
 
   (feature
@@ -2836,8 +2867,9 @@ parts of buffers to pastebin-like services."
           (emacs-calc-currency emacs-calc-currency)
           (currency 'EUR)
           (exchange-update-interval 7))
-  "Configure Calc, an advanced desk calculator and mathematical
-tool for Emacs."
+  "Configure Calc, an advanced desk calculator and mathematical tool for Emacs.
+Additionally, you can compute the current exchange rate for your preferred
+CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
   (ensure-pred any-package? emacs-calc-currency)
   (ensure-pred symbol? currency)
   (ensure-pred number? exchange-update-interval)
@@ -2851,9 +2883,12 @@ tool for Emacs."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((add-hook 'calc-start-hook 'calc-currency-load)
+      `((require 'xdg)
+        (add-hook 'calc-start-hook 'calc-currency-load)
         (autoload 'calc-currency-load "calc-currency")
         (with-eval-after-load 'calc-currency
+          (setq calc-currency-exchange-rates-file
+                (expand-file-name "calc-currency-rates.el" (or (xdg-cache-home) "~/.cache")))
           (setq calc-currency-base-currency ',currency)
           (setq calc-currency-update-interval ,exchange-update-interval)))
       #:elisp-packages (list emacs-calc-currency))))
