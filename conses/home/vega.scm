@@ -41,8 +41,9 @@
   #:use-module (rde features docker)
   #:use-module (rde features terminals)
   #:use-module (rde features virtualization)
-  #:use-module ((rde features emacs-xyz) #:select (feature-emacs-keycast
-                                                   feature-emacs-eglot))
+  #:use-module ((rde features emacs-xyz) #:select (feature-emacs-eglot
+                                                   feature-emacs-keycast
+                                                   feature-emacs-spelling))
   #:use-module (gnu home)
   #:use-module (gnu services)
   #:use-module (gnu home services)
@@ -124,12 +125,14 @@ EndSection"))
     #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
    (feature-clojure)
    (feature-nyxt
-    #:autostart? #t
+    #:scroll-distance 150
+    #:smooth-scrolling? #t
+    #:autostart-slynk? #t
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:extra-bindings
     '("C-c s" 'query-selection-in-search-engine))
-   (feature-nyxt-mosaic)
+   (feature-nyxt-nx-mosaic)
    (feature-nyxt-nx-tailor
     #:auto? #f
     #:dark-theme? #t
@@ -160,7 +163,8 @@ EndSection"))
    (feature-nyxt-prompt
     #:mouse-support? #f)
    (feature-nyxt-hint)
-   (feature-nyxt-emacs)
+   (feature-nyxt-emacs
+    #:autostart-delay 5)
    (feature-nyxt-blocker)
    (feature-emacs-pdf-tools)
    (feature-mpv
@@ -201,6 +205,12 @@ EndSection"))
    (feature-emacs-tempel)
    (feature-emacs-files)
    (feature-emacs-ibuffer)
+   (feature-youtube-dl
+    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next-local)
+    #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
+                      "--compat-options" "all")
+    #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+                      "--add-metadata" "--compat-options" "all"))
    (feature-emacs-emms)
    (feature-emacs-image)
    (feature-emacs-graphviz)
@@ -234,8 +244,6 @@ EndSection"))
     #:set-footer? #f
     #:set-init-info? #f)
    (feature-emacs-spelling
-    #:spelling-program (@ (gnu packages aspell) aspell)
-    #:spelling-dictionaries (strings->packages "aspell-dict-en")
     #:flyspell-hooks
     '(org-mode-hook bibtex-mode-hook)
     #:ispell-standard-dictionary "en_US")
@@ -243,7 +251,7 @@ EndSection"))
    (feature-emacs-browse-url)
    (feature-emacs-window)
    (feature-emacs-pulseaudio-control
-    #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
+    #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next-local))
    (feature-emacs-org
     #:document-converters? #t
     #:org-capture-templates
@@ -382,6 +390,9 @@ EndSection"))
    (feature-emacs-eww)
    (feature-emacs-webpaste)
    (feature-emacs-time
+    #:display-time? #t
+    #:display-time-24hr-format? #t
+    #:display-time-date? #t
     #:timezones
     '(("Europe/London" "London")
       ("Europe/Madrid" "Madrid")
@@ -505,12 +516,14 @@ EndSection"))
     #:default-input-method "spanish-keyboard")
    (feature-lisp
     #:custom-sly-prompt? #t
-    #:extra-packages
+    #:extra-lisp-packages
     (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk")
     #:extra-source-registry-entries
     `(("common-lisp/source-registry.conf.d/10-home.conf"
        ,(plain-file "10-home.conf"
-                    (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))
+                    (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
+    #:extra-lisp-templates
+    '((do "(do (" p ")" n> r> ")")))
    (feature-mail-settings
     #:mail-accounts
     (list
@@ -527,7 +540,8 @@ EndSection"))
    (feature-isync)
    (feature-goimapnotify
     #:goimapnotify (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
-   (feature-emacs-ebdb)
+   (feature-emacs-ebdb
+    #:ebdb-popup-size 0.2)
    (feature-emacs-gnus
     #:topic-alist
     '(("personal"
@@ -610,8 +624,7 @@ EndSection"))
     (list
      (matrix-account
       (id (getenv "MATRIX_USER"))
-      (homeserver (string-append "matrix." (getenv "DOMAIN")))
-      (local? #t))))
+      (homeserver (string-append "matrix." (getenv "DOMAIN"))))))
    (feature-emacs-ement)
    (feature-nyxt-status
     #:height 30
@@ -662,7 +675,7 @@ EndSection"))
     #:media-enabled? #t
     #:extra-routes
     '((router:make-route
-       (match-regex ".*/watch\\?.*v=.*")
+       (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
        :redirect "www.youtube.com"
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil :audio t :repeat t)))
@@ -808,12 +821,6 @@ EndSection"))
                        "node_modules"
                        "*.elc"
                        ".log"))
-   (feature-youtube-dl
-    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next-local)
-    #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
-                      "--compat-options" "all")
-    #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-                      "--add-metadata" "--compat-options" "all"))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
