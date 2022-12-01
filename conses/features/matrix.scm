@@ -1,20 +1,19 @@
 (define-module (conses features matrix)
   #:use-module (conses features web)
-  #:use-module (conses utils)
   #:use-module (conses home services matrix)
   #:use-module (conses system services matrix)
   #:use-module (conses packages emacs-xyz)
-  #:use-module (rde features)
-  #:use-module (rde features emacs)
-  #:use-module (rde features predicates)
+  #:use-module (gnu home services)
   #:use-module (gnu services)
-  #:use-module (gnu services web)
   #:use-module (gnu services certbot)
   #:use-module (gnu services configuration)
-  #:use-module (gnu home services)
+  #:use-module (gnu services web)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages matrix)
   #:use-module (guix gexp)
+  #:use-module (rde features)
+  #:use-module (rde features emacs)
+  #:use-module (rde features predicates)
   #:use-module (srfi srfi-1)
   #:export (matrix-account
             matrix-account?
@@ -28,14 +27,11 @@
 (define-configuration/no-serialization matrix-account
   (id
    (maybe-string #f)
-   "The Matrix ID to use. It should take the form
-of @code{\"@username:example.com\"}, for instance.")
+   "The Matrix ID to use. It should take the form of
+ @code{\"@username:example.com\"}.")
   (homeserver
    (maybe-string #f)
-   "The Matrix homeserver where this user @code{id} is registered under.")
-  (local?
-   (boolean #f)
-   "Whether the Matrix account belongs to a personal homeserver."))
+   "The Matrix homeserver the account is registered under."))
 
 (define (list-of-matrix-accounts? lst)
   (and (list? lst) (not (null? lst)) (every matrix-account? lst)))
@@ -65,9 +61,17 @@ of @code{\"@username:example.com\"}, for instance.")
 (define* (feature-pantalaimon
           #:key
           (pantalaimon pantalaimon)
+          (port 8009)
+          (ssl? #t)
+          (ignore-device-verification? #f)
           (extra-config '()))
-  "Configure Pantalaimon, an E2EE-aware proxy daemon for Matrix clients."
-  (ensure-pred any-package? pantalaimon)
+  "Configure Pantalaimon, an E2EE-aware proxy daemon for Matrix clients.
+See @uref{https://github.com/matrix-org/pantalaimon/blob/master/docs/man/pantalaimon.5.md,
+Pantalaimon's man page} for the list of available options."
+  (ensure-pred file-like? pantalaimon)
+  (ensure-pred integer? port)
+  (ensure-pred boolean? ssl?)
+  (ensure-pred boolean? ignore-device-verification?)
   (ensure-pred list? extra-config)
 
   (define (get-home-services config)
@@ -81,14 +85,14 @@ of @code{\"@username:example.com\"}, for instance.")
        (pantalaimon pantalaimon)
        (config
         `((Default
-           ((log-level . debug)))
+           ((LogLevel . debug)))
           (local-matrix
-           ((homeserver . ,(get-value 'matrix-homeserver config))
-            (listen-address . localhost)
-            (listen-port . 8009)
-            (ssl . #f)
-            (ignore-verification . #t)
-            (use-keyring . #f)))
+           ((Homeserver . ,(get-value 'matrix-homeserver config))
+            (ListenAddress . localhost)
+            (ListenPort . ,port)
+            (Ssl . ,ssl?)
+            (IgnoreVerification . ,ignore-device-verification?)
+            (UseKeyring . #f)))
           ,@extra-config))))))
 
   (define (get-system-services config)
@@ -133,7 +137,8 @@ of @code{\"@username:example.com\"}, for instance.")
 
   (feature
    (name 'pantalaimon)
-   (values `((pantalaimon . ,pantalaimon)))
+   (values `((pantalaimon . ,pantalaimon)
+             (pantalaimon-port . ,port)))
    (home-services-getter get-home-services)
    (system-services-getter get-system-services)))
 
@@ -203,19 +208,20 @@ of @code{\"@username:example.com\"}, for instance.")
              (matrix-whatsapp-bridge? . ,whatsapp-bridge?)))
    (system-services-getter get-system-services)))
 
-
 (define* (feature-emacs-ement
           #:key
-          (emacs-ement emacs-ement-next))
+          (emacs-ement emacs-ement)
+          (ement-key "e"))
   "Configure Ement, the Matrix client for Emacs."
-  (ensure-pred any-package? emacs-ement)
+  (ensure-pred file-like? emacs-ement)
+  (ensure-pred string? ement-key)
 
   (define emacs-f-name 'ement)
   (define f-name (symbol-append 'emacs- emacs-f-name))
 
   (define (get-home-services config)
     "Return home services related to Ement."
-    (require-value 'matrix-accounts config)
+    (require-value 'matrix-settings config)
     (define homeserver (get-value 'matrix-homeserver config))
 
     (list
@@ -228,13 +234,11 @@ of @code{\"@username:example.com\"}, for instance.")
         (defgroup configure-ement nil
           "Utilities for Ement, the Emacs Matrix client."
           :group 'configure)
+        (cl-defstruct configure-ement-user id homeserver)
         (defcustom configure-ement-users '()
-          "A list of `configure-ement-user' structs that hold Matrix accounts."
+          "List of `configure-ement-user' structs that hold Matrix accounts."
           :type '(repeat configure-ement-user)
           :group 'configure-ement)
-        (cl-defstruct configure-ement-user
-          "An Ement user."
-          id homeserver local-p)
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
               '((defvar configure-ement-buffer-source
@@ -271,23 +275,19 @@ of @code{\"@username:example.com\"}, for instance.")
             (ement-connect
              :user-id (configure-ement-user-id user)
              :password (auth-source-pick-first-password :host homeserver)
-             :uri-prefix (if (configure-ement-user-local-p user)
-                             ,(if (get-value 'pantalaimon config)
-                                  "http://localhost:8009"
-                                  homeserver)
-                           homeserver))))
+             :uri-prefix ,(if (get-value 'pantalaimon config)
+                              (string-append "http://localhost:"
+                                             (number->string (get-value 'pantalaimon-port config)))
+                              homeserver))))
 
-        (define-key rde-app-map "e" 'configure-ement-connect)
+        (define-key rde-app-map (kbd ,ement-key) 'configure-ement-connect)
         (setq configure-ement-users
               (list
                ,@(map
                   (lambda (matrix-acc)
                     `(make-configure-ement-user
                       :id ,(matrix-account-id matrix-acc)
-                      :homeserver ,(matrix-account-homeserver matrix-acc)
-                      :local-p ,(if (matrix-account-local? matrix-acc)
-                                    't
-                                  'nil)))
+                      :homeserver ,(matrix-account-homeserver matrix-acc)))
                   (get-value 'matrix-accounts config))))
         (with-eval-after-load 'ement
           (add-hook 'ement-room-compose-hook 'ement-room-compose-org)
