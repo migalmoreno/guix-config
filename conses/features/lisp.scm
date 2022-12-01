@@ -1,18 +1,14 @@
 (define-module (conses features lisp)
-  #:use-module (conses features web-browsers)
-  #:use-module (conses utils)
   #:use-module (conses home services lisp)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
   #:use-module (rde home services emacs-xyz)
-  #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages lisp)
   #:use-module (gnu packages lisp-xyz)
-  #:use-module (gnu packages emacs-xyz)
-  #:use-module (gnu packages lisp-check)
-  #:use-module (gnu packages commencement)
+  #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:export (feature-lisp))
@@ -23,15 +19,18 @@
           (emacs-sly emacs-sly)
           (extra-sbclrc '())
           (extra-slynk '())
-          (extra-packages '())
+          (extra-lisp-packages '())
           (extra-source-registry-entries '())
+          (extra-lisp-templates '())
           (custom-sly-prompt? #f))
+  "Set up and configure Common Lisp tooling."
   (ensure-pred any-package? lisp)
   (ensure-pred file-like? emacs-sly)
   (ensure-pred lisp-config? extra-sbclrc)
   (ensure-pred lisp-config? extra-slynk)
-  (ensure-pred list-of-packages? extra-packages)
+  (ensure-pred list-of-packages? extra-lisp-packages)
   (ensure-pred list? extra-source-registry-entries)
+  (ensure-pred list? extra-lisp-templates)
   (ensure-pred boolean? custom-sly-prompt?)
 
   (define f-name 'lisp)
@@ -44,7 +43,8 @@
                (lisp lisp)
                (sbclrc-lisp
                 `((require :asdf)
-                  (let ((guix-profile (format nil "~a/.guix-home/profile/lib/" (uiop:getenv "HOME"))))
+                  (let ((guix-profile (merge-pathnames ".guix-home/profile/lib/"
+                                                       (user-homedir-pathname))))
                     (when (and (probe-file guix-profile)
                                (ignore-errors (asdf:load-system "cffi")))
                       (push guix-profile
@@ -59,15 +59,15 @@
                 `((setf (cdr (assoc 'slynk:*string-elision-length* slynk:*slynk-pprint-bindings*)) nil)
                   ,@extra-slynk))))
      (simple-service
-      'home-lisp-xdg-configuration-files-service
+      'add-lisp-source-registry-entries
       home-xdg-configuration-files-service-type
       extra-source-registry-entries)
      (simple-service
-      'home-lisp-profile-service
+      'add-lisp-packages
       home-profile-service-type
-      extra-packages)
+      extra-lisp-packages)
      (simple-service
-      'home-lisp-emacs-tempel-service
+      'add-lisp-templates
       home-emacs-tempel-service-type
       `(,#~"lisp-mode"
            (lambda "(lambda (" p ")" n> r> ")")
@@ -80,7 +80,8 @@
            (let "(let (" p ")" n> r> ")")
            (let* "(let* (" p ")" n> r> ")")
            (dolist "(dolist (" p ")" n> r> ")")
-           (loop "(loop for " p " in " p " do" n> r> ")")))
+           (loop "(loop for " p " in " p " do" n> r> ")")
+           ,@extra-lisp-templates))
      (rde-elisp-configuration-service
       f-name
       config
@@ -141,7 +142,8 @@
             (define-key map (kbd "C-c C-z") 'sly-switch-to-most-recent)
             (define-key map (kbd "C-c M-n") 'sly-mrepl-next-prompt)
             (define-key map (kbd "C-c M-p") 'sly-mrepl-previous-prompt))
-          (setq sly-mrepl-history-file-name (expand-file-name "emacs/sly-mrepl-history" (xdg-cache-home)))
+          (setq sly-mrepl-history-file-name (expand-file-name "emacs/sly-mrepl-history"
+                                                              (or (xdg-cache-home) "~/.cache")))
           (setq sly-mrepl-prevent-duplicate-history t)
           (setq sly-mrepl-pop-sylvester nil)
           ,@(if custom-sly-prompt?
@@ -155,7 +157,7 @@
         (with-eval-after-load 'ob-core
           (setq org-babel-default-header-args:lisp '((:results . "scalar")))))
       #:elisp-packages (list emacs-sly)
-      #:summary "Extensions for Lisp tooling"
+      #:summary "Extensions for Common Lisp tooling"
       #:commentary "Provide extensions for Common Lisp programming utilities.")))
 
   (feature
