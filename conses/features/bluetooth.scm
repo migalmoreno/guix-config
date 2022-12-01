@@ -8,9 +8,12 @@
 
 (define* (feature-bluetooth
           #:key
-          (auto-enable? #t))
+          (emacs-bluetooth emacs-bluetooth)
+          (auto-enable? #t)
+          (bluetooth-key "b"))
   "Configure and set up Bluetooth."
   (ensure-pred boolean? auto-enable?)
+  (ensure-pred string? bluetooth-key)
 
   (define f-name 'bluetooth)
 
@@ -20,8 +23,8 @@
      (rde-elisp-configuration-service
       f-name
       config
-      '((require 'configure-rde-keymaps)
-        (define-key rde-app-map "b" 'bluetooth-list-devices)
+      `((require 'configure-rde-keymaps)
+        (define-key rde-app-map (kbd ,bluetooth-key) 'bluetooth-list-devices)
         (with-eval-after-load 'bluetooth
           (add-hook 'kill-emacs-hook 'bluetooth-toggle-powered)
           (define-key bluetooth-mode-map "C" 'bluetooth-connect-profile)))
