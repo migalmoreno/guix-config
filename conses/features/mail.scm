@@ -94,7 +94,7 @@ is not provided, use all the mail accounts."
                                                         '(notifications-notify
                                                           :app-name "goimapnotify"
                                                           :title "New email received"
-                                                          :timeout 0))))))))
+                                                          :timeout 5000))))))))
               mail-accounts)))))))
 
   (feature
@@ -509,11 +509,11 @@ is not provided, use all the mail accounts."
                             (nnfolder-get-new-mail nil)
                             (nnfolder-inhibit-expiry t)))))
         (with-eval-after-load 'mail-source
-          (setq mail-source-directory "~/.cache/gnus/Mail")
-          (setq mail-default-directory "~/.cache/gnus"))
+          (setq mail-source-directory (expand-file-name "emacs/gnus/mail" (or (xdg-cache-home) "~/.cache")))
+          (setq mail-default-directory (expand-file-name "emacs/gnus" (or (xdg-cache-home) "~/.cache"))))
         (with-eval-after-load 'gnus-start
-          (setq gnus-dribble-directory (locate-user-emacs-file "gnus"))
-          (setq gnus-startup-file (locate-user-emacs-file "gnus/.newsrc"))
+          (setq gnus-dribble-directory (expand-file-name "emacs/gnus" (or (xdg-cache-home) "~/.cache")))
+          (setq gnus-startup-file (expand-file-name "emacs/gnus/.newsrc" (or (xdg-cache-home) "~/.cache")))
           (setq gnus-subscribe-newsgroup-method 'gnus-subscribe-hierarchically)
           (setq gnus-check-new-newsgroups nil)
           (setq gnus-save-killed-list nil))
@@ -532,7 +532,7 @@ is not provided, use all the mail accounts."
           (setq gnus-visible-headers
                 '("^From:" "^To:" "^Cc:" "^Subject:" "^Newsgroups:" "^Date:"
                   "Followup-To:" "Reply-To:" "^Organization:" "^X-Newsreader:"
-                  "^X-Mailer:" "^Message-ID:" "^In-Reply-To:"))
+                  "^X-Mailer:" "^Message-ID:" "^In-Reply-To:" "^References:"))
           (setq gnus-sorted-header-list gnus-visible-headers))
         ,#~"(with-eval-after-load 'gnus-art
 (define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
