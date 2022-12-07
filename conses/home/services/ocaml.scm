@@ -1,7 +1,6 @@
 (define-module (conses home services ocaml)
   #:use-module (rde features predicates)
   #:use-module (gnu home services)
-  #:use-module (gnu home-services-utils)
   #:use-module (gnu packages ocaml)
   #:use-module (gnu services configuration)
   #:use-module (guix gexp)
@@ -17,7 +16,7 @@
    "List of strings that make up a @file{.ocamlinit} configuration."))
 
 (define (home-ocaml-files-service config)
-  (when (not (null? (home-ocaml-configuration-config config)))
+  (unless (null? (home-ocaml-configuration-config config))
     `(("ocaml/init.ml"
        ,(mixed-text-file
          "init-ml"
