@@ -133,15 +133,16 @@
           (setq sly-enable-evaluate-in-emacs t)
           (setq sly-keep-buffers-on-connection-close nil))
         (with-eval-after-load 'sly-mrepl
-          (define-key lisp-mode-map (kbd "C-c C-z") 'sly-mrepl)
           (let ((map sly-mode-map))
             (define-key map (kbd "C-c C-b") 'sly-eval-buffer)
-            (define-key map (kbd "C-c C-q") 'sly-interrupt))
+            (define-key map (kbd "C-c C-q") 'sly-interrupt)
+            (define-key map (kbd "C-c C-z") nil))
           (let ((map sly-mrepl-mode-map))
             (define-key map (kbd "C-M-q") 'indent-sexp)
             (define-key map (kbd "C-c C-z") 'sly-switch-to-most-recent)
             (define-key map (kbd "C-c M-n") 'sly-mrepl-next-prompt)
             (define-key map (kbd "C-c M-p") 'sly-mrepl-previous-prompt))
+          (define-key lisp-mode-map (kbd "C-c C-z") 'sly-mrepl)
           (setq sly-mrepl-history-file-name (expand-file-name "emacs/sly-mrepl-history"
                                                               (or (xdg-cache-home) "~/.cache")))
           (setq sly-mrepl-prevent-duplicate-history t)
