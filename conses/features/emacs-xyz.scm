@@ -1928,7 +1928,7 @@ and organizer for Emacs."
            (setq org-insert-heading-respect-content t)
            (setq org-auto-align-tags t)
            (setq org-tags-column -77)
-           (setq org-tags-exclude-from-inheritance '("project" "crypt"))
+           (setq org-tags-exclude-from-inheritance '("project" "todo" "crypt"))
            (setq org-default-priority ?B)
            (setq org-default-notes-file ,org-default-notes-file)
            (setq org-enforce-todo-dependencies t)
@@ -2085,7 +2085,7 @@ and organizer for Emacs."
       (rde-elisp-configuration-service
        emacs-f-name
        config
-       `((eval-when-compile
+       `((eval-and-compile
           (let ((org-roam-v2-ack t))
             (require 'org-roam)))
          (defun configure-org-roam-open-ref ()
@@ -2143,7 +2143,7 @@ and organizer for Emacs."
                               (lambda (n)
                                 (member "todo" (org-roam-node-tags n)))
                               (org-roam-node-list))))
-             (delete-dups (mapcar #'org-roam-node-file todo-nodes))))
+             (delete-dups (mapcar 'org-roam-node-file todo-nodes))))
 
          (defun configure-org-roam-update-todo-files (&rest _)
            "Update the value of `org-agenda-files'."
@@ -2163,12 +2163,11 @@ and organizer for Emacs."
          ,@(if org-roam-directory
                `((setq org-roam-directory ,org-roam-directory))
                '())
-         (autoload 'org-roam-db-autosync-enable "org-roam")
          (add-to-list 'display-buffer-alist
                       `(,(rx "*org-roam*")
                         display-buffer-same-window))
          ,@(if org-roam-todo?
-               '((add-hook 'find-file-hook 'configure-org-roam-update-todo-tag)
+               '((add-hook 'org-roam-find-file-hook 'configure-org-roam-update-todo-tag)
                  (add-hook 'before-save-hook 'configure-org-roam-update-todo-tag)
                  (advice-add 'org-agenda :before 'configure-org-roam-update-todo-files))
                '())
@@ -2187,8 +2186,9 @@ and organizer for Emacs."
            (define-key map "ndt" 'org-roam-dailies-goto-tomorrow)
            (define-key map "ndC" 'org-roam-dailies-capture-date)
            (define-key map "ndc" 'org-roam-dailies-goto-date))
+         (with-eval-after-load 'org-roam-autoloads
+           (org-roam-db-autosync-enable))
          (with-eval-after-load 'org-roam
-           (org-roam-db-autosync-enable)
            (let ((map org-mode-map))
              (define-key map (kbd "C-TAB") 'completion-at-point)
              (define-key map (kbd "C-c r r") 'org-roam-ref-add)
@@ -2384,7 +2384,7 @@ result is longer than LEN."
           (setq org-agenda-skip-deadline-if-done t)
           (setq org-agenda-compact-blocks nil)
           (setq org-agenda-include-diary t)
-          (setq org-agenda-custom-commands ',org-agenda-custom-commands)
+          (setq org-agenda-custom-commands ,org-agenda-custom-commands)
           (setq org-agenda-bulk-custom-functions
                 '((?P (lambda nil
                         (org-agenda-priority 'set))))))
