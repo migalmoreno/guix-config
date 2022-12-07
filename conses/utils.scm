@@ -4,9 +4,6 @@
   #:use-module (srfi srfi-1)
   #:export (project-file))
 
-(define-public (maybe-symbol? x)
-  (or (symbol? x) (not x)))
-
 (define-public (maybe-procedure? x)
   (or (procedure? x) (not x)))
 
