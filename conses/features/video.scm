@@ -100,6 +100,7 @@ and whether to add the file to the current PLAYLIST."
          (defun configure-mpv-kill ()
            "Kill the mpv process unless this is not currently `emms-player-mpv-proc'."
            (interactive)
+           (require 'emms-player-mpv)
            (when (equal mpv--process
                         emms-player-mpv-proc)
              (emms-stop))
@@ -268,7 +269,6 @@ proxy url as per `configure-browse-url-mappings'."
          (autoload 'mpv-mode-line-mode "mpv")
          (mpv-mode-line-mode)
          (autoload 'mpv-playing-time-mode "mpv")
-         (add-hook 'emms-player-mpv-event-functions 'configure-mpv-connect-to-emms-on-startup)
          (mpv-playing-time-mode)
          (advice-add 'mpv-start :around 'configure-browse-url-add-scheme)
          (with-eval-after-load 'mpv

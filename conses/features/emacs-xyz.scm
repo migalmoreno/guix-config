@@ -1083,6 +1083,7 @@ operate on buffers like Dired."
            (define-key map "en" 'configure-emms-next)
            (define-key map "ep" 'configure-emms-previous)
            (define-key map "ea" 'configure-emms-seek-to-beginning))
+         (add-hook 'emms-player-mpv-event-functions 'configure-mpv-connect-to-emms-on-startup)
          (with-eval-after-load 'emms
            (require 'emms-setup)
            (require ',emms-info-method)
