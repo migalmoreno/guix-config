@@ -248,7 +248,6 @@ proxy url as per `configure-browse-url-mappings'."
            (org-link-set-parameters
             "mpv"
             :store 'configure-mpv-store-link))
-         (add-hook 'emms-player-mpv-event-functions 'configure-mpv-connect-to-emms-on-startup)
          (let ((map mode-specific-map))
            (define-key map "mc" 'mpv-jump-to-chapter)
            (define-key map "ml" 'mpv-jump-to-playlist-entry)
