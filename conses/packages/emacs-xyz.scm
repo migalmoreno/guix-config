@@ -349,28 +349,6 @@ the first completion candidate for in-buffer completion as an overlay. Instead o
 within Emacs.")
       (license license:gpl3))))
 
-(define-public emacs-nm
-  (let ((commit "0aee81296420a84004b27b99d90f831393b55ed0")
-        (revision "0"))
-    (package
-      (name "emacs-nm")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri (git-reference
-               (commit commit)
-               (url "https://github.com/Kodkollektivet/emacs-nm")))
-         (file-name (git-file-name name version))
-         (sha256
-          (base32 "0jnndiw6xzlwzbh963m4y30lr9zxjmi3m3xh481mqqvnl8zpx2k4"))))
-      (build-system emacs-build-system)
-      (home-page "https://github.com/Kodkollektivet/emacs-nm")
-      (synopsis "NetworkManager integration in Emacs.")
-      (description "This package provides an Emacs interface for the Gnome NetworkManager to easily
-set up WiFi interfaces via nmcli.")
-      (license #f))))
-
 (define-public emacs-hexrgb
   (let ((commit "90e5f07f14bdb9966648977965094c75072691d4")
         (revision "0"))
