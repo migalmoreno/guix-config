@@ -2066,13 +2066,15 @@ and organizer for Emacs."
           (org-roam-directory #f)
           (org-roam-dailies-directory #f)
           (org-roam-capture-templates #f)
-          (org-roam-dailies-capture-templates #f))
+          (org-roam-dailies-capture-templates #f)
+          (org-roam-todo? #t))
   "Configure Org-roam, Roam Research for Emacs."
   (ensure-pred file-like? emacs-org-roam)
   (ensure-pred maybe-path? org-roam-directory)
   (ensure-pred maybe-path? org-roam-dailies-directory)
   (ensure-pred maybe-list? org-roam-capture-templates)
   (ensure-pred maybe-list? org-roam-dailies-capture-templates)
+  (ensure-pred boolean? org-roam-todo?)
 
   (define emacs-f-name 'org-roam)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -2088,40 +2090,89 @@ and organizer for Emacs."
           (let ((org-roam-v2-ack t))
             (require 'org-roam)))
          (defun configure-org-roam-open-ref ()
-                "List all ROAM_REFS in the current buffer and allow you to open them."
-                (interactive)
-                (when (derived-mode-p 'org-mode)
-                  (if-let* ((refs (org-property-values "ROAM_REFS"))
-                            (choices (mapcar (lambda (x)
-                                               (org-unbracket-string "[[" "]]" x))
-                                             (split-string (car (org-property-values "ROAM_REFS")) " ")))
-                            (node-ref (completing-read "Refs: "
-                                                       (lambda (string pred action)
-                                                         (if (eq action 'metadata)
-                                                             `(metadata
-                                                               (category . org-roam-ref)
-                                                               ,(cons 'display-sort-function 'identity))
-                                                             (complete-with-action action choices string pred)))
-                                                       nil 'require-match)))
-                           node-ref
-                           (error "No roam refs in this node"))))
+           "List all ROAM_REFS in the current buffer and allow you to open them."
+           (interactive)
+           (when (derived-mode-p 'org-mode)
+             (if-let* ((refs (org-property-values "ROAM_REFS"))
+                       (choices (mapcar (lambda (x)
+                                          (org-unbracket-string "[[" "]]" x))
+                                        (split-string (car (org-property-values "ROAM_REFS")) " ")))
+                       (node-ref (completing-read "Refs: "
+                                                  (lambda (string pred action)
+                                                    (if (eq action 'metadata)
+                                                        `(metadata
+                                                          (category . org-roam-ref)
+                                                          ,(cons 'display-sort-function 'identity))
+                                                      (complete-with-action action choices string pred)))
+                                                  nil 'require-match)))
+                 node-ref
+               (error "No roam refs in this node"))))
+
+         (defun configure-org-roam-get-filetags ()
+           "Return the top-level tags for the current org-roam node."
+           (split-string
+            (or (cadr (assoc "FILETAGS"
+                             (org-collect-keywords '("filetags"))))
+                "")
+            ":" 'omit-nulls))
+
+         (defun configure-org-roam-todo-p ()
+           "Return non-nil if the current buffer has any to-do entry."
+           (org-element-map
+               (org-element-parse-buffer 'headline)
+               'headline
+             (lambda (h)
+               (eq (org-element-property :todo-type h) 'todo))
+             nil 'first-match))
+
+         (defun configure-org-roam-update-todo-tag ()
+           "Update the \"todo\" tag in the current buffer."
+           (when (and (not (active-minibuffer-window))
+                      (org-roam-file-p))
+             (org-with-point-at 1
+               (let* ((tags (configure-org-roam-get-filetags))
+                      (is-todo (configure-org-roam-todo-p)))
+                 (cond ((and is-todo (not (member "todo" tags)))
+                        (org-roam-tag-add '("todo")))
+                       ((and (not is-todo) (member "todo" tags))
+                        (org-roam-tag-remove '("todo"))))))))
+
+         (defun configure-org-roam-list-todo-files ()
+           "Return a list of org-roam files containing the \"todo\" tag."
+           (org-roam-db-sync)
+           (let ((todo-nodes (cl-remove-if-not
+                              (lambda (n)
+                                (member "todo" (org-roam-node-tags n)))
+                              (org-roam-node-list))))
+             (delete-dups (mapcar #'org-roam-node-file todo-nodes))))
+
+         (defun configure-org-roam-update-todo-files (&rest _)
+           "Update the value of `org-agenda-files'."
+           (setq org-agenda-files (configure-org-roam-list-todo-files)))
 
          (defun configure-org-roam-node-insert-immediate (arg &rest args)
-                "Immediately insert new Org Roam node with ARG and ARGS in the buffer."
-                (interactive "P")
-                (let ((args (cons arg args))
-                      (org-roam-capture-templates (list
-                                                   (append
-                                                    (car org-roam-capture-templates)
-                                                    '(:immediate-finish)))))
-                  (apply 'org-roam-node-insert args)))
+           "Immediately insert new Org Roam node with ARG and ARGS in the buffer."
+           (interactive "P")
+           (let ((args (cons arg args))
+                 (org-roam-capture-templates (list
+                                              (append
+                                               (car org-roam-capture-templates)
+                                               '(:immediate-finish)))))
+             (apply 'org-roam-node-insert args)))
 
          (setq org-roam-v2-ack t)
-         (setq org-roam-directory ,org-roam-directory)
+         ,@(if org-roam-directory
+               `((setq org-roam-directory ,org-roam-directory))
+               '())
          (autoload 'org-roam-db-autosync-enable "org-roam")
          (add-to-list 'display-buffer-alist
                       `(,(rx "*org-roam*")
                         display-buffer-same-window))
+         ,@(if org-roam-todo?
+               '((add-hook 'find-file-hook 'configure-org-roam-update-todo-tag)
+                 (add-hook 'before-save-hook 'configure-org-roam-update-todo-tag)
+                 (advice-add 'org-agenda :before 'configure-org-roam-update-todo-files))
+               '())
          (let ((map mode-specific-map))
            (define-key map "nb" 'org-roam-buffer-toggle)
            (define-key map "nf" 'org-roam-node-find)
@@ -2163,7 +2214,10 @@ and organizer for Emacs."
                    '()))
            (with-eval-after-load 'org-roam-node
              (setq org-roam-completion-everywhere t)
-             (setq org-roam-node-display-template "${title:*} ${tags:35}"))
+             (setq org-roam-node-display-template
+                   (concat "${title:80}" (propertize "${tags:35}" 'face 'org-tag)))
+             (setq org-roam-node-annotation-function
+                   (lambda (node) (marginalia--time (org-roam-node-file-mtime node)))))
            ,@(if (get-value 'emacs-embark config)
                  '((eval-when-compile
                     (require 'embark))
@@ -2198,14 +2252,42 @@ and organizer for Emacs."
 
   (feature
    (name f-name)
-   (values `((,f-name . ,emacs-org-roam)))
+   (values `((,f-name . ,emacs-org-roam)
+             (org-roam-todo? . ,org-roam-todo?)))
    (home-services-getter get-home-services)))
+
+(define %rde-org-agenda-custom-commands
+  '(("d" "Workflow"
+     ((agenda
+       ""
+       ((org-deadline-warning-days 7)
+        (org-agenda-block-separator nil)))
+      (todo
+       "INTR"
+       ((org-agenda-block-separator nil)
+        (org-agenda-overriding-header "\nCritical Tasks\n")))
+      (todo
+       "PROG"
+       ((org-agenda-block-separator nil)
+        (org-agenda-overriding-header "\nTasks In Progress\n")))
+      (todo
+       "NEXT"
+       ((org-agenda-block-separator nil)
+        (org-agenda-overriding-header "\nTasks Not Yet Started\n")))
+      (todo
+       "TODO"
+       ((org-agenda-block-separator nil)
+        (org-agenda-overriding-header "\nTasks To Review\n")))))))
 
 (define* (feature-emacs-org-agenda
           #:key
-          (org-agenda-files #f))
-  "Configure The Org Agenda planner."
+          (org-agenda-files #f)
+          (org-agenda-custom-commands %rde-org-agenda-custom-commands)
+          (org-agenda-prefix-format '()))
+  "Configure the Org Agenda planner."
   (ensure-pred maybe-list? org-agenda-files)
+  (ensure-pred list? org-agenda-custom-commands)
+  (ensure-pred maybe-list? org-agenda-prefix-format)
 
   (define emacs-f-name 'org-agenda)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -2243,6 +2325,36 @@ and organizer for Emacs."
           (interactive)
           (org-agenda nil "d"))
 
+        (defun configure-org-agenda-category (&optional len)
+          "Get category of the Org Agenda item at point.
+The category is defined by one of the following:
+- CATEGORY property
+- TITLE keyword
+- TITLE property
+- filename without directory and extension
+When LEN is a number, the resulting string is right-padded with
+white space and then truncated with an ellipsis on the right if the
+result is longer than LEN."
+          (let* ((filename (when buffer-file-name
+                             (file-name-sans-extension
+                              (file-name-nondirectory buffer-file-name))))
+                 (title (cadr (assoc "TITLE" (org-collect-keywords '("title")))))
+                 (project-title (if (and title (string-match (rx (group (+ any)) ":" (+ any)) title))
+                                    (match-string 1 title)
+                                  title))
+                 (category (org-get-category))
+                 (agenda-category (if (and title (string= category filename))
+                                      project-title
+                                    category))
+                 (result
+                  (or (if (numberp len)
+                          (s-truncate len (s-pad-right len " " agenda-category))
+                        agenda-category)
+                      "")))
+            (if (and (not project-title) (numberp len))
+                (s-truncate len (s-pad-right len " " result))
+              result)))
+
         (define-minor-mode configure-org-agenda-appt-mode
           "Set up `appt-mode' integration for Agenda items."
           :global t :group 'configure-org-agenda
@@ -2255,14 +2367,21 @@ and organizer for Emacs."
               (remove-hook 'org-agenda-finalize-hook 'configure-org-agenda-to-appt)
               (cancel-timer configure-org-agenda-appt-timer))))
 
-        (let ((map mode-specific-map))
-          (define-key map "oA" 'org-agenda)
-          (define-key map "oa" 'configure-org-agenda-open-dashboard))
+        (define-key global-map (kbd "C-x C-a") 'configure-org-agenda-open-dashboard)
         (add-hook 'org-agenda-mode-hook 'hack-dir-local-variables-non-file-buffer)
         (configure-org-agenda-appt-mode)
         (with-eval-after-load 'org-agenda
           ,@(if org-agenda-files
                 `((setq org-agenda-files ',org-agenda-files))
+                '())
+          ,@(if org-agenda-prefix-format
+                (if (get-value 'org-roam-todo? config)
+                    `((setq org-agenda-prefix-format
+                            '((agenda . " %i %(configure-org-agenda-category 12)%?-12t% s")
+                              (todo . " %i %(configure-org-agenda-category 12) ")
+                              (tags . " %i %(configure-org-agenda-category 12) ")
+                              (search . " %i %(configure-org-agenda-category 12) "))))
+                    `((setq org-agenda-prefix-format ',org-agenda-prefix-format)))
                 '())
           (setq org-agenda-sticky t)
           (setq org-agenda-tags-column 0)
@@ -2282,22 +2401,7 @@ and organizer for Emacs."
           (setq org-agenda-skip-deadline-if-done t)
           (setq org-agenda-compact-blocks nil)
           (setq org-agenda-include-diary t)
-          (setq org-agenda-custom-commands
-                '(("d" "Workflow"
-                   ((agenda "" ((org-deadline-warning-days 7)))
-                    (todo "INTR"
-                          ((org-agenda-overriding-header "Critical Tasks")))
-                    (todo "PROG"
-                          ((org-agenda-overriding-header "Tasks In Progress")))
-                    (todo "NEXT"
-                          ((org-agenda-overriding-header "Tasks Not Yet Started")))
-                    (todo "TODO"
-                          ((org-agenda-overriding-header "Tasks To Review"))))
-                   ((org-agenda-prefix-format
-                     '((agenda . " %i %?-12t% s")
-                       (todo . "%?-12:c")
-                       (tags . "%c")
-                       (search . " %i %-12:c")))))))
+          (setq org-agenda-custom-commands ',org-agenda-custom-commands)
           (setq org-agenda-bulk-custom-functions
                 '((?P (lambda nil
                         (org-agenda-priority 'set))))))
