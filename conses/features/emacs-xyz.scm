@@ -1090,7 +1090,6 @@ operate on buffers like Dired."
            (emms-all)
            (emms-default-players)
            (emms-toggle-random-playlist)
-           (emms-smart-browse)
            (define-key emms-playlist-mode-map "m" 'configure-emms-download-track)
            (define-key dired-mode-map "e" 'emms-play-dired)
            (emms-browser-make-filter
