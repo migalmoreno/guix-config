@@ -19,6 +19,7 @@
   #:use-module (conses features web-browsers)
   #:use-module (conses features version-control)
   #:use-module (rde packages)
+  #:use-module (rde features)
   #:use-module (rde features xdg)
   #:use-module (rde features base)
   #:use-module (rde features gnupg)
@@ -96,7 +97,11 @@
    (feature-fonts)
    (feature-emacs
     #:emacs emacs-next-pgtk
-    #:emacs-server-mode? #t)
+    #:emacs-server-mode? #f
+    #:extra-init-el
+    '((unless (server-running-p)
+        (server-force-delete))
+      (add-hook 'after-init-hook 'server-start)))
    (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
@@ -261,24 +266,28 @@
    (feature-nyxt-nx-router
     #:media-enabled? #t
     #:extra-routes
-    '((router:make-route
-       (match-regex ".*/watch\\?.*v=.*"  ".*/playlist\\?list=.*")
-       :redirect "www.youtube.com"
-       :external (lambda (req)
-                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-      (router:make-route
-       (match-regex "https://(m.)?soundcloud.com/.*/.*")
-       :external (lambda (req)
-                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-      (router:make-route
-       (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
-                    "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
-       :external (lambda (req)
-                   (play-video-mpv (url req) :formats nil)))
-      (router:make-route (match-scheme "magnet")
-                         :external (lambda (req)
-                                     (eval-in-emacs
-                                      `(transmission-add ,(render-url (url req))))))))
+    (lambda (config)
+      `((router:make-route
+         (match-regex ".*/watch\\?.*v=.*"  ".*/playlist\\?list=.*")
+         :redirect "www.youtube.com"
+         :external (lambda (req)
+                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
+        (router:make-route
+         (match-regex "https://(m.)?soundcloud.com/.*/.*")
+         :external (lambda (req)
+                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
+        (router:make-route
+         (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
+                      "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
+         :external (lambda (req)
+                     (play-video-mpv (url req) :formats nil)))
+        (router:make-route (match-regex ".*eddit.*/.*")
+                           :original "www.reddit.com"
+                           :redirect (quri:uri ,(get-value 'reddit-proxy config))
+                           :instances 'make-teddit-instances
+                           :blocklist (make-instance
+                                       'router:blocklist
+                                       :rules '(:contains (not "/comments/" "/wiki/")))))))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet

@@ -29,6 +29,7 @@
   #:use-module (conses features web)
   #:use-module (conses features xorg)
   #:use-module (rde packages)
+  #:use-module (rde features)
   #:use-module (rde features wm)
   #:use-module (rde features ssh)
   #:use-module (rde features xdg)
@@ -678,26 +679,30 @@ EndSection"))
    (feature-nyxt-nx-router
     #:media-enabled? #t
     #:extra-routes
-    '((router:make-route
-       (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
-       :redirect "www.youtube.com"
-       :external (lambda (req)
-                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-      (router:make-route
-       (match-regex "https://(m.)?soundcloud.com/.*/.*")
-       :external (lambda (req)
-                   (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-      (router:make-route
-       (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
-                    "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
-       :external (lambda (req)
-                   (play-video-mpv (url req) :formats nil)))
-      (router:make-route (match-scheme "mailto" "magnet")
-                         :external "xdg-open ~s")
-      (router:make-route (match-regex ".*eddit.*/.*")
-                         :blocklist (make-instance
-                                     'router:blocklist
-                                     :rules '(:contains (not "/comments/" "/wiki/"))))))
+    (lambda (config)
+      `((router:make-route
+         (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
+         :redirect "www.youtube.com"
+         :external (lambda (req)
+                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
+        (router:make-route
+         (match-regex "https://(m.)?soundcloud.com/.*/.*")
+         :external (lambda (req)
+                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
+        (router:make-route
+         (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
+                      "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
+         :external (lambda (req)
+                     (play-video-mpv (url req) :formats nil)))
+        (router:make-route (match-scheme "mailto" "magnet")
+                           :external "xdg-open ~s")
+        (router:make-route (match-regex ".*eddit.*/.*")
+                           :original "www.reddit.com"
+                           :redirect (quri:uri ,(get-value 'reddit-proxy config))
+                           :instances 'make-teddit-instances
+                           :blocklist (make-instance
+                                       'router:blocklist
+                                       :rules '(:contains (not "/comments/" "/wiki/")))))))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
