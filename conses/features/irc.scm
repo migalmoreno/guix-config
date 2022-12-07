@@ -1,10 +1,10 @@
 (define-module (conses features irc)
+  #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu services configuration)
+  #:use-module (guix gexp)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
-  #:use-module (gnu services configuration)
-  #:use-module (gnu packages emacs-xyz)
-  #:use-module (guix gexp)
   #:use-module (srfi srfi-1)
   #:export (feature-irc-settings
             feature-emacs-erc
@@ -24,10 +24,10 @@
    "The IRC network to connect to.")
   (bouncer?
    (boolean #f)
-   "Whether the IRC account should connect to a bouncer server.")
+   "Whether the IRC account is connecting to a bouncer server.")
   (nick
    (string #f)
-   "The nick that is registered under the IRC network."))
+   "The nick the account is registered under in the IRC network."))
 
 (define (list-of-irc-accounts? lst)
   (and (list? lst) (not (null? lst)) (every irc-account? lst)))
@@ -46,10 +46,44 @@
 
 (define* (feature-emacs-erc
           #:key
-          (autojoin-channels-alist '())
+          (erc-server "irc.libera.chat")
+          (erc-port 6697)
+          (erc-nick #f)
+          (erc-full-name #f)
+          (erc-autojoin-channels-alist '())
+          (erc-auto-query 'window-no-select)
+          (erc-query-display 'window)
+          (erc-join-buffer 'buffer)
+          (erc-kill-buffers-on-quit? #t)
+          (erc-align-nicknames? #t)
+          (erc-log? #f)
+          (erc-images? #f)
+          (erc-header-line-format " %n on %t (%m,%l)")
+          (erc-hide-list '("NICK" "JOIN" "PART" "QUIT" "MODE" "AWAY"))
+          (erc-track-exclude-types '("324" "329" "JOIN" "MODE" "NICK" "PART" "QUIT"))
           (erc-key "i"))
-  "Configure the extensible IRC client for Emacs."
-  (ensure-pred list? autojoin-channels-alist)
+  "Configure ERC, the extensible IRC client for Emacs.
+ERC-AUTO-QUERY, ERC-QUERY-DISPLAY, and ERC-JOIN-BUFFER determine the
+window behavior upon receiving a message, talking to someone, and joining
+a buffer, respectively.  See the documentation of @command{erc-join-buffer} for
+the possible configuration values.
+ERC-HIDE-LIST is a list of message types to hide, and ERC-TRACK-EXCLUDE-TYPES
+is a list of message types to ignore."
+  (ensure-pred string? erc-server)
+  (ensure-pred integer? erc-port)
+  (ensure-pred maybe-string? erc-nick)
+  (ensure-pred maybe-string? erc-full-name)
+  (ensure-pred list? erc-autojoin-channels-alist)
+  (ensure-pred symbol? erc-auto-query)
+  (ensure-pred symbol? erc-query-display)
+  (ensure-pred symbol? erc-join-buffer)
+  (ensure-pred boolean? erc-kill-buffers-on-quit?)
+  (ensure-pred boolean? erc-align-nicknames?)
+  (ensure-pred boolean? erc-log?)
+  (ensure-pred boolean? erc-images?)
+  (ensure-pred maybe-string? erc-header-line-format)
+  (ensure-pred list? erc-hide-list)
+  (ensure-pred list? erc-track-exclude-types)
   (ensure-pred string? erc-key)
 
   (define emacs-f-name 'erc)
@@ -63,8 +97,10 @@
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'erc)
+      `((eval-when-compile
+         (require 'erc))
         (require 'erc-status-sidebar)
+        (require 'xdg)
         (require 'configure-rde-keymaps)
         (defgroup configure-erc nil
           "Extra customizations for ERC."
@@ -72,11 +108,12 @@
         (cl-defstruct configure-erc-user id network nick bouncer-p)
         (defcustom configure-erc-users '()
           "A list of `configure-erc-user' structs that hold IRC accounts."
-          :type 'list
+          :type '(repeat configure-erc-user)
           :group 'configure-erc)
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              '((defvar configure-erc-buffer-source
+              '((autoload 'erc-buffer-list "erc")
+                (defvar configure-erc-buffer-source
                   `(:name "ERC"
                           :narrow ?i
                           :category buffer
@@ -130,24 +167,24 @@
              :password (auth-source-pick-first-password :host network))))
 
         (defun configure-erc-close-buffers ()
-          "Close all ERC buffers when ERC server is closed by killing a buffer."
+          "Close all erc buffers upon closing the erc server process."
           (interactive)
           (mapc 'kill-buffer (erc-buffer-list nil erc-server-process)))
 
         (defun configure-erc-toggle-timestamps ()
-          "Refresh the current ERC buffer after toggling the timestamps."
+          "Refresh and toggle the timestamps in the current erc buffer."
           (interactive)
           (erc-toggle-timestamps)
           (force-window-update (selected-window)))
 
         (defun configure-erc-window-reuse-condition (buf-name action)
-          "Set up a condition for ERC buffers to be reused."
+          "Set up a condition for erc buffers to be reused."
           (with-current-buffer buf-name
             (when (eq major-mode 'erc-mode)
               (not action))))
 
         (defun configure-erc-status-sidebar-toggle ()
-          "Toggle the status sidebar killing its buffer when closed."
+          "Toggle the status sidebar by killing its buffer when closed."
           (interactive)
           (if (get-buffer-window erc-status-sidebar-buffer-name nil)
               (progn
@@ -170,79 +207,101 @@
                       :nick ,(irc-account-nick irc-acc)
                       :bouncer-p ,(if (irc-account-bouncer? irc-acc) 't 'nil)))
                   (get-value 'irc-accounts config))))
-        (autoload 'erc-buffer-list "erc")
+
+        (add-to-list 'display-buffer-alist
+                     (cons 'configure-erc-window-reuse-condition
+                           '(display-buffer-reuse-mode-window
+                             (inhibit-same-window . t)
+                             (inhibit-switch-frame . t)
+                             (mode . erc-mode))))
+        (with-eval-after-load 'erc-status-sidebar
+          (advice-add 'erc-status-sidebar-default-chan-format :around 'configure-erc-status-add-padding)
+          (when erc-status-sidebar-mode-line-format
+            (setq erc-status-sidebar-header-line-format
+                  (concat " " erc-status-sidebar-mode-line-format)))
+          (setq erc-status-sidebar-width 22)
+          (setq erc-status-sidebar-mode-line-format nil))
+
         (with-eval-after-load 'erc
           (let ((map erc-mode-map))
             (define-key map (kbd "C-c C-q") 'configure-erc-close-buffers)
             (define-key map (kbd "C-c C-t") 'configure-erc-toggle-timestamps)
             (define-key map (kbd "C-c C-s") 'configure-erc-status-sidebar-toggle))
-          (dolist (module '(keep-place services notifications hl-nicks image spelling log))
-            (add-to-list 'erc-modules module))
-          (erc-update-modules)
-          (require 'erc-image)
-          (require 'erc-hl-nicks)
-          (require 'erc-join)
-          (erc-autojoin-enable)
-          (erc-spelling-mode 1)
-          (erc-fill-disable)
-          (setq erc-server "irc.libera.chat")
-          (setq erc-default-port 6697)
-          (setq erc-user-full-name nil)
-          (setq erc-hide-list '("NICK" "JOIN" "PART" "QUIT" "MODE" "AWAY"))
+          (setq erc-default-server ,erc-server)
+          (setq erc-default-port ,erc-port)
+          ,@(if erc-nick
+                `((setq erc-nick ,erc-nick))
+                '())
+          ,@(if erc-full-name
+                `((setq erc-user-full-name ,erc-full-name))
+                '())
+          (setq erc-hide-list ',erc-hide-list)
           (setq erc-hide-prompt t)
           (setq erc-hide-timestamps t)
           (setq erc-echo-timestamps nil)
-          (setq erc-kill-buffer-on-part t)
-          (setq erc-kill-server-buffer-on-quit t)
-          (setq erc-kill-queries-on-quit t)
+          ,@(if erc-kill-buffers-on-quit?
+                '((setq erc-kill-buffer-on-part t)
+                  (setq erc-kill-server-buffer-on-quit t)
+                  (setq erc-kill-queries-on-quit t))
+                '())
           (setq erc-rename-buffers t)
-          (setq erc-auto-query 'bury)
-          (setq erc-header-line-format nil)
-          (setq erc-query-display 'buffer)
-          (setq erc-join-buffer 'bury)
+          ,@(if erc-header-line-format
+                `((setq erc-header-line-format ,erc-header-line-format))
+                '((setq erc-header-line-format nil)))
+          (setq erc-auto-query ',erc-auto-query)
+          (setq erc-query-display ',erc-query-display)
+          (setq erc-join-buffer ',erc-join-buffer)
           (setq erc-timestamp-format "%H:%M")
-          (setq erc-prompt-for-password nil))
-        (add-to-list
-         'display-buffer-alist
-         '(configure-erc-window-reuse-condition . (display-buffer-reuse-mode-window
-                                                   (inhibit-same-window . t)
-                                                   (inhibit-switch-frame . t)
-                                                   (mode . erc-mode))))
-        (with-eval-after-load 'erc-status-sidebar
-          (advice-add 'erc-status-sidebar-default-chan-format :around 'configure-erc-status-add-padding)
-          (setq erc-status-sidebar-header-line-format
-                (concat " " erc-status-sidebar-mode-line-format))
-          (setq erc-status-sidebar-width 22)
-          (setq erc-status-sidebar-mode-line-format nil))
-        (with-eval-after-load 'erc-log
-          (setq erc-log-insert-log-on-open t)
-          (setq erc-log-channels-directory (expand-file-name "erc-logs" (xdg-cache-home))))
-        (with-eval-after-load 'erc-join
-          (setq erc-autojoin-timing 'connect)
-          (setq erc-autojoin-delay 5)
-          (setq erc-autojoin-channels-alist ',autojoin-channels-alist)
-          (setq erc-autojoin-domain-only t))
-        (with-eval-after-load 'erc-fill
-          (setq erc-fill-function 'erc-fill-static)
-          (setq erc-fill-static-center 14)
-          (setq erc-fill-column 82))
-        (with-eval-after-load 'erc-track
-          (setq erc-track-exclude-server-buffer t)
-          (setq erc-track-enable-keybindings t)
-          (setq erc-track-shorten-start 8)
-          (setq erc-track-exclude-types '("324" "329" "JOIN" "MODE" "NICK" "PART" "QUIT")))
-        (with-eval-after-load 'erc-backends
-          (setq erc-server-reconnect-timeout 3)
-          (setq erc-server-reconnect-attempts t))
-        (with-eval-after-load 'erc-services
-          (setq erc-prompt-for-nickserv-password nil))
-        (with-eval-after-load 'erc-image
-          (setq erc-image-inline-rescale 100)))
-      #:elisp-packages (list emacs-erc-image
-                             emacs-erc-hl-nicks
-                             (get-value 'emacs-configure-rde-keymaps config))
-      #:summary "ERC helpers"
-      #:commentary "Provide helpers to ERC, the extensible IRC client.")))
+          (setq erc-prompt-for-password nil)
+          (add-to-list 'erc-modules 'keep-place)
+          (add-to-list 'erc-modules 'notifications)
+          (with-eval-after-load 'erc-track
+            (setq erc-track-exclude-server-buffer t)
+            (setq erc-track-enable-keybindings t)
+            (setq erc-track-shorten-start 8)
+            (setq erc-track-exclude-types ',erc-track-exclude-types))
+          (with-eval-after-load 'erc-join
+            (setq erc-autojoin-timing 'connect)
+            (setq erc-autojoin-delay 5)
+            (setq erc-autojoin-channels-alist ',erc-autojoin-channels-alist)
+            (setq erc-autojoin-domain-only t))
+          (with-eval-after-load 'erc-backends
+            (setq erc-server-reconnect-timeout 3)
+            (setq erc-server-reconnect-attempts t))
+          (add-to-list 'erc-modules 'services)
+          (with-eval-after-load 'erc-services
+            (setq erc-prompt-for-nickserv-password nil))
+          ,@(if (get-value 'emacs-spelling config)
+                '((add-to-list 'erc-modules 'spelling))
+                '())
+          ,@(if erc-log?
+              '((add-to-list 'erc-modules 'log)
+                (with-eval-after-load 'erc-log
+                  (setq erc-log-insert-log-on-open t)
+                  (setq erc-log-channels-directory
+                        (expand-file-name "emacs/erc-logs" (or (xdg-cache-home) "~/.cache")))))
+              '())
+        ,@(if erc-align-nicknames?
+              '((with-eval-after-load 'erc-fill
+                  (setq erc-fill-function 'erc-fill-static)
+                  (setq erc-fill-static-center 14)
+                  (setq erc-fill-column 82)))
+              '())
+        ,@(if erc-images?
+              '((add-to-list 'erc-modules 'image)
+                (with-eval-after-load 'erc-image
+                  (setq erc-image-inline-rescale 100)))
+              '())))
+      #:elisp-packages (append
+                        (if erc-images?
+                            (list emacs-erc-image)
+                            '())
+                        (list emacs-erc-hl-nicks
+                              (get-value 'emacs-configure-rde-keymaps config)))
+      #:summary "Reasonable defaults and extensions for ERC"
+      #:commentary "Provide a distraction-free IRC experience with highlighting of nicks,
+image support, content alignment, and more."
+      #:keywords '(convenience))))
 
   (feature
    (name f-name)
