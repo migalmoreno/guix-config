@@ -31,15 +31,6 @@
    "Name of the default cursor theme to use."))
 
 (define (home-gtk3-files-service config)
-  (define (boolean->one-or-zero bool)
-    (if (eq? bool #t) 1 0))
-
-  (define (serialize-field key val)
-    (let ((value (cond
-                  ((boolean? val) (boolean->one-or-zero val))
-                  (else val))))
-      (format #f "~a = ~a\n" key value)))
-
   (append
    (if (home-gtk3-configuration-default-cursor config)
        (list
@@ -48,7 +39,7 @@
                   "index.theme"
                   (serialize-ini-config
                    `((#{Icon Theme}#
-                      ((Inherits . ,(home-gtk3-configuration-default-cursor config)))))))))
+                      ((Inherits . ,#~(format #f "~a" #$(home-gtk3-configuration-default-cursor config))))))))))
        '())
    (if (home-gtk3-configuration-theme config)
        (list
