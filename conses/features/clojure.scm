@@ -94,7 +94,7 @@
         (with-eval-after-load 'ob-clojure
           (setq org-babel-clojure-backend 'cider))
         (require 'clj-deps-new)
-        (define-key rde-app-map "n" 'clj-deps-new))
+        (define-key rde-app-map "J" 'clj-deps-new))
       #:elisp-packages (list emacs-clojure-mode
                              emacs-cider
                              emacs-clj-deps-new
