@@ -289,8 +289,7 @@ EndSection"))
     #:org-todo-keyword-faces
     '(("TODO" . "#ff665c")
       ("NEXT" . "#FCCE7B")
-      ("PROG" . "#51afef")
-      ("INTR" . "#a991f1")
+      ("HOLD" . "#a991f1")
       ("DONE" . "#7bc275"))
     #:org-tag-alist
     '((:startgroup)
