@@ -96,9 +96,7 @@
    (feature-fonts)
    (feature-emacs
     #:emacs emacs-next-pgtk
-    #:emacs-server-mode? #f
-    #:extra-init-el
-    '((add-hook 'after-init-hook 'server-start)))
+    #:emacs-server-mode? #t)
    (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
