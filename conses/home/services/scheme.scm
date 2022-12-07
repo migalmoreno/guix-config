@@ -4,7 +4,6 @@
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services utils)
-  #:use-module (gnu home-services-utils)
   #:use-module (guix packages)
   #:use-module (gnu packages guile)
   #:use-module (gnu home services)
@@ -60,18 +59,21 @@ in ``@code{GUIX_PROFILE}''."))
      config
      (filter-fields field)))
 
-  (filter
-   (compose not null?)
-   (list
-    (optional (not (null? (home-guix-configuration-channels config)))
-              `("guix/channels.scm"
-                ,(mixed-text-file
-                  "channels.scm"
-                  (serialize-field 'channels))))
-    `("guix/shell-authorized-directories"
-      ,(mixed-text-file
-        "shell-authorized-directories"
-        (serialize-field 'shell-authorized-directories))))))
+  (append
+   (if (not (null? (home-guix-configuration-channels config)))
+       (list
+        `("guix/channels.scm"
+          ,(mixed-text-file
+            "channels.scm"
+            (serialize-field 'channels))))
+       '())
+   (if (not (null? (home-guix-configuration-shell-authorized-directories config)))
+       (list
+        `("guix/shell-authorized-directories"
+          ,(mixed-text-file
+            "shell-authorized-directories"
+            (serialize-field 'shell-authorized-directories))))
+       '())))
 
 (define home-guix-service-type
   (service-type
