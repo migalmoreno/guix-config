@@ -267,7 +267,7 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
           (instagram-proxy "https://iganony.com")
           (quora-proxy "https://quora.vern.cc")
           (google-proxy "https://search.sethforprivacy.com")
-          (imgur-proxy "https://imgin.voidnet.tech")
+          (imgur-proxy "https://i.bcow.xyz")
           (medium-proxy "https://scribe.rip")
           (twitter-proxy "https://nitter.namazso.eu")
           (tiktok-proxy "https://tok.artemislena.eu"))
