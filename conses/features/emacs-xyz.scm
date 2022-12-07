@@ -2256,33 +2256,10 @@ and organizer for Emacs."
              (org-roam-todo? . ,org-roam-todo?)))
    (home-services-getter get-home-services)))
 
-(define %rde-org-agenda-custom-commands
-  '(("d" "Workflow"
-     ((agenda
-       ""
-       ((org-deadline-warning-days 7)
-        (org-agenda-block-separator nil)))
-      (todo
-       "INTR"
-       ((org-agenda-block-separator nil)
-        (org-agenda-overriding-header "\nCritical Tasks\n")))
-      (todo
-       "PROG"
-       ((org-agenda-block-separator nil)
-        (org-agenda-overriding-header "\nTasks In Progress\n")))
-      (todo
-       "NEXT"
-       ((org-agenda-block-separator nil)
-        (org-agenda-overriding-header "\nTasks Not Yet Started\n")))
-      (todo
-       "TODO"
-       ((org-agenda-block-separator nil)
-        (org-agenda-overriding-header "\nTasks To Review\n")))))))
-
 (define* (feature-emacs-org-agenda
           #:key
           (org-agenda-files #f)
-          (org-agenda-custom-commands %rde-org-agenda-custom-commands)
+          (org-agenda-custom-commands (@@ (rde features emacs-xyz) %rde-org-agenda-custom-commands))
           (org-agenda-prefix-format '()))
   "Configure the Org Agenda planner."
   (ensure-pred maybe-list? org-agenda-files)
@@ -2320,10 +2297,15 @@ and organizer for Emacs."
           (setq configure-org-agenda-appt-timer
                 (run-at-time "24:01" nil 'configure-org-agenda-appt-reset)))
 
-        (defun configure-org-agenda-open-dashboard ()
-          "Invoke a custom Org agenda dispatcher for a block agenda view."
+        (defun configure-org-agenda-daily ()
+          "Invoke a custom Org agenda dispatcher for the daily agenda view."
           (interactive)
-          (org-agenda nil "d"))
+          (org-agenda nil (kbd "C-d")))
+
+        (defun configure-org-agenda-overview ()
+          "Invoke a custom Org agenda dispatcher for the overview."
+          (interactive)
+          (org-agenda nil (kbd "C-o")))
 
         (defun configure-org-agenda-category (&optional len)
           "Get category of the Org Agenda item at point.
@@ -2367,7 +2349,9 @@ result is longer than LEN."
               (remove-hook 'org-agenda-finalize-hook 'configure-org-agenda-to-appt)
               (cancel-timer configure-org-agenda-appt-timer))))
 
-        (define-key global-map (kbd "C-x C-a") 'configure-org-agenda-open-dashboard)
+        (define-key global-map (kbd "C-x C-a") 'org-agenda)
+        (define-key rde-app-map (kbd "ad") 'configure-org-agenda-daily)
+        (define-key rde-app-map (kbd "ao") 'configure-org-agenda-overview)
         (add-hook 'org-agenda-mode-hook 'hack-dir-local-variables-non-file-buffer)
         (configure-org-agenda-appt-mode)
         (with-eval-after-load 'org-agenda
