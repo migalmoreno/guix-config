@@ -987,7 +987,8 @@ operate on buffers like Dired."
        emacs-f-name
        config
        `((eval-when-compile
-          (require 'emms))
+           (require 'emms)
+           (require 'emms-browser))
          (require 'ytdl)
 
          (defun configure-emms-download-track ()
@@ -995,21 +996,17 @@ operate on buffers like Dired."
            (interactive)
            (emms-playlist-ensure-playlist-buffer)
            (with-current-emms-playlist
-             (let* ((download-type (completing-read "Download type: " '("Music" "Video")))
+             (let* ((dl-type (ytdl--get-download-type))
                     (track (emms-playlist-track-at))
                     (title (emms-track-get track 'info-title))
                     (source (emms-track-get track 'name)))
                (if (equal (emms-track-get track 'type) 'url)
                    (ytdl--download-async
                     source
-                    (expand-file-name title (if (string= download-type "Music")
-                                                ytdl-music-folder
-                                              ytdl-video-folder))
-                    (if (string= download-type "Music")
-                        ytdl-music-extra-args
-                      ytdl-video-extra-args)
+                    (expand-file-name title (ytdl--eval-field (nth 1 dl-type)))
+                    (ytdl--eval-list (ytdl--eval-field (nth 2 dl-type)))
                     'ignore
-                    download-type)
+                    (car dl-type))
                  (error "Track `%s' is not a remote track to download" title)))))
 
          (defun configure-emms-library-load ()
@@ -1116,7 +1113,7 @@ operate on buffers like Dired."
                  (info-note . "--comment")
                  (info-albumartist . "--albumArtist")
                  (info-composer . "--composer")))))
-           (setq emms-playlist-buffer-name "*Music*")
+           (setq emms-playlist-buffer-name "*EMMS Playlist*")
            (setq emms-history-file (expand-file-name "emacs/emms-history" (or (xdg-cache-home) "~/.cache")))
            (setq emms-seek-seconds 15)
            (setq emms-source-file-default-directory ,emms-media-dir)
