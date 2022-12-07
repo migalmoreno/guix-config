@@ -1298,7 +1298,7 @@ operate on buffers like Dired."
           #:key
           (emacs-ednc emacs-ednc)
           (notifications-icon #f)
-          (ednc-key "E"))
+          (ednc-key "n"))
   "Configure the Emacs Desktop Notification Center (EDNC)."
   (ensure-pred any-package? emacs-ednc)
   (ensure-pred maybe-path? notifications-icon)
