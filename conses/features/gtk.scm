@@ -1,7 +1,7 @@
 (define-module (conses features gtk)
   #:use-module (conses features fontutils)
-  #:use-module (conses packages desktop)
   #:use-module (conses home services gtk)
+  #:use-module (conses packages desktop)
   #:use-module (conses utils)
   #:use-module (rde features)
   #:use-module (gnu services)
@@ -9,9 +9,10 @@
   #:use-module (gnu packages gtk)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages gnome-xyz)
+  #:use-module (guix gexp)
   #:use-module (guix records)
   #:use-module (srfi srfi-9)
-  #:export (feature-gtk
+  #:export (feature-gtk3
             theme
             make-theme
             theme?
@@ -26,7 +27,7 @@
 (define (maybe-theme? x)
   (or (theme? x) (not x)))
 
-(define* (feature-gtk
+(define* (feature-gtk3
           #:key
           (custom-gtk-theme %default-gtk-theme)
           (gtk-theme (make-theme "Numix" numix-gtk-theme))
@@ -34,7 +35,10 @@
           (cursor-theme (make-theme "Bibata-Modern-Classic" bibata-cursor-theme))
           (dark-theme? #f)
           (extra-gtk-settings '()))
-  "Configure the GTK toolkit."
+  "Configure the GTK3 toolkit.
+You can change the GTK-THEME or override some of its styling via CUSTOM-GTK-THEME,
+a single argument procedure that returns a list of CSS rules to be ingested by
+@code{serialize-css-config}."
   (ensure-pred maybe-procedure? custom-gtk-theme)
   (ensure-pred maybe-theme? gtk-theme)
   (ensure-pred maybe-theme? icon-theme)
@@ -43,6 +47,8 @@
 
   (define (get-home-services config)
     "Return home services related to GTK."
+    (require-value 'fonts config)
+
     (list
      (simple-service
       'home-gtk-profile-service
@@ -58,19 +64,19 @@
        (if cursor-theme
            (list (theme-package cursor-theme))
            '())))
-     (service home-gtk-service-type
-              (home-gtk-configuration
+     (service home-gtk3-service-type
+              (home-gtk3-configuration
                (default-cursor (and=> cursor-theme theme-name))
                (settings
                 `((Settings
                    (,@(if gtk-theme
-                          `((gtk-theme-name . ,(theme-name gtk-theme)))
+                          `((gtk-theme-name . ,#~(format #f "~a" #$(theme-name gtk-theme))))
                           '())
                     ,@(if icon-theme
-                          `((gtk-icon-theme-name . ,(theme-name icon-theme)))
+                          `((gtk-icon-theme-name . ,#~(format #f "~a" #$(theme-name icon-theme))))
                           '())
                     ,@(if cursor-theme
-                          `((gtk-cursor-theme-name . ,(theme-name cursor-theme)))
+                          `((gtk-cursor-theme-name . ,#~(format #f "~a" #$(theme-name cursor-theme))))
                           '())
                     (gtk-cursor-blink . #f)
                     (gtk-cursor-theme-size . 16)
@@ -80,7 +86,7 @@
                     (gtk-enable-event-sounds . #f)
                     (gtk-enable-input-feedback-sounds . #f)
                     (gtk-error-bell . #f)
-                    (gtk-font-name . ,(font-specification (get-value 'font-monospace config)))
+                    (gtk-font-name . ,#~(format #f "~a" #$(font-specification (get-value 'font-monospace config))))
                     (gtk-overlay-scrolling . #t)
                     (gtk-application-prefer-dark-theme . ,dark-theme?)
                     (gtk-recent-files-enabled . #f)
