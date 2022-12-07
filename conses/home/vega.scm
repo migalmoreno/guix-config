@@ -60,7 +60,7 @@
     #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
-   (feature-gtk
+   (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme #f)
    (feature-proxy
@@ -305,7 +305,7 @@ EndSection"))
       ("guix" . ?g)
       ("chore" . ?c)))
    (feature-emacs-org-roam
-    #:org-roam-directory "~/notes"
+    #:org-roam-directory "~/documents/notes"
     #:org-roam-dailies-directory "journal/"
     #:org-roam-capture-templates
     `(("d" "default" plain "%?"
@@ -360,9 +360,7 @@ EndSection"))
        "* %<%I:%M %p>: %?"
        :if-new (file+head "%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
-   (feature-emacs-org-agenda
-    #:org-agenda-files
-    '("~/documents/tasks.org"))
+   (feature-emacs-org-agenda)
    (feature-tex
     #:listings-options
     '(("basicstyle" "\\ttfamily")
@@ -388,17 +386,20 @@ EndSection"))
    (feature-emacs-helpful)
    (feature-emacs-keycast)
    (feature-emacs-eww)
-   (feature-emacs-webpaste)
+   (feature-emacs-webpaste
+    #:webpaste-providers '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
    (feature-emacs-time
     #:display-time? #t
-    #:display-time-24hr-format? #t
+    #:display-time-24hr? #t
     #:display-time-date? #t
-    #:timezones
+    #:world-clock-time-format "%R %Z"
+    #:world-clock-timezones
     '(("Europe/London" "London")
       ("Europe/Madrid" "Madrid")
       ("Europe/Moscow" "Moscow")
       ("America/New_York" "New York")
-      ("Australia/Sydney" "Sydney")))
+      ("Australia/Sydney" "Sydney")
+      ("Asia/Tokyo" "Tokyo")))
    (feature-emacs-dired)
    (feature-emacs-calc)
    (feature-emacs-tramp)
@@ -478,7 +479,12 @@ EndSection"))
       (network "irc.oftc.net")
       (nick (getenv "IRC_OFTC_NICK")))))
    (feature-emacs-erc
-    #:autojoin-channels-alist
+    #:erc-auto-query 'bury
+    #:erc-query-display 'buffer
+    #:erc-join-buffer 'bury
+    #:erc-images? #t
+    #:erc-log? #t
+    #:erc-autojoin-channels-alist
     '((Libera.Chat
        "#nyxt" "#emacs" "#org-mode" "#guix" "#nonguix" "#ocaml"
        "#clojure" "#commonlisp" "#scheme" "#tropin")
@@ -689,7 +695,11 @@ EndSection"))
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil)))
       (router:make-route (match-scheme "mailto" "magnet")
-                         :external "xdg-open ~s")))
+                         :external "xdg-open ~s")
+      (router:make-route (match-regex ".*eddit.*/.*")
+                         :blocklist (make-instance
+                                     'router:blocklist
+                                     :rules '(:contains (not "/comments/" "/wiki/"))))))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
@@ -755,6 +765,11 @@ EndSection"))
        :shortcut "clj"
        :search-url "https://clojars.org/search?q=~a"
        :fallback-url "https://clojars.org")
+      (make-instance
+       'search-engine
+       :shortcut "et"
+       :search-url "https://www.etsy.com/search?q=~a"
+       :fallback-url "https://www.etsy.com")
       (make-instance
        'search-engine
        :shortcut "to"

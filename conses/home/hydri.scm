@@ -34,7 +34,7 @@
 (define-public %hydri-ssh-key
   (plain-file
    "hydri.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9qhkk0r5Tos8xL7HmDIld6m0L5AvDe5jRUFoQHxpTM\n"))
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
 
 (define-public %home-features
   (list
@@ -99,7 +99,7 @@
     #:emacs-server-mode? #f
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))
-   (feature-gtk
+   (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
     #:icon-theme (make-theme "Adwaita" (@ (gnu packages gnome) adwaita-icon-theme))
@@ -264,7 +264,7 @@
     #:media-enabled? #t
     #:extra-routes
     '((router:make-route
-       (match-regex ".*/watch\\?.*v=.*")
+       (match-regex ".*/watch\\?.*v=.*"  ".*/playlist\\?list=.*")
        :redirect "www.youtube.com"
        :external (lambda (req)
                    (play-video-mpv (url req) :formats nil :audio t :repeat t)))
