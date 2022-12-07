@@ -1491,8 +1491,8 @@ operate on buffers like Dired."
    (values `((,f-name . #t)))
    (home-services-getter get-home-services)))
 
-(define (file-like-or-path-or-boolean? x)
-  (or (boolean? x) (file-like-or-path? x)))
+(define (file-like-or-path-or-symbol-or-boolean? x)
+  (or (boolean? x) (symbol? x) (file-like-or-path? x)))
 
 (define* (feature-emacs-dashboard
           #:key
@@ -1510,7 +1510,7 @@ operate on buffers like Dired."
           (heading-icons #f)
           (set-file-icons? #f)
           (navigator-buttons #f)
-          (banner #f)
+          (banner 'logo)
           (banner-max-height 0)
           (banner-max-width 0)
           (org-agenda-weekly? #t)
@@ -1525,8 +1525,35 @@ operate on buffers like Dired."
           (projects-show-base? #f)
           (path-style #f)
           (path-max-length 70)
-          (path-shorten-string "..."))
-  "Configure Emacs Dashboard, an extensible startup screen."
+          (path-shorten-string "...")
+          (dashboard-key "h"))
+  "Configure Emacs Dashboard, an extensible startup screen.
+Set up the visible sections via ITEMS, where each entry is
+of the form (LIST-TYPE . LIST-SIZE).  For the aforementioned to work,
+you also need to configure ITEM-GENERATORS, where each entry is of
+the form (LIST-TYPE . LIST-GENERATOR-FUNCTION). You can quickly navigate
+to each section with ITEM-SHORTCUTS and set a custom name for each one via
+ITEM-NAMES.
+
+In terms of visuals, you can choose whether you want icons to be displayed in
+the section headings via SET-HEADING-ICONS? and select what icon to show for each
+section with HEADING-ICONS, where each entry is of the form (LIST-TYPE . ICON-NAME-STRING).
+Choose if you want section entries to be shown alongside icons via SET-FILE-ICONS?.
+
+NAVIGATOR-BUTTONS are custom buttons that you can display below the BANNER, to include
+quick shortcuts to things like web bookmarks. BANNER can be either `official' for the
+official Emacs logo, #f to hide the banner, `logo' for an alternative Emacs logo, or a custom
+file path to an image whose dimensions you can constrain with BANNER-MAX-HEIGHT and BANNER-MAX-WIDTH.
+
+Remind yourself of tasks by setting ORG-AGENDA-WEEKLY? to #t and customize the format of
+each task entry with ORG-AGENDA-PREFIX-FORMAT (see the Emacs variable with the same name for
+information on the format strings).
+
+Choose whether to show the bookmark name, file name, and project name, respectively, for the
+entries in each section with BOOKMARKS-SHOW-BASE?, RECENTF-SHOW-BASE?, and PROJECTS-SHOW-BASE?.
+
+You can truncate paths whose character length is greater than PATH-MAX-LENGTH by setting
+PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'."
   (ensure-pred file-like? emacs-dashboard)
   (ensure-pred string? page-separator)
   (ensure-pred string? logo-title)
@@ -1541,7 +1568,7 @@ operate on buffers like Dired."
   (ensure-pred maybe-list? heading-icons)
   (ensure-pred boolean? set-file-icons?)
   (ensure-pred maybe-list? navigator-buttons)
-  (ensure-pred file-like-or-path-or-boolean? banner)
+  (ensure-pred file-like-or-path-or-symbol-or-boolean? banner)
   (ensure-pred number? banner-max-height)
   (ensure-pred number? banner-max-width)
   (ensure-pred boolean? org-agenda-weekly?)
@@ -1557,6 +1584,7 @@ operate on buffers like Dired."
   (ensure-pred maybe-symbol? path-style)
   (ensure-pred integer? path-max-length)
   (ensure-pred string? path-shorten-string)
+  (ensure-pred string? dashboard-key)
 
   (define emacs-f-name 'dashboard)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -1577,7 +1605,7 @@ operate on buffers like Dired."
             (dashboard-insert-startupify-lists)
             (dashboard-refresh-buffer)))
 
-        (define-key rde-app-map "h" 'configure-dashboard-open)
+        (define-key rde-app-map (kbd ,dashboard-key) 'configure-dashboard-open)
         (with-eval-after-load 'dashboard
           (setq dashboard-set-file-icons ,(if set-file-icons? 't 'nil))
           (setq dashboard-projects-backend ',projects-backend)
@@ -1599,13 +1627,14 @@ operate on buffers like Dired."
                 '((setq dashboard-week-agenda t))
                 '())
           (setq dashboard-banner-logo-title ,logo-title)
-          ,@(if banner
+          ,@(if (symbol? banner)
+                `((setq dashboard-startup-banner ',banner))
                 `((setq dashboard-startup-banner ,(match banner
-                                                    (#t ':official)
-                                                    (e e)))
-                  (setq dashboard-image-banner-max-height ,banner-max-height)
-                  (setq dashboard-image-banner-max-width ,banner-max-width))
-                '())
+                                                    (#f 'nil)
+                                                    (e e)))))
+          (setq dashboard-image-banner-max-height ,banner-max-height)
+          (setq dashboard-image-banner-max-width ,banner-max-width)
+          '()
           ,@(if items
                 `((setq dashboard-items ',items))
                 '())
