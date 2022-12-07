@@ -693,10 +693,7 @@ search engines for Nyxt."
                       (match-domain "reddit.com")
                       :original "www.reddit.com"
                       :redirect (quri:uri ,(get-value 'reddit-proxy config))
-                      :instances 'make-teddit-instances
-                      :blocklist (make-instance
-                                  'router:blocklist
-                                  :rules '(:contains (not "/comments/" "/wiki/")))))
+                      :instances 'make-teddit-instances))
                    '())
              ,@(if (get-value 'google-proxy config)
                    `((router:make-route
