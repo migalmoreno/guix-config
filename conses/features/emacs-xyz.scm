@@ -2838,9 +2838,16 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
 
 (define* (feature-emacs-webpaste
           #:key
-          (emacs-webpaste emacs-webpaste))
+          (emacs-webpaste emacs-webpaste)
+          (webpaste-providers '())
+          (webpaste-key "P"))
   "Configure Webpaste.el, a mode to paste whole buffers or
-parts of buffers to pastebin-like services."
+parts of buffers to pastebin-like services.
+WEBPASTE-PROVIDERS denotes the list of providers that will
+be used in descending order of priority."
+  (ensure-pred file-like? emacs-webpaste)
+  (ensure-pred list? webpaste-providers)
+  (ensure-pred string? webpaste-key)
 
   (define emacs-f-name 'webpaste)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -2851,14 +2858,20 @@ parts of buffers to pastebin-like services."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((let ((map mode-specific-map))
-          (define-key map "Wb" 'webpaste-paste-buffer)
-          (define-key map "Wr" 'webpaste-paste-region)
-          (define-key map "Wp" 'webpaste-paste-buffer-or-region))
+      `((require 'configure-rde-keymaps)
+        (defvar rde-webpaste-map nil
+          "Map to bind `webpaste' commands under.")
+        (define-prefix-command 'rde-webpaste-map)
+        (define-key rde-app-map (kbd ,webpaste-key) 'rde-webpaste-map)
+        (let ((map rde-webpaste-map))
+          (define-key map "b" 'webpaste-paste-buffer)
+          (define-key map "r" 'webpaste-paste-region)
+          (define-key map "p" 'webpaste-paste-buffer-or-region))
         (with-eval-after-load 'webpaste
-          (setq webpaste-provider-priority '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
+          (setq webpaste-provider-priority ',webpaste-providers)
           (setq webpaste-paste-confirmation t)))
-      #:elisp-packages (list emacs-webpaste))))
+      #:elisp-packages (list emacs-webpaste
+                             (get-value 'emacs-configure-rde-keymaps config)))))
 
   (feature
    (name f-name)
