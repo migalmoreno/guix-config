@@ -285,8 +285,7 @@ EndSection"))
       (?B . (:foreground "#51AFEF"))
       (?C . (:foreground "#4CA171")))
     #:org-todo-keywords
-    '((sequence "TODO(t)" "NEXT(n)" "PROG(p)" "INTR(i)" "|" "DONE(d!)")
-      (sequence "GOING(g)" "|" "MISSED(m@)" "ATTENDED(a@)"))
+    '((sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "|" "DONE(d!)"))
     #:org-todo-keyword-faces
     '(("TODO" . "#ff665c")
       ("NEXT" . "#FCCE7B")
