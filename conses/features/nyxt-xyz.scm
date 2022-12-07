@@ -587,10 +587,10 @@ search engines for Nyxt."
 (define* (feature-nyxt-nx-router
           #:key
           (media-enabled? #t)
-          (extra-routes '()))
+          (extra-routes #f))
   "Configure nx-router, a URL routing extension for Nyxt."
   (ensure-pred boolean? media-enabled?)
-  (ensure-pred lisp-config? extra-routes)
+  (ensure-pred maybe-procedure? extra-routes)
 
   (define nyxt-f-name 'nx-router)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
@@ -647,7 +647,7 @@ search engines for Nyxt."
            (router:banner-p t)
            (router:routes
             (list
-             ,@extra-routes
+             ,@(extra-routes config)
              ,@(if (get-value 'tiktok-proxy config)
                    `((router:make-route
                       (match-domain "tiktok.com")
