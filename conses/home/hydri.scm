@@ -339,7 +339,7 @@
       (network "irc.oftc.net")
       (nick (getenv "IRC_OFTC_NICK")))))
    (feature-emacs-erc
-    #:autojoin-channels-alist
+    #:erc-autojoin-channels-alist
     '((Libera.Chat
        "#nyxt" "#emacs" "#org-mode" "#guix" "#ocaml"
        "#clojure" "#commonlisp" "#scheme" "#tropin")
@@ -350,8 +350,7 @@
     (list
      (matrix-account
       (id (getenv "MATRIX_USER"))
-      (homeserver (string-append "matrix." (getenv "DOMAIN")))
-      (local? #t))))
+      (homeserver (string-append "matrix." (getenv "DOMAIN"))))))
    (feature-emacs-ement)
    (feature-slack-settings
     #:slack-accounts
@@ -484,7 +483,7 @@
        :if-new (file+head "%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
    (feature-emacs-time
-    #:timezones
+    #:world-clock-timezones
     '(("Europe/London" "London")
       ("Europe/Madrid" "Madrid")
       ("Europe/Moscow" "Moscow")
