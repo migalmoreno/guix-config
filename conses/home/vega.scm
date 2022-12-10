@@ -127,10 +127,12 @@ EndSection"))
    (feature-clojure)
    (feature-nyxt
     #:scroll-distance 150
+    #:temporary-history? #t
     #:smooth-scrolling? #t
     #:autostart-slynk? #t
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
+    #:restore-session? #f
     #:extra-bindings
     '("C-c s" 'query-selection-in-search-engine))
    (feature-nyxt-nx-mosaic)
@@ -327,7 +329,7 @@ EndSection"))
        :if-new (file+head
                 "%<%Y%m%d%H%M%S>-${slug}.org"
                 ,(string-append
-                  ":PROPERTIES:\n:ROAM_REFS: %^{Reference}\n:END:\n"
+                  ":PROPERTIES:\n:ROAM_REFS: ${ref}\n:END:\n"
                   "#+title: ${title}\n#+filetags: :${Topic}:"))
        :unnarrowed t)
       ("w" "Web Resource" plain "%?"
@@ -337,7 +339,7 @@ EndSection"))
                   ":PROPERTIES:\n:ROAM_REFS: %l\n:END:\n"
                   "#+title: ${title}\n#+filetags: :${Topic}:"))
        :unnarrowed t)
-      ("r" "Recipe" plain "* Ingredients\n- %?\n* Directions"
+      ("m" "Recipe" plain "* Ingredients\n- %?\n* Directions"
        :if-new (file+head
                 "%<%Y%m%d%H%M%S>-${title}.org"
                 ,(string-append
@@ -356,7 +358,7 @@ EndSection"))
        :unnarrowed t))
     #:org-roam-dailies-capture-templates
     '(("d" "default" entry
-       "* %<%I:%M %p>: %?"
+       "* %?"
        :if-new (file+head "%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
    (feature-emacs-org-agenda)
@@ -522,7 +524,7 @@ EndSection"))
    (feature-lisp
     #:custom-sly-prompt? #t
     #:extra-lisp-packages
-    (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk")
+    (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk" "sbcl-lisp-unit2")
     #:extra-source-registry-entries
     `(("common-lisp/source-registry.conf.d/10-home.conf"
        ,(plain-file "10-home.conf"
@@ -678,31 +680,29 @@ EndSection"))
                  :visibility "hidden"))))))
    (feature-nyxt-nx-router
     #:media-enabled? #t
+    #:show-block-banner? #t
     #:extra-routes
-    (lambda (config)
-      `((router:make-route
-         (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
-         :redirect "www.youtube.com"
-         :external (lambda (req)
-                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-        (router:make-route
-         (match-regex "https://(m.)?soundcloud.com/.*/.*")
-         :external (lambda (req)
-                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-        (router:make-route
-         (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
-                      "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
-         :external (lambda (req)
-                     (play-video-mpv (url req) :formats nil)))
-        (router:make-route (match-scheme "mailto" "magnet")
-                           :external "xdg-open ~s")
-        (router:make-route (match-regex ".*eddit.*/.*")
-                           :original "www.reddit.com"
-                           :redirect (quri:uri ,(get-value 'reddit-proxy config))
-                           :instances 'make-teddit-instances
-                           :blocklist (make-instance
-                                       'router:blocklist
-                                       :rules '(:contains (not "/comments/" "/wiki/")))))))
+    `((make-instance 'router:web-route
+                     :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
+                     :redirect-url "www.youtube.com"
+                     :resource (lambda (url)
+                                 (play-video-mpv url :formats nil :audio t :repeat t)))
+      (make-instance 'router:web-route
+                     :trigger (match-regex "https://(m.)?soundcloud.com/.*/.*")
+                     :resource (lambda (url)
+                                 (play-video-mpv url :formats nil :audio t :repeat t)))
+      (make-instance 'router:opener
+                     :trigger (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
+                                           "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
+                     :resource (lambda (url)
+                                 (play-video-mpv url :formats nil)))
+      (make-instance 'router:opener
+                     :trigger (match-scheme "mailto" "magnet")
+                     :resource "xdg-open ~s")
+      (make-instance 'router:blocker
+                     :trigger (match-regex ".*eddit.*/.*")
+                     :instances 'make-teddit-instances
+                     :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
