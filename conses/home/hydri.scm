@@ -99,9 +99,7 @@
     #:emacs emacs-next-pgtk
     #:emacs-server-mode? #f
     #:extra-init-el
-    '((unless (server-running-p)
-        (server-force-delete))
-      (add-hook 'after-init-hook 'server-start)))
+    '((add-hook 'after-init-hook 'server-start)))
    (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
@@ -266,28 +264,29 @@
    (feature-nyxt-nx-router
     #:media-enabled? #t
     #:extra-routes
-    (lambda (config)
-      `((router:make-route
-         (match-regex ".*/watch\\?.*v=.*"  ".*/playlist\\?list=.*")
-         :redirect "www.youtube.com"
-         :external (lambda (req)
-                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-        (router:make-route
-         (match-regex "https://(m.)?soundcloud.com/.*/.*")
-         :external (lambda (req)
-                     (play-video-mpv (url req) :formats nil :audio t :repeat t)))
-        (router:make-route
-         (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
-                      "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
-         :external (lambda (req)
-                     (play-video-mpv (url req) :formats nil)))
-        (router:make-route (match-regex ".*eddit.*/.*")
-                           :original "www.reddit.com"
-                           :redirect (quri:uri ,(get-value 'reddit-proxy config))
-                           :instances 'make-teddit-instances
-                           :blocklist (make-instance
-                                       'router:blocklist
-                                       :rules '(:contains (not "/comments/" "/wiki/")))))))
+    `((make-instance 'router:web-route
+                     :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
+                     :redirect-url "www.youtube.com"
+                     :resource (lambda (url)
+                                 (play-video-mpv url :formats nil :audio t :repeat t)))
+      (make-instance 'router:web-route
+                     :trigger (match-regex "https://(m.)?soundcloud.com/.*/.*")
+                     :resource (lambda (url)
+                                 (play-video-mpv url :formats nil :audio t :repeat t)))
+      (make-instance 'router:opener
+                     :trigger (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
+                                           "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
+                     :resource (lambda (url)
+                                 (play-video-mpv url :formats nil)))
+      (make-instance 'router:opener
+                     :trigger (match-scheme "magnet")
+                     :resource (lambda (url)
+                                 (eval-with-emacs
+                                  `(transmission-add ,url))))
+      (make-instance 'router:blocker
+                     :trigger (match-regex ".*eddit.*/.*")
+                     :instances 'make-teddit-instances
+                     :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))))
    (feature-nyxt-nx-search-engines
     #:extra-engines
     '((engines:wordnet
@@ -416,8 +415,6 @@
     #:org-todo-keyword-faces
     '(("TODO" . "#ff665c")
       ("NEXT" . "#FCCE7B")
-      ("PROG" . "#51afef")
-      ("INTR" . "#a991f1")
       ("DONE" . "#7bc275"))
     #:org-tag-alist
     '((:startgroup)
@@ -430,11 +427,9 @@
       ("finance" . ?f)
       ("guix" . ?g)
       ("chore" . ?c)))
-   (feature-emacs-org-agenda
-    #:org-agenda-files
-    '("~/documents/tasks.org"))
+   (feature-emacs-org-agenda)
    (feature-emacs-org-roam
-    #:org-roam-directory "~/notes"
+    #:org-roam-directory "~/documents/notes"
     #:org-roam-dailies-directory "journal/"
     #:org-roam-capture-templates
     `(("d" "default" plain "%?"
