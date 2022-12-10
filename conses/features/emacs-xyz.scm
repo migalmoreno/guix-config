@@ -2087,7 +2087,7 @@ and organizer for Emacs."
       (rde-elisp-configuration-service
        emacs-f-name
        config
-       `((eval-and-compile
+       `((eval-when-compile
           (let ((org-roam-v2-ack t))
             (require 'org-roam)))
          (defun configure-org-roam-open-ref ()
@@ -2151,6 +2151,26 @@ and organizer for Emacs."
            "Update the value of `org-agenda-files'."
            (setq org-agenda-files (configure-org-roam-list-todo-files)))
 
+         (defun configure-org-roam-ref-add (ref node)
+           "Add REF to NODE.
+If NODE doesn't exist, create a new org-roam node with REF."
+           (interactive
+            (list
+             (read-string "Ref: ")
+             (org-roam-node-read)))
+           (if-let ((file (org-roam-node-file node)))
+               (with-current-buffer (or (find-buffer-visiting file)
+                                        (find-file-noselect file))
+                 (org-roam-property-add "ROAM_REFS" ref)
+                 (save-buffer)
+                 (kill-current-buffer))
+             (org-roam-capture-
+              :keys "r"
+              :node node
+              :info `(:ref ,ref)
+              :templates org-roam-capture-templates
+              :props '(:finalize find-file))))
+
          (defun configure-org-roam-node-insert-immediate (arg &rest args)
            "Immediately insert new Org Roam node with ARG and ARGS in the buffer."
            (interactive "P")
@@ -2161,6 +2181,7 @@ and organizer for Emacs."
                                                '(:immediate-finish)))))
              (apply 'org-roam-node-insert args)))
 
+         (autoload 'org-roam-node-read "org-roam")
          (setq org-roam-v2-ack t)
          ,@(if org-roam-directory
                `((setq org-roam-directory ,org-roam-directory))
@@ -2188,9 +2209,8 @@ and organizer for Emacs."
            (define-key map "ndt" 'org-roam-dailies-goto-tomorrow)
            (define-key map "ndC" 'org-roam-dailies-capture-date)
            (define-key map "ndc" 'org-roam-dailies-goto-date))
-         (with-eval-after-load 'org-roam-autoloads
-           (org-roam-db-autosync-enable))
          (with-eval-after-load 'org-roam
+           (org-roam-db-autosync-enable)
            (let ((map org-mode-map))
              (define-key map (kbd "C-TAB") 'completion-at-point)
              (define-key map (kbd "C-c r r") 'org-roam-ref-add)
@@ -2248,7 +2268,11 @@ and organizer for Emacs."
                "Store and capture the current page as an Org Roam node."
                (eval-in-emacs
                 '(nyxt-capture "w" :roam-p t)))
-             (define-key *rde-keymap* "C-c n" 'org-roam-capture))))
+             (define-command org-roam-ref-capture ()
+               "Reference an org-roam node with the current page."
+               (eval-in-emacs
+                `(configure-org-roam-ref-add ,(render-url (url (current-buffer))) (org-roam-node-read))))
+             (define-key *rde-keymap* "C-c n" 'org-roam-ref-capture))))
          '())))
 
   (feature
