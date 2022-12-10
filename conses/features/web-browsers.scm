@@ -161,7 +161,7 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
            ((nyxt/auto-mode:prompt-on-mode-toggle t)))
          (define-configuration browser
            ((default-cookie-policy ,default-cookie-policy)
-            (restore-session-on-startup-p ,(if temporary-history? 't 'nil))
+            (restore-session-on-startup-p ,(if restore-session? 't 'nil))
             (default-new-buffer-url (quri:uri ,default-new-buffer-url))))
          ,@(if autostart-slynk?
                '((unless nyxt::*run-from-repl-p*
@@ -270,7 +270,8 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
           (imgur-proxy "https://i.bcow.xyz")
           (medium-proxy "https://scribe.rip")
           (twitter-proxy "https://nitter.namazso.eu")
-          (tiktok-proxy "https://tok.artemislena.eu"))
+          (tiktok-proxy "https://tok.artemislena.eu")
+          (fandom-proxy "https://bw.vern.cc"))
   (ensure-pred maybe-string? youtube-proxy)
   (ensure-pred maybe-string? reddit-proxy)
   (ensure-pred maybe-string? instagram-proxy)
@@ -280,11 +281,12 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
   (ensure-pred maybe-string? medium-proxy)
   (ensure-pred maybe-string? twitter-proxy)
   (ensure-pred maybe-string? tiktok-proxy)
+  (ensure-pred maybe-string? fandom-proxy)
 
   (feature
    (name 'proxy)
    (values (append
             `((proxy . #t))
             (make-feature-values
-             youtube-proxy reddit-proxy instagram-proxy quora-proxy
-             google-proxy imgur-proxy medium-proxy twitter-proxy tiktok-proxy)))))
+             youtube-proxy reddit-proxy instagram-proxy quora-proxy google-proxy
+             imgur-proxy medium-proxy twitter-proxy tiktok-proxy fandom-proxy)))))
