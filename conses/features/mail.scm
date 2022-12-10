@@ -521,6 +521,8 @@ is not provided, use all the mail accounts."
         (add-hook 'gnus-group-mode-hook 'hl-line-mode)
         (with-eval-after-load 'gnus-sum
           (setq gnus-thread-hide-subtree t))
+        (with-eval-after-load 'nndraft-directory
+          (setq nndraft-directory (expand-file-name "emacs/gnus/mail/drafts" (or (xdg-cache-home) "~/.cache"))))
         (add-hook 'gnus-topic-mode-hook 'configure-gnus-topic-mode)
         (with-eval-after-load 'gnus-topic
           (setq gnus-gcc-mark-as-read t)
