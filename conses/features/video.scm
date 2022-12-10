@@ -77,16 +77,16 @@
        `((eval-when-compile
            (require 'mpv)
            (require 'cl-lib))
-         (cl-defun configure-mpv-play-url (url &key (audio nil) (repeat nil) (formats t) (select t) (playlist nil))
+         (cl-defun configure-mpv-play-url (url &optional format &key audio repeat (formats t) (select t) playlist)
            "Play URL with `mpv-start'.
 You can specify whether to PLAY the file as AUDIO, if you want to be
-prompted for FORMATS, to REPEAT the file, manually SELECT what to do with the file,
+prompted for FORMATS or use FORMAT, to REPEAT the file, manually SELECT what to do with the file,
 and whether to add the file to the current PLAYLIST."
            (interactive "sURI: ")
-           (let* ((format (and formats (ytdl-select-format url)))
+           (let* ((sel-format (or format (and formats (ytdl-select-format url))))
                   (extra-args (split-string
                                (concat
-                                (format "--ytdl-format=%s" (or format "best"))
+                                (format "--ytdl-format=%s" (or sel-format "best"))
                                 (and audio " --video=no")
                                 (and repeat " --loop-file=inf")))))
              (if (and select (mpv-get-property "playlist"))
@@ -229,7 +229,7 @@ proxy url as per `configure-browse-url-mappings'."
                        (url (mpv-get-property "path"))
                        (original-url (if original-p
                                          (configure-browse-url--transform-host url)
-                                       (configure-browse-url--transform-host url :alt-p nil))))
+                                       (configure-browse-url--transform-host url :alt nil))))
              (kill-new original-url)
              (message (format "Copied \"%s\" to the system clipboard" title))))
 
@@ -326,9 +326,26 @@ proxy url as per `configure-browse-url-mappings'."
                                           :prompt "Select"
                                           :sources (make-instance 'prompter:yes-no-source
                                                                   :constructor '("Play" "Enqueue")))))
+                      (formats (delete-duplicates
+                                (remove-if-not (lambda (f)
+                                                 (ppcre:scan "\\d+x\\d+" f))
+                                               (mapcar (lambda (f) (getf f :resolution))
+                                                       (with-input-from-string (s (eval-in-emacs
+                                                                                   `(ytdl--list-formats ,url)))
+                                                         (read s))))
+                                :test 'equal))
+                      (format (when formats
+                                (ppcre:register-groups-bind (height)
+                                    ("\\d+x(\\d+)"
+                                     (nyxt:prompt1
+                                      :prompt "Format"
+                                      :sources (make-instance 'prompter:source
+                                                              :name "Formats"
+                                                              :constructor formats)))
+                                  (format nil "best[height<=~a]" height))))
                       (res (and play-or-enqueue (string= play-or-enqueue "Enqueue"))))
                  (eval-in-emacs
-                  `(apply 'configure-mpv-play-url ,url :select nil :playlist ,res ',extra-args))))
+                  `(apply 'configure-mpv-play-url ,url ,format :select nil :playlist ,res ',extra-args))))
              (define-command play-video-mpv-current-buffer (&optional (buffer (current-buffer)))
                "Play contents of BUFFER in an Emacs-controlled mpv process."
                (play-video-mpv (render-url (url buffer))))
