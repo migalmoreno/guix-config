@@ -587,10 +587,12 @@ search engines for Nyxt."
 (define* (feature-nyxt-nx-router
           #:key
           (media-enabled? #t)
-          (extra-routes #f))
+          (extra-routes '())
+          (show-block-banner? #f))
   "Configure nx-router, a URL routing extension for Nyxt."
   (ensure-pred boolean? media-enabled?)
-  (ensure-pred maybe-procedure? extra-routes)
+  (ensure-pred list? extra-routes)
+  (ensure-pred boolean? show-block-banner?)
 
   (define nyxt-f-name 'nx-router)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
@@ -634,6 +636,82 @@ search engines for Nyxt."
                     (json:with-decoder-simple-list-semantics
                       (json:decode-json-from-string instances)))))
 
+        (define-configuration (router:opener router:redirector)
+          ((router:toplevel-p nil)))
+
+        (define-configuration router:blocker
+          ((router:block-banner-p ,(if show-block-banner? 't 'nil))))
+
+        (define-configuration router:router-mode
+          ((router:routes
+            (list
+             ,@extra-routes
+             ,@(if (get-value 'tiktok-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "tiktok.com")
+                                    :original-url "www.tiktok.com"
+                                    :redirect-url (quri:uri ,(get-value 'tiktok-proxy config))
+                                    :redirect-rule '(("/@placeholder/video/" . (not "/" "/@" "/t")))))
+                   '())
+             ,@(if (get-value 'youtube-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "youtube.com" "youtu.be")
+                                    :original-url "www.youtube.com"
+                                    :redirect-url (quri:uri ,(get-value 'youtube-proxy config))))
+                   '())
+             ,@(if (get-value 'quora-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "quora.com")
+                                    :original-url "www.quora.com"
+                                    :redirect-url (quri:uri ,(get-value 'quora-proxy config))))
+                   '())
+             ,@(if (get-value 'imgur-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "imgur.com")
+                                    :original-url "imgur.com"
+                                    :redirect-url (quri:uri ,(get-value 'imgur-proxy config))))
+                   '())
+             ,@(if (get-value 'medium-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "medium.com")
+                                    :original-url "www.medium.com"
+                                    :redirect-url (quri:uri ,(get-value 'medium-proxy config))
+                                    :instances 'make-scribe-instances))
+                   '())
+             ,@(if (get-value 'twitter-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "twitter.com")
+                                    :original-url "www.twitter.com"
+                                    :redirect-url (quri:uri ,(get-value 'twitter-proxy config))))
+                   '())
+             ,@(if (get-value 'reddit-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-domain "reddit.com")
+                                    :original-url "www.reddit.com"
+                                    :redirect-url (quri:uri ,(get-value 'reddit-proxy config))
+                                    :instances 'make-teddit-instances))
+                   '())
+             ,@(if (get-value 'google-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-regex "https://whoogle.*" "https://.*google.com/search.*")
+                                    :original-url (quri:uri "https://www.google.com")
+                                    :redirect-url (quri:uri ,(get-value 'google-proxy config))))
+                   '())
+             ,@(if (get-value 'instagram-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-regex "https://(www.)?insta.*")
+                                    :original-url "www.instagram.com"
+                                    :redirect-url (quri:uri ,(get-value 'instagram-proxy config))
+                                    :redirect-rule '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
+                                                     ("/media/" . "/p/"))))
+                   '())
+             ,@(if (get-value 'fandom-proxy config)
+                   `((make-instance 'router:redirector
+                                    :trigger (match-regex "https://.*fandom.com/wiki/.*")
+                                    :redirect-rule "https://(\\w+)\\.fandom.com/wiki/(.*)"
+                                    :redirect-url (quri:uri ,(format #f "~a/\\1/wiki/\\2"
+                                                                     (get-value 'fandom-proxy config))))))))))
+
         (defmethod nyxt:on-signal-load-finished :around ((mode nyxt/history-mode:history-mode) url)
           (call-next-method mode (router:trace-url url)))
 
@@ -641,77 +719,6 @@ search engines for Nyxt."
           (setf (url buffer) (router:trace-url (url buffer)))
           (call-next-method buffer))
 
-        (define-configuration router:router-mode
-          ((router:enforce-p t)
-           (router:media-enabled-p ,(if media-enabled? 't 'nil))
-           (router:banner-p t)
-           (router:routes
-            (list
-             ,@(extra-routes config)
-             ,@(if (get-value 'tiktok-proxy config)
-                   `((router:make-route
-                      (match-domain "tiktok.com")
-                      :original "www.tiktok.com"
-                      :redirect (make-instance
-                                 'router:redirect
-                                 :to (quri:uri ,(get-value 'tiktok-proxy config))
-                                 :rules '(("/@placeholder/video/" . (not "/" "/@"))))))
-                   '())
-             ,@(if (get-value 'youtube-proxy config)
-                   `((router:make-route
-                      (match-domain "youtube.com" "youtu.be")
-                      :original "www.youtube.com"
-                      :redirect (quri:uri ,(get-value 'youtube-proxy config))))
-                   '())
-             ,@(if (get-value 'quora-proxy config)
-                   `((router:make-route
-                      (match-domain "quora.com")
-                      :original "www.quora.com"
-                      :redirect (quri:uri ,(get-value 'quora-proxy config))))
-                   '())
-             ,@(if (get-value 'imgur-proxy config)
-                   `((router:make-route
-                      (match-domain "imgur.com")
-                      :original "imgur.com"
-                      :redirect (quri:uri ,(get-value 'imgur-proxy config))))
-                   '())
-             ,@(if (get-value 'medium-proxy config)
-                   `((router:make-route
-                      (match-domain "medium.com")
-                      :original "www.medium.com"
-                      :redirect (quri:uri ,(get-value 'medium-proxy config))
-                      :instances 'make-scribe-instances))
-                   '())
-             ,@(if (get-value 'twitter-proxy config)
-                   `((router:make-route
-                      (match-domain "twitter.com")
-                      :original "www.twitter.com"
-                      :redirect (quri:uri ,(get-value 'twitter-proxy config))))
-                   '())
-             ,@(if (get-value 'reddit-proxy config)
-                   `((router:make-route
-                      (match-domain "reddit.com")
-                      :original "www.reddit.com"
-                      :redirect (quri:uri ,(get-value 'reddit-proxy config))
-                      :instances 'make-teddit-instances))
-                   '())
-             ,@(if (get-value 'google-proxy config)
-                   `((router:make-route
-                      (match-regex "https://whoogle.*"
-                                   "https://.*google.com/search.*")
-                      :original (quri:uri "https://www.google.com")
-                      :redirect (quri:uri ,(get-value 'google-proxy config))))
-                   '())
-             ,@(if (get-value 'instagram-proxy config)
-                   `((router:make-route
-                      (match-regex "https://(www.)?insta.*")
-                      :original "www.instagram.com"
-                      :redirect (make-instance
-                                 'router:redirect
-                                 :to (quri:uri ,(get-value 'instagram-proxy config))
-                                 :rules '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
-                                          ("/media/" . "/p/")))))
-                   '())))))
         (define-configuration web-buffer
           ((default-modes `(router:router-mode ,@%slot-value%)))))
       #:lisp-packages '(nx-router))))
