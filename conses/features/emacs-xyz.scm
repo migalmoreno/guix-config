@@ -782,7 +782,8 @@ on the current project."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((eval-when-compile
+      `((require 'xdg)
+        (eval-when-compile
          (require 'cl-lib))
         (defgroup configure-project nil
           "Custom `project.el' enhancements."
@@ -833,7 +834,8 @@ on the current project."
         (add-hook 'project-find-functions 'configure-project-custom-root)
         (advice-add 'project-compile :override 'configure-project-compile)
         (with-eval-after-load 'project
-          (setq project-switch-use-entire-map t)))
+          (setq project-switch-use-entire-map t)
+          (setq project-list-file (expand-file-name "emacs/projects" (or (xdg-cache-home) "~/.cache")))))
       #:elisp-packages (if (get-value 'emacs-consult config)
                            (list (get-value 'emacs-consult config))
                            '())
