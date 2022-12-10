@@ -1073,7 +1073,7 @@ operate on buffers like Dired."
              (emms-playlist-insert-track emms-track)))
 
          (let ((map mode-specific-map))
-           (define-key map "eb" 'emms-browser)
+           (define-key map "eb" 'emms-smart-browse)
            (define-key map "eh" 'emms-history-save)
            (define-key map "eq" 'emms-stop)
            (define-key map "es" 'emms-toggle-random-playlist)
