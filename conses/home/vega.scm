@@ -680,7 +680,6 @@ EndSection"))
                  :visibility "hidden"))))))
    (feature-nyxt-nx-router
     #:media-enabled? #t
-    #:show-block-banner? #t
     #:extra-routes
     `((make-instance 'router:web-route
                      :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")

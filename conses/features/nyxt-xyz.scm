@@ -588,7 +588,7 @@ search engines for Nyxt."
           #:key
           (media-enabled? #t)
           (extra-routes '())
-          (show-block-banner? #f))
+          (show-block-banner? #t))
   "Configure nx-router, a URL routing extension for Nyxt."
   (ensure-pred boolean? media-enabled?)
   (ensure-pred list? extra-routes)
