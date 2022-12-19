@@ -1,6 +1,5 @@
 (define-module (conses home hydri)
   #:use-module (conses utils)
-  #:use-module (conses features irc)
   #:use-module (conses features gtk)
   #:use-module (conses features lisp)
   #:use-module (conses features xorg)
@@ -20,9 +19,10 @@
   #:use-module (conses features version-control)
   #:use-module (rde packages)
   #:use-module (rde features)
-  #:use-module (rde features xdg)
   #:use-module (rde features base)
+  #:use-module (rde features irc)
   #:use-module (rde features gnupg)
+  #:use-module (rde features xdg)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
@@ -55,6 +55,7 @@
      ;; "gnome-contacts"
      ;; "chatty"
      ;; "calls"
+     "gnome-clocks"
      "gnome-console"
      "pinentry-tty"
      "portfolio"
@@ -188,25 +189,25 @@
     #:sign-commits? #t)
    (feature-emacs-tab-bar
     #:modules-center
-    '((make-configure-tab-bar-module
+    '((make-rde-tab-bar-module
        :id 'mpv-string
        :label 'mpv-mode-line-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-prev
        :label 'mpv-prev-button
        :help "Previous playlist entry"
        :action 'mpv-playlist-prev)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-toggle
        :label 'mpv-toggle-button
        :help "Toggle playback"
        :action 'mpv-pause)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-next
        :label 'mpv-next-button
        :help "Next playlist entry"
        :action 'mpv-playlist-next)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-playing-time
        :label 'mpv-playing-time-string)))
    (feature-emacs-emms)
@@ -264,13 +265,16 @@
    (feature-nyxt-nx-router
     #:media-enabled? #t
     #:extra-routes
-    `((make-instance 'router:web-route
+    `((make-instance 'router:media-toggler
+                     :trigger (match-regex ".*")
+                     :media-p nil)
+      (make-instance 'router:web-route
                      :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
                      :redirect-url "www.youtube.com"
                      :resource (lambda (url)
                                  (play-video-mpv url :formats nil :audio t :repeat t)))
       (make-instance 'router:web-route
-                     :trigger (match-regex "https://(m.)?soundcloud.com/.*/.*")
+                     :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
                      :resource (lambda (url)
                                  (play-video-mpv url :formats nil :audio t :repeat t)))
       (make-instance 'router:opener

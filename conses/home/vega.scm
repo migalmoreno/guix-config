@@ -10,7 +10,6 @@
   #:use-module (conses features fontutils)
   #:use-module (conses features golang)
   #:use-module (conses features gtk)
-  #:use-module (conses features irc)
   #:use-module (conses features keyboard)
   #:use-module (conses features tex)
   #:use-module (conses features lisp)
@@ -28,6 +27,7 @@
   #:use-module (conses features wm)
   #:use-module (conses features web)
   #:use-module (conses features xorg)
+  #:use-module (contrib features javascript)
   #:use-module (rde packages)
   #:use-module (rde features)
   #:use-module (rde features wm)
@@ -37,9 +37,10 @@
   #:use-module (rde features gnupg)
   #:use-module ((rde features mail) #:select (feature-mail-settings
                                               feature-isync))
+  #:use-module (rde features docker)
+  #:use-module (rde features irc)
   #:use-module (rde features linux)
   #:use-module (rde features shells)
-  #:use-module (rde features docker)
   #:use-module (rde features terminals)
   #:use-module (rde features virtualization)
   #:use-module ((rde features emacs-xyz) #:select (feature-emacs-eglot
@@ -48,8 +49,8 @@
   #:use-module (gnu home)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home services desktop)
   #:use-module (gnu system keyboard)
-  #:use-module (gnu packages emacs)
   #:use-module (guix gexp))
 
 (define-public %home-features
@@ -74,6 +75,7 @@
    (feature-bluetooth)
    (feature-manpages)
    (feature-emacs
+    #:emacs (@ (gnu packages emacs) emacs-next)
     #:default-application-launcher? #f
     #:emacs-server-mode? #f
     #:extra-init-el
@@ -222,30 +224,30 @@ EndSection"))
    (feature-emacs-calendar
     #:week-numbers? #t)
    (feature-emacs-bookmark)
-   (feature-emacs-dashboard
-    #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
-    #:logo-title "Welcome to GNU/Emacs"
-    #:item-generators '((recents . dashboard-insert-recents)
-                        (bookmarks . dashboard-insert-bookmarks)
-                        (agenda . dashboard-insert-agenda)
-                        (registers . dashboard-insert-registers))
-    #:items '((agenda . 7)
-              (bookmarks . 7)
-              (recents . 7))
-    #:navigator-buttons '((("☆" "Calendar" "Show calendar"
-                            (lambda (&rest _)
-                              (calendar)) diary "[" "]")))
-    #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
-    #:org-agenda-prefix-format "%?-12:c"
-    #:banner-max-height 320
-    #:banner-max-width 240
-    #:path-max-length 50
-    #:bookmarks-show-base? #f
-    #:path-style 'truncate-beginning
-    #:set-heading-icons? #t
-    #:set-file-icons? #f
-    #:set-footer? #f
-    #:set-init-info? #f)
+   ;; (feature-emacs-dashboard
+   ;;  #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
+   ;;  #:logo-title "Welcome to GNU/Emacs"
+   ;;  #:item-generators '((recents . dashboard-insert-recents)
+   ;;                      (bookmarks . dashboard-insert-bookmarks)
+   ;;                      (agenda . dashboard-insert-agenda)
+   ;;                      (registers . dashboard-insert-registers))
+   ;;  #:items '((agenda . 7)
+   ;;            (bookmarks . 7)
+   ;;            (recents . 7))
+   ;;  #:navigator-buttons '((("☆" "Calendar" "Show calendar"
+   ;;                          (lambda (&rest _)
+   ;;                            (calendar)) diary "[" "]")))
+   ;;  #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
+   ;;  #:org-agenda-prefix-format "%?-12:c"
+   ;;  #:banner-max-height 320
+   ;;  #:banner-max-width 240
+   ;;  #:path-max-length 50
+   ;;  #:bookmarks-show-base? #f
+   ;;  #:path-style 'truncate-beginning
+   ;;  #:set-heading-icons? #t
+   ;;  #:set-file-icons? #f
+   ;;  #:set-footer? #f
+   ;;  #:set-init-info? #f)
    (feature-emacs-spelling
     #:flyspell-hooks
     '(org-mode-hook bibtex-mode-hook)
@@ -305,6 +307,7 @@ EndSection"))
       ("finance" . ?f)
       ("guix" . ?g)
       ("chore" . ?c)))
+   (feature-emacs-org-recur)
    (feature-emacs-org-roam
     #:org-roam-directory "~/documents/notes"
     #:org-roam-dailies-directory "journal/"
@@ -325,18 +328,11 @@ EndSection"))
                   "%^{Data Type|Function|Method|Variable|Macro|Procedure}"
                   "\n:END:\n#+title: ${title}\n#+filetags: :${Topic}:"))
        :unnarrowed t)
-      ("r" "Referenced Concept" plain "%?"
+      ("r" "Reference" plain "%?"
        :if-new (file+head
                 "%<%Y%m%d%H%M%S>-${slug}.org"
                 ,(string-append
                   ":PROPERTIES:\n:ROAM_REFS: ${ref}\n:END:\n"
-                  "#+title: ${title}\n#+filetags: :${Topic}:"))
-       :unnarrowed t)
-      ("w" "Web Resource" plain "%?"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:ROAM_REFS: %l\n:END:\n"
                   "#+title: ${title}\n#+filetags: :${Topic}:"))
        :unnarrowed t)
       ("m" "Recipe" plain "* Ingredients\n- %?\n* Directions"
@@ -384,7 +380,8 @@ EndSection"))
    (feature-emacs-citar)
    (feature-emacs-info)
    (feature-emacs-which-key)
-   (feature-emacs-helpful)
+   (feature-emacs-helpful
+    #:emacs-helpful (@ (conses packages emacs-xyz) emacs-helpful-next))
    (feature-emacs-keycast)
    (feature-emacs-eww)
    (feature-emacs-webpaste
@@ -409,55 +406,55 @@ EndSection"))
     #:emacs-display-wttr (@ (conses packages emacs-xyz) emacs-display-wttr-next))
    (feature-emacs-tab-bar
     #:modules-left
-    '((make-configure-tab-bar-module
+    '((make-rde-tab-bar-module
        :id 'menu-bar
        :label (format " %s "
                       (all-the-icons-fileicon
                        "emacs" :v-adjust -0.1 :height 1))
        :help "Menu"
        :action 'tab-bar-menu-bar)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-string
        :label 'mpv-mode-line-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-prev
        :label 'mpv-prev-button
        :help "Previous playlist entry"
        :action 'mpv-playlist-prev)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-toggle
        :label 'mpv-toggle-button
        :help "Toggle playback"
        :action 'mpv-pause)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-next
        :label 'mpv-next-button
        :help "Next playlist entry"
        :action 'mpv-playlist-next)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'mpv-playing-time
        :label 'mpv-playing-time-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'notifications
-       :label '(:eval (configure-ednc--notify))))
+       :label '(:eval (rde-ednc--notify))))
     #:modules-center
-    '((make-configure-tab-bar-module
+    '((make-rde-tab-bar-module
        :id 'time
        :label 'display-time-string))
     #:modules-right
-    '((make-configure-tab-bar-module
+    '((make-rde-tab-bar-module
        :id 'org-timer
        :label 'org-timer-mode-line-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'appointments
        :label 'appt-mode-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'weather
        :label 'display-wttr-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'volume-sink
        :label 'pulseaudio-control-display-volume-string)
-      (make-configure-tab-bar-module
+      (make-rde-tab-bar-module
        :id 'battery
        :label 'battery-mode-line-string)))
    (feature-emacs-comint)
@@ -507,12 +504,15 @@ EndSection"))
                             elisp-mode
                             minibuffer-inactive-mode
                             comint-mode))
+   (feature-emacs-flymake)
    (feature-emacs-xref)
    (feature-emacs-re-builder)
    (feature-emacs-elisp)
    (feature-emacs-rainbow-delimiters)
    (feature-emacs-yaml)
    (feature-emacs-lang-web)
+   (feature-javascript
+    #:node (@ (gnu packages node) node-lts))
    (feature-emacs-polymode)
    (feature-go)
    (feature-qmk
@@ -606,25 +606,33 @@ EndSection"))
     `((".*"
        (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
       ((header "to" ".*@lists.sr.ht")
+       (To rde-gnus-get-article-participants)
        (name ,(getenv "USERNAME"))
        (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
        (In-Reply-To make-message-in-reply-to)
        (signature ,(string-append "Best regards,\n"
-                                  (getenv "USERNAME")))
-       (To configure-gnus-get-article-participants))
+                                  (getenv "USERNAME"))))
       ("^nntp.+:"
+       (To rde-gnus-get-article-participants)
        (name ,(getenv "USERNAME"))
        (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
        (signature ,(string-append "Best regards,\n"
-                                  (getenv "USERNAME")))
-       (To configure-gnus-get-article-participants))))
+                                  (getenv "USERNAME"))))))
    (feature-emacs-message
     #:message-signature (string-append "Best regards,\n" (getenv "USERNAME")))
    (feature-emacs-org-mime)
    (feature-emacs-smtpmail
     #:smtp-user (getenv "MAIL_PERSONAL_EMAIL")
     #:smtp-server (getenv "MAIL_PERSONAL_HOST"))
-   (feature-desktop-services)
+   (feature-desktop-services
+    #:default-desktop-home-services
+    (append
+     (list
+      (service home-redshift-service-type
+               (home-redshift-configuration
+                (dawn-time "07:00")
+                (dusk-time "20:00"))))
+     (@@ (rde features base) %rde-desktop-home-services)))
    (feature-matrix-settings
     #:homeserver (string-append "https://pantalaimon." (getenv "DOMAIN"))
     #:matrix-accounts
@@ -687,7 +695,7 @@ EndSection"))
                      :resource (lambda (url)
                                  (play-video-mpv url :formats nil :audio t :repeat t)))
       (make-instance 'router:web-route
-                     :trigger (match-regex "https://(m.)?soundcloud.com/.*/.*")
+                     :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
                      :resource (lambda (url)
                                  (play-video-mpv url :formats nil :audio t :repeat t)))
       (make-instance 'router:opener
@@ -777,6 +785,11 @@ EndSection"))
        :shortcut "to"
        :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
        :fallback-url "https://torrents-csv.ml")
+      (make-instance
+       'search-engine
+       :shortcut "mdn"
+       :search-url "https://developer.mozilla.org/en-US/search?q=~a"
+       :fallback-url "https://developer.mozilla.org")
       (engines:whoogle
        :shortcut "who"
        :fallback-url (quri:uri "http://localhost:5000")
