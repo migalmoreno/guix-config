@@ -3601,6 +3601,28 @@ implemented in Emacs Lisp."
    (values `((,f-name . ,emacs-smartparens)))
    (home-services-getter get-home-services)))
 
+(define* (feature-emacs-flymake)
+  "Set up Flymake, the built-in on-the-fly syntax checker for Emacs."
+
+  (define emacs-f-name 'flymake)
+  (define f-name (symbol-append 'emacs- emacs-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to Flymake."
+    (list
+     (rde-elisp-configuration-service
+      emacs-f-name
+      config
+      `((with-eval-after-load 'flymake
+          (let ((map flymake-mode-map))
+            (define-key map (kbd "M-n") 'flymake-goto-next-error)
+            (define-key map (kbd "M-p") 'flymake-goto-prev-error)))))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . #t)))
+   (home-services-getter get-home-services)))
+
 (define* (feature-emacs-xref)
   "Configure Xref, an Emacs mechanism to find definitions
 and references in your programs."
