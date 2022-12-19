@@ -12,6 +12,42 @@
   #:use-module (guix build-system emacs)
   #:use-module ((guix licenses) #:prefix license:))
 
+(define-public emacs-org-recur
+  (package
+    (name "org-recur")
+    (version "1.3.1")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/m-cat/org-recur")
+             (commit version)))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "0y7bz2n3qwcy1yzgzwiw18halk28nv03xys9kmcc71g6mk45blfg"))))
+    (build-system emacs-build-system)
+    (home-page "https://github.com/m-cat/org-recur")
+    (synopsis "Simple recurring org-mode tasks")
+    (description "This package extends org-mode and org-agenda with support
+for defining recurring tasks and easily scheduling them.")
+    (license license:gpl3)))
+
+(define-public emacs-helpful-next
+  (let ((commit "94c25337b2de2f9da60914a7c0c6cca9584c0231")
+        (revision "0"))
+    (package
+      (inherit emacs-helpful)
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/Wilfred/helpful")
+               (commit commit)))
+         (file-name (git-file-name (package-name emacs-helpful) version))
+         (sha256
+          (base32 "09da3d3kx4c8im58kwfv59zpwda70yvwnjk01w7r6lra1ww8d3yx")))))))
+
 (define-public emacs-al-scheme
   (package
     (name "emacs-al-scheme")

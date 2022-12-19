@@ -2060,6 +2060,39 @@ and organizer for Emacs."
              (emacs-org-modern? . org-modern?)))
    (home-services-getter get-home-services)))
 
+(define* (feature-emacs-org-recur
+          #:key
+          (emacs-org-recur emacs-org-recur))
+  "Configure org-recur, a simple mode for recurring org-mode tasks."
+  (ensure-pred file-like? emacs-org-recur)
+
+  (define f-name 'org-recur)
+  (define emacs-f-name (symbol-append 'emacs- f-name))
+
+  (define (get-home-services config)
+    "Return home services related to org-recur."
+    (list
+     (rde-elisp-configuration-service
+      emacs-f-name
+      config
+      `((add-hook 'org-mode-hook 'org-recur-mode)
+        (add-hook 'org-agenda-mode-hook 'org-recur-agenda-mode)
+        (with-eval-after-load 'org-recur
+          (let ((map org-recur-mode-map))
+            (define-key map (kbd "C-c d") 'org-recur-finish)
+            (define-key map (kbd "C-c 0") 'org-recur-schedule-today))
+          (let ((map org-recur-agenda-mode-map))
+            (define-key map (kbd "d") 'org-recur-finish)
+            (define-key map (kbd "C-c d") 'org-recur-finish))
+          (setq org-recur-finish-done t)
+          (setq org-recur-finish-archive t)))
+      #:elisp-packages (list emacs-org-recur))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . ,emacs-org-recur)))
+   (home-services-getter get-home-services)))
+
 (define* (feature-emacs-org-roam
           #:key
           (emacs-org-roam emacs-org-roam)
@@ -2116,28 +2149,33 @@ and organizer for Emacs."
                 "")
             ":" 'omit-nulls))
 
-         (defun configure-org-roam-todo-p ()
+         (defun rde-org-roam-todo-p ()
            "Return non-nil if the current buffer has any to-do entry."
            (org-element-map
                (org-element-parse-buffer 'headline)
                'headline
              (lambda (h)
-               (eq (org-element-property :todo-type h) 'todo))
+               ,@(if (get-value 'emacs-org-recur config)
+                     '((require 'org-recur)
+                       (or (eq (org-element-property :todo-type h) 'todo)
+                           (when (stringp (org-element-property :raw-value h))
+                             (string-match org-recur--regexp (org-element-property :raw-value h)))))
+                     '((eq (org-element-property :todo-type h) 'todo))))
              nil 'first-match))
 
-         (defun configure-org-roam-update-todo-tag ()
+         (defun rde-org-roam-update-todo-tag ()
            "Update the \"todo\" tag in the current buffer."
            (when (and (not (active-minibuffer-window))
                       (org-roam-file-p))
              (org-with-point-at 1
-               (let* ((tags (configure-org-roam-get-filetags))
-                      (is-todo (configure-org-roam-todo-p)))
+               (let* ((tags (rde-org-roam-get-filetags))
+                      (is-todo (rde-org-roam-todo-p)))
                  (cond ((and is-todo (not (member "todo" tags)))
                         (org-roam-tag-add '("todo")))
                        ((and (not is-todo) (member "todo" tags))
                         (org-roam-tag-remove '("todo"))))))))
 
-         (defun configure-org-roam-list-todo-files ()
+         (defun rde-org-roam-list-todo-files ()
            "Return a list of org-roam files containing the \"todo\" tag."
            (org-roam-db-sync)
            (let ((todo-nodes (cl-remove-if-not
