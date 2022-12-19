@@ -27,7 +27,7 @@
           #:optional (lisp-expressions '())
           #:key
           (lisp-packages '()))
-  (let* ((file-name (string-append "configure-" (symbol->string name)))
+  (let* ((file-name (string-append "rde-" (symbol->string name)))
          (conf-file (mixed-text-file (string-append file-name ".lisp")
                                      (serialize-lisp-config
                                       #f
