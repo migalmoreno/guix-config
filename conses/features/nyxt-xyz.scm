@@ -298,7 +298,10 @@
           "Evaluate S-EXPS with `emacsclient'."
           (let ((s-exps-string (str:replace-all
                                 "nyxt::" "" (write-to-string
-                                             `(progn ,@s-exps) :case :downcase))))
+                                             `(progn
+                                               (setq print-length nil)
+                                               ,@s-exps)
+                                             :case :downcase))))
             (format *error-output* "Sending to Emacs:~%~a~%" s-exps-string)
             (uiop:run-program
              (list "emacsclient" "-e" s-exps-string)
