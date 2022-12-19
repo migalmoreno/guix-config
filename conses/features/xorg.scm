@@ -40,9 +40,9 @@
       f-name
       config
       `((require 'hexrgb)
-        (defvar configure-xorg-screencast-process nil
+        (defvar rde-xorg-screencast-process nil
           "The current screencast process.")
-        (defun configure-xorg-take-screenshot (&optional region)
+        (defun rde-xorg-take-screenshot (&optional region)
           "Take a fullscreen or REGION screenshot of the current display."
           (interactive "P")
           (when-let* ((pictures-dir (xdg-user-dir "PICTURES"))
@@ -65,7 +65,7 @@
                             2 nil (lambda ()
                                     (message "Screenshot taken"))))))))
 
-        (defun configure-xorg-record-screencast (&optional region)
+        (defun rde-xorg-record-screencast (&optional region)
           "Record a screencast and if REGION, record a portion of the screen."
           (interactive "P")
           (if-let* ((videos-dir (xdg-user-dir "VIDEOS"))
@@ -84,7 +84,7 @@
                     (pos-y (nth 1 screen-region))
                     (height (nth 2 screen-region))
                     (width (nth 3 screen-region)))
-              (setq configure-xorg-screencast-process
+              (setq rde-xorg-screencast-process
                     (make-process
                      :name "ffmpeg"
                      :buffer nil
@@ -107,7 +107,7 @@
               (run-at-time
                2 nil
                (lambda ()
-                 (setq configure-xorg-screencast-process
+                 (setq rde-xorg-screencast-process
                        (make-process
                         :name "ffmpeg"
                         :buffer nil
@@ -116,15 +116,15 @@
                                        (format "%sx%s" frame-width frame-height)
                                        "-i" ":0.0" (concat videos-dir "/" file-name)))))))))
 
-        (defun configure-xorg-stop-screencast ()
+        (defun rde-xorg-stop-screencast ()
           "Stop the current screencast process."
           (interactive)
-          (when configure-xorg-screencast-process
+          (when rde-xorg-screencast-process
             (ignore-errors
-              (interrupt-process configure-xorg-screencast-process)))
-          (setq configure-xorg-screencast-process nil))
+             (interrupt-process rde-xorg-screencast-process)))
+          (setq rde-xorg-screencast-process nil))
 
-        (defun configure-xorg--toggle-xinput-device (device)
+        (defun rde-xorg--toggle-xinput-device (device)
           "Toggle active status of an X input DEVICE through xinput, such as 'Touchpad'."
           (let* ((xinput-bin ,(file-append xinput "/bin/xinput"))
                  (id (with-temp-buffer
@@ -143,7 +143,7 @@
                 (call-process xinput-bin nil nil nil "disable" id)
               (call-process xinput-bin nil nil nil "enable" id))))
 
-        (defun configure-xorg--toggle-lsusb-device (device)
+        (defun rde-xorg--toggle-lsusb-device (device)
           "Toggle active status of lsusb DEVICE, such as 'Camera' or 'Webcam'."
           (let* ((bus (with-temp-buffer
                         (call-process ,(file-append usbutils "/bin/lsusb"))
@@ -172,16 +172,16 @@
                 (write-region "0" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping))
                 (write-region "1" nil (format "/sudo::/sys/bus/usb/devices/%s/bConfigurationValue" device-mapping)))))
 
-        (defun configure-xorg-call-slock ()
+        (defun rde-xorg-call-slock ()
           "Invoke a Slock process."
           (interactive)
           (call-process (executable-find "slock")))
 
         ,@(if (get-value 'emacs-exwm config)
               '((with-eval-after-load 'exwm-autoloads
-                  (exwm-input-set-key (kbd "s-p") 'configure-xorg-take-screenshot)
-                  (exwm-input-set-key (kbd "s-v") 'configure-xorg-record-screencast)
-                  (exwm-input-set-key (kbd "s-l") 'configure-xorg-call-slock)))
+                  (exwm-input-set-key (kbd "s-p") 'rde-xorg-take-screenshot)
+                  (exwm-input-set-key (kbd "s-v") 'rde-xorg-record-screencast)
+                  (exwm-input-set-key (kbd "s-l") 'rde-xorg-call-slock)))
               '()))
       #:elisp-packages (list emacs-hexrgb)
       #:summary "Helpers for Xorg"

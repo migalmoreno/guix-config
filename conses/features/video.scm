@@ -68,8 +68,8 @@
                    ("ctrl+b" . "seek -5 relative")
                    ("Shift+n" . "add chapter 1")
                    ("Shift+p" . "add chapter -1")
-                   ("D" . ,(run-with-emacs '(configure-mpv-download)))
-                   ("Alt+c" . ,(run-with-emacs '(configure--mpv-capture)))
+                   ("D" . ,(run-with-emacs '(rde-mpv-download)))
+                   ("Alt+c" . ,(run-with-emacs '(rde-mpv-capture)))
                    ,@extra-bindings))))
       (rde-elisp-configuration-service
        f-name
@@ -77,7 +77,7 @@
        `((eval-when-compile
            (require 'mpv)
            (require 'cl-lib))
-         (cl-defun configure-mpv-play-url (url &optional format &key audio repeat (formats t) (select t) playlist)
+         (cl-defun rde-mpv-play-url (url &optional format &key audio repeat (formats t) (select t) playlist)
            "Play URL with `mpv-start'.
 You can specify whether to PLAY the file as AUDIO, if you want to be
 prompted for FORMATS or use FORMAT, to REPEAT the file, manually SELECT what to do with the file,
@@ -97,7 +97,7 @@ and whether to add the file to the current PLAYLIST."
                    (apply 'mpv-playlist-append-url url extra-args)
                  (apply 'mpv-start url extra-args)))))
 
-         (defun configure-mpv-kill ()
+         (defun rde-mpv-kill ()
            "Kill the mpv process unless this is not currently `emms-player-mpv-proc'."
            (interactive)
            (require 'emms-player-mpv)
@@ -120,7 +120,7 @@ and whether to add the file to the current PLAYLIST."
            (setq mpv--queue nil)
            (run-hooks 'mpv-finished-hook))
 
-         (defun configure-mpv-download ()
+         (defun rde-mpv-download ()
            "Download current mpv playback via `ytdl'."
            (interactive)
            (if-let* ((dl-type (ytdl--get-download-type))
@@ -134,7 +134,7 @@ and whether to add the file to the current PLAYLIST."
                 (car dl-type))
              (error "mpv is not currently active")))
 
-         (defun configure-mpv-store-link ()
+         (defun rde-mpv-store-link ()
            "Store a link to an mpv track."
            (when (and (mpv-live-p)
                       (not (equal (mpv--with-json
@@ -148,7 +148,7 @@ and whether to add the file to the current PLAYLIST."
                 :link url
                 :description title))))
 
-         (defun configure-mpv-capture ()
+         (defun rde-mpv-capture ()
            "Store and capture the current mpv playback link."
            (interactive)
            (with-current-buffer
@@ -158,24 +158,24 @@ and whether to add the file to the current PLAYLIST."
              (org-store-link t t)
              (org-capture nil "tv")))
 
-         (cl-defun configure-mpv-play-url-other-window (url &rest args &key &allow-other-keys)
+         (cl-defun rde-mpv-play-url-other-window (url &rest args &key &allow-other-keys)
            "Launch an mpv process for URL and ARGS in another window."
            (interactive "sURI: ")
-           (apply 'configure-mpv-play-url url args)
+           (apply 'rde-mpv-play-url url args)
            (switch-to-buffer-other-window (current-buffer)))
 
-         (defun configure-mpv-seek-start ()
+         (defun rde-mpv-seek-start ()
            "Seek to the start of the current MPV stream."
            (interactive)
            (mpv-seek 0))
 
-         (defun configure-mpv-connect-to-emms-on-startup (data)
+         (defun rde-mpv-connect-to-emms-on-startup (data)
            "Connect to the EMMS process when mpv is started with DATA."
            (interactive)
            (when (string= (alist-get 'event data) "start-file")
-             (configure-mpv-connect-to-emms-proc)))
+             (rde-mpv-connect-to-emms-proc)))
 
-         (defun configure-mpv-connect-to-emms-proc ()
+         (defun rde-mpv-connect-to-emms-proc ()
            "Connect to a running EMMS MPV process."
            (interactive)
            (setq mpv-playing-time-string "")
@@ -213,27 +213,27 @@ and whether to add the file to the current PLAYLIST."
              (mpv-display-mode-line))
            t)
 
-         (defun configure-mpv-playlist-shuffle ()
+         (defun rde-mpv-playlist-shuffle ()
            "Toggle the shuffle state for the current playlist."
            (interactive)
            (mpv-run-command "playlist-shuffle"))
 
-         (defun configure-mpv-kill-url (original-p)
+         (defun rde-mpv-kill-url (original-p)
            "Copy the URL in the current mpv stream to the system clibpoard.
 If ORIGINAL-P, ensure the original service URL is killed rather than a
-proxy url as per `configure-browse-url-mappings'."
+proxy url as per `rde-browse-url-mappings'."
            (interactive
             (list
              (yes-or-no-p "Copy original URL?")))
            (when-let* ((title (mpv-get-property "media-title"))
                        (url (mpv-get-property "path"))
                        (original-url (if original-p
-                                         (configure-browse-url--transform-host url)
-                                       (configure-browse-url--transform-host url :alt nil))))
+                                         (rde-browse-url--transform-host url)
+                                       (rde-browse-url--transform-host url :alt nil))))
              (kill-new original-url)
              (message (format "Copied \"%s\" to the system clipboard" title))))
 
-         (defun configure-mpv-set-transient-map ()
+         (defun rde-mpv-set-transient-map ()
            "Set a transient map for transient MPV commands."
            (interactive)
            (set-transient-map
@@ -244,11 +244,11 @@ proxy url as per `configure-browse-url-mappings'."
               map)
             t))
 
-         (advice-add 'mpv-kill :override 'configure-mpv-kill)
+         (advice-add 'mpv-kill :override 'rde-mpv-kill)
          (with-eval-after-load 'org
            (org-link-set-parameters
             "mpv"
-            :store 'configure-mpv-store-link))
+            :store 'rde-mpv-store-link))
          (let ((map mode-specific-map))
            (define-key map "mc" 'mpv-jump-to-chapter)
            (define-key map "ml" 'mpv-jump-to-playlist-entry)
@@ -261,16 +261,16 @@ proxy url as per `configure-browse-url-mappings'."
            (define-key map (kbd "m SPC") 'mpv-pause)
            (define-key map "mr" 'mpv-toggle-loop)
            (define-key map "mv" 'mpv-toggle-video)
-           (define-key map "m\r" 'configure-mpv-play-url)
-           (define-key map "ms" 'configure-mpv-download)
-           (define-key map "ma" 'configure-mpv-seek-start)
-           (define-key map "mw" 'configure-mpv-kill-url))
-         (define-key mode-specific-map "M" 'configure-mpv-set-transient-map)
+           (define-key map "m\r" 'rde-mpv-play-url)
+           (define-key map "ms" 'rde-mpv-download)
+           (define-key map "ma" 'rde-mpv-seek-start)
+           (define-key map "mw" 'rde-mpv-kill-url))
+         (define-key mode-specific-map "M" 'rde-mpv-set-transient-map)
          (autoload 'mpv-mode-line-mode "mpv")
          (mpv-mode-line-mode)
          (autoload 'mpv-playing-time-mode "mpv")
          (mpv-playing-time-mode)
-         (advice-add 'mpv-start :around 'configure-browse-url-add-scheme)
+         (advice-add 'mpv-start :around 'rde-browse-url-add-scheme)
          (with-eval-after-load 'mpv
            (setq mpv-seek-step 3)
            (setq mpv-display-title-truncate-threshold 25)
@@ -291,7 +291,7 @@ proxy url as per `configure-browse-url-mappings'."
                `((eval-when-compile
                    (require 'embark))
                  (with-eval-after-load 'embark
-                   (define-key embark-url-map "v" 'configure-mpv-play-url)
+                   (define-key embark-url-map "v" 'rde-mpv-play-url)
                    (embark-define-keymap embark-mpv-chapter-actions
                      "Keymap for actions on mpv chapters."
                      ("r" mpv-set-chapter-ab-loop))
@@ -345,7 +345,7 @@ proxy url as per `configure-browse-url-mappings'."
                                   (format nil "best[height<=~a]" height))))
                       (res (and play-or-enqueue (string= play-or-enqueue "Enqueue"))))
                  (eval-in-emacs
-                  `(apply 'configure-mpv-play-url ,url ,format :select nil :playlist ,res ',extra-args))))
+                  `(apply 'rde-mpv-play-url ,url ,format :select nil :playlist ,res ',extra-args))))
              (define-command play-video-mpv-current-buffer (&optional (buffer (current-buffer)))
                "Play contents of BUFFER in an Emacs-controlled mpv process."
                (play-video-mpv (render-url (url buffer))))
@@ -391,8 +391,8 @@ from YouTube and various other sites."
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map (kbd ,youtube-dl-key) 'ytdl-show-list)
+      `((with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,youtube-dl-key) 'ytdl-show-list))
         (with-eval-after-load 'ytdl
           (define-key ytdl--dl-list-mode-map "a" 'ytdl-download)
           (setq ytdl-command ,yt-dlp)
@@ -404,8 +404,7 @@ from YouTube and various other sites."
                 (list ,@music-dl-args "--ffmpeg-location" ,ffmpeg-bin))
           (setq ytdl-video-extra-args
                 (list ,@video-dl-args "--ffmpeg-location" ,ffmpeg-bin))))
-      #:elisp-packages (list emacs-ytdl
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+      #:elisp-packages (list emacs-ytdl))))
 
   (feature
    (name f-name)

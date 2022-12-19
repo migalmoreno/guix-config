@@ -54,28 +54,28 @@
       config
       `((eval-when-compile
           (require 'cl-macs))
-        (defgroup configure-exwm nil
+        (defgroup rde-exwm nil
           "Helpers for EXWM."
-          :group 'configure)
+          :group 'rde)
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              `((defvar configure-exwm-buffer-source
+              `((defvar rde-exwm-buffer-source
                         `(:name "EXWM"
                           :hidden t
                           :narrow ?x
                           :category buffer
                           :state ,'consult--buffer-state
-                          :items ,(lambda () (mapcar 'buffer-name (configure-completion--mode-buffers
+                          :items ,(lambda () (mapcar 'buffer-name (rde-completion--mode-buffers
                                                                    'exwm-mode))))
                         "Source for EXWM buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources configure-exwm-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(exwm-mode . ?x)))
+                (add-to-list 'consult-buffer-sources rde-exwm-buffer-source)
+                (add-to-list 'rde-completion-initial-narrow-alist '(exwm-mode . ?x)))
               '())
 
-        (defun configure-exwm--disable-tab-bar (frame)
+        (defun rde-exwm--disable-tab-bar (frame)
           "Disable the tab-bar on new Emacs FRAME."
           (set-frame-parameter frame 'tab-bar-lines 0))
 
-        (defun configure-exwm--get-outputs ()
+        (defun rde-exwm--get-outputs ()
           "Return the currently-connected RandR outputs."
           (let ((xrandr-output-regexp (rx "\n" bol (group (+ any)) " connected"))
                 outputs)
@@ -89,7 +89,7 @@
                 (setq outputs (append (list outputs) (list (match-string 1)))))
               outputs)))
 
-        (defun configure-exwm-apply-display-settings ()
+        (defun rde-exwm-apply-display-settings ()
           "Apply the corresponding display settings after EXWM is enabled."
           (interactive)
           ;; TODO: Remove once I figure out how to invoke user services after Xorg is launched
@@ -97,7 +97,7 @@
           (start-process "unclutter" nil ,(file-append unclutter "/bin/unclutter") "-display" ":0")
           ,@(if (get-value 'emacs-fontaine config)
                 '((require 'fontaine)
-                  (if (listp (configure-exwm--get-outputs))
+                  (if (listp (rde-exwm--get-outputs))
                       (fontaine-set-preset 'docked)
                     (fontaine-set-preset 'headless)))
                 '())
@@ -108,9 +108,9 @@
                                              ,(get-value 'emacs-margin config)))
                    finally (progn
                             (exwm-workspace-switch-create 0)
-                            (add-hook 'after-make-frame-functions 'configure-exwm--disable-tab-bar))))
+                            (add-hook 'after-make-frame-functions 'rde-exwm--disable-tab-bar))))
 
-        (defun configure-exwm-shorten-buffer-name ()
+        (defun rde-exwm-shorten-buffer-name ()
           "Shorten EXWM buffer names to be more discernible."
           (interactive)
           (exwm-workspace-rename-buffer
@@ -119,11 +119,11 @@
                        exwm-title
                      (concat (substring exwm-title 0 29) "...")))))
 
-        (defun configure-exwm--call-xrandr (&rest args)
+        (defun rde-exwm--call-xrandr (&rest args)
           "Call `xrandr' with the supplied ARGS."
           (apply 'start-process "xrandr" nil ,(file-append xrandr "/bin/xrandr") args))
 
-        (defun configure-exwm--get-resolution ()
+        (defun rde-exwm--get-resolution ()
           "Prompt the user for a list of available resolutions."
           (with-temp-buffer
             (call-process ,(file-append xrandr "/bin/xrandr") nil t nil)
@@ -147,51 +147,51 @@
                                        ,(cons 'display-sort-function 'identity))
                                    (complete-with-action action resolutions string pred)))))))
 
-        (defun configure-exwm-change-resolution ()
+        (defun rde-exwm-change-resolution ()
           "Change the resolution of the primary RandR output."
           (interactive)
-          (configure-exwm-automatic-output-mode -1)
-          (when-let ((resolution (configure-exwm--get-resolution))
-                     (outputs (configure-exwm--get-outputs)))
+          (rde-exwm-automatic-output-mode -1)
+          (when-let ((resolution (rde-exwm--get-resolution))
+                     (outputs (rde-exwm--get-outputs)))
             (set-process-sentinel
              (if (listp outputs)
-                 (configure-exwm--call-xrandr "--output" (cadr outputs) "--primary"
-                                              "--mode" resolution "--output" (car outputs) "--off")
-               (configure-exwm--call-xrandr "--output" outputs "--mode" resolution))
+                 (rde-exwm--call-xrandr "--output" (cadr outputs) "--primary"
+                                        "--mode" resolution "--output" (car outputs) "--off")
+               (rde-exwm--call-xrandr "--output" outputs "--mode" resolution))
              (lambda (_process event)
                (when (string= event "finished\n")
-                 (configure-exwm-automatic-output-mode))))))
+                 (rde-exwm-automatic-output-mode))))))
 
-        (defun configure-exwm-update-output ()
+        (defun rde-exwm-update-output ()
           "Update RandR output configuration."
           (interactive)
           (when-let ((secondary-output-regexp (rx "\n" blank (+ any) blank (group (+ nonl))))
-                     (outputs (configure-exwm--get-outputs)))
+                     (outputs (rde-exwm--get-outputs)))
             (if (listp outputs)
                 (progn
-                  (configure-exwm--call-xrandr "--output" (cadr outputs) "--primary"
-                                               "--auto" "--output" (car outputs) "--off")
+                  (rde-exwm--call-xrandr "--output" (cadr outputs) "--primary"
+                                         "--auto" "--output" (car outputs) "--off")
                   (setq exwm-randr-workspace-monitor-plist (list 0 (cadr outputs))))
-              (configure-exwm--call-xrandr "--output" outputs "--auto")
+              (rde-exwm--call-xrandr "--output" outputs "--auto")
               (with-temp-buffer
                 (call-process ,(file-append xrandr "/bin/xrandr") nil t nil "--listactivemonitors")
                 (goto-char (point-min))
                 (while (not (eobp))
                   (when (and (re-search-forward secondary-output-regexp nil 'noerror)
                              (not (string= (match-string 1) outputs)))
-                    (configure-exwm--call-xrandr "--output" (match-string 1) "--auto")))))))
+                    (rde-exwm--call-xrandr "--output" (match-string 1) "--auto")))))))
 
-        (define-minor-mode configure-exwm-automatic-output-mode
+        (define-minor-mode rde-exwm-automatic-output-mode
           "Set up automatic handling of RandR outputs."
-          :global t :group 'configure-exwm
-          (if configure-exwm-automatic-output-mode
-              (add-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output)
-            (remove-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output)))
+          :global t :group 'rde-exwm
+          (if rde-exwm-automatic-output-mode
+              (add-hook 'exwm-randr-screen-change-hook 'rde-exwm-update-output)
+            (remove-hook 'exwm-randr-screen-change-hook 'rde-exwm-update-output)))
 
-        (add-hook 'exwm-init-hook 'configure-exwm-apply-display-settings)
+        (add-hook 'exwm-init-hook 'rde-exwm-apply-display-settings)
         (add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
-        (add-hook 'exwm-update-class-hook 'configure-exwm-shorten-buffer-name)
-        (add-hook 'exwm-update-title-hook 'configure-exwm-shorten-buffer-name)
+        (add-hook 'exwm-update-class-hook 'rde-exwm-shorten-buffer-name)
+        (add-hook 'exwm-update-title-hook 'rde-exwm-shorten-buffer-name)
         (setq exwm-input-global-keys
               (append
                (list
@@ -201,7 +201,7 @@
                 (cons (kbd "s-C-e") '(lambda () (interactive) (exwm-layout-enlarge-window 40)))
                 (cons (kbd "s-f") 'exwm-layout-toggle-fullscreen)
                 (cons (kbd "s-r") 'exwm-reset)
-                (cons (kbd "s-x") 'configure-exwm-change-resolution)
+                (cons (kbd "s-x") 'rde-exwm-change-resolution)
                 (cons (kbd "s-t") 'exwm-floating-toggle-floating)
                 (cons (kbd "s-i") 'exwm-input-toggle-keyboard)
                 (cons (kbd "s-q") 'kill-this-buffer)
@@ -247,8 +247,8 @@
           (setq exwm-manage-configurations ',window-configurations)
           (require 'exwm-randr)
           (exwm-randr-enable)
-          (configure-exwm-update-output)
-          (add-hook 'exwm-randr-screen-change-hook 'configure-exwm-update-output)))
+          (rde-exwm-update-output)
+          (add-hook 'exwm-randr-screen-change-hook 'rde-exwm-update-output)))
       #:elisp-packages (append
                         (list emacs-exwm)
                         (if (get-value 'emacs-fontaine config)

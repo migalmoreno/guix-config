@@ -104,7 +104,7 @@
       `((require 'xdg)
         (eval-when-compile
          (require 'cl-macs))
-        (defun configure-fonts--build-emojis ()
+        (defun rde-fonts--build-emojis ()
           "Create an emoji list by looping over the corresponding range of characters."
           (delete
            nil
@@ -116,22 +116,20 @@
                                 (replace-regexp-in-string " " "-" (downcase name))
                                 (format ":%s:")
                                 (format "%s %s" (char-to-string (char-from-name name))))))))
-
-        (defvar configure-fonts-emoji-list nil
+        (defvar rde-fonts-emoji-list nil
           "Cached list of emojis.")
-
-        (defun configure-fonts-insert-emoji ()
+        (defun rde-fonts-insert-emoji ()
           "Insert an emoji character to the current buffer."
           (interactive)
           (thread-first
             (completing-read
              "Select emoji: "
-             (or configure-fonts-emoji-list
-                 (setq configure-fonts-emoji-list (configure-fonts--build-emojis))))
+             (or rde-fonts-emoji-list
+                 (setq rde-fonts-emoji-list (rde-fonts--build-emojis))))
             (substring 0 1)
             (insert)))
 
-        (define-key search-map "e" 'configure-fonts-insert-emoji)
+        (define-key search-map "e" 'rde-fonts-insert-emoji)
         (with-eval-after-load 'fontset
           (set-fontset-font t 'symbol ,(font-name font-unicode) nil 'append)
           (set-fontset-font t 'unicode ,(font-name font-unicode) nil 'append)

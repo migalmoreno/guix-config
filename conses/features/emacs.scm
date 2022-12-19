@@ -34,7 +34,7 @@
   (ensure-pred list-of-file-likes? additional-elisp-packages)
 
   (define emacsclient (file-append emacs "/bin/emacsclient"))
-  (define configure-rde-keymaps (@@ (rde features emacs) emacs-configure-rde-keymaps))
+  (define rde-keymaps (@@ (rde features emacs) emacs-configure-rde-keymaps))
 
   (define (get-home-services config)
     "Return home services related to Emacs."
@@ -48,12 +48,12 @@
      (rde-elisp-configuration-service
       'rde-emacs
       config
-      `((require 'xdg)
-        (require 'configure-rde-keymaps)
-        (defgroup configure nil
+      `((require 'rde-keymaps)
+        (require 'xdg)
+        (defgroup rde nil
           "Base configuration group."
           :group 'external
-          :prefix 'configure-)
+          :prefix 'rde-)
         (with-eval-after-load 'comp
           (setq native-comp-async-report-warnings-errors nil))
         (require 'warnings)
@@ -83,7 +83,7 @@
         (setq package-enable-at-startup nil)
         (setq auto-save-list-file-prefix (expand-file-name "emacs/auto-save-list/.saves-"
                                                            (xdg-data-home))))
-      #:elisp-packages (append (list configure-rde-keymaps)
+      #:elisp-packages (append (list rde-keymaps)
                                (if default-application-launcher?
                                    (list emacs-app-launcher)
                                    '())))
@@ -111,7 +111,7 @@
    (values (append
             `((emacs . ,emacs)
               (emacs-server-mode? . ,emacs-server-mode?)
-              (emacs-configure-rde-keymaps . ,configure-rde-keymaps))
+              (emacs-rde-keymaps . ,rde-keymaps))
             (if default-application-launcher?
                 `((default-application-launcher? . ,emacs-app-launcher))
                 '())))

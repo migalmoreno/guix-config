@@ -230,34 +230,33 @@ Pantalaimon's man page} for the list of available options."
       config
       `((eval-when-compile
           (require 'ement))
-        (require 'configure-rde-keymaps)
-        (defgroup configure-ement nil
+        (defgroup rde-ement nil
           "Utilities for Ement, the Emacs Matrix client."
-          :group 'configure)
-        (cl-defstruct configure-ement-user id homeserver)
-        (defcustom configure-ement-users '()
-          "List of `configure-ement-user' structs that hold Matrix accounts."
-          :type '(repeat configure-ement-user)
-          :group 'configure-ement)
+          :group 'rde)
+        (cl-defstruct rde-ement-user id homeserver)
+        (defcustom rde-ement-users '()
+          "List of `rde-ement-user' structs that hold Matrix accounts."
+          :type '(repeat rde-ement-user)
+          :group 'rde-ement)
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              '((defvar configure-ement-buffer-source
+              '((defvar rde-ement-buffer-source
                   `(:name "Ement"
                           :narrow ?e
                           :category buffer
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
                           :items ,(lambda ()
-                                    (mapcar 'buffer-name (configure-completion--mode-buffers
+                                    (mapcar 'buffer-name (rde-completion--mode-buffers
                                                           'ement-room-mode
                                                           'ement-room-list-mode))))
                   "Source for Ement buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources configure-ement-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(ement-room-mode . ?e))
-                (add-to-list 'configure-completion-initial-narrow-alist '(ement-room-list-mode . ?e)))
+                (add-to-list 'consult-buffer-sources rde-ement-buffer-source)
+                (add-to-list 'rde-completion-initial-narrow-alist '(ement-room-mode . ?e))
+                (add-to-list 'rde-completion-initial-narrow-alist '(ement-room-list-mode . ?e)))
               '())
 
-        (defun configure-ement-connect (user)
+        (defun rde-ement-connect (user)
           "Connect to Matrix homeserver with USER."
           (interactive
            (list (cl-find (completing-read
@@ -268,24 +267,28 @@ Pantalaimon's man page} for the list of available options."
                                    ,(cons 'display-sort-function 'identity))
                                (complete-with-action
                                 action
-                                (mapcar 'configure-ement-user-id configure-ement-users)
+                                (mapcar 'rde-ement-user-id rde-ement-users)
                                 string pred))))
-                          configure-ement-users :key 'configure-ement-user-id :test 'string=)))
-          (let ((homeserver (configure-ement-user-homeserver user)))
+                          rde-ement-users :key 'rde-ement-user-id :test 'string=)))
+          (let ((homeserver (rde-ement-user-homeserver user))
+                (id (rde-ement-user-id user)))
             (ement-connect
-             :user-id (configure-ement-user-id user)
-             :password (auth-source-pick-first-password :host homeserver)
+             :user-id id
+             :password (auth-source-pick-first-password
+                        :host homeserver
+                        :user (substring id 1 (string-match ":" id)))
              :uri-prefix ,(if (get-value 'pantalaimon config)
                               (string-append "http://localhost:"
                                              (number->string (get-value 'pantalaimon-port config)))
                               homeserver))))
 
-        (define-key rde-app-map (kbd ,ement-key) 'configure-ement-connect)
-        (setq configure-ement-users
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,ement-key) 'rde-ement-connect))
+        (setq rde-ement-users
               (list
                ,@(map
                   (lambda (matrix-acc)
-                    `(make-configure-ement-user
+                    `(make-rde-ement-user
                       :id ,(matrix-account-id matrix-acc)
                       :homeserver ,(matrix-account-homeserver matrix-acc)))
                   (get-value 'matrix-accounts config))))
@@ -299,11 +302,8 @@ Pantalaimon's man page} for the list of available options."
                 '(ement-notify--event-mentions-session-user-p
                   ement-notify--event-mentions-room-p))
           (setq ement-save-sessions t)
-          (setq ement-room-send-read-receipts nil)
-          (setq warning-suppress-log-types '((ement-room-send-event-callback)
-                                             (ement-room-send-event-callback)))))
-      #:elisp-packages (list emacs-ement
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+          (setq ement-room-send-read-receipts nil)))
+      #:elisp-packages (list emacs-ement))))
 
   (feature
    (name f-name)

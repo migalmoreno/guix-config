@@ -61,53 +61,52 @@ how to retrieve it. This is only needed for tokens that start with @code{xoxc}."
       emacs-f-name
       config
       `((require 'cl-seq)
-        (require 'configure-rde-keymaps)
-        (defgroup configure-slack nil
+        (defgroup rde-slack nil
           "Utilities for slack.el, the Emacs Slack client."
-          :group 'configure)
-        (cl-defstruct configure-slack-team workspace token cookie)
-        (defcustom configure-slack-teams '()
-          "List of `configure-slack-team' structs that hold Slack accounts."
-          :type '(repeat configure-slack-team)
-          :group 'configure-slack)
+          :group 'rde)
+        (cl-defstruct rde-slack-team workspace token cookie)
+        (defcustom rde-slack-teams '()
+          "List of `rde-slack-team' structs that hold Slack accounts."
+          :type '(repeat rde-slack-team)
+          :group 'rde-slack)
         (defvar rde-slack-map nil
           "Map to bind `slack' commands under.")
         (define-prefix-command 'rde-slack-map)
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              '((defvar configure-slack-buffer-source
+              '((defvar rde-slack-buffer-source
                   `(:name "Slack"
                           :narrow ?s
                           :category buffer
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
                           :items ,(lambda ()
-                                    (mapcar 'buffer-name (configure-completion--mode-buffers
+                                    (mapcar 'buffer-name (rde-completion--mode-buffers
                                                           'slack-message-buffer-mode
                                                           'slack-thread-message-buffer-mode))))
                   "Source for Slack buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources configure-slack-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(slack-message-buffer-mode . ?s))
-                (add-to-list 'configure-completion-initial-narrow-alist '(slack-thread-message-buffer-mode . ?s)))
+                (add-to-list 'consult-buffer-sources rde-slack-buffer-source)
+                (add-to-list 'rde-completion-initial-narrow-alist '(slack-message-buffer-mode . ?s))
+                (add-to-list 'rde-completion-initial-narrow-alist '(slack-thread-message-buffer-mode . ?s)))
               '())
 
-        (defun configure-slack-connect (team)
+        (defun rde-slack-connect (team)
           "Connect to Slack TEAM with personal credentials."
           (interactive
-           (list (cl-find (completing-read "Team: " (mapcar 'configure-slack-team-workspace
-                                                            configure-slack-teams))
-                          configure-slack-teams :key 'configure-slack-team-workspace :test 'string=)))
+           (list (cl-find (completing-read "Team: " (mapcar 'rde-slack-team-workspace
+                                                            rde-slack-teams))
+                          rde-slack-teams :key 'rde-slack-team-workspace :test 'string=)))
           (slack-register-team
-           :name (configure-slack-team-workspace team)
-           :token (configure-slack-team-token team)
-           :cookie (configure-slack-team-cookie team))
+           :name (rde-slack-team-workspace team)
+           :token (rde-slack-team-token team)
+           :cookie (rde-slack-team-cookie team))
           (slack-change-current-team))
 
-        (setq configure-slack-teams
+        (setq rde-slack-teams
               (list
                ,@(map
                   (lambda (slack-acc)
-                    `(make-configure-slack-team
+                    `(make-rde-slack-team
                       :workspace ,(slack-account-workspace slack-acc)
                       :token ,(slack-account-token slack-acc)
                       :cookie ,(or (slack-account-cookie slack-acc) 'nil)))
@@ -116,14 +115,14 @@ how to retrieve it. This is only needed for tokens that start with @code{xoxc}."
           (setq slack-buffer-emojify t)
           (setq slack-prefer-current-team t)
           (setq slack-buffer-function 'switch-to-buffer)
-          (define-key rde-app-map (kbd ,slack-key) 'rde-slack-map)
-          (let ((map rde-slack-map))
-            (define-key map "c" 'configure-slack-connect)
-            (define-key map "s" 'slack-channel-select)
-            (define-key map "t" 'slack-change-current-team))
+          (with-eval-after-load 'rde-keymaps
+            (define-key rde-app-map (kbd ,slack-key) 'rde-slack-map)
+            (let ((map rde-slack-map))
+              (define-key map "c" 'rde-slack-connect)
+              (define-key map "s" 'slack-channel-select)
+              (define-key map "t" 'slack-change-current-team)))
           (set-face-attribute 'slack-preview-face nil :background 'unspecified)))
-      #:elisp-packages (list emacs-slack
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+      #:elisp-packages (list emacs-slack))))
 
   (feature
    (name f-name)

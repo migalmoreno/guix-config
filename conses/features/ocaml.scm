@@ -85,44 +85,43 @@
       (rde-elisp-configuration-service
        f-name
        config
-       `((require 'configure-rde-keymaps)
-         (defgroup configure-ocaml nil
+       `((defgroup rde-ocaml nil
            "General OCaml programming utilities."
-           :group 'configure)
-
+           :group 'rde)
          ,@(if opam?
-               '((defun configure-ocaml-load-merlin ()
+               '((defun rde-ocaml-load-merlin ()
                    "Set up `merlin-mode' for OCaml."
                    (let ((opam-share (car (process-lines "opam" "var" "share"))))
                      (when (and opam-share (file-directory-p opam-share))
                        (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
 
-                 (defun configure-ocaml-set-environment ()
+                 (defun rde-ocaml-set-environment ()
                    "When using Opam, set its corresponding environment variables."
                    (dolist (var (car (read-from-string
                                       (shell-command-to-string "opam config env --sexp"))))
                      (setenv (car var) (cadr var)))))
                '())
 
-         (define-minor-mode configure-ocaml-mode
+         (define-minor-mode rde-ocaml-mode
            "Set up convenient tweaks for an OCaml programming environment."
-           :global t :group 'configure-ocaml
-           (if configure-ocaml-mode
+           :group 'rde-ocaml
+           (if rde-ocaml-mode
                (progn
                 (setq-local comment-style 'multiline
                             comment-continue "   ")
                 (when (fboundp 'prettify-symbols-mode)
                   (prettify-symbols-mode 1))
                 ,@(if opam?
-                      '((configure-ocaml-load-merlin)
-                        (configure-ocaml-set-environment))
+                      '((rde-ocaml-load-merlin)
+                        (rde-ocaml-set-environment))
                       '())
                 (autoload 'merlin-mode "merlin" nil t nil)
                 (merlin-mode))))
 
          (add-to-list 'auto-mode-alist '("\\.ml[ily]?\\'" . tuareg-mode))
-         (add-hook 'tuareg-mode-hook 'configure-ocaml-mode)
-         (define-key rde-app-map "o" 'run-ocaml)
+         (add-hook 'tuareg-mode-hook 'rde-ocaml-mode)
+         (with-eval-after-load 'rde-keymaps
+           (define-key rde-app-map "o" 'run-ocaml))
          (setq tuareg-interactive-program
                ,@(if opam?
                      '((format "%s -nopromptcont"
@@ -155,8 +154,7 @@
                           (ignore-errors
                            (car (process-lines "opam" "var" "bin")))))
                        `(,(file-append ocaml "/bin/ocaml"))))))
-       #:elisp-packages (list emacs-tuareg
-                              (get-value 'emacs-configure-rde-keymaps config))
+       #:elisp-packages (list emacs-tuareg)
        #:summary "OCaml programming utilities"
        #:commentary "General OCaml programming utilities and tooling setup."))))
 

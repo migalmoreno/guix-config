@@ -37,8 +37,7 @@
             leiningen
             unzip
             clojure-tools
-            jdk
-            node))
+            jdk))
      (simple-service
       'home-clojure-envs
       home-environment-variables-service-type
@@ -57,8 +56,10 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "j" 'cider-jack-in)
+      `((with-eval-after-load 'rde-keymaps
+          (let ((map rde-app-map))
+            (define-key map "j" 'cider-jack-in)
+            (define-key map "J" 'clj-deps-new)))
         (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
         (with-eval-after-load 'cider
           (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
@@ -67,8 +68,8 @@
           (setq cider-repl-display-in-current-window t)
           (setq cider-allow-jack-in-without-project t))
         ,@(if (get-value 'emacs-consult config)
-              '((with-eval-after-load 'configure-completion
-                  (add-to-list 'configure-completion-initial-narrow-alist '(cider-repl-mode . ?c)))
+              '((with-eval-after-load 'rde-completion
+                  (add-to-list 'rde-completion-initial-narrow-alist '(cider-repl-mode . ?c)))
                 (with-eval-after-load 'consult-imenu
                   (add-to-list 'consult-imenu-config
                                '(clojure-mode
@@ -92,13 +93,10 @@
                 '((:results . "scalar")
                   (:session . ""))))
         (with-eval-after-load 'ob-clojure
-          (setq org-babel-clojure-backend 'cider))
-        (require 'clj-deps-new)
-        (define-key rde-app-map "J" 'clj-deps-new))
+          (setq org-babel-clojure-backend 'cider)))
       #:elisp-packages (list emacs-clojure-mode
                              emacs-cider
-                             emacs-clj-deps-new
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+                             emacs-clj-deps-new))))
 
   (feature
    (name f-name)

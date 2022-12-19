@@ -39,6 +39,7 @@
             feature-emacs-org
             feature-emacs-org-roam
             feature-emacs-org-agenda
+            feature-emacs-org-recur
             feature-emacs-citar
             feature-emacs-pdf-tools
             feature-emacs-info
@@ -60,6 +61,7 @@
             feature-emacs-eshell
             feature-emacs-telega
             feature-emacs-smartparens
+            feature-emacs-flymake
             feature-emacs-xref
             feature-emacs-re-builder
             feature-emacs-elisp
@@ -250,41 +252,39 @@ themes for Emacs."
       emacs-f-name
       config
       `((require 'modus-themes)
-        (require 'configure-rde-keymaps)
-
-        (defgroup configure-modus-themes nil
+        (defgroup rde-modus-themes nil
           "Minor nits related to `modus-themes'."
-          :group 'configure)
+          :group 'rde)
 
-        (defcustom configure-modus-themes-tab-bar-padding 1
+        (defcustom rde-modus-themes-tab-bar-padding 1
           "The padding of the tab bar."
           :type 'number
-          :group 'configure-modus-themes)
+          :group 'rde-modus-themes)
 
-        (defcustom configure-modus-themes-header-line-padding 1
+        (defcustom rde-modus-themes-header-line-padding 1
           "The padding of the header line."
           :type 'number
-          :group 'configure-modus-themes)
+          :group 'rde-modus-themes)
 
-        (defun configure-modus-themes-set-custom-faces (&optional _theme)
+        (defun rde-modus-themes-set-custom-faces (&optional _theme)
           "Set faces based on the current theme or THEME."
           (interactive)
           (modus-themes-with-colors
             (custom-set-faces
              `(tab-bar ((,class :background ,bg-header
-                                :box (:line-width ,configure-modus-themes-tab-bar-padding
+                                :box (:line-width ,rde-modus-themes-tab-bar-padding
                                                   :color ,bg-header :style unspecified))))
-             `(header-line ((,class :box (:line-width ,configure-modus-themes-header-line-padding
+             `(header-line ((,class :box (:line-width ,rde-modus-themes-header-line-padding
                                                       :color ,bg-header))))
              `(aw-leading-char-face ((,class :height 1.0 :foreground ,blue-alt-other))))))
 
-        (defun configure-modus-themes--dark-theme-p (&optional theme)
+        (defun rde-modus-themes--dark-theme-p (&optional theme)
           "Indicate if there is a curently-active dark THEME."
           (if theme
               (eq theme 'modus-vivendi)
             (eq (car custom-enabled-themes) 'modus-vivendi)))
 
-        (defun configure-modus-themes-set-info-faces ()
+        (defun rde-modus-themes-set-info-faces ()
           "Apply some extra appearance settings to `Info-mode' and `Info+-mode'."
           (interactive)
           (face-remap-add-relative 'default :inherit 'variable-pitch)
@@ -302,44 +302,45 @@ themes for Emacs."
 
         ,@(if (get-value 'mpv config)
               '((require 'mpv)
-                (defun configure-modus-themes-change-mpv-theme (&optional theme)
+                (defun rde-modus-themes-change-mpv-theme (&optional theme)
                   "Set theme in current mpv process according to current system theme or THEME."
                   (interactive)
-                  (if (or (and theme (configure-modus-themes--dark-theme-p theme))
-                          (configure-modus-themes--dark-theme-p))
+                  (if (or (and theme (rde-modus-themes--dark-theme-p theme))
+                          (rde-modus-themes--dark-theme-p))
                       (progn
                         (mpv-set-property "background" "#000000")
                         (mpv-set-property "osd-color" "#ffffff"))
                     (mpv-set-property "background" "#ffffff")
                     (mpv-set-property "osd-color" "#323232")))
-                (add-hook 'mpv-started-hook 'configure-modus-themes-change-mpv-theme)
-                (add-hook 'modus-themes-after-load-theme-hook 'configure-modus-themes-change-mpv-theme))
+                (add-hook 'mpv-started-hook 'rde-modus-themes-change-mpv-theme)
+                (add-hook 'modus-themes-after-load-theme-hook 'rde-modus-themes-change-mpv-theme))
               '())
 
         ,@(if (get-value 'nyxt-emacs config)
               '((require 'nyxt)
-                (defun configure-modus-themes-load-nyxt-theme (&optional theme)
+                (defun rde-modus-themes-load-nyxt-theme (&optional theme)
                   "Load theme in Nyxt according to current system theme or THEME."
                   (interactive)
                   (when nyxt-process
-                    (if (or (and theme (configure-modus-themes--dark-theme-p theme))
-                            (configure-modus-themes--dark-theme-p))
+                    (if (or (and theme (rde-modus-themes--dark-theme-p theme))
+                            (rde-modus-themes--dark-theme-p))
                         (nyxt-load-theme 'modus-vivendi)
                         (nyxt-load-theme 'modus-operandi))))
-                (add-hook 'modus-themes-after-load-theme-hook 'configure-modus-themes-load-nyxt-theme))
+                (add-hook 'modus-themes-after-load-theme-hook 'rde-modus-themes-load-nyxt-theme))
               '())
 
 
-        (setq configure-modus-themes-header-line-padding ,header-line-padding)
-        (setq configure-modus-themes-tab-bar-padding ,tab-bar-padding)
+        (setq rde-modus-themes-header-line-padding ,header-line-padding)
+        (setq rde-modus-themes-tab-bar-padding ,tab-bar-padding)
         ,@(map (lambda (hook)
                  `(add-hook 'modus-themes-after-load-theme-hook ',hook))
                (append
-                '(configure-modus-themes-set-custom-faces)
+                '(rde-modus-themes-set-custom-faces)
                  extra-after-load-theme-hooks))
         (modus-themes-load-themes)
         (with-eval-after-load 'modus-themes
-          (define-key rde-toggle-map "t" 'modus-themes-toggle)
+          (with-eval-after-load 'rde-keymaps
+            (define-key rde-toggle-map "t" 'modus-themes-toggle))
           (setq modus-themes-mode-line '(borderless))
           (setq modus-themes-operandi-color-overrides
                 '((fg-window-divider-inner . "#ffffff")
@@ -371,8 +372,8 @@ themes for Emacs."
               '((modus-themes-load-operandi)))
         ,@(if auto?
               '((require 'circadian)
-                (add-hook 'circadian-after-load-theme-hook 'configure-org-update-faces)
-                (add-hook 'circadian-after-load-theme-hook 'configure-modus-themes-set-theme-dependent-faces)
+                (add-hook 'circadian-after-load-theme-hook 'rde-org-update-faces)
+                (add-hook 'circadian-after-load-theme-hook 'rde-modus-themes-set-theme-dependent-faces)
                 (setq circadian-themes '((:sunrise . modus-operandi)
                                          (:sunset . modus-vivendi)))
                 (circadian-setup))
@@ -387,8 +388,7 @@ themes for Emacs."
                          (if (get-value 'emacs-mpv config)
                              (list (get-value 'emacs-mpv config))
                              '())
-                         (list emacs-modus-themes
-                               (get-value 'emacs-configure-rde-keymaps config)))
+                         (list emacs-modus-themes))
       #:summary "Modus Themes extensions"
       #:commentary "Customizations to Modus Themes, the elegant, highly legible Emacs themes.")))
 
@@ -463,9 +463,9 @@ themes for Emacs."
       config
       `((require 'xdg)
         (require 'consult)
-        (defgroup configure-completion nil
+        (defgroup rde-completion nil
           "Tweaks to the built-in Emacs completion via `consult'."
-          :group 'configure)
+          :group 'rde)
         (autoload 'savehist-mode "savehist")
         (add-hook 'after-init-hook 'savehist-mode)
         (with-eval-after-load 'savehist
@@ -496,7 +496,7 @@ themes for Emacs."
                 (with-eval-after-load 'all-the-icons
                   (add-hook 'marginalia-mode-hook 'all-the-icons-completion-marginalia-setup)))
               '())
-        (advice-add 'completing-read-multiple :filter-args 'configure-completion-crm-indicator)
+        (advice-add 'completing-read-multiple :filter-args 'rde-completion-crm-indicator)
         (autoload 'embark-pp-eval-defun "embark")
         (define-key global-map (kbd "C-.") 'embark-act)
         (define-key global-map (kbd "M-.") 'embark-dwim)
@@ -511,20 +511,20 @@ themes for Emacs."
           (setq embark-prompter 'embark-keymap-prompter))
 
         ,@(if consult-initial-narrowing?
-              '((defcustom configure-completion-initial-narrow-alist '()
+              '((defcustom rde-completion-initial-narrow-alist '()
                   "Alist of MODE . KEY to present an initial completion narrowing via `consult'."
-                  :group 'configure-completion
+                  :group 'rde-completion
                   :type 'list)
-                (defun configure-completion--mode-buffers (&rest modes)
+                (defun rde-completion--mode-buffers (&rest modes)
                   "Return a list of buffers that are derived from MODES in `buffer-list'."
                   (cl-remove-if-not
                    (lambda (buffer)
                      (with-current-buffer buffer
                        (cl-some 'derived-mode-p modes)))
                    (buffer-list)))
-                (defun configure-completion-initial-narrow ()
+                (defun rde-completion-initial-narrow ()
                   "Set initial narrow source for buffers under a specific mode."
-                  (let* ((buffer-mode-assoc configure-completion-initial-narrow-alist)
+                  (let* ((buffer-mode-assoc rde-completion-initial-narrow-alist)
                          (key (and (eq this-command 'consult-buffer)
                                    (or (alist-get (buffer-local-value
                                                    'major-mode (window-buffer (minibuffer-selected-window)))
@@ -536,13 +536,13 @@ themes for Emacs."
                                                         buffer-mode-assoc))))))
                     (when key
                       (setq unread-command-events (append unread-command-events (list key 32))))))
-                (add-hook 'minibuffer-setup-hook 'configure-completion-initial-narrow)
+                (add-hook 'minibuffer-setup-hook 'rde-completion-initial-narrow)
                 (with-eval-after-load 'consult
                   (setq consult-narrow-key (kbd "C-="))
                   (setq consult-widen-key (kbd "C--"))))
               '())
 
-        (defun configure-completion-crm-indicator (args)
+        (defun rde-completion-crm-indicator (args)
           "Display a discernible indicator for `completing-read-multiple'."
           (cons (concat "[CRM] " (car args)) (cdr args)))
 
@@ -550,9 +550,9 @@ themes for Emacs."
               '((require 'project)
                 (let ((map project-prefix-map))
                   (define-key map "F" 'consult-find)
-                  (define-key map "R" 'configure-project-ripgrep))
+                  (define-key map "R" 'rde-project-ripgrep))
                 (add-to-list 'project-switch-commands '(consult-find "Find file consult"))
-                (add-to-list 'project-switch-commands '(configure-project-ripgrep "Search for regexp with rg")))
+                (add-to-list 'project-switch-commands '(rde-project-ripgrep "Search for regexp with rg")))
               '())
         (define-key global-map (kbd "M-y") 'consult-yank-pop)
         (define-key global-map (kbd "C-s") 'consult-line)
@@ -742,14 +742,14 @@ completion UI based on the default Emacs completion system."
       (rde-elisp-configuration-service
        emacs-f-name
        config
-       `((defun configure-tempel-setup-capf ()
+       `((defun rde-tempel-setup-capf ()
                 "Add the TempEL Capf `tempel-complete'."
                 (setq-local completion-at-point-functions
                             (cons 'tempel-complete
                                   completion-at-point-functions)))
 
          (mapcar (lambda (hook)
-                   (add-hook hook 'configure-tempel-setup-capf))
+                   (add-hook hook 'rde-tempel-setup-capf))
                  ',tempel-capf-hooks)
          (define-key global-map (kbd "M-+") 'tempel-complete)
          (define-key global-map (kbd "M-*") 'tempel-insert)
@@ -785,42 +785,42 @@ on the current project."
       `((require 'xdg)
         (eval-when-compile
          (require 'cl-lib))
-        (defgroup configure-project nil
+        (defgroup rde-project nil
           "Custom `project.el' enhancements."
-          :group 'configure)
+          :group 'rde)
 
-        (defcustom configure-project-dominating-files '()
+        (defcustom rde-project-dominating-files '()
           "List of root files that indicate a directory is project."
-          :group 'configure-project
+          :group 'rde-project
           :type '(repeat string))
 
         (cl-defmethod project-root ((project (head explicit)))
           "Determine the PROJECT root."
           (cdr project))
 
-        (defun configure-project-custom-root (dir)
+        (defun rde-project-custom-root (dir)
           "Search in project's DIR for a set of project dominating files."
-          (let* ((files configure-project-dominating-files)
+          (let* ((files rde-project-dominating-files)
                  (root (cl-find-if (lambda (file)
                                      (locate-dominating-file dir file))
                                    files)))
             (when root
               (cons 'explicit (locate-dominating-file dir root)))))
 
-        (defun configure-project-ripgrep ()
+        (defun rde-project-ripgrep ()
           "Run `consult-ripgrep' in the current project root."
           (interactive)
           (when-let ((default-dir (project-root (project-current t))))
             (consult-ripgrep default-dir)))
 
-        (defun configure-project-org-capture ()
+        (defun rde-project-org-capture ()
           "Run `org-capture' in the current project root."
           (interactive)
           (when-let ((default-dir (project-root (project-current t))))
             (dir-locals-read-from-dir default-dir)
             (org-capture)))
 
-        (defun configure-project-compile (&optional comint)
+        (defun rde-project-compile (&optional comint)
           "Compile the current project, where if COMINT, the compilation buffer will be in Comint mode."
           (interactive "P")
           (let ((default-directory (project-root (project-current t)))
@@ -829,10 +829,10 @@ on the current project."
                      compilation-buffer-name-function)))
             (call-interactively 'compile nil (and comint (vector (list 4))))))
 
-        (setq configure-project-dominating-files '(".project.el" ".dir-locals.el"))
+        (setq rde-project-dominating-files '(".project.el" ".dir-locals.el" ".gitignore"))
         (add-hook 'project-find-functions 'project-try-vc)
-        (add-hook 'project-find-functions 'configure-project-custom-root)
-        (advice-add 'project-compile :override 'configure-project-compile)
+        (add-hook 'project-find-functions 'rde-project-custom-root)
+        (advice-add 'project-compile :override 'rde-project-compile)
         (with-eval-after-load 'project
           (setq project-switch-use-entire-map t)
           (setq project-list-file (expand-file-name "emacs/projects" (or (xdg-cache-home) "~/.cache")))))
@@ -875,9 +875,7 @@ on the current project."
           (setq kept-new-versions 3)
           (setq kept-old-versions 2)
           (setq version-control t)
-          (setq remote-file-name-inhibit-cache nil)
-          (setq safe-local-variable-values '((after-save-hook . (org-babel-tangle))
-                                             (ispell-dictionary . "en_GB"))))
+          (setq remote-file-name-inhibit-cache nil))
         (setq custom-file (expand-file-name (format "emacs/custom-%s.el" (user-uid)) (xdg-cache-home)))
         (with-eval-after-load 'custom
           (setq custom-safe-themes t)
@@ -993,7 +991,7 @@ operate on buffers like Dired."
            (require 'emms-browser))
          (require 'ytdl)
 
-         (defun configure-emms-download-track ()
+         (defun rde-emms-download-track ()
            "Download EMMS track at point using `ytdl'."
            (interactive)
            (emms-playlist-ensure-playlist-buffer)
@@ -1011,7 +1009,7 @@ operate on buffers like Dired."
                     (car dl-type))
                  (error "Track `%s' is not a remote track to download" title)))))
 
-         (defun configure-emms-library-load ()
+         (defun rde-emms-library-load ()
            "Load an EMMS playlist with local music files and move to it."
            (interactive)
            (ignore-errors
@@ -1024,18 +1022,18 @@ operate on buffers like Dired."
                    (emms-add-directory-tree ,emms-media-dir))
                  (emms-playlist-mode-go)))))
 
-         (defun configure-emms-source-track (url title &optional length play)
+         (defun rde-emms-source-track (url title &optional length play)
            "Append and/or PLAY track with URL, TITLE, and LENGTH to the current EMMS playlist."
            (interactive "sURL: \nsTitle: \nP")
            (if length
-               (emms-add-configure-emms-track url title length)
-             (emms-add-configure-emms-track url title nil))
+               (emms-add-rde-emms-track url title length)
+             (emms-add-rde-emms-track url title nil))
            (when play
              (emms-stop)
              (emms-playlist-current-select-last)
              (emms-start)))
 
-         (defun configure-emms-toggle-random-repeat ()
+         (defun rde-emms-toggle-random-repeat ()
            "Toggle both the random and repeat state for the current EMMS playlist."
            (interactive)
            (emms-toggle-random-playlist)
@@ -1046,26 +1044,26 @@ operate on buffers like Dired."
              (setq emms-repeat-track t)
              (message "Will play the tracks sequentially and repeat the current track")))
 
-         (defun configure-emms-seek-to-beginning ()
+         (defun rde-emms-seek-to-beginning ()
            "Seek to beginning of current EMMS track."
            (interactive)
            (emms-seek-to 0))
 
-         (defun configure-emms-next ()
+         (defun rde-emms-next ()
            "Move to the next track depending on the current playlist state."
            (interactive)
            (if emms-random-playlist
                (emms-random)
              (emms-next)))
 
-         (defun configure-emms-previous ()
+         (defun rde-emms-previous ()
            "Move to the previous track depending on the current playlist state."
            (interactive)
            (if emms-random-playlist
                (emms-random)
              (emms-next)))
 
-         (define-emms-source configure-emms-track (url title &optional length)
+         (define-emms-source rde-emms-track (url title &optional length)
            (let ((emms-track (emms-track 'url url)))
              (emms-track-set emms-track 'info-title title)
              (when length
@@ -1080,19 +1078,19 @@ operate on buffers like Dired."
            (define-key map "eS" 'emms-seek-to)
            (define-key map (kbd "e SPC") 'emms-pause)
            (define-key map "er" 'emms-toggle-repeat-track)
-           (define-key map "eR" 'configure-emms-toggle-random-repeat)
-           (define-key map "el" 'configure-emms-library-load)
-           (define-key map "en" 'configure-emms-next)
-           (define-key map "ep" 'configure-emms-previous)
-           (define-key map "ea" 'configure-emms-seek-to-beginning))
-         (add-hook 'emms-player-mpv-event-functions 'configure-mpv-connect-to-emms-on-startup)
+           (define-key map "eR" 'rde-emms-toggle-random-repeat)
+           (define-key map "el" 'rde-emms-library-load)
+           (define-key map "en" 'rde-emms-next)
+           (define-key map "ep" 'rde-emms-previous)
+           (define-key map "ea" 'rde-emms-seek-to-beginning))
+         (add-hook 'emms-player-mpv-event-functions 'rde-mpv-connect-to-emms-on-startup)
          (with-eval-after-load 'emms
            (require 'emms-setup)
            (require ',emms-info-method)
            (emms-all)
            (emms-default-players)
            (emms-toggle-random-playlist)
-           (define-key emms-playlist-mode-map "m" 'configure-emms-download-track)
+           (define-key emms-playlist-mode-map "m" 'rde-emms-download-track)
            (define-key dired-mode-map "e" 'emms-play-dired)
            (emms-browser-make-filter
             "all-files" (emms-browser-filter-only-type 'file))
@@ -1136,8 +1134,7 @@ operate on buffers like Dired."
                          (if (get-value 'emacs-ytdl config)
                              (list (get-value 'emacs-ytdl config))
                              '())
-                         (list emacs-emms
-                               (get-value 'emacs-configure-rde-keymaps config)))
+                         (list emacs-emms))
        #:summary "Extensions for EMMS"
        #:commentary "Extensions for EMMS, the Emacs MultiMedia System."))
      (if (get-value 'nyxt config)
@@ -1149,7 +1146,7 @@ operate on buffers like Dired."
                "Source the current buffer as an EMMS track."
                (let ((url (quri:render-uri (url (current-buffer)))))
                  (eval-in-emacs
-                  `(configure-emms-source-track
+                  `(rde-emms-source-track
                     ,url
                     ,(title (current-buffer))
                     t))
@@ -1276,13 +1273,13 @@ operate on buffers like Dired."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defun configure-graphviz-fix-inline-images ()
+      `((defun rde-graphviz-fix-inline-images ()
           "Display inline images automatically."
           (interactive)
           (when org-inline-image-overlays
             (org-redisplay-inline-images)))
 
-        (add-hook 'org-babel-after-execute-hook 'configure-graphviz-fix-inline-images)
+        (add-hook 'org-babel-after-execute-hook 'rde-graphviz-fix-inline-images)
         (require 'graphviz-dot-mode)
         (with-eval-after-load 'org
           (require 'ob-dot))
@@ -1317,46 +1314,47 @@ operate on buffers like Dired."
       `((defvar rde-ednc-map nil
            "Map to bind `ednc' commands under.")
         (define-prefix-command 'rde-ednc-map)
-        (defun configure-ednc--notify ()
+        (defun rde-ednc--notify ()
           "Display the latest EDNC notification."
           (when (ednc-notifications)
             (ednc-format-notification (car (ednc-notifications)))))
 
-        (defun configure-ednc-show-notification-log ()
+        (defun rde-ednc-show-notification-log ()
           "Switch to the EDNC log buffer."
           (interactive)
           (when (bufferp (get-buffer ednc-log-name))
             (switch-to-buffer ednc-log-name)))
 
-        (defun configure-ednc-close-last-notification ()
+        (defun rde-ednc-close-last-notification ()
           "Close the latest notification provided by the notification daemon."
           (interactive)
           (when-let* ((notification (car (ednc-notifications))))
             (ednc--close-notification notification 2)))
 
-        (defun configure-ednc-close-all-notifications ()
+        (defun rde-ednc-close-all-notifications ()
           "Dismiss all EDNC notifications."
           (interactive)
           (mapc 'ednc-dismiss-notification (cdr ednc--state)))
 
-        (defun configure-ednc-update-notifications (&rest _)
+        (defun rde-ednc-update-notifications (&rest _)
           "Update the display of EDNC notifications."
           (interactive)
           (force-mode-line-update t))
 
         (with-eval-after-load 'ednc-autoloads
           (add-hook 'after-init-hook 'ednc-mode))
-        (add-hook 'ednc-notification-presentation-functions 'configure-ednc-update-notifications)
+        (add-hook 'ednc-notification-presentation-functions 'rde-ednc-update-notifications)
         (add-hook 'ednc-notification-presentation-functions 'ednc--update-log-buffer)
         (with-eval-after-load 'notifications
           ,@(if notifications-icon
                 `((setq notifications-application-icon ,notifications-icon))
                 '()))
-        (define-key rde-app-map (kbd ,ednc-key) 'rde-ednc-map)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,ednc-key) 'rde-ednc-map))
         (let ((map rde-ednc-map))
-          (define-key map "c" 'configure-ednc-close-last-notification)
-          (define-key map "l" 'configure-ednc-show-notification-log)
-          (define-key map "d" 'configure-ednc-close-all-notifications)))
+          (define-key map "c" 'rde-ednc-close-last-notification)
+          (define-key map "l" 'rde-ednc-show-notification-log)
+          (define-key map "d" 'rde-ednc-close-all-notifications)))
       #:elisp-packages (list emacs-ednc))))
 
   (feature
@@ -1388,8 +1386,8 @@ operate on buffers like Dired."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "c" 'calendar)
+      `((with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "c" 'calendar))
         (with-eval-after-load 'calendar
           (setq diary-file ,diary-file)
           (setq calendar-week-start-day 1)
@@ -1410,9 +1408,10 @@ operate on buffers like Dired."
                           'font-lock-face 'font-lock-function-name-face)))
                 '()))
         (appt-activate 1)
-        (let ((map rde-app-map))
-          (define-key map "Aa" 'appt-add)
-          (define-key map "Ad" 'appt-delete))
+        (with-eval-after-load 'rde-keymaps
+          (let ((map rde-app-map))
+            (define-key map "Aa" 'appt-add)
+            (define-key map "Ad" 'appt-delete)))
         (with-eval-after-load 'appt
           (setq appt-display-format 'echo)
           (setq appt-audible nil)
@@ -1420,7 +1419,7 @@ operate on buffers like Dired."
           (setq appt-display-interval 2)
           (setq appt-display-diary nil))
         ,@(if (get-value 'emacs-auto-theme? config)
-              '((defun configure-calendar--get-geolocation ()
+              '((defun rde-calendar--get-geolocation ()
                   "Fetch the current location's coordinates through Mozilla's Geolocation API."
                   (with-current-buffer
                       (ignore-errors
@@ -1435,10 +1434,9 @@ operate on buffers like Dired."
                       (cons longitude latitude))))
 
                 (with-eval-after-load 'solar
-                  (setq calendar-longitude (car (configure-calendar--get-geolocation)))
-                  (setq calendar-latitude (cdr (configure-calendar--get-geolocation)))))
-              '()))
-      #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config)))))
+                  (setq calendar-longitude (car (rde-calendar--get-geolocation)))
+                  (setq calendar-latitude (cdr (rde-calendar--get-geolocation)))))
+              '())))))
 
   (feature
    (name f-name)
@@ -1467,7 +1465,7 @@ operate on buffers like Dired."
            (setq bookmark-default-file ,bookmark-file))
          ,@(if (get-value 'emacs-embark config)
                '((with-eval-after-load 'embark
-                   (define-key embark-bookmark-map "c" 'configure-browse-url-alt-bookmark-jump)))
+                   (define-key embark-bookmark-map "c" 'rde-browse-url-alt-bookmark-jump)))
                '()))))
      (if (get-value 'nyxt config)
          (list
@@ -1479,7 +1477,7 @@ operate on buffers like Dired."
                (eval-in-emacs
                 `(let ((bookmark-make-record-function
                         (lambda ()
-                          (configure-browse-url-bookmark-make-record
+                          (rde-browse-url-bookmark-make-record
                            ,(quri:render-uri (url (current-buffer)))
                            ,(title (current-buffer))))))
                    (bookmark-set)))
@@ -1595,9 +1593,8 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        (require 'dashboard)
-        (defun configure-dashboard-open ()
+      `((require 'dashboard)
+        (defun rde-dashboard-open ()
           "Jump to a dashboard buffer, creating one if it doesn't exist."
           (interactive)
           (when (get-buffer-create dashboard-buffer-name)
@@ -1606,7 +1603,8 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
             (dashboard-insert-startupify-lists)
             (dashboard-refresh-buffer)))
 
-        (define-key rde-app-map (kbd ,dashboard-key) 'configure-dashboard-open)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,dashboard-key) 'rde-dashboard-open))
         (with-eval-after-load 'dashboard
           (setq dashboard-set-file-icons ,(if set-file-icons? 't 'nil))
           (setq dashboard-projects-backend ',projects-backend)
@@ -1677,9 +1675,7 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
           ,@(if path-style
                 `((setq dashboard-path-style ',path-style))
                 '())))
-      #:elisp-packages (list
-                        emacs-dashboard
-                        (get-value 'emacs-configure-rde-keymaps config)))))
+      #:elisp-packages (list emacs-dashboard))))
 
   (feature
    (name f-name)
@@ -1706,21 +1702,20 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup configure-markdown nil
+      `((defgroup rde-markdown nil
           "Markdown mode customizations."
-          :group 'configure)
-
-        (define-minor-mode configure-markdown-minimal-mode
+          :group 'rde)
+        (define-minor-mode rde-markdown-minimal-mode
           "A more minimal interface to Markdown mode."
-          :global t :group 'configure-markdown
-          (if configure-markdown-minimal-mode
+          :group 'rde-markdown
+          (if rde-markdown-minimal-mode
               (progn
                 (display-line-numbers-mode -1)
                 (visual-line-mode 1))
             (display-line-numbers-mode 1)
             (visual-line-mode -1)))
 
-        (add-hook 'markdown-mode-hook 'configure-markdown-minimal-mode)
+        (add-hook 'markdown-mode-hook 'rde-markdown-minimal-mode)
         (with-eval-after-load 'markdown-mode
           (setq markdown-header-scaling t)
           (setq markdown-header-scaling-values '(1.2 1.1 1.1 1.0 1.0 0.9))
@@ -1784,12 +1779,12 @@ and organizer for Emacs."
        config
        `((eval-when-compile
           (require 'cl-macs))
-         (defgroup configure-org nil
+         (defgroup rde-org nil
            "Extensions for basic Org mode features."
-           :group 'configure)
+           :group 'rde)
 
          ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-               '((defvar configure-org-buffer-source
+               '((defvar rde-org-buffer-source
                    `(:name "Org"
                            :narrow ?o
                            :category buffer
@@ -1797,24 +1792,24 @@ and organizer for Emacs."
                            :state ,'consult--buffer-state
                            :items ,(lambda () (mapcar 'buffer-name (org-buffer-list))))
                    "Source for Org buffers to be set in `consult-buffer-sources'.")
-                 (add-to-list 'consult-buffer-sources configure-org-buffer-source)
-                 (add-to-list 'configure-completion-initial-narrow-alist '(org-mode . ?o)))
+                 (add-to-list 'consult-buffer-sources rde-org-buffer-source)
+                 (add-to-list 'rde-completion-initial-narrow-alist '(org-mode . ?o)))
              '())
 
-         (defun configure-org-timer-reset ()
+         (defun rde-org-timer-reset ()
            "Set `org-timer-mode-line-string' to nil."
            (interactive)
            (setq org-timer-mode-line-string nil))
 
-         (defun configure-org-timer-update-mode-line ()
+         (defun rde-org-timer-update-mode-line ()
            "Update the timer in the mode line without adding surrounding angle brackets."
            (if org-timer-pause-time
                nil
              (setq org-timer-mode-line-string (substring (org-timer-value-string) 0 -1))
              (force-mode-line-update)))
 
-         (defun configure-org-set-custom-faces ()
-           "Set Org mode's faces for `configure-org-minimal-mode'."
+         (defun rde-org-set-custom-faces ()
+           "Set Org mode's faces for `rde-org-minimal-mode'."
            (interactive)
            ,@(if (get-value 'emacs-modus-themes config)
                  '((eval-when-compile
@@ -1841,13 +1836,13 @@ and organizer for Emacs."
                       `(org-indent ((,class :inherit (org-hide fixed-pitch)))))))
                '()))
 
-         (defun configure-org-update-faces (&optional _theme)
+         (defun rde-org-update-faces (&optional _theme)
            "Apply appropriate faces to currently-active Org mode buffers."
            (cl-loop for buffer in (org-buffer-list)
                     do (with-current-buffer buffer
-                         (configure-org-set-custom-faces))))
+                         (rde-org-set-custom-faces))))
 
-         (cl-defun configure-org-do-promote (&optional (levels 1))
+         (cl-defun rde-org-do-promote (&optional (levels 1))
            "Allow promoting the current heading a number of LEVELS high up the tree."
            (interactive "p")
            (save-excursion
@@ -1860,10 +1855,10 @@ and organizer for Emacs."
                  (org-promote))))
            (org-fix-position-after-promote))
 
-         (define-minor-mode configure-org-minimal-mode
+         (define-minor-mode rde-org-minimal-mode
            "Provide a minimal interface to Org mode."
-           :group 'configure-org
-           (if configure-org-minimal-mode
+           :group 'rde-org
+           (if rde-org-minimal-mode
                (progn
                  (corfu-mode -1)
                  (electric-pair-local-mode -1)
@@ -1875,7 +1870,7 @@ and organizer for Emacs."
                  (org-appear-mode)
                  (org-make-toc-mode)
                  (setq-local fill-prefix "")
-                 (configure-org-set-custom-faces))
+                 (rde-org-set-custom-faces))
              (corfu-mode 1)
              (electric-pair-local-mode)
              (org-indent-mode -1)
@@ -1887,9 +1882,9 @@ and organizer for Emacs."
              (org-make-toc-mode -1)
              (setq-local fill-prefix nil)))
 
-         (advice-add 'org-do-promote :override 'configure-org-do-promote)
+         (advice-add 'org-do-promote :override 'rde-org-do-promote)
          (add-hook 'org-mode-hook 'org-fragtog-mode)
-         (add-hook 'org-mode-hook 'configure-org-minimal-mode)
+         (add-hook 'org-mode-hook 'rde-org-minimal-mode)
          (autoload 'org-buffer-list "org")
          (let ((map mode-specific-map))
            (define-key map "l" 'org-store-link)
@@ -1939,7 +1934,7 @@ and organizer for Emacs."
            (setq org-outline-path-complete-in-steps nil)
            (setq org-fast-tag-selection-single-key 'expert)
            (setq org-display-remote-inline-images 'cache)
-           (setq org-image-actual-width t)
+           (setq org-image-actual-width nil)
            (setq org-pretty-entities t)
            (setq org-pretty-entities-include-sub-superscripts nil)
            (setq org-M-RET-may-split-line nil)
@@ -1969,8 +1964,8 @@ and organizer for Emacs."
          (with-eval-after-load 'org-refile
            (setq org-refile-targets '((org-agenda-files . (:maxlevel . 1)))))
          ,@(if (get-value 'emacs-project config)
-               '((define-key project-prefix-map "o" 'configure-project-org-capture)
-                 (add-to-list 'project-switch-commands '(configure-project-org-capture "Capture with Org")))
+               '((define-key project-prefix-map "o" 'rde-project-org-capture)
+                 (add-to-list 'project-switch-commands '(rde-project-org-capture "Capture with Org")))
                '())
          (with-eval-after-load 'org-capture
            (setq org-capture-bookmark nil)
@@ -1999,8 +1994,8 @@ and organizer for Emacs."
          (org-crypt-use-before-save-magic)
          (with-eval-after-load 'org-crypt
            (setq org-crypt-key nil))
-         (add-hook 'org-timer-stop-hook 'configure-org-timer-reset)
-         (advice-add 'org-timer-update-mode-line :override 'configure-org-timer-update-mode-line)
+         (add-hook 'org-timer-stop-hook 'rde-org-timer-reset)
+         (advice-add 'org-timer-update-mode-line :override 'rde-org-timer-update-mode-line)
          (with-eval-after-load 'org-timer
            (let ((map mode-specific-map))
              (define-key map "ots" 'org-timer-start)
@@ -2024,7 +2019,10 @@ and organizer for Emacs."
            (setq org-export-with-date nil)
            (setq org-export-with-author nil)
            (setq org-export-preserve-breaks t)
-           (setq org-html-postamble nil)))
+           (setq org-html-postamble nil))
+         (with-eval-after-load 'org-download
+           (setq org-download-image-dir "images")
+           (setq org-download-image-org-width 300)))
        #:elisp-packages (append
                          (list
                           emacs-org-contrib
@@ -2032,7 +2030,8 @@ and organizer for Emacs."
                           emacs-org-appear
                           emacs-org-modern
                           emacs-visual-fill-column
-                          emacs-org-fragtog)
+                          emacs-org-fragtog
+                          emacs-org-download)
                          (if (get-value 'emacs-all-the-icons config)
                              (list (get-value 'emacs-all-the-icons config))
                              '())
@@ -2090,7 +2089,7 @@ and organizer for Emacs."
        `((eval-when-compile
           (let ((org-roam-v2-ack t))
             (require 'org-roam)))
-         (defun configure-org-roam-open-ref ()
+         (defun rde-org-roam-open-ref ()
            "List all ROAM_REFS in the current buffer and allow you to open them."
            (interactive)
            (when (derived-mode-p 'org-mode)
@@ -2109,7 +2108,7 @@ and organizer for Emacs."
                  node-ref
                (error "No roam refs in this node"))))
 
-         (defun configure-org-roam-get-filetags ()
+         (defun rde-org-roam-get-filetags ()
            "Return the top-level tags for the current org-roam node."
            (split-string
             (or (cadr (assoc "FILETAGS"
@@ -2147,11 +2146,11 @@ and organizer for Emacs."
                               (org-roam-node-list))))
              (delete-dups (mapcar 'org-roam-node-file todo-nodes))))
 
-         (defun configure-org-roam-update-todo-files (&rest _)
+         (defun rde-org-roam-update-todo-files (&rest _)
            "Update the value of `org-agenda-files'."
-           (setq org-agenda-files (configure-org-roam-list-todo-files)))
+           (setq org-agenda-files (rde-org-roam-list-todo-files)))
 
-         (defun configure-org-roam-ref-add (ref node)
+         (defun rde-org-roam-ref-add (ref node)
            "Add REF to NODE.
 If NODE doesn't exist, create a new org-roam node with REF."
            (interactive
@@ -2171,7 +2170,7 @@ If NODE doesn't exist, create a new org-roam node with REF."
               :templates org-roam-capture-templates
               :props '(:finalize find-file))))
 
-         (defun configure-org-roam-node-insert-immediate (arg &rest args)
+         (defun rde-org-roam-node-insert-immediate (arg &rest args)
            "Immediately insert new Org Roam node with ARG and ARGS in the buffer."
            (interactive "P")
            (let ((args (cons arg args))
@@ -2190,9 +2189,9 @@ If NODE doesn't exist, create a new org-roam node with REF."
                       `(,(rx "*org-roam*")
                         display-buffer-same-window))
          ,@(if org-roam-todo?
-               '((add-hook 'org-roam-find-file-hook 'configure-org-roam-update-todo-tag)
-                 (add-hook 'before-save-hook 'configure-org-roam-update-todo-tag)
-                 (advice-add 'org-agenda :before 'configure-org-roam-update-todo-files))
+               '((add-hook 'org-roam-find-file-hook 'rde-org-roam-update-todo-tag)
+                 (add-hook 'before-save-hook 'rde-org-roam-update-todo-tag)
+                 (advice-add 'org-agenda :before 'rde-org-roam-update-todo-files))
                '())
          (let ((map mode-specific-map))
            (define-key map "nb" 'org-roam-buffer-toggle)
@@ -2200,7 +2199,7 @@ If NODE doesn't exist, create a new org-roam node with REF."
            (define-key map "nr" 'org-roam-ref-find)
            (define-key map "nc" 'org-roam-capture)
            (define-key map "ni" 'org-roam-node-insert)
-           (define-key map "nI" 'configure-org-roam-node-insert-immediate)
+           (define-key map "nI" 'rde-org-roam-node-insert-immediate)
            (define-key map "ndn" 'org-roam-dailies-capture-today)
            (define-key map "ndd" 'org-roam-dailies-goto-today)
            (define-key map "ndY" 'org-roam-dailies-capture-yesterday)
@@ -2220,7 +2219,7 @@ If NODE doesn't exist, create a new org-roam node with REF."
              (define-key map (kbd "C-c r T") 'org-roam-tag-remove)
              (define-key map (kbd "C-c r a") 'org-roam-alias-add)
              (define-key map (kbd "C-c r A") 'org-roam-alias-remove)
-             (define-key map (kbd "C-c r O") 'configure-org-roam-open-ref)
+             (define-key map (kbd "C-c r O") 'rde-org-roam-open-ref)
              (define-key map (kbd "C-c n df") 'org-roam-dailies-goto-next-note)
              (define-key map (kbd "C-c n db") 'org-roam-dailies-goto-previous-note))
            ,@(if org-roam-capture-templates
@@ -2249,13 +2248,16 @@ If NODE doesn't exist, create a new org-roam node with REF."
                        ("RET" browse-url-generic)
                        ("c" browse-url-chromium)
                        ("r" org-roam-ref-remove)
-                       ("v" 'configure-mpv-play-url)
-                       ("V" 'configure-mpv-play-url-other-window))
+                       ("v" 'rde-mpv-play-url)
+                       ("V" 'rde-mpv-play-url-other-window))
                      (add-to-list 'embark-keymap-alist '(org-roam-ref . embark-roam-ref-map))
-                     (advice-add 'org-roam-ref-add :around 'configure-browse-url-trace-url)))
+                     (advice-add 'org-roam-ref-add :around 'rde-browse-url-trace-url)))
                  '())))
        #:elisp-packages (append
                          (list emacs-org-roam)
+                         (if (get-value 'emacs-org-recur config)
+                             (list (get-value 'emacs-org-recur config))
+                             '())
                          (if (get-value 'emacs-embark config)
                              (list (get-value 'emacs-embark config))
                              '()))))
@@ -2271,7 +2273,7 @@ If NODE doesn't exist, create a new org-roam node with REF."
              (define-command org-roam-ref-capture ()
                "Reference an org-roam node with the current page."
                (eval-in-emacs
-                `(configure-org-roam-ref-add ,(render-url (url (current-buffer))) (org-roam-node-read))))
+                `(rde-org-roam-ref-add ,(render-url (url (current-buffer))) (org-roam-node-read))))
              (define-key *rde-keymap* "C-c n" 'org-roam-ref-capture))))
          '())))
 
@@ -2302,37 +2304,37 @@ If NODE doesn't exist, create a new org-roam node with REF."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup configure-org-agenda nil
+      `((defgroup rde-org-agenda nil
           "Custom enhancements to the Org Agenda."
-          :group 'configure)
+          :group 'rde)
 
-        (defvar configure-org-agenda-appt-timer nil
+        (defvar rde-org-agenda-appt-timer nil
           "Timer to update `appt-time-msg-list' from Agenda entries.")
 
-        (defun configure-org-agenda-to-appt ()
+        (defun rde-org-agenda-to-appt ()
           "Reset the `appt-mode' list and initialize it from Agenda entries."
           (interactive)
           (setq appt-time-msg-list nil)
           (org-agenda-to-appt))
 
-        (defun configure-org-agenda-appt-reset ()
+        (defun rde-org-agenda-appt-reset ()
           "Initialize the `appt-mode' list for today and reset the timer to run tomorrow."
           (interactive)
-          (configure-org-agenda-to-appt)
-          (setq configure-org-agenda-appt-timer
-                (run-at-time "24:01" nil 'configure-org-agenda-appt-reset)))
+          (rde-org-agenda-to-appt)
+          (setq rde-org-agenda-appt-timer
+                (run-at-time "24:01" nil 'rde-org-agenda-appt-reset)))
 
-        (defun configure-org-agenda-daily ()
+        (defun rde-org-agenda-daily ()
           "Invoke a custom Org agenda dispatcher for the daily agenda view."
           (interactive)
           (org-agenda nil (kbd "C-d")))
 
-        (defun configure-org-agenda-overview ()
+        (defun rde-org-agenda-overview ()
           "Invoke a custom Org agenda dispatcher for the overview."
           (interactive)
           (org-agenda nil (kbd "C-o")))
 
-        (defun configure-org-agenda-category (&optional len)
+        (defun rde-org-agenda-category (&optional len)
           "Get category of the Org Agenda item at point.
 The category is defined by one of the following:
 - CATEGORY property
@@ -2362,23 +2364,24 @@ result is longer than LEN."
                 (s-truncate len (s-pad-right len " " result))
               result)))
 
-        (define-minor-mode configure-org-agenda-appt-mode
+        (define-minor-mode rde-org-agenda-appt-mode
           "Set up `appt-mode' integration for Agenda items."
-          :global t :group 'configure-org-agenda
-          (if configure-org-agenda-appt-mode
+          :global t :group 'rde-org-agenda
+          (if rde-org-agenda-appt-mode
               (progn
-                (setq configure-org-agenda-appt-timer
-                      (configure-org-agenda-appt-reset))
-                (add-hook 'org-agenda-finalize-hook 'configure-org-agenda-to-appt))
+                (setq rde-org-agenda-appt-timer
+                      (rde-org-agenda-appt-reset))
+                (add-hook 'org-agenda-finalize-hook 'rde-org-agenda-to-appt))
             (progn
-              (remove-hook 'org-agenda-finalize-hook 'configure-org-agenda-to-appt)
-              (cancel-timer configure-org-agenda-appt-timer))))
+              (remove-hook 'org-agenda-finalize-hook 'rde-org-agenda-to-appt)
+              (cancel-timer rde-org-agenda-appt-timer))))
 
         (define-key global-map (kbd "C-x C-a") 'org-agenda)
-        (define-key rde-app-map (kbd "ad") 'configure-org-agenda-daily)
-        (define-key rde-app-map (kbd "ao") 'configure-org-agenda-overview)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd "ad") 'rde-org-agenda-daily)
+          (define-key rde-app-map (kbd "ao") 'rde-org-agenda-overview))
         (add-hook 'org-agenda-mode-hook 'hack-dir-local-variables-non-file-buffer)
-        (configure-org-agenda-appt-mode)
+        (rde-org-agenda-appt-mode)
         (with-eval-after-load 'org-agenda
           ,@(if org-agenda-files
                 `((setq org-agenda-files ',org-agenda-files))
@@ -2386,10 +2389,10 @@ result is longer than LEN."
           ,@(if org-agenda-prefix-format
                 (if (get-value 'org-roam-todo? config)
                     `((setq org-agenda-prefix-format
-                            '((agenda . " %i %(configure-org-agenda-category 12)%?-12t% s")
-                              (todo . " %i %(configure-org-agenda-category 12) ")
-                              (tags . " %i %(configure-org-agenda-category 12) ")
-                              (search . " %i %(configure-org-agenda-category 12) "))))
+                            '((agenda . " %i %(rde-org-agenda-category 12)%?-12t% s")
+                              (todo . " %i %(rde-org-agenda-category 12) ")
+                              (tags . " %i %(rde-org-agenda-category 12) ")
+                              (search . " %i %(rde-org-agenda-category 12) "))))
                     `((setq org-agenda-prefix-format ',org-agenda-prefix-format)))
                 '())
           (setq org-agenda-sticky t)
@@ -2414,8 +2417,8 @@ result is longer than LEN."
           (setq org-agenda-bulk-custom-functions
                 '((?P (lambda nil
                         (org-agenda-priority 'set))))))
-        (advice-add 'org-redo :after 'configure-org-agenda-to-appt)
-        (add-hook 'org-capture-after-finalize-hook 'configure-org-agenda-to-appt)
+        (advice-add 'org-redo :after 'rde-org-agenda-to-appt)
+        (add-hook 'org-capture-after-finalize-hook 'rde-org-agenda-to-appt)
         ,@(if (get-value 'emacs-org-modern? config)
               '((add-hook 'org-agenda-finalize-hook 'org-modern-agenda))
               '())))))
@@ -2505,11 +2508,11 @@ result is longer than LEN."
       emacs-f-name
       config
       `((require 'cl-lib)
-        (defgroup configure-pdf-tools nil
+        (defgroup rde-pdf-tools nil
           "Custom tweaks for PDF Tools."
-          :group 'configure)
+          :group 'rde)
 
-        (defun configure-pdf-tools--list-buffers ()
+        (defun rde-pdf-tools--list-buffers ()
           "List all currently-opened `pdf-view' mode buffers."
           (cl-remove-if-not
            (lambda (buffer)
@@ -2517,35 +2520,35 @@ result is longer than LEN."
                (derived-mode-p 'pdf-view-mode)))
            (buffer-list)))
 
-        (defun configure-pdf-tools-update-buffers (&optional _theme)
-          "Apply `configure-pdf-tools-mode' to currently opened `pdf-view' mode buffers."
-          (cl-loop for buffer in (configure-pdf-tools--list-buffers)
+        (defun rde-pdf-tools-update-buffers (&optional _theme)
+          "Apply `rde-pdf-tools-mode' to currently opened `pdf-view' mode buffers."
+          (cl-loop for buffer in (rde-pdf-tools--list-buffers)
                    do (with-current-buffer buffer
-                        (configure-pdf-tools-mode 1))))
+                        (rde-pdf-tools-mode 1))))
 
-        (defun configure-pdf-tools-run (fun &rest args)
+        (defun rde-pdf-tools-run (fun &rest args)
           "Run FUN with ARGS in the context of the first `pdf-view' mode buffer."
-          (if (cl-find (current-buffer) (configure-pdf-tools--list-buffers))
+          (if (cl-find (current-buffer) (rde-pdf-tools--list-buffers))
               (apply fun args)
-            (let ((buffer (car (configure-pdf-tools--list-buffers))))
+            (let ((buffer (car (rde-pdf-tools--list-buffers))))
               (save-window-excursion
                 (with-selected-window (get-buffer-window buffer)
                   (apply fun args))))))
 
-        (define-minor-mode configure-pdf-tools-mode
+        (define-minor-mode rde-pdf-tools-mode
           "Apply `pdf-tools' settings based on the current theme."
-          :global t :group 'configure-pdf-tools
-          (if configure-pdf-tools-mode
-              (if (configure-modus-themes--dark-theme-p)
+          :global t :group 'rde-pdf-tools
+          (if rde-pdf-tools-mode
+              (if (rde-modus-themes--dark-theme-p)
                   (pdf-view-themed-minor-mode 1)
                 (pdf-view-themed-minor-mode -1))
             (pdf-view-themed-minor-mode -1)))
 
         (autoload 'pdf-loader-install "pdf-loader")
         (pdf-loader-install)
-        (add-hook 'pdf-view-mode-hook 'configure-pdf-tools-mode)
-        (advice-add 'pdf-view-next-page-command :around 'configure-pdf-tools-run)
-        (advice-add 'pdf-view-previous-page-command :around 'configure-pdf-tools-run)
+        (add-hook 'pdf-view-mode-hook 'rde-pdf-tools-mode)
+        (advice-add 'pdf-view-next-page-command :around 'rde-pdf-tools-run)
+        (advice-add 'pdf-view-previous-page-command :around 'rde-pdf-tools-run)
         (let ((map mode-specific-map))
           (define-key map (kbd "pn") 'pdf-view-next-page-command)
           (define-key map (kbd "pp") 'pdf-view-previous-page-command))
@@ -2594,7 +2597,7 @@ custom themeing.")))
           (setq Info-use-header-line nil)
           (require 'info+)
           (add-hook 'Info-mode-hook 'visual-line-mode)
-          (add-hook 'Info-mode-hook 'configure-modus-themes-set-info-faces)
+          (add-hook 'Info-mode-hook 'rde-modus-themes-set-info-faces)
           (setq info-manual+node-buffer-name-mode t)
           (setq Info-persist-history-mode t)
           (setq Info-fontify-isolated-quote-flag nil)
@@ -2655,7 +2658,8 @@ built-in help that provides much more contextual information."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((let ((map help-map))
+      `((defvar read-symbol-positions-list nil)
+        (let ((map help-map))
           (define-key map "f" 'helpful-callable)
           (define-key map "v" 'helpful-variable)
           (define-key map "o" 'helpful-at-point)
@@ -2702,29 +2706,28 @@ built-in help that provides much more contextual information."
       emacs-f-name
       config
       `((require 'cl-lib)
-        (defgroup configure-browse-url nil
+        (defgroup rde-browse-url nil
           "Generic utilities to enhance `browse-url'."
-          :group 'configure)
-
-        (defcustom configure-browse-url-mappings '()
+          :group 'rde)
+        (defcustom rde-browse-url-mappings '()
           "URL mapping alist.
 It has the form (SERVICE . PRIVATE-MAPPING) where SERVICE is the hostname of
 a media service and PRIVATE-MAPPING is a cons pair of (REGEX . PRIVATE-HOST)
 where REGEX is what should match the alternative service URL and PRIVATE-HOST
 is the preferred host of the alternative service to rewrite urls to."
           :type 'list
-          :group 'configure-browse-url)
+          :group 'rde-browse-url)
 
-        (cl-defun configure-browse-url--transform-host (url &key (alt t))
-          "Transform URL to its currently set proxy in `configure-browse-url-mappings'.
+        (cl-defun rde-browse-url--transform-host (url &key (alt t))
+          "Transform URL to its currently set proxy in `rde-browse-url-mappings'.
 If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
           (string-match (rx (group (+ any) "://" (+ (not "/"))) (+ any)) url)
           (if-let* ((service-url (match-string 1 url))
                     (mapping (if alt
-                                 (cl-rassoc service-url configure-browse-url-mappings
+                                 (cl-rassoc service-url rde-browse-url-mappings
                                             :test (lambda (url privacy-map)
                                                     (string-match-p (car privacy-map) url)))
-                               (assoc-string service-url configure-browse-url-mappings))))
+                               (assoc-string service-url rde-browse-url-mappings))))
               (if alt
                   (replace-regexp-in-string
                    service-url
@@ -2736,7 +2739,7 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
                  url))
             url))
 
-        (defun configure-browse-url-bookmark-make-record (url title)
+        (defun rde-browse-url-bookmark-make-record (url title)
           "Create a bookmark record from a browser buffer with URL and TITLE."
           (let* ((defaults (delq nil (list title url)))
                  (bookmark
@@ -2744,21 +2747,21 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
                     ,@(bookmark-make-record-default 'no-file)
                     ,(cons 'browser-url url)
                     ,(cons 'filename url)
-                    ,(cons 'handler 'configure-browse-url-bookmark-jump)
+                    ,(cons 'handler 'rde-browse-url-bookmark-jump)
                     ,(cons 'defaults defaults))))
             bookmark))
 
-        (defun configure-browse-url-bookmark-jump (bookmark)
+        (defun rde-browse-url-bookmark-jump (bookmark)
           "Jump to BOOKMARK in the default browser."
           (let ((location (bookmark-prop-get bookmark 'browser-url)))
             (browse-url-default-browser location)))
 
-        (defun configure-browse-url-alt-bookmark-jump (bookmark)
+        (defun rde-browse-url-alt-bookmark-jump (bookmark)
           "Jump to BOOKMARK in an alternative browser."
           (cl-letf (((symbol-function 'browse-url-can-use-xdg-open) 'ignore))
-            (configure-browse-url-bookmark-jump bookmark)))
+            (rde-browse-url-bookmark-jump bookmark)))
 
-        (defun configure-browse-url-with-cookies (cookies &optional url)
+        (defun rde-browse-url-with-cookies (cookies &optional url)
           "Fetch and open URL with corresponding external application and COOKIES."
           (interactive "\nsURL: ")
           (let ((url-request-extra-headers
@@ -2778,19 +2781,19 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
                 (write-region (point-min) (point-max) filename)))
             (consult-file-externally filename)))
 
-        (defun configure-browse-url-add-scheme (fun url &rest args)
+        (defun rde-browse-url-add-scheme (fun url &rest args)
           "Add an HTTPS scheme to URL if missing and invoke FUN and ARGS with it."
           (let ((link (if (string-match (rx bol (+ (in (?A . ?Z))) ":") url)
                           url
                         (concat "https:" url))))
             (apply fun link args)))
 
-        (defun configure-browse-url-trace-url (fun url &rest args)
+        (defun rde-browse-url-trace-url (fun url &rest args)
           "Transform mapped URL to its original host and invoke FUN and ARGS with it."
-          (let ((link (configure-browse-url--transform-host url)))
+          (let ((link (rde-browse-url--transform-host url)))
             (apply fun link args)))
 
-        (setq configure-browse-url-mappings
+        (setq rde-browse-url-mappings
               (append
                (list
                 ,@(if (get-value 'youtube-proxy config)
@@ -2815,7 +2818,7 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
                       `((cons "https://medium.com" (cons ".*scribe.*" ,(get-value 'medium-proxy config))))
                       '()))
                ',extra-url-mappings))
-        (advice-add 'browse-url-xdg-open :around 'configure-browse-url-add-scheme)
+        (advice-add 'browse-url-xdg-open :around 'rde-browse-url-add-scheme)
         (with-eval-after-load 'browse-url
           (setq browse-url-browser-function 'browse-url-xdg-open))))))
 
@@ -2867,20 +2870,19 @@ be used in descending order of priority."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        (defvar rde-webpaste-map nil
+      `((defvar rde-webpaste-map nil
           "Map to bind `webpaste' commands under.")
-        (define-prefix-command 'rde-webpaste-map)
-        (define-key rde-app-map (kbd ,webpaste-key) 'rde-webpaste-map)
-        (let ((map rde-webpaste-map))
-          (define-key map "b" 'webpaste-paste-buffer)
-          (define-key map "r" 'webpaste-paste-region)
-          (define-key map "p" 'webpaste-paste-buffer-or-region))
+        (with-eval-after-load 'rde-keymaps
+          (define-prefix-command 'rde-webpaste-map)
+          (define-key rde-app-map (kbd ,webpaste-key) 'rde-webpaste-map)
+          (let ((map rde-webpaste-map))
+            (define-key map "b" 'webpaste-paste-buffer)
+            (define-key map "r" 'webpaste-paste-region)
+            (define-key map "p" 'webpaste-paste-buffer-or-region)))
         (with-eval-after-load 'webpaste
           (setq webpaste-provider-priority ',webpaste-providers)
           (setq webpaste-paste-confirmation t)))
-      #:elisp-packages (list emacs-webpaste
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+      #:elisp-packages (list emacs-webpaste))))
 
   (feature
    (name f-name)
@@ -2924,8 +2926,8 @@ accordingly set its appearance with DISPLAY-TIME-24HR? and DISPLAY-TIME-DATE?."
       config
       `((eval-when-compile
           (require 'time))
-        (require 'configure-rde-keymaps)
-        (define-key rde-app-map (kbd ,world-clock-key) 'world-clock)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,world-clock-key) 'world-clock))
         ,@(if world-clock-timezones
               `((setq world-clock-list ',world-clock-timezones))
               '())
@@ -2940,8 +2942,7 @@ accordingly set its appearance with DISPLAY-TIME-24HR? and DISPLAY-TIME-DATE?."
               '())
         ,@(if display-time?
               '((display-time-mode))
-              '()))
-      #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config)))))
+              '())))))
 
   (feature
    (name f-name)
@@ -2970,7 +2971,7 @@ accordingly set its appearance with DISPLAY-TIME-24HR? and DISPLAY-TIME-DATE?."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defun configure-dired-open-externally ()
+      `((defun rde-dired-open-externally ()
           "Open files in Dired through their corresponding external program."
           (interactive)
           (let ((files (dired-get-marked-files)))
@@ -2992,7 +2993,7 @@ accordingly set its appearance with DISPLAY-TIME-24HR? and DISPLAY-TIME-DATE?."
           (let ((map dired-mode-map))
             (define-key map "q" 'kill-current-buffer)
             (define-key map (kbd "C-c C-r") 'dired-rsync)
-            (define-key map "V" 'configure-dired-open-externally)))
+            (define-key map "V" 'rde-dired-open-externally)))
         ,@(if (get-value 'emacs-all-the-icons config)
               '((add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
                 (with-eval-after-load 'all-the-icons-dired
@@ -3040,7 +3041,7 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
         (autoload 'calc-currency-load "calc-currency")
         (with-eval-after-load 'calc-currency
           (setq calc-currency-exchange-rates-file
-                (expand-file-name "calc-currency-rates.el" (or (xdg-cache-home) "~/.cache")))
+                (expand-file-name "emacs/calc-currency-rates.el" (or (xdg-cache-home) "~/.cache")))
           (setq calc-currency-base-currency ',currency)
           (setq calc-currency-update-interval ,exchange-update-interval)))
       #:elisp-packages (list emacs-calc-currency))))
@@ -3065,7 +3066,7 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defun configure-tramp--parse-sconfig-hosts ()
+      `((defun rde-tramp--parse-sconfig-hosts ()
           "Parse SSH configuration file and return a list of host definitions."
           (when-let ((file (expand-file-name "~/.ssh/config")))
             (with-temp-buffer
@@ -3083,9 +3084,9 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
                 unless (> (skip-chars-forward "\t") 0)
                 do (forward-line 1))))))
 
-        (defun configure-tramp-run (read command &rest args)
+        (defun rde-tramp-run (read command &rest args)
           "Execute COMMAND with ARGS in TRAMP session and READ remote directory/file."
-          (let* ((host (completing-read "SSH host: " (configure-tramp--parse-sconfig-hosts)))
+          (let* ((host (completing-read "SSH host: " (rde-tramp--parse-sconfig-hosts)))
                  (action
                   (pcase read
                     ('dir (read-directory-name
@@ -3101,7 +3102,7 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
                 (funcall command)))))
 
         ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              '((defvar configure-tramp-buffer-source
+              '((defvar rde-tramp-buffer-source
                   `(:name "Tramp"
                           :narrow ?r
                           :category buffer
@@ -3109,33 +3110,33 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
                           :state ,'consult--buffer-state
                           :items ,(lambda () (mapcar 'buffer-name (tramp-list-remote-buffers))))
                   "Source for TRAMP buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources configure-tramp-buffer-source))
+                (add-to-list 'consult-buffer-sources rde-tramp-buffer-source))
             '())
 
-        (defun configure-tramp-shell (&optional arg)
+        (defun rde-tramp-shell (&optional arg)
           "Open a shell buffer inside a TRAMP host with ARG."
           (interactive "P")
-          (configure-tramp-run nil 'shell arg))
+          (rde-tramp-run nil 'shell arg))
 
-        (defun configure-tramp-eshell (&optional arg)
+        (defun rde-tramp-eshell (&optional arg)
           "Open an eshell buffer inside a TRAMP host with ARG."
           (interactive "P")
-          (configure-tramp-run nil 'eshell arg))
+          (rde-tramp-run nil 'eshell arg))
 
-        (defun configure-tramp-dired ()
+        (defun rde-tramp-dired ()
           "Open a Dired buffer inside a TRAMP host."
           (interactive)
-          (configure-tramp-run 'dir 'dired))
+          (rde-tramp-run 'dir 'dired))
 
-        (defun configure-tramp-find-file ()
+        (defun rde-tramp-find-file ()
           "Open a file inside a TRAMP host."
           (interactive)
-          (configure-tramp-run 'file 'find-file))
+          (rde-tramp-run 'file 'find-file))
 
         (let ((map mode-specific-map))
-          (define-key map "rf" 'configure-tramp-find-file)
-          (define-key map "rd" 'configure-tramp-dired)
-          (define-key map "rs" 'configure-tramp-shell))
+          (define-key map "rf" 'rde-tramp-find-file)
+          (define-key map "rd" 'rde-tramp-dired)
+          (define-key map "rs" 'rde-tramp-shell))
         (with-eval-after-load 'tramp
           (setq tramp-verbose 1)
           (setq tramp-default-method ,default-method)
@@ -3216,34 +3217,30 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup configure-tab-bar nil
+      `((defgroup rde-tab-bar nil
           "Configure the tab bar via menu items."
-          :group 'configure)
-
-        (defcustom configure-tab-bar-modules-left '()
+          :group 'rde)
+        (cl-defstruct rde-tab-bar-module id label help action)
+        (defcustom rde-tab-bar-modules-left '()
           "List of modules on the left-hand side of the tab bar."
-          :type '(repeat configure-tab-bar-module)
-          :group 'configure-tab-bar)
+          :type '(repeat rde-tab-bar-module)
+          :group 'rde-tab-bar)
 
-        (defcustom configure-tab-bar-modules-center '()
+        (defcustom rde-tab-bar-modules-center '()
           "List of modules in the center of the tab bar."
-          :type '(repeat configure-tab-bar-module)
-          :group 'configure-tab-bar)
+          :type '(repeat rde-tab-bar-module)
+          :group 'rde-tab-bar)
 
-        (defcustom configure-tab-bar-modules-right '()
+        (defcustom rde-tab-bar-modules-right '()
           "List of modules on the right-hand side of the tab bar."
-          :type '(repeat configure-tab-bar-module)
-          :group 'configure-tab-bar)
+          :type '(repeat rde-tab-bar-module)
+          :group 'rde-tab-bar)
 
-        (cl-defstruct configure-tab-bar-module
-          "Menu item module to be displayed in the tab bar."
-          id label help action)
-
-        (defun configure-tab-bar-build-formatter (modules)
+        (defun rde-tab-bar-build-formatter (modules)
           "Build a tab bar formatter with MODULES."
           (mapcar (lambda (item)
-                    (let ((label (configure-tab-bar-module-label item)))
-                      `(,(configure-tab-bar-module-id item) menu-item
+                    (let ((label (rde-tab-bar-module-label item)))
+                      `(,(rde-tab-bar-module-id item) menu-item
                         ,(cond
                           ((symbolp label)
                            `(when (boundp ',label)
@@ -3251,41 +3248,41 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
                           ((and (listp label) (equal (car label) :eval))
                            `(format-mode-line ',label))
                           (t label))
-                        ,(or (configure-tab-bar-module-action item)
+                        ,(or (rde-tab-bar-module-action item)
                              'nil)
-                        ,@(when (configure-tab-bar-module-help item)
-                            `(:help ,(configure-tab-bar-module-help item))))))
+                        ,@(when (rde-tab-bar-module-help item)
+                            `(:help ,(rde-tab-bar-module-help item))))))
                   modules))
 
-        (defun configure-tab-bar-format-left ()
+        (defun rde-tab-bar-format-left ()
           "Return modules for the left-hand side of the tab bar."
-          (configure-tab-bar-build-formatter configure-tab-bar-modules-left))
+          (rde-tab-bar-build-formatter rde-tab-bar-modules-left))
 
-        (defun configure-tab-bar-format-center ()
+        (defun rde-tab-bar-format-center ()
           "Return modules for the center of the tab bar."
           (let* ((modules (mapconcat
                            (lambda (module)
-                             (let ((label (configure-tab-bar-module-label module)))
+                             (let ((label (rde-tab-bar-module-label module)))
                                (if (symbolp label)
                                    (symbol-value label)
                                  label)))
-                           configure-tab-bar-modules-center ""))
+                           rde-tab-bar-modules-center ""))
                  (str (concat (propertize
                                " " 'display
                                `(space :align-to (- center ,(/ (length modules) 2.0)))))))
             (cons
              `(align-center menu-item ,str nil)
-             (configure-tab-bar-build-formatter configure-tab-bar-modules-center))))
+             (rde-tab-bar-build-formatter rde-tab-bar-modules-center))))
 
-        (defun configure-tab-bar-format-right ()
+        (defun rde-tab-bar-format-right ()
           "Return modules for the right-hand side of the tab bar."
           (let* ((labels (mapconcat
                           (lambda (module)
-                            (let ((label (configure-tab-bar-module-label module)))
+                            (let ((label (rde-tab-bar-module-label module)))
                               (if (symbolp label)
                                   (symbol-value label)
                                 label)))
-                          configure-tab-bar-modules-right ""))
+                          rde-tab-bar-modules-right ""))
                  (n-icons (cl-loop with nprops = 0
                                    for i from 0 to (- (length labels) 1)
                                    when (get-text-property i 'rear-nonsticky labels)
@@ -3295,20 +3292,21 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
                  (str (propertize " " 'display `(space :align-to (- right ,hpos)))))
             (cons
              `(align-right menu-item ,str nil)
-             (configure-tab-bar-build-formatter configure-tab-bar-modules-right))))
+             (rde-tab-bar-build-formatter rde-tab-bar-modules-right))))
 
         (tab-bar-mode)
         ,@(if (get-value 'emacs-all-the-icons config)
               `((eval-when-compile
                  (require 'all-the-icons))
-                (setq configure-tab-bar-modules-left (list ,@modules-left))
-                (setq configure-tab-bar-modules-center (list ,@modules-center))
-                (setq configure-tab-bar-modules-right (list ,@modules-right)))
+                (setq rde-tab-bar-modules-left (list ,@modules-left))
+                (setq rde-tab-bar-modules-center (list ,@modules-center))
+                (setq rde-tab-bar-modules-right (list ,@modules-right)))
               '())
         (with-eval-after-load 'tab-bar
-          (setq tab-bar-format '(configure-tab-bar-format-left
-                                 configure-tab-bar-format-center
-                                 configure-tab-bar-format-right))
+          (setq tab-bar-format '(rde-tab-bar-format-left
+                                 rde-tab-bar-format-center
+                                 rde-tab-bar-format-right))
+          (setq tab-bar-border nil)
           (setq tab-bar-close-button-show nil)
           (setq tab-bar-show t)))
       #:elisp-packages (if (get-value 'emacs-all-the-icons config)
@@ -3337,18 +3335,18 @@ process-in-a-buffer derived packages like shell, REPLs, etc."
       emacs-f-name
       config
       `(,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              '((defvar configure-comint-buffer-source
+              '((defvar rde-comint-buffer-source
                   `(:name "Comint"
                           :narrow ?c
                           :category buffer
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
                           :items ,(lambda ()
-                                    (mapcar 'buffer-name (configure-completion--mode-buffers
+                                    (mapcar 'buffer-name (rde-completion--mode-buffers
                                                           'comint-mode 'cider-repl-mode))))
                   "Source for `comint-mode' buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources configure-comint-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(comint-mode . ?c)))
+                (add-to-list 'consult-buffer-sources rde-comint-buffer-source)
+                (add-to-list 'rde-completion-initial-narrow-alist '(comint-mode . ?c)))
               '())
         (add-hook 'comint-preoutput-filter-functions 'ansi-color-apply nil t)
         (add-hook 'comint-mode 'capf-autosuggest-mode)))))
@@ -3410,43 +3408,43 @@ implemented in Emacs Lisp."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup configure-shell nil
+      `((defgroup rde-shell nil
           "Eshell customizations for a better integration in Emacs."
-          :group 'configure)
+          :group 'rde)
 
-        (defun configure-eshell--bookmark-make-record ()
+        (defun rde-eshell--bookmark-make-record ()
           "Create a bookmark for an `eshell-mode' buffer."
           (let ((eshell-buffer-name (with-current-buffer (current-buffer)
                                       (substring-no-properties (buffer-name))))
                 (bookmark `(,eshell-buffer-name
                             ,@(bookmark-make-record-default 'no-file)
-                            ,(cons 'handler 'configure-eshell-bookmark-jump)
+                            ,(cons 'handler 'rde-eshell-bookmark-jump)
                             ,(cons 'filename default-directory))))
             bookmark))
 
-        (defun configure-eshell-bookmark-jump (bookmark)
+        (defun rde-eshell-bookmark-jump (bookmark)
           "Jump to BOOKMARK in an Eshell buffer."
           (when-let ((eshell-buffer-name eshell-buffer-name))
             (eshell)
             (setq default-directory (alist-get 'filename bookmark))
             (eshell-reset)))
 
-        (defun configure-eshell-bookmark-handler ()
+        (defun rde-eshell-bookmark-handler ()
           "Set up corresponding `bookmark-make-record-function' for `eshell-mode' buffers."
-          (setq-local bookmark-make-record-function 'configure-eshell-bookmark-make-record))
+          (setq-local bookmark-make-record-function 'rde-eshell-bookmark-make-record))
 
-        (define-minor-mode configure-eshell-mode-setup
+        (define-minor-mode rde-eshell-mode-setup
           "Set up environment on `eshell-mode' invocation."
-          :global t :group 'configure-shell
-          (if configure-eshell-mode-setup
+          :global t :group 'rde-shell
+          (if rde-eshell-mode-setup
               (progn
                 (setenv "PAGER" "")
                 (define-key eshell-mode-map (kbd "C-c L") 'eshell/clear)
                 (define-key eshell-hist-mode-map (kbd "M-r") 'consult-history))
             (local-unset-key 'eshell/clear)))
 
-        (add-hook 'eshell-mode-hook 'configure-eshell-mode-setup)
-        (add-hook 'eshell-mode-hook 'configure-eshell-bookmark-handler)
+        (add-hook 'eshell-mode-hook 'rde-eshell-mode-setup)
+        (add-hook 'eshell-mode-hook 'rde-eshell-bookmark-handler)
         (with-eval-after-load 'eshell
           (setq eshell-banner-message "\n\n")
           (autoload 'eshell-syntax-highlighting-global-mode "eshell-syntax-highlighting")
@@ -3483,31 +3481,29 @@ implemented in Emacs Lisp."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        ,@(if (get-value 'emacs-consult-initial-narrowing? config)
-              '((defvar configure-telega-buffer-source
+      `(,@(if (get-value 'emacs-consult-initial-narrowing? config)
+              '((defvar rde-telega-buffer-source
                         `(:name "Telega"
                           :narrow ?t
                           :category buffer
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
                           :items ,(lambda () (mapcar 'buffer-name
-                                                     (configure-completion--mode-buffers
+                                                     (rde-completion--mode-buffers
                                                       'telega-chat-mode 'telega-root-mode))))
                         "Source for Telega buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources configure-telega-buffer-source)
-                (add-to-list 'configure-completion-initial-narrow-alist '(telega-root-mode . ?t))
-                (add-to-list 'configure-completion-initial-narrow-alist '(telega-chat-mode . ?t)))
+                (add-to-list 'consult-buffer-sources rde-telega-buffer-source)
+                (add-to-list 'rde-completion-initial-narrow-alist '(telega-root-mode . ?t))
+                (add-to-list 'rde-completion-initial-narrow-alist '(telega-chat-mode . ?t)))
               '())
-        (let ((map rde-app-map))
-          (define-key map "t" 'telega))
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "t" 'telega))
         (add-hook 'telega-load-hook 'telega-notifications-mode)
         (autoload 'telega-root--buffer "telega")
         (setq telega-directory (expand-file-name "telega" user-emacs-directory))
         (with-eval-after-load 'telega
           (setq telega-completing-read-function 'completing-read)))
-      #:elisp-packages (list emacs-telega
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+      #:elisp-packages (list emacs-telega))))
 
   (feature
    (name f-name)
@@ -3610,13 +3606,12 @@ Regexps with visual feedback."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "r" 're-builder)
+      `((with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "r" 're-builder))
         (with-eval-after-load 're-builder
           (setq reb-re-syntax ',re-syntax)
           (setq reb-blink-delay 0)
-          (setq reb-auto-match-limit nil)))
-      #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config)))))
+          (setq reb-auto-match-limit nil))))))
 
   (feature
    (name f-name)
@@ -3670,7 +3665,9 @@ language for GNU Emacs."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
+      `(,@(if (get-value 'emacs-flymake config)
+              '((add-hook 'emacs-lisp-mode-hook 'flymake-mode))
+              '())
         (with-eval-after-load 'elisp-mode
           (let ((map emacs-lisp-mode-map))
             (define-key map (kbd "C-x C-e") 'pp-eval-last-sexp)
@@ -3680,7 +3677,8 @@ language for GNU Emacs."
             ,@(if (get-value 'emacs-embark config)
                   '((define-key map (kbd "C-c C-c") 'embark-pp-eval-defun))
                   '())))
-        (define-key rde-app-map "I" 'ielm)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "I" 'ielm))
         (with-eval-after-load 'ielm
           (setq ielm-header "")
           (setq ielm-noisy nil))
@@ -3689,8 +3687,7 @@ language for GNU Emacs."
         (with-eval-after-load 'ob-core
           (setq org-babel-default-header-args:elisp
                 '((:lexical . "t")
-                  (:results . "scalar")))))
-      #:elisp-packages (list (get-value 'emacs-configure-rde-keymaps config)))))
+                  (:results . "scalar"))))))))
 
   (feature
    (name f-name)
@@ -3807,7 +3804,7 @@ web-related languages."
       config
       `((eval-when-compile
          (require 'eieio))
-        (defun configure-polymode-set-poly-block-faces ()
+        (defun rde-polymode-set-poly-block-faces ()
           "Correctly set a fixed pitch face for polymode source blocks."
           (interactive)
           (let* ((fix-pitch (face-attribute 'fixed-pitch :family))
@@ -3818,7 +3815,7 @@ web-related languages."
                           :family ,fix-pitch
                           :font ,fix-font)))
             (oset pm/chunkmode adjust-face props)))
-        ;; (add-hook 'polymode-init-inner-hook 'configure-polymode-set-poly-block-faces)
+        ;; (add-hook 'polymode-init-inner-hook 'rde-polymode-set-poly-block-faces)
         )
       #:elisp-packages (list emacs-polymode
                              ;; emacs-polymode-org

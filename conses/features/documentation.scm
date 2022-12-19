@@ -31,15 +31,13 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'configure-rde-keymaps)
-        (add-hook 'woman-mode-hook 'toggle-truncate-lines)
-        (let ((map rde-app-map))
-          (define-key map (kbd ,woman-key) 'woman)
-          (define-key map (kbd ,man-key) ',(if (get-value 'emacs-consult config)
-                                               'consult-man
-                                               'man))))
-      #:elisp-packages (list
-                        (get-value 'emacs-configure-rde-keymaps config)))))
+      `((add-hook 'woman-mode-hook 'toggle-truncate-lines)
+        (with-eval-after-load 'rde-keymaps
+          (let ((map rde-app-map))
+            (define-key map (kbd ,woman-key) 'woman)
+            (define-key map (kbd ,man-key) ',(if (get-value 'emacs-consult config)
+                                                 'consult-man
+                                                 'man))))))))
 
   (feature
    (name f-name)

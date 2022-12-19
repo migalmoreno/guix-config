@@ -85,14 +85,15 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'sly)
-        (defun configure-lisp-sly-autoconnect ()
+      `((eval-when-compile
+         (require 'sly))
+        (defun rde-lisp-sly-autoconnect ()
           "Start a SLY REPL unless an active connection is already present."
           (unless (sly-connected-p)
             (save-excursion
               (sly))))
 
-        (defun configure-lisp-sly-custom-prompt (_package nickname error-level next-entry-idx _condition)
+        (defun rde-lisp-sly-custom-prompt (_package nickname error-level next-entry-idx _condition)
           "Construct a custom SLY prompt with package NICKNAME, ERROR-LEVEL and NEXT-ENTRY-IDX."
           (let ((dir (propertize (abbreviate-file-name default-directory) 'font-lock-face 'diff-mode))
                 (nick (propertize nickname 'font-lock-face 'sly-mode-line))
@@ -110,7 +111,7 @@
                     err-level
                     (propertize "> " 'font-lock-face 'sly-mrepl-prompt-face))))
 
-        (defun configure-lisp-setup-sly-history ()
+        (defun rde-lisp-setup-sly-history ()
           "Create an empty history file for SLY if missing."
           (unless (file-exists-p sly-mrepl-history-file-name)
             (make-empty-file sly-mrepl-history-file-name)))
@@ -118,8 +119,8 @@
         (with-eval-after-load 'lisp-mode
           (setq inferior-lisp-program ,(file-append lisp "/bin/" (package-name lisp))))
         (add-hook 'debugger-mode-hook 'toggle-truncate-lines)
-        (add-hook 'sly-mode-hook 'configure-lisp-sly-autoconnect)
-        (add-hook 'sly-mode-hook 'configure-lisp-setup-sly-history)
+        (add-hook 'sly-mode-hook 'rde-lisp-sly-autoconnect)
+        (add-hook 'sly-mode-hook 'rde-lisp-setup-sly-history)
         (add-to-list 'display-buffer-alist `(,(rx "*sly-mrepl" (* any) "*")
                                              (display-buffer-no-window)
                                              (allow-no-window . t)))
@@ -148,7 +149,7 @@
           (setq sly-mrepl-prevent-duplicate-history t)
           (setq sly-mrepl-pop-sylvester nil)
           ,@(if custom-sly-prompt?
-                '((setq sly-mrepl-prompt-formatter 'configure-lisp-sly-custom-prompt))
+                '((setq sly-mrepl-prompt-formatter 'rde-lisp-sly-custom-prompt))
                 '()))
         (with-eval-after-load 'org
           (require 'ob-lisp)
@@ -157,7 +158,7 @@
           (setq org-babel-lisp-eval-fn 'sly-eval))
         (with-eval-after-load 'ob-core
           (setq org-babel-default-header-args:lisp '((:results . "scalar")))))
-      #:elisp-packages (list emacs-sly)
+      #:elisp-packages (list emacs-sly emacs-sly-asdf)
       #:summary "Extensions for Common Lisp tooling"
       #:commentary "Provide extensions for Common Lisp programming utilities.")))
 

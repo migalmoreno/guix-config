@@ -37,10 +37,9 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map "T" 'transmission))
-      #:elisp-packages (list emacs-transmission
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+      `((with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "T" 'transmission)))
+      #:elisp-packages (list emacs-transmission))))
 
   (feature
    (name 'transmission)

@@ -23,13 +23,12 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'configure-rde-keymaps)
-        (define-key rde-app-map (kbd ,bluetooth-key) 'bluetooth-list-devices)
+      `((with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,bluetooth-key) 'bluetooth-list-devices))
         (with-eval-after-load 'bluetooth
           (add-hook 'kill-emacs-hook 'bluetooth-toggle-powered)
           (define-key bluetooth-mode-map "C" 'bluetooth-connect-profile)))
-      #:elisp-packages (list emacs-bluetooth
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+      #:elisp-packages (list emacs-bluetooth))))
 
   (define (get-system-services config)
     "Return system services related to Bluetooth."

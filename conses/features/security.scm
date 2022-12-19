@@ -47,13 +47,12 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'configure-rde-keymaps)
-        (with-eval-after-load 'auth-source
-          (require 'password-store)
+      `((with-eval-after-load 'auth-source
           (setenv "GPG_AGENT_INFO" nil)
-          (setq auth-sources '(password-store))
+          (auth-source-pass-enable)
           (setq auth-source-pass-filename ,password-store-directory))
-        (define-key rde-app-map "p" 'password-store-copy)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "p" 'password-store-copy))
         (with-eval-after-load 'password-store
           (setq password-store-time-before-clipboard-restore 60))
         (with-eval-after-load 'pass
@@ -87,8 +86,7 @@
                         (list emacs-pass
                               emacs-password-store
                               emacs-password-store-otp
-                              emacs-pinentry
-                              (get-value 'emacs-configure-rde-keymaps config))
+                              emacs-pinentry)
                         (if (get-value 'emacs-embark config)
                             (list (get-value 'emacs-embark config))
                             '())))))

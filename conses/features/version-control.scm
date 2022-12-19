@@ -74,7 +74,7 @@
       f-name
       config
       `((require 'request)
-        (defun configure-sourcehut-repo-id (name)
+        (defun rde-sourcehut-repo-id (name)
           "Return the ID associated with the sourcehut repository NAME."
           (interactive "sRepo name: ")
           (let* ((srht-token ,(forge-account-token sourcehut-account))
@@ -100,14 +100,14 @@
                                     (lambda (&key error-thrown &allow-other-keys) (message "Error %S" error-thrown)))))))))))
             id))
 
-        (defun configure-sourcehut-set-readme (id)
+        (defun rde-sourcehut-set-readme (id)
           "Export the current file to html and set it as readme for the Sourcehut repo ID."
           (interactive
            (list (if-let* ((project (project-current t))
                            (dir (project-root project))
                            (name (string-match (rx "/" (group (+ (not "/"))) "/" eol) dir)))
-                     (configure-sourcehut-repo-id (match-string 1 dir))
-                   (call-interactively 'configure-sourcehut-repo-id))))
+                          (rde-sourcehut-repo-id (match-string 1 dir))
+                   (call-interactively 'rde-sourcehut-repo-id))))
           (let* ((srht-token ,(forge-account-token sourcehut-account))
                  (oauth2-token (concat "Bearer " srht-token))
                  (readme (if (derived-mode-p 'html-mode)
@@ -214,7 +214,7 @@
       (rde-elisp-configuration-service
        f-name
        config
-       `((defun configure-git-email--get-current-project ()
+       `((defun rde-git-email--get-current-project ()
            "Return the path of the current project.
 Falls back to `default-directory'."
            (let ((dir (or (and (bound-and-true-p projectile-known-projects)
@@ -226,7 +226,7 @@ Falls back to `default-directory'."
                           (vc-root-dir)
                           default-directory)))
              dir))
-         (advice-add 'git-email--get-current-project :override 'configure-git-email--get-current-project)
+         (advice-add 'git-email--get-current-project :override 'rde-git-email--get-current-project)
          (define-key ctl-x-map "g" 'magit)
          (add-hook 'magit-mode-hook 'toggle-truncate-lines)
          ,@(if (get-value 'emacs-project config)

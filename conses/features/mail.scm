@@ -195,12 +195,11 @@ is not provided, use all the mail accounts."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup configure-message nil
+      `((defgroup rde-message nil
           "Message mode tweaks."
-          :group 'configure)
-
-        (defun configure-message-add-gcc-header ()
-          "Prompt for a Gcc header from `configure-gnus-topic-alist'.
+          :group 'rde)
+        (defun rde-message-add-gcc-header ()
+          "Prompt for a Gcc header from `rde-gnus-topic-alist'.
 This will allow a message to be stored in the right directory
 of the IMAP server (usually \"Sent\").
 If this header is missing, the outgoing message will go through,
@@ -212,28 +211,28 @@ but it won't appear on the right Maildir directory."
                                                    (cl-remove-if-not
                                                     (lambda (group)
                                                       (string-match (rx "Sent" eol) group))
-                                                    (configure-gnus--get-topic-groups))))
+                                                    (rde-gnus--get-topic-groups))))
                                               (if (> 1 (length groups))
                                                   (completing-read "Account: " groups)
                                                 (car groups))))))
             (error "Gnus is not running.  No GCC header will be inserted")))
 
-        (define-minor-mode configure-message-mode
+        (define-minor-mode rde-message-mode
           "Tweak the appearance of `message-mode' buffers."
-          :global t :group 'configure-message
-          (if configure-message-mode
+          :group 'rde-message
+          (if rde-message-mode
               (display-line-numbers-mode -1)
             (display-line-numbers-mode 1)))
         ,@(if (get-value 'emacs-org-mime config)
               `((add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart))
               '())
 
-        (add-hook 'message-mode-hook 'configure-message-mode)
+        (add-hook 'message-mode-hook 'rde-message-mode)
         (with-eval-after-load 'message
           ,@(if (get-value 'emacs-ebdb config)
                 `((require 'ebdb-message))
               '())
-          (add-hook 'message-header-setup-hook 'configure-message-add-gcc-header)
+          (add-hook 'message-header-setup-hook 'rde-message-add-gcc-header)
           (setq message-kill-buffer-on-exit t)
           (setq message-signature
                 ,(match message-signature
@@ -277,25 +276,24 @@ but it won't appear on the right Maildir directory."
       emacs-f-name
       config
       `((require 'org-mime)
-        (defgroup configure-org-mime nil
+        (defgroup rde-org-mime nil
           "Minor tweaks for Org Mime."
-          :group 'configure)
-
-        (defun configure-org-mime-darken-codeblocks ()
+          :group 'rde)
+        (defun rde-org-mime-darken-codeblocks ()
           "Apply a dark background to HTML email body codeblocks."
           (org-mime-change-element-style
            "pre"
            "color: #E6E1Dc; background-color: #232323; padding: 0.5em;"))
 
-        (defun configure-org-mime-indent-quotes ()
+        (defun rde-org-mime-indent-quotes ()
           "Add padding to block quotes in HTML email body."
           (org-mime-change-element-style
            "blockquote"
            "border-left: 2px solid gray; padding-left: 4px;"))
 
         (define-key org-mode-map (kbd "C-c M-o") 'org-mime-org-buffer-htmlize)
-        (add-hook 'org-mime-html-hook 'configure-org-mime-darken-codeblocks)
-        (add-hook 'org-mime-html-hook 'configure-org-mime-indent-quotes)
+        (add-hook 'org-mime-html-hook 'rde-org-mime-darken-codeblocks)
+        (add-hook 'org-mime-html-hook 'rde-org-mime-indent-quotes)
         (let ((map message-mode-map))
           (define-key map (kbd "C-c M-z") 'org-mime-htmlize)
           (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode))
@@ -384,62 +382,61 @@ is not provided, use all the mail accounts."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'configure-rde-keymaps)
-        (defgroup configure-gnus nil
+      `((defgroup rde-gnus nil
           "Customizations for the Gnus newsreader."
-          :group 'configure)
-
-        (defcustom configure-gnus-topic-topology nil
+          :group 'rde)
+        (defcustom rde-gnus-topic-topology nil
           "Topics topology for Gnus."
-          :group 'configure-gnus
+          :group 'rde-gnus
           :type 'list)
-
-        (defcustom configure-gnus-topic-alist nil
+        (defcustom rde-gnus-topic-alist nil
           "Alist of Gnus topics."
-          :group 'configure-gnus
+          :group 'rde-gnus
           :type 'list)
-
-        (defvar configure-gnus-subscribed-p nil
+        (defvar rde-gnus-subscribed-p nil
           "Whether we're currently subscribed to Gnus groups.")
-
-        (defun configure-gnus--get-topic-groups ()
-          "Return a flattened list of groups from `configure-gnus-topic-alist'."
+        (defun rde-gnus--get-topic-groups ()
+          "Return a flattened list of groups from `rde-gnus-topic-alist'."
           (flatten-list (mapcar (lambda (topic)
                                   (cdr topic))
-                                configure-gnus-topic-alist)))
+                                rde-gnus-topic-alist)))
 
-        (defun configure-gnus-get-article-participants ()
+        (defun rde-gnus-get-article-participants ()
           "Retrieve the participants from the current article."
-          (when (gnus-alive-p)
-            (with-current-buffer gnus-article-buffer
-              (string-join
-               (remove-if
-                (lambda (address)
-                  (string-match user-mail-address address))
-                (append
-                 (split-string (message-fetch-field "from") ", ")
-                 (split-string (message-fetch-field "to") ", ")))
-               ", "))))
+          (if (and (gnus-alive-p)
+                   (message-fetch-field "from")
+                   (message-fetch-field "to"))
+              (with-current-buffer gnus-article-buffer
+                (string-join
+                 (remove-if
+                  (lambda (address)
+                    (string-match user-mail-address address))
+                  (append
+                   (split-string (message-fetch-field "from") ", ")
+                   (split-string (message-fetch-field "to") ", ")))
+                 ", "))
+            ""))
 
-        (defun configure-gnus-shr-browse-url-new-window ()
+        (defun rde-gnus-shr-browse-url-new-window ()
           "When using shr, open links in a new window."
           (interactive)
           (shr-browse-url nil nil t))
 
-        (define-minor-mode configure-gnus-topic-mode
+        (define-minor-mode rde-gnus-topic-mode
           "Apply Gnus topic settings declaratively and subscribe to groups."
-          :global t :group 'configure-gnus
-          (setq gnus-topic-topology configure-gnus-topic-topology)
-          (setq gnus-topic-alist configure-gnus-topic-alist)
-          (unless configure-gnus-subscribed-p
+          :group 'rde-gnus
+          (setq gnus-topic-topology rde-gnus-topic-topology)
+          (setq gnus-topic-alist rde-gnus-topic-alist)
+          (unless rde-gnus-subscribed-p
             (mapc (lambda (topic)
                     (gnus-subscribe-hierarchically topic))
-                  (configure-gnus--get-topic-groups)))
-          (setq configure-gnus-subscribed-p t))
+                  (rde-gnus--get-topic-groups)))
+          (setq rde-gnus-subscribed-p t))
 
-        (setq configure-gnus-topic-alist ',topic-alist)
-        (setq configure-gnus-topic-topology ',topic-topology)
-        (define-key rde-app-map "g" 'gnus)
+        (setq rde-gnus-topic-alist ',topic-alist)
+        (setq rde-gnus-topic-topology ',topic-topology)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map "g" 'gnus))
         (setq mail-user-agent 'gnus-user-agent)
         (with-eval-after-load 'gnus
           ,@(if (get-value 'emacs-ebdb config)
@@ -523,7 +520,7 @@ is not provided, use all the mail accounts."
           (setq gnus-thread-hide-subtree t))
         (with-eval-after-load 'nndraft-directory
           (setq nndraft-directory (expand-file-name "emacs/gnus/mail/drafts" (or (xdg-cache-home) "~/.cache"))))
-        (add-hook 'gnus-topic-mode-hook 'configure-gnus-topic-mode)
+        (add-hook 'gnus-topic-mode-hook 'rde-gnus-topic-mode)
         (with-eval-after-load 'gnus-topic
           (setq gnus-gcc-mark-as-read t)
           (setq gnus-server-alist '(("archive" nnfolder "archive"
@@ -538,9 +535,8 @@ is not provided, use all the mail accounts."
           (setq gnus-sorted-header-list gnus-visible-headers))
         ,#~"(with-eval-after-load 'gnus-art
 (define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
-(define-key gnus-article-mode-map [remap shr-browse-url] #'configure-gnus-shr-browse-url-new-window))")
-      #:elisp-packages (list emacs-debbugs
-                             (get-value 'emacs-configure-rde-keymaps config)))))
+(define-key gnus-article-mode-map [remap shr-browse-url] #'rde-gnus-shr-browse-url-new-window))")
+      #:elisp-packages (list emacs-debbugs))))
 
   (feature
    (name f-name)

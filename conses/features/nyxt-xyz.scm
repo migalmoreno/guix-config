@@ -313,7 +313,7 @@
               '((with-eval-after-load 'consult
                   (add-to-list
                    'consult-bookmark-narrow
-                   `(?n "Nyxt" ,'configure-browse-url-bookmark-jump))))
+                   `(?n "Nyxt" ,'rde-browse-url-bookmark-jump))))
               '())
         (with-eval-after-load 'nyxt-autoloads
           (nyxt-default-keybindings))

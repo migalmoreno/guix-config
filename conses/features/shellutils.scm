@@ -77,14 +77,14 @@ use_guix_shell() {
      (rde-elisp-configuration-service
       f-name
       config
-      `((defun configure-compile-ansi-color-apply ()
+      `((defun rde-compile-ansi-color-apply ()
           "Translate control sequences into text properties in the current buffer."
           (interactive)
           (ansi-color-apply-on-region (point-min) (point-max)))
 
         (with-eval-after-load 'compile
           (setq compilation-ask-about-save nil))
-        (add-hook 'compilation-filter-hook 'configure-compile-ansi-color-apply)
+        (add-hook 'compilation-filter-hook 'rde-compile-ansi-color-apply)
         ,@(if (get-value 'emacs-project config)
               '((define-key project-prefix-map "c" 'project-compile)
                 (add-to-list 'project-switch-commands '(project-compile "Compile Project")))
