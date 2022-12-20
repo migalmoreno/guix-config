@@ -121,7 +121,9 @@
    (feature-nyxt
     #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)
     #:default-browser? #t
-    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic")
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
+    #:restore-session? #f
+    #:temporary-history? #t)
    (feature-nyxt-emacs)
    (feature-youtube-dl
     #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
@@ -265,10 +267,7 @@
    (feature-nyxt-nx-router
     #:media-enabled? #t
     #:extra-routes
-    `((make-instance 'router:media-toggler
-                     :trigger (match-regex ".*")
-                     :media-p nil)
-      (make-instance 'router:web-route
+    `((make-instance 'router:web-route
                      :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
                      :redirect-url "www.youtube.com"
                      :resource (lambda (url)
