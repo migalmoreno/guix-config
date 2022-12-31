@@ -119,7 +119,6 @@
    (feature-password-store
     #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
    (feature-nyxt
-    #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:restore-session? #f
