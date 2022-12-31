@@ -10,6 +10,7 @@
   #:use-module (conses features databases)
   #:use-module (rde features base)
   #:use-module (rde features system)
+  #:use-module (rde packages)
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
@@ -21,7 +22,6 @@
   #:use-module (gnu services web)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
-  #:use-module (gnu packages ssh)
   #:use-module (guix gexp))
 
 (define %domain (getenv "DOMAIN"))
@@ -60,7 +60,8 @@
      (bootloader grub-bootloader)
      (targets '("/dev/vda"))
      (terminal-outputs '(console))))
-   (feature-base-packages)
+   (feature-base-packages
+    #:system-packages (strings->packages "git"))
    (feature-file-systems
     #:file-systems
     (list
@@ -79,7 +80,7 @@
      (service dhcp-client-service-type)
      (service openssh-service-type
               (openssh-configuration
-               (openssh openssh-sans-x)
+               (openssh (@ (gnu packages ssh) openssh-sans-x))
                (password-authentication? #f)
                (permit-root-login 'prohibit-password)
                (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
