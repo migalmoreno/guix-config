@@ -27,7 +27,7 @@
 (define-public %default-keyboard-layout
   (keyboard-layout
    "us,es"
-   #:options '("grp:rctl_rshift_toggle"
+   #:options '("grp:shifts_toggle"
                "caps:ctrl_modifier"
                "altwin:prtsc_rwin")))
 
