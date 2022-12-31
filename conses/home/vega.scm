@@ -500,11 +500,10 @@ EndSection"))
    (feature-emacs-eglot)
    (feature-emacs-smartparens
     #:paredit-bindings? #t
-    #:extra-sp-lisp-modes '(sly-mode
-                            lisp-data-mode
-                            elisp-mode
-                            minibuffer-inactive-mode
-                            comint-mode))
+    #:smartparens-hooks '(prog-mode-hook
+                          lisp-data-mode-hook
+                          minibuffer-inactive-mode-hook
+                          comint-mode-hook))
    (feature-emacs-flymake)
    (feature-emacs-xref)
    (feature-emacs-re-builder)

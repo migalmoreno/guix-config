@@ -3556,12 +3556,14 @@ implemented in Emacs Lisp."
 (define* (feature-emacs-smartparens
           #:key
           (emacs-smartparens emacs-smartparens)
-          (extra-sp-lisp-modes '())
+          (smartparens-hooks '(prog-mode-hook))
+          (smartparens-strict-hooks '(prog-mode-hook))
           (show-smartparens? #f)
           (paredit-bindings? #f))
   "Configure smartparens, a minor mode to deal with pairs in Emacs."
   (ensure-pred file-like? emacs-smartparens)
-  (ensure-pred list? extra-sp-lisp-modes)
+  (ensure-pred list? smartparens-hooks)
+  (ensure-pred list? smartparens-strict-hooks)
   (ensure-pred boolean? show-smartparens?)
   (ensure-pred boolean? paredit-bindings?)
 
@@ -3585,14 +3587,19 @@ implemented in Emacs Lisp."
               '((show-paren-mode 0)
                 (show-smartparens-global-mode))
               '((show-paren-mode)))
+        ,@(if smartparens-hooks
+              `((mapcar (lambda (hook)
+                          (add-hook hook 'smartparens-mode))
+                        ',smartparens-hooks))
+              '())
+        ,@(if smartparens-strict-hooks
+              `((mapcar (lambda (hook)
+                          (add-hook hook 'smartparens-strict-mode))
+                        ',smartparens-strict-hooks))
+              '())
         (with-eval-after-load 'smartparens
           (define-key smartparens-mode-map (kbd "M-s") nil)
           (setq sp-highlight-pair-overlay nil)
-          (mapcar (lambda (mode)
-                    (add-to-list 'sp-lisp-modes mode))
-                  ',extra-sp-lisp-modes)
-          (dolist (command '(smartparens-mode smartparens-strict-mode))
-            (mapc (lambda (hook) (add-hook (intern (format "%s-hook" hook)) command)) sp-lisp-modes))
           (require 'smartparens-config)))
       #:elisp-packages (list emacs-smartparens))))
 
