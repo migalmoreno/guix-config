@@ -710,7 +710,7 @@ search engines for Nyxt."
                    '())
              ,@(if (get-value 'fandom-proxy config)
                    `((make-instance 'router:redirector
-                                    :trigger "https://(\\w+)\\.fandom.com/wiki/(.*)"
+                                    :trigger "https://([\\w'-]+)\\.fandom.com/wiki/(.*)"
                                     :redirect-url (quri:uri ,(format #f "~a/\\1/wiki/\\2"
                                                                      (get-value 'fandom-proxy config))))))))))
 
