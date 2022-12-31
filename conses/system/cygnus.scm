@@ -18,12 +18,33 @@
   #:use-module (gnu services ssh)
   #:use-module (gnu services networking)
   #:use-module (gnu services certbot)
+  #:use-module (gnu services web)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu packages ssh)
   #:use-module (guix gexp))
 
 (define %domain (getenv "DOMAIN"))
+
+(define extra-nginx-config-service
+  (simple-service
+   'add-extra-nginx-configuration
+   nginx-service-type
+   (list
+    (nginx-server-configuration
+     (listen '("443 ssl http2"))
+     (server-name (list (getenv "TAU_URL")))
+     (ssl-certificate (string-append "/etc/letsencrypt/live/" (getenv "TAU_URL") "/fullchain.pem"))
+     (ssl-certificate-key (string-append "/etc/letsencrypt/live/" (getenv "TAU_URL") "/privkey.pem"))
+     (locations
+      (list
+       (nginx-location-configuration
+        (uri "/")
+        (body
+         (list "proxy_pass http://localhost:3000;"
+               "proxy_set_header X-Forwarded-For $remote_addr;"
+               "proxy_set_header HOST $http_host;")))
+       %letsencrypt-acme-challenge))))))
 
 (define-public %system-features
   (list
@@ -54,6 +75,7 @@
    (feature-custom-services
     #:system-services
     (list
+     extra-nginx-config-service
      (service dhcp-client-service-type)
      (service openssh-service-type
               (openssh-configuration
@@ -69,7 +91,6 @@
     #:nginx nginx-with-dav)
    (feature-certbot
     #:email (getenv "MAIL_PERSONAL_MAIL"))
-   (feature-whoogle)
    (feature-matrix-settings
     #:homeserver (string-append "https://matrix." %domain)
     #:synapse-configuration
