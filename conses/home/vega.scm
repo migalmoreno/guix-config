@@ -64,7 +64,26 @@
     #:emacs-advanced-user? #t)
    (feature-gtk3
     #:dark-theme? #t
-    #:gtk-theme #f)
+    #:gtk-theme #f
+    #:extra-gtk-settings
+    `((gtk-cursor-blink . #f)
+      (gtk-cursor-theme-size . 16)
+      (gtk-decoration-layout . "")
+      (gtk-dialogs-use-header . #f)
+      (gtk-enable-animations . #t)
+      (gtk-enable-event-sounds . #f)
+      (gtk-enable-input-feedback-sounds . #f)
+      (gtk-error-bell . #f)
+      (gtk-overlay-scrolling . #t)
+      (gtk-recent-files-enabled . #f)
+      (gtk-shell-shows-app-menu . #f)
+      (gtk-shell-shows-desktop . #f)
+      (gtk-shell-shows-menubar . #f)
+      (gtk-xft-antialias . #t)
+      (gtk-xft-dpi . 92)
+      (gtk-xft-hinting . #t)
+      (gtk-xft-hintstyle . hintfull)
+      (gtk-xft-rgba . none)))
    (feature-proxy
     #:google-proxy "http://localhost:5000"
     #:youtube-proxy "https://invidio.xamh.de"
