@@ -26,8 +26,8 @@
               (rename-file filename "meditate.png"))
             #t)))
     (home-page "https://www.gnu.org/graphics/meditate.en.html")
-    (synopsis "Levitating, Meditating, Flute-playing gnu color drawing.")
+    (synopsis "Levitating, Meditating, Flute-playing gnu color drawing")
     (description "This color drawing depicts a levitating gnu, deep in in meditation, wrapped
-snugly in a gold robe. Both he and his computer float gracefully above the floor, only his tail
+snugly in a gold robe.  Both he and his computer float gracefully above the floor, only his tail
 lightly touches the ground.")
     (license license:gpl3+)))
