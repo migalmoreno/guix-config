@@ -1445,9 +1445,9 @@ operate on buffers like Dired."
 
 (define* (feature-emacs-bookmark
           #:key
-          (bookmark-file "~/.cache/emacs/bookmarks"))
+          (bookmarks-file "~/.cache/emacs/bookmarks"))
   "Configure the built-in Emacs bookmark mechanism."
-  (ensure-pred path? bookmark-file)
+  (ensure-pred path? bookmarks-file)
 
   (define emacs-f-name 'bookmark)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -1462,7 +1462,7 @@ operate on buffers like Dired."
        `((with-eval-after-load 'bookmark
            (setq bookmark-save-flag 1)
            (setq bookmark-set-fringe-mark nil)
-           (setq bookmark-default-file ,bookmark-file))
+           (setq bookmark-default-file ,bookmarks-file))
          ,@(if (get-value 'emacs-embark config)
                '((with-eval-after-load 'embark
                    (define-key embark-bookmark-map "c" 'rde-browse-url-alt-bookmark-jump)))

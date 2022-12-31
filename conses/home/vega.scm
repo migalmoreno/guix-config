@@ -223,7 +223,8 @@ EndSection"))
     #:notifications-icon "")
    (feature-emacs-calendar
     #:week-numbers? #t)
-   (feature-emacs-bookmark)
+   (feature-emacs-bookmark
+    #:bookmarks-file "~/documents/bookmarks")
    ;; (feature-emacs-dashboard
    ;;  #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
    ;;  #:logo-title "Welcome to GNU/Emacs"

@@ -494,4 +494,6 @@
       ("Europe/Moscow" "Moscow")
       ("America/New_York" "New York")
       ("Australia/Sydney" "Sydney")))
-   (feature-emacs-which-key)))
+   (feature-emacs-which-key)
+   (feature-emacs-bookmark
+    #:bookmarks-file "~/documents/bookmarks")))
