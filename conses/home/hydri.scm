@@ -48,7 +48,6 @@
    (feature-base-packages
     #:home-packages
     (strings->packages
-     "make"
      "nss-certs"
      "glibc-locales"
      ;; "seahorse"
