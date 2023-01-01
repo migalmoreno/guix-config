@@ -50,17 +50,16 @@
     (strings->packages
      "nss-certs"
      "glibc-locales"
-     ;; "seahorse"
+     "seahorse"
      ;; "gnome-contacts"
      ;; "chatty"
      ;; "calls"
-     ;; "gnome-clocks"
-     ;; "gnome-console"
+     "gnome-clocks"
+     "gnome-console"
      "pinentry-tty"
      "portfolio"
-     ;; "pavucontrol"
-     ;; "srain"
-     ))
+     "pavucontrol"
+     "srain"))
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
@@ -119,6 +118,7 @@
    (feature-password-store
     #:remote-password-store-url "git@git.sr.ht:~conses/pass")
    (feature-nyxt
+    #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:restore-session? #f
