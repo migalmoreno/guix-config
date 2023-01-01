@@ -117,7 +117,7 @@
     #:pinentry-flavor 'tty
     #:default-ttl 34560000)
    (feature-password-store
-    #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
+    #:remote-password-store-url "git@git.sr.ht:~conses/pass")
    (feature-nyxt
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
