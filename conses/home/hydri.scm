@@ -26,6 +26,7 @@
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
+  #:use-module (gnu home services xdg)
   #:use-module (gnu packages emacs)
   #:use-module (guix gexp))
 
@@ -74,6 +75,24 @@
    (feature-custom-services
     #:home-services
     (list
+     (simple-service
+      'add-nyxt-entry-with-gst-plugins
+      home-xdg-mime-applications-service-type
+      (home-xdg-mime-applications-configuration
+       (desktop-entries
+        (list
+         (xdg-desktop-entry
+          (file "nyxt")
+          (name "Nyxt")
+          (type 'application)
+          (config
+           `((exec . ,#~(string-append
+                         "guix shell gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-plugins-base gst-libav -- "
+                         #$(file-append (@ (conses packages web-browsers) nyxt-next-sans-gst) "/bin/nyxt")
+                         " %U"))
+             (terminal . #f)
+             (icon . "nyxt")
+             (comment . "Be productive"))))))))
      (simple-service
       'run-syncthing-on-userspace
       home-shepherd-service-type
