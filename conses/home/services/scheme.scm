@@ -1,6 +1,4 @@
 (define-module (conses home services scheme)
-  #:use-module (conses serializers base)
-  #:use-module (conses home services lisp)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services utils)
@@ -9,6 +7,7 @@
   #:use-module (gnu home services)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
+  #:use-module (rde serializers base)
   #:export (home-guix-service-type
             home-guix-configuration
             home-guile-service-type
@@ -21,9 +20,12 @@
          (map maybe-object->string val)
          "\n" 'suffix)))
 
+(define-public guile-config? sexp-config?)
+(define-public serialize-guile-config serialize-sexp-config)
+
 (define-configuration home-guix-configuration
   (channels
-   (lisp-config '())
+   (guile-config '())
    "List of expressions as per @{lisp-config} that will place Guix's channel file
 in @file{channels.scm}.")
   (shell-authorized-directories

@@ -1,11 +1,11 @@
 (define-module (conses home services lisp)
-  #:use-module (conses serializers base)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu packages lisp)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (rde serializers base)
   #:export (lisp-config?
             serialize-lisp-config
             home-lisp-configuration
