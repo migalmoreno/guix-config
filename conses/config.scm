@@ -1,13 +1,13 @@
 (define-module (conses config)
   #:use-module (conses system)
   #:use-module (conses deploy)
-  #:use-module (rde features)
+  #:use-module (ice-9 match)
   #:use-module (gnu system)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
-  #:use-module (nongnu packages linux)
   #:use-module (guix records)
-  #:use-module (ice-9 match)
+  #:use-module (nongnu packages linux)
+  #:use-module (rde features)
   #:export (dispatcher))
 
 (define* (dispatcher
