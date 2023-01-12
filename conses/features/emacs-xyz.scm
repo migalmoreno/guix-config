@@ -88,7 +88,7 @@
   (ensure-pred any-package? emacs-modus-themes)
   (ensure-pred number? margin)
   (ensure-pred boolean? auto-theme?)
-  (ensure-pred maybe-number? fringes)
+  (ensure-pred maybe-integer? fringes)
   (ensure-pred number? mode-line-padding)
   (ensure-pred number? header-line-padding)
   (ensure-pred number? tab-bar-padding)
@@ -492,8 +492,7 @@ themes for Emacs."
           (setq completion-category-overrides '((file (styles basic partial-completion)))))
         ,@(if (get-value 'emacs-all-the-icons config)
               '((with-eval-after-load 'all-the-icons-completion-autoloads
-                  (all-the-icons-completion-mode))
-                (with-eval-after-load 'all-the-icons
+                  (all-the-icons-completion-mode)
                   (add-hook 'marginalia-mode-hook 'all-the-icons-completion-marginalia-setup)))
               '())
         (advice-add 'completing-read-multiple :filter-args 'rde-completion-crm-indicator)
@@ -782,8 +781,7 @@ on the current project."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'xdg)
-        (eval-when-compile
+      `((eval-when-compile
          (require 'cl-lib))
         (defgroup rde-project nil
           "Custom `project.el' enhancements."
@@ -834,6 +832,7 @@ on the current project."
         (add-hook 'project-find-functions 'rde-project-custom-root)
         (advice-add 'project-compile :override 'rde-project-compile)
         (with-eval-after-load 'project
+          (require 'xdg)
           (setq project-switch-use-entire-map t)
           (setq project-list-file (expand-file-name "emacs/projects" (or (xdg-cache-home) "~/.cache")))))
       #:elisp-packages (if (get-value 'emacs-consult config)
@@ -1237,7 +1236,7 @@ operate on buffers like Dired."
 
     (list
      (simple-service
-      'image-packages
+      'add-external-image-converters
       home-profile-service-type
       (list imagemagick))
      (rde-elisp-configuration-service
@@ -1245,7 +1244,7 @@ operate on buffers like Dired."
       config
       `((with-eval-after-load 'image-mode
           (define-key image-mode-map "q" 'image-kill-buffer)
-          (setq image-user-external-converter t))))))
+          (setq image-use-external-converter t))))))
 
   (feature
    (name f-name)
@@ -1267,7 +1266,7 @@ operate on buffers like Dired."
 
     (list
      (simple-service
-      'emacs-graphviz-profile-service
+      'add-graphviz-home-package
       home-profile-service-type
       (list graphviz))
      (rde-elisp-configuration-service
@@ -1311,8 +1310,7 @@ operate on buffers like Dired."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defvar rde-ednc-map nil
-           "Map to bind `ednc' commands under.")
+      `((defvar rde-ednc-map nil)
         (define-prefix-command 'rde-ednc-map)
         (defun rde-ednc--notify ()
           "Display the latest EDNC notification."
@@ -1359,7 +1357,7 @@ operate on buffers like Dired."
 
   (feature
    (name f-name)
-   (values `((,f-name . ,f-name)))
+   (values `((,f-name . ,emacs-ednc)))
    (home-services-getter get-home-services)))
 
 
@@ -1742,8 +1740,7 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
           (org-archive-location (format #f "~a/archive.org::* From %s" org-directory))
           (emacs-org-modern emacs-org-modern-next)
           (org-modern? #t)
-          (org-indent? #t)
-          (document-converters? #f))
+          (org-indent? #t))
   "Configure Org Mode, the outline-based note management tool
 and organizer for Emacs."
   (ensure-pred path? org-directory)
@@ -1756,23 +1753,15 @@ and organizer for Emacs."
   (ensure-pred any-package? emacs-org-modern)
   (ensure-pred boolean? org-modern?)
   (ensure-pred boolean? org-indent?)
-  (ensure-pred boolean? document-converters?)
 
   (define emacs-f-name 'org)
   (define f-name (symbol-append 'emacs- emacs-f-name))
 
   (define (get-home-services config)
     "Return home services related to Org Mode."
-    (define unoconv (@ (gnu packages libreoffice) unoconv))
+
 
     (append
-     (if document-converters?
-         (list
-          (simple-service
-           'emacs-org-profile-service
-           home-profile-service-type
-           (list unoconv)))
-         '())
      (list
       (rde-elisp-configuration-service
        emacs-f-name
@@ -2575,7 +2564,7 @@ result is longer than LEN."
 
         (define-minor-mode rde-pdf-tools-mode
           "Apply `pdf-tools' settings based on the current theme."
-          :global t :group 'rde-pdf-tools
+          :group 'rde-pdf-tools
           (if rde-pdf-tools-mode
               (if (rde-modus-themes--dark-theme-p)
                   (pdf-view-themed-minor-mode 1)
@@ -2834,26 +2823,26 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
         (setq rde-browse-url-mappings
               (append
                (list
-                ,@(if (get-value 'youtube-proxy config)
-                      `((cons "https://www.youtube.com" (cons "^invidio.*" ,(get-value 'youtube-proxy config))))
+                ,@(if (get-value 'youtube-frontend config)
+                      `((cons "https://www.youtube.com" (cons "^invidio.*" ,(get-value 'youtube-frontend config))))
                       '())
-                ,@(if (get-value 'reddit-proxy config)
-                      `((cons "https://www.reddit.com" (cons ".*teddit.*" ,(get-value 'reddit-proxy config))))
+                ,@(if (get-value 'reddit-frontend config)
+                      `((cons "https://www.reddit.com" (cons ".*teddit.*" ,(get-value 'reddit-frontend config))))
                       '())
-                ,@(if (get-value 'quora-proxy config)
-                      `((cons "https://quora.com" (cons ".*quora.*" ,(get-value 'quora-proxy config))))
+                ,@(if (get-value 'quora-frontend config)
+                      `((cons "https://quora.com" (cons ".*quora.*" ,(get-value 'quora-frontend config))))
                       '())
-                ,@(if (get-value 'twitter-proxy config)
-                      `((cons "https://twitter.com" (cons ".*nitter.*" ,(get-value 'twitter-proxy config))))
+                ,@(if (get-value 'twitter-frontend config)
+                      `((cons "https://twitter.com" (cons ".*nitter.*" ,(get-value 'twitter-frontend config))))
                       '())
-                ,@(if (get-value 'imgur-proxy config)
-                      `((cons "https://imgur.com" (cons ".*imgin.*" ,(get-value 'imgur-proxy config))))
+                ,@(if (get-value 'imgur-frontend config)
+                      `((cons "https://imgur.com" (cons ".*imgin.*" ,(get-value 'imgur-frontend config))))
                       '())
-                ,@(if (get-value 'google-proxy config)
-                      `((cons "https://www.google.com" (cons ".*whoogle.*" ,(get-value 'google-proxy config))))
+                ,@(if (get-value 'google-frontend config)
+                      `((cons "https://www.google.com" (cons ".*whoogle.*" ,(get-value 'google-frontend config))))
                       '())
-                ,@(if (get-value 'medium-proxy config)
-                      `((cons "https://medium.com" (cons ".*scribe.*" ,(get-value 'medium-proxy config))))
+                ,@(if (get-value 'medium-frontend config)
+                      `((cons "https://medium.com" (cons ".*scribe.*" ,(get-value 'medium-frontend config))))
                       '()))
                ',extra-url-mappings))
         (advice-add 'browse-url-xdg-open :around 'rde-browse-url-add-scheme)
@@ -3074,10 +3063,10 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'xdg)
-        (add-hook 'calc-start-hook 'calc-currency-load)
+      `((add-hook 'calc-start-hook 'calc-currency-load)
         (autoload 'calc-currency-load "calc-currency")
         (with-eval-after-load 'calc-currency
+          (require 'xdg)
           (setq calc-currency-exchange-rates-file
                 (expand-file-name "emacs/calc-currency-rates.el" (or (xdg-cache-home) "~/.cache")))
           (setq calc-currency-base-currency ',currency)
@@ -3236,6 +3225,29 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
    (values `((,f-name . ,emacs-display-wttr)))
    (home-services-getter get-home-services)))
 
+(define-public %rde-mpv-tab-bar-modules
+  '((make-rde-tab-bar-module
+     :id 'mpv-string
+     :label 'mpv-mode-line-string)
+    (make-rde-tab-bar-module
+     :id 'mpv-prev
+     :label 'mpv-prev-button
+     :help "Previous playlist entry"
+     :action 'mpv-playlist-prev)
+    (make-rde-tab-bar-module
+     :id 'mpv-toggle
+     :label 'mpv-toggle-button
+     :help "Toggle playback"
+     :action 'mpv-pause)
+    (make-rde-tab-bar-module
+     :id 'mpv-next
+     :label 'mpv-next-button
+     :help "Next playlist entry"
+     :action 'mpv-playlist-next)
+    (make-rde-tab-bar-module
+     :id 'mpv-playing-time
+     :label 'mpv-playing-time-string)))
+
 (define* (feature-emacs-tab-bar
           #:key
           (modules-left '())
@@ -3286,8 +3298,7 @@ CURRENCY and update it every EXCHANGE-UPDATE-INTERVAL days."
                           ((and (listp label) (equal (car label) :eval))
                            `(format-mode-line ',label))
                           (t label))
-                        ,(or (rde-tab-bar-module-action item)
-                             'nil)
+                        ,(or (rde-tab-bar-module-action item) 'nil)
                         ,@(when (rde-tab-bar-module-help item)
                             `(:help ,(rde-tab-bar-module-help item))))))
                   modules))
@@ -3696,7 +3707,7 @@ language for GNU Emacs."
     "Return home services related to Emacs Lisp."
     (list
      (simple-service
-      'elisp-tempel-templates
+      'add-elisp-tempel-templates
       home-emacs-tempel-service-type
       `(,#~"emacs-lisp-mode"
            (lambda "(lambda (" p ")" n> r> ")")
@@ -3828,7 +3839,7 @@ web-related languages."
     "Return home services related to web languages."
     (list
      (simple-service
-      'home-npm-environment-variables
+      'add-npm-home-envs
       home-environment-variables-service-type
       '(("npm_config_userconfig" . "$XDG_CONFIG_HOME/npm-config")
         ("npm_config_cache" . "$XDG_CACHE_HOME/npm")
