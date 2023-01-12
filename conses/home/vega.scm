@@ -1,51 +1,23 @@
 (define-module (conses home vega)
-  #:use-module (conses system)
+  #:use-module (conses features)
   #:use-module (conses features android)
-  #:use-module (conses features bluetooth)
-  #:use-module (conses features bittorrent)
-  #:use-module (conses features clojure)
   #:use-module (conses features documentation)
   #:use-module (conses features emacs)
   #:use-module (conses features emacs-xyz)
-  #:use-module (conses features fontutils)
-  #:use-module (conses features golang)
   #:use-module (conses features gtk)
   #:use-module (conses features keyboard)
-  #:use-module (conses features tex)
-  #:use-module (conses features lisp)
-  #:use-module (conses features mail)
-  #:use-module (conses features matrix)
-  #:use-module (conses features messaging)
   #:use-module (conses features nyxt-xyz)
-  #:use-module (conses features ocaml)
   #:use-module (conses features scheme)
-  #:use-module (conses features security)
-  #:use-module (conses features shellutils)
-  #:use-module (conses features version-control)
   #:use-module (conses features video)
-  #:use-module (conses features web-browsers)
-  #:use-module (conses features wm)
   #:use-module (conses features web)
-  #:use-module (conses features xorg)
-  #:use-module (contrib features javascript)
-  #:use-module (rde packages)
+  #:use-module (conses features web-browsers)
+  #:use-module (conses home services linux)
+  #:use-module (conses utils)
   #:use-module (rde features)
-  #:use-module (rde features wm)
   #:use-module (rde features ssh)
-  #:use-module (rde features xdg)
   #:use-module (rde features base)
-  #:use-module (rde features gnupg)
-  #:use-module ((rde features mail) #:select (feature-mail-settings
-                                              feature-isync))
-  #:use-module (rde features docker)
-  #:use-module (rde features irc)
   #:use-module (rde features linux)
-  #:use-module (rde features shells)
-  #:use-module (rde features terminals)
   #:use-module (rde features virtualization)
-  #:use-module ((rde features emacs-xyz) #:select (feature-emacs-eglot
-                                                   feature-emacs-keycast
-                                                   feature-emacs-spelling))
   #:use-module (gnu home)
   #:use-module (gnu services)
   #:use-module (gnu home services)
@@ -53,8 +25,61 @@
   #:use-module (gnu system keyboard)
   #:use-module (guix gexp))
 
+
+;;; Service extensions
+
+(define extra-shell-envs-service
+  (simple-service
+   'add-missing-shell-envs
+   home-environment-variables-service-type
+   '(("GPG_TTY" . "$(tty)")
+     ("LESSHISTFILE" . "-"))))
+
+(define extra-gtk-settings
+  `((gtk-cursor-blink . #f)
+    (gtk-cursor-theme-size . 16)
+    (gtk-decoration-layout . "")
+    (gtk-dialogs-use-header . #f)
+    (gtk-enable-animations . #t)
+    (gtk-enable-event-sounds . #f)
+    (gtk-enable-input-feedback-sounds . #f)
+    (gtk-error-bell . #f)
+    (gtk-overlay-scrolling . #t)
+    (gtk-recent-files-enabled . #f)
+    (gtk-shell-shows-app-menu . #f)
+    (gtk-shell-shows-desktop . #f)
+    (gtk-shell-shows-menubar . #f)
+    (gtk-xft-antialias . #t)
+    (gtk-xft-dpi . 92)
+    (gtk-xft-hinting . #t)
+    (gtk-xft-hintstyle . hintfull)
+    (gtk-xft-rgba . none)))
+
+(define extra-ssh-config
+  (home-ssh-configuration
+   (extra-config
+    (list
+     (ssh-host
+      (host "cygnus")
+      (options
+       `((host-name . ,(getenv "CYGNUS_HOST"))
+         (user . "root"))))
+     (ssh-host
+      (host "deneb")
+      (options
+       `((host-name . ,(getenv "CYGNUS_HOST"))
+         (user . "deneb"))))
+     (ssh-host
+      (host "hydri")
+      (options
+       `((host-name . ,(getenv "HYDRI_HOST"))
+         (user . "hydri"))))))))
+
+
+;;; Home features
+
 (define-public %home-features
-  (list
+  (make-feature-list
    (feature-user-info
     #:user-name "vega"
     #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
@@ -62,36 +87,12 @@
     #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
-   (feature-gtk3
-    #:dark-theme? #t
-    #:gtk-theme #f
-    #:extra-gtk-settings
-    `((gtk-cursor-blink . #f)
-      (gtk-cursor-theme-size . 16)
-      (gtk-decoration-layout . "")
-      (gtk-dialogs-use-header . #f)
-      (gtk-enable-animations . #t)
-      (gtk-enable-event-sounds . #f)
-      (gtk-enable-input-feedback-sounds . #f)
-      (gtk-error-bell . #f)
-      (gtk-overlay-scrolling . #t)
-      (gtk-recent-files-enabled . #f)
-      (gtk-shell-shows-app-menu . #f)
-      (gtk-shell-shows-desktop . #f)
-      (gtk-shell-shows-menubar . #f)
-      (gtk-xft-antialias . #t)
-      (gtk-xft-dpi . 92)
-      (gtk-xft-hinting . #t)
-      (gtk-xft-hintstyle . hintfull)
-      (gtk-xft-rgba . none)))
-   (feature-proxy
-    #:google-proxy "http://localhost:5000"
-    #:youtube-proxy "https://invidio.xamh.de"
-    #:reddit-proxy "https://teddit.namazso.eu")
+   (feature-alternative-frontends
+    #:google-frontend "http://localhost:5000"
+    #:youtube-frontend (string-append "https://" (getenv "TAU_URL"))
+    #:reddit-frontend "https://teddit.namazso.eu")
    (feature-android)
    (feature-emacs-fdroid)
-   (feature-transmission)
-   (feature-bluetooth)
    (feature-manpages)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
@@ -99,53 +100,12 @@
     #:emacs-server-mode? #f
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))
-   (feature-fonts)
-   (feature-emacs-all-the-icons)
-   (feature-emacs-completion
-    #:consult-initial-narrowing? #t)
-   (feature-vterm)
-   (feature-emacs-exwm
-    #:window-configurations
-    '(((string= exwm-class-name "Nyxt")
-       char-mode t
-       workspace 1
-       simulation-keys nil
-       (exwm-layout-hide-mode-line))
-      ((string= exwm-instance-name "emacs")
-       char-mode t)
-      ((string-match "Android Emulator" exwm-title)
-       floating t)))
-   (feature-emacs-exwm-run-on-tty
-    #:emacs-exwm-tty-number 1
-    #:launch-arguments '("-mm" "--debug-init")
-    #:extra-xorg-config
-    (list
-     "Section \"Monitor\"
-  Identifier \"DP-3\"
-  Option \"DPMS\" \"false\"
-EndSection
-Section \"ServerFlags\"
-  Option \"BlankTime\" \"0\"
-EndSection"))
-   (feature-gnupg
-    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
-    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
-    #:pinentry-flavor 'emacs
-    #:default-ttl 34560000)
-   (feature-emacs-project)
-   (feature-emacs-appearance
-    #:auto-theme? #f)
-   (feature-emacs-whitespace
-    #:global-modes '(not org-mode org-agenda-mode
-                         org-agenda-follow-mode org-capture-mode
-                         dired-mode eshell-mode magit-status-mode
-                         diary-mode magit-diff-mode text-mode
-                         pass-view-mode erc-mode))
-   (feature-direnv)
-   (feature-compile)
-   (feature-password-store
-    #:remote-password-store-url "git@git.sr.ht:~conses/password-store")
-   (feature-clojure)
+   %ui-base-features
+   (feature-gtk3
+    #:dark-theme? #t
+    #:gtk-theme #f
+    #:extra-gtk-settings extra-gtk-settings)
+   %emacs-completion-base-features
    (feature-nyxt
     #:scroll-distance 150
     #:temporary-history? #t
@@ -153,513 +113,9 @@ EndSection"))
     #:autostart-slynk? #t
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
-    #:restore-session? #f
-    #:extra-bindings
-    '("C-c s" 'query-selection-in-search-engine))
-   (feature-nyxt-nx-mosaic)
-   (feature-nyxt-nx-tailor
-    #:auto? #f
-    #:dark-theme? #t
-    #:themes
-    '((tailor:make-theme
-       'modus-operandi
-       :background-color "white"
-       :on-background-color "black"
-       :primary-color "#e5e5e5"
-       :on-primary-color "black"
-       :secondary-color "#005a5f"
-       :on-secondary-color "black"
-       :accent-color "#0000c0"
-       :on-accent-color "white"
-       :font-family "Iosevka")
-      (tailor:make-theme
-       'modus-vivendi
-       :dark-p t
-       :background-color "black"
-       :on-background-color "white"
-       :primary-color "#212121"
-       :on-primary-color "#a8a8a8"
-       :secondary-color "#100f10"
-       :on-secondary-color "#6ae4b9"
-       :accent-color "#00bcff"
-       :on-accent-color "black"
-       :font-family "Iosevka")))
-   (feature-nyxt-prompt
-    #:mouse-support? #f)
-   (feature-nyxt-hint)
-   (feature-nyxt-emacs
-    #:autostart-delay 5)
-   (feature-nyxt-blocker)
-   (feature-emacs-pdf-tools)
-   (feature-mpv
-    #:mpv (@ (conses packages video) mpv-34)
-    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next-local)
-    #:extra-mpv-conf
-    `((border . no)
-      (volume . 100)
-      (screenshot-directory . ,(string-append (getenv "XDG_DATA_HOME") "/mpv/screenshots"))
-      (autofit . 800x800)
-      (osd-border-size . 2)
-      (osd-bar . yes)
-      (osd-level . 0)
-      (slang . en)
-      (ytdl-raw-options . "ignore-config=,sub-lang=en,write-auto-sub=")
-      (script-opts-add=osc-visibility . never)
-      (script-opts-add=osc-windowcontrols . no))
-    #:extra-bindings
-    `(("F" . "cycle fullscreen")
-      ("M" . "cycle mute")
-      ("+" . "add volume 2")
-      ("-" . "add volume -2")
-      (":" . "script-binding console/enable")
-      ("s" . "screenshot video")
-      ("Q" . "quit-watch-later")
-      ("O" . "no-osd cycle-values osd-level 3 0")
-      ("o" . "osd-bar show-progress")
-      ("v" . "cycle sub-visibility")
-      ("b" . "cycle sub")
-      ("n" . "script-message osc-visibility always")
-      ("N" . "script-message osc-visibility never")
-      ("L" . "cycle-values loop-file \"inf\" \"no\"")))
-   (feature-emacs-modus-themes
-    #:dark? #t)
-   (feature-emacs-corfu
-    #:corfu-doc? #t)
-   (feature-emacs-vertico)
-   (feature-emacs-tempel)
-   (feature-emacs-files)
-   (feature-emacs-ibuffer)
-   (feature-youtube-dl
-    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next-local)
-    #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
-                      "--compat-options" "all")
-    #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-                      "--add-metadata" "--compat-options" "all"))
-   (feature-emacs-emms)
-   (feature-emacs-image)
-   (feature-emacs-graphviz)
-   (feature-emacs-ednc
-    #:notifications-icon "")
-   (feature-emacs-calendar
-    #:week-numbers? #t)
-   (feature-emacs-bookmark
-    #:bookmarks-file "~/documents/bookmarks")
-   ;; (feature-emacs-dashboard
-   ;;  #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
-   ;;  #:logo-title "Welcome to GNU/Emacs"
-   ;;  #:item-generators '((recents . dashboard-insert-recents)
-   ;;                      (bookmarks . dashboard-insert-bookmarks)
-   ;;                      (agenda . dashboard-insert-agenda)
-   ;;                      (registers . dashboard-insert-registers))
-   ;;  #:items '((agenda . 7)
-   ;;            (bookmarks . 7)
-   ;;            (recents . 7))
-   ;;  #:navigator-buttons '((("☆" "Calendar" "Show calendar"
-   ;;                          (lambda (&rest _)
-   ;;                            (calendar)) diary "[" "]")))
-   ;;  #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
-   ;;  #:org-agenda-prefix-format "%?-12:c"
-   ;;  #:banner-max-height 320
-   ;;  #:banner-max-width 240
-   ;;  #:path-max-length 50
-   ;;  #:bookmarks-show-base? #f
-   ;;  #:path-style 'truncate-beginning
-   ;;  #:set-heading-icons? #t
-   ;;  #:set-file-icons? #f
-   ;;  #:set-footer? #f
-   ;;  #:set-init-info? #f)
-   (feature-emacs-spelling
-    #:flyspell-hooks
-    '(org-mode-hook bibtex-mode-hook)
-    #:ispell-standard-dictionary "en_US")
-   (feature-emacs-markdown)
-   (feature-emacs-browse-url)
-   (feature-emacs-window)
-   (feature-emacs-pulseaudio-control
-    #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next-local))
-   (feature-emacs-org
-    #:document-converters? #t
-    #:org-capture-templates
-    '(("t" "Tasks/Projects")
-      ("tt" "TODO Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
-       "* TODO %? %^G\n%U\n"
-       :empty-lines 1)
-      ("tl" "Linked Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
-       "* TODO %? %a %^G\n%U\n"
-       :immediate-finish 1)
-      ("tb" "Read It Later" entry (file+headline "~/documents/tasks.org" "Read It Later")
-       "* %a %^G"
-       :immediate-finish 1)
-      ("tv" "Watch It Later" entry (file+headline "~/documents/tasks.org" "Watch It Later")
-       "* %a %^G"
-       :immediate-finish 1)
-      ("th" "Habit Entry" entry (file+headline "~/documents/tasks.org" "Habits")
-       "* TODO %? %^G\nSCHEDULED:%^t\n:PROPERTIES:\n:STYLE: habit\n:END:"
-       :empty-lines 1)
-      ("tc" "Critical TODO Entry" entry (file+headline "~/documents/tasks.org" "TODOs")
-       "* INTR %? %^G\n%U\n"
-       :empty-lines 1)
-      ("ts" "TODO Entry with Subtasks" entry (file+headline "~/documents/tasks.org" "TODOs")
-       "* TODO %? [/]\n- [ ]"
-       :empty-lines 1)
-      ("td" "Scheduled Task" entry (file+headline "~/documents/tasks.org" "TODOs")
-       "* TODO %?\nSCHEDULED: %^T"
-       :empty-lines 1))
-    #:org-priority-faces
-    '((?A . (:foreground "#FF665C" :weight bold))
-      (?B . (:foreground "#51AFEF"))
-      (?C . (:foreground "#4CA171")))
-    #:org-todo-keywords
-    '((sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "|" "DONE(d!)"))
-    #:org-todo-keyword-faces
-    '(("TODO" . "#ff665c")
-      ("NEXT" . "#FCCE7B")
-      ("HOLD" . "#a991f1")
-      ("DONE" . "#7bc275"))
-    #:org-tag-alist
-    '((:startgroup)
-      (:endgroup)
-      ("work" . ?w)
-      ("emacs" . ?e)
-      ("project" . ?p)
-      ("linux" . ?l)
-      ("education" . ?d)
-      ("finance" . ?f)
-      ("guix" . ?g)
-      ("chore" . ?c)))
-   (feature-emacs-org-recur)
-   (feature-emacs-org-roam
-    #:org-roam-directory "~/documents/notes"
-    #:org-roam-dailies-directory "journal/"
-    #:org-roam-capture-templates
-    `(("d" "default" plain "%?"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                "#+title: ${title}\n#+filetags: :${Topic}:\n")
-       :unnarrowed t)
-      ("e" "Programming Concept" plain
-       ,(string-append
-         "#+begin_src %^{Language|elisp|lisp|scheme"
-         "|clojure|ocaml|js}\n%?\n#+end_src\n")
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:DATA_TYPE: "
-                  "%^{Data Type|Function|Method|Variable|Macro|Procedure}"
-                  "\n:END:\n#+title: ${title}\n#+filetags: :${Topic}:"))
-       :unnarrowed t)
-      ("r" "Reference" plain "%?"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:ROAM_REFS: ${ref}\n:END:\n"
-                  "#+title: ${title}\n#+filetags: :${Topic}:"))
-       :unnarrowed t)
-      ("m" "Recipe" plain "* Ingredients\n- %?\n* Directions"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${title}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:ROAM_REFS: %l\n"
-                  ":MEAL_TYPE: %^{Meal Type|Lunch\|Breakfast|Appetizer|Dessert}"
-                  "\n:END:\n#+title: ${title}\n#+filetags: :cooking:"))
-       :unnarrowed t)
-      ("b" "Book" plain
-       "* Chapters\n%?"
-       :if-new (file+head
-                "%<%Y%M%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:AUTHOR: ${Author}\n:DATE: ${Date}\n"
-                  ":PUBLISHER: ${Publisher}\n:EDITION: ${Edition}\n:END:\n"
-                  "#+title: ${title}\n#+filetags: :${Topic}:"))
-       :unnarrowed t))
-    #:org-roam-dailies-capture-templates
-    '(("d" "default" entry
-       "* %?"
-       :if-new (file+head "%<%Y-%m-%d>.org"
-                          "#+title: %<%Y-%m-d>\n"))))
-   (feature-emacs-org-agenda)
-   (feature-tex
-    #:listings-options
-    '(("basicstyle" "\\ttfamily")
-      ("stringstyle" "\\color{blue}\\ttfamily")
-      ("numbers" "left")
-      ("numberstyle" "\\tiny")
-      ("breaklines" "true")
-      ("showstringspaces" "false")
-      ("showtabs" "false")
-      ("keywordstyle" "\\color{violet}")
-      ("commentstyle" "\\color{gray}")
-      ("label" "{Figure}"))
-    #:extra-packages
-    (strings->packages
-     "texlive-wrapfig" "texlive-capt-of"
-     "texlive-hyperref" "texlive-fonts-ec"
-     "texlive-latex-geometry" "texlive-listings"
-     "texlive-xcolor" "texlive-ulem" "texlive-latex-preview"
-     "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"))
-   (feature-emacs-citar)
-   (feature-emacs-info)
-   (feature-emacs-which-key)
-   (feature-emacs-helpful
-    #:emacs-helpful (@ (conses packages emacs-xyz) emacs-helpful-next))
-   (feature-emacs-keycast)
-   (feature-emacs-eww)
-   (feature-emacs-webpaste
-    #:webpaste-providers '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))
-   (feature-emacs-time
-    #:display-time? #t
-    #:display-time-24hr? #t
-    #:display-time-date? #t
-    #:world-clock-time-format "%R %Z"
-    #:world-clock-timezones
-    '(("Europe/London" "London")
-      ("Europe/Madrid" "Madrid")
-      ("Europe/Moscow" "Moscow")
-      ("America/New_York" "New York")
-      ("Australia/Sydney" "Sydney")
-      ("Asia/Tokyo" "Tokyo")))
-   (feature-emacs-dired)
-   (feature-emacs-calc)
-   (feature-emacs-tramp)
-   (feature-emacs-battery)
-   (feature-emacs-display-wttr
-    #:emacs-display-wttr (@ (conses packages emacs-xyz) emacs-display-wttr-next))
-   (feature-emacs-tab-bar
-    #:modules-left
-    '((make-rde-tab-bar-module
-       :id 'menu-bar
-       :label (format " %s "
-                      (all-the-icons-fileicon
-                       "emacs" :v-adjust -0.1 :height 1))
-       :help "Menu"
-       :action 'tab-bar-menu-bar)
-      (make-rde-tab-bar-module
-       :id 'mpv-string
-       :label 'mpv-mode-line-string)
-      (make-rde-tab-bar-module
-       :id 'mpv-prev
-       :label 'mpv-prev-button
-       :help "Previous playlist entry"
-       :action 'mpv-playlist-prev)
-      (make-rde-tab-bar-module
-       :id 'mpv-toggle
-       :label 'mpv-toggle-button
-       :help "Toggle playback"
-       :action 'mpv-pause)
-      (make-rde-tab-bar-module
-       :id 'mpv-next
-       :label 'mpv-next-button
-       :help "Next playlist entry"
-       :action 'mpv-playlist-next)
-      (make-rde-tab-bar-module
-       :id 'mpv-playing-time
-       :label 'mpv-playing-time-string)
-      (make-rde-tab-bar-module
-       :id 'notifications
-       :label '(:eval (rde-ednc--notify))))
-    #:modules-center
-    '((make-rde-tab-bar-module
-       :id 'time
-       :label 'display-time-string))
-    #:modules-right
-    '((make-rde-tab-bar-module
-       :id 'org-timer
-       :label 'org-timer-mode-line-string)
-      (make-rde-tab-bar-module
-       :id 'appointments
-       :label 'appt-mode-string)
-      (make-rde-tab-bar-module
-       :id 'weather
-       :label 'display-wttr-string)
-      (make-rde-tab-bar-module
-       :id 'volume-sink
-       :label 'pulseaudio-control-display-volume-string)
-      (make-rde-tab-bar-module
-       :id 'battery
-       :label 'battery-mode-line-string)))
-   (feature-emacs-comint)
-   (feature-emacs-shell)
-   (feature-emacs-eshell)
-   (feature-irc-settings
-    #:irc-accounts
-    (list
-     (irc-account
-      (id 'srht)
-      (network "chat.sr.ht")
-      (bouncer? #t)
-      (nick (getenv "IRC_BOUNCER_NICK")))
-     (irc-account
-      (id 'libera)
-      (network "irc.libera.chat")
-      (nick (getenv "IRC_LIBERA_NICK")))
-     (irc-account
-      (id 'oftc)
-      (network "irc.oftc.net")
-      (nick (getenv "IRC_OFTC_NICK")))))
-   (feature-emacs-erc
-    #:erc-auto-query 'bury
-    #:erc-query-display 'buffer
-    #:erc-join-buffer 'bury
-    #:erc-images? #t
-    #:erc-log? #t
-    #:erc-autojoin-channels-alist
-    '((Libera.Chat
-       "#nyxt" "#emacs" "#org-mode" "#guix" "#nonguix" "#ocaml"
-       "#clojure" "#commonlisp" "#scheme" "#tropin")
-      (OFTC "#postmarketos" "#mobian")))
-   (feature-slack-settings
-    #:slack-accounts
-    (list
-     (slack-account
-      (workspace (getenv "SLACK_WORKSPACE"))
-      (token (getenv "SLACK_TOKEN"))
-      (cookie (getenv "SLACK_COOKIE")))))
-   (feature-emacs-slack)
-   (feature-emacs-telega)
-   (feature-emacs-eglot)
-   (feature-emacs-smartparens
-    #:paredit-bindings? #t
-    #:smartparens-hooks '(prog-mode-hook
-                          lisp-data-mode-hook
-                          minibuffer-inactive-mode-hook
-                          comint-mode-hook))
-   (feature-emacs-flymake)
-   (feature-emacs-xref)
-   (feature-emacs-re-builder)
-   (feature-emacs-elisp)
-   (feature-emacs-rainbow-delimiters)
-   (feature-emacs-yaml)
-   (feature-emacs-lang-web)
-   (feature-javascript
-    #:node (@ (gnu packages node) node-lts))
-   (feature-emacs-polymode)
-   (feature-go)
-   (feature-qmk
-    #:keyboard "dztech/dz65rgb/v1"
-    #:keymap "custom")
-   (feature-keyboard
-    #:keyboard-layout %default-keyboard-layout
-    #:default-input-method "spanish-keyboard")
-   (feature-lisp
-    #:custom-sly-prompt? #t
-    #:extra-lisp-packages
-    (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk" "sbcl-lisp-unit2")
-    #:extra-source-registry-entries
-    `(("common-lisp/source-registry.conf.d/10-home.conf"
-       ,(plain-file "10-home.conf"
-                    (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
-    #:extra-lisp-templates
-    '((do "(do (" p ")" n> r> ")")))
-   (feature-mail-settings
-    #:mail-accounts
-    (list
-     (mail-acc 'personal (getenv "MAIL_PERSONAL_EMAIL") 'gandi))
-    #:mail-directory-fn mail-directory-fn
-    #:mailing-lists
-    (list
-     (mail-lst 'guix-devel "guix-devel@gnu.org"
-               '("https://yhetil.org/guix-devel/0"))
-     (mail-lst 'guix-devel "guix-bugs@gnu.org"
-               '("https://yhetil.org/guix-bugs/0"))
-     (mail-lst 'guix-devel "guix-patches@gnu.org"
-               '("https://yhetil.org/guix-patches/1"))))
-   (feature-isync)
-   (feature-goimapnotify
-    #:goimapnotify (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
-   (feature-emacs-ebdb
-    #:ebdb-popup-size 0.2)
-   (feature-emacs-gnus
-    #:topic-alist
-    '(("personal"
-       "nnmaildir+personal:inbox"
-       "nnmaildir+personal:drafts"
-       "nnmaildir+personal:sent"
-       "nnmaildir+personal:spam"
-       "nnmaildir+personal:trash")
-      ("clojure"
-       "nntp+gwene:gwene.clojure.planet"
-       "nntp+gwene:gwene.com.google.groups.clojure")
-      ("lisp"
-       "nntp+gwene:gwene.org.lisp.planet"
-       "nntp+gwene:gwene.engineer.atlas.nyxt"
-       "nntp+gwene:gwene.org.wingolog")
-      ("technology"
-       "nntp+gwene:gwene.org.fsf.news"
-       "nntp+gwene:gwene.rs.lobste"
-       "nntp+gwene:gwene.org.hnrss.newest.points"
-       "nntp+gwene:gwene.com.unixsheikh"
-       "nntp+gwene:gwene.com.drewdevault.blog"
-       "nntp+gwene:gwene.net.lwn.headlines.newrss"
-       "nntp+gwene:gwene.com.usesthis"
-       "nntp+gwene:gwene.org.sourcehut.blog"
-       "nntp+gwene:gwene.cc.tante"
-       "nntp+gwene:gwene.org.matrix.blog")
-      ("emacs"
-       "nntp+gwene:gmane.emacs.devel"
-       "nntp+gwene:gmane.emacs.erc.general"
-       "nntp+gwene:gwene.com.oremacs"
-       "nntp+gwene:gwene.org.emacslife.planet"
-       "nntp+gwene:gwene.group.discourse.org-roam.latest")
-      ("guix"
-       "nntp+gwene:gmane.comp.gnu.guix.bugs"
-       "nntp+gwene:gmane.comp.gnu.guix.patches"
-       "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
-      ("Gnus"))
-    #:topic-topology
-    '(("Gnus" visible)
-      (("personal" visible nil))
-      (("clojure" visible nil))
-      (("lisp" visible nil))
-      (("technology" visible nil))
-      (("emacs" visible nil))
-      (("guix" visible nil)))
-    #:message-archive-method '(nnmaildir "personal")
-    #:message-archive-group '((".*" "sent"))
-    #:group-parameters
-    '(("^nnmaildir"
-       (display . 100)
-       (gcc-self . "nnmaildir+personal:sent"))
-      ("^nntp"
-       (display . 1000)))
-    #:posting-styles
-    `((".*"
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
-      ((header "to" ".*@lists.sr.ht")
-       (To rde-gnus-get-article-participants)
-       (name ,(getenv "USERNAME"))
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
-       (In-Reply-To make-message-in-reply-to)
-       (signature ,(string-append "Best regards,\n"
-                                  (getenv "USERNAME"))))
-      ("^nntp.+:"
-       (To rde-gnus-get-article-participants)
-       (name ,(getenv "USERNAME"))
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
-       (signature ,(string-append "Best regards,\n"
-                                  (getenv "USERNAME"))))))
-   (feature-emacs-message
-    #:message-signature (string-append "Best regards,\n" (getenv "USERNAME")))
-   (feature-emacs-org-mime)
-   (feature-emacs-smtpmail
-    #:smtp-user (getenv "MAIL_PERSONAL_EMAIL")
-    #:smtp-server (getenv "MAIL_PERSONAL_HOST"))
-   (feature-desktop-services
-    #:default-desktop-home-services
-    (append
-     (list
-      (service home-redshift-service-type
-               (home-redshift-configuration
-                (dawn-time "07:00")
-                (dusk-time "20:00"))))
-     (@@ (rde features base) %rde-desktop-home-services)))
-   (feature-matrix-settings
-    #:homeserver (string-append "https://pantalaimon." (getenv "DOMAIN"))
-    #:matrix-accounts
-    (list
-     (matrix-account
-      (id (getenv "MATRIX_USER"))
-      (homeserver (string-append "matrix." (getenv "DOMAIN"))))))
-   (feature-emacs-ement)
+    #:restore-session? #f)
+   %nyxt-base-features
+   (feature-nyxt-prompt #:mouse-support? #f)
    (feature-nyxt-status
     #:height 30
     #:glyphs? #t
@@ -681,208 +137,66 @@ EndSection"))
              :title (nyxt::modes-string buffer)
         (:raw
          (format-status-modes status))))))
-   (feature-nyxt-userscript
-    #:userstyles
-    '((make-instance
-       'nyxt/user-script-mode:user-style
-       :include '("https://github.com/*"
-                  "https://gist.github.com/*")
-       :code (cl-css:css
-              `((,(str:join "," '("#dashboard .body"
-                                  ".js-inline-dashboard-render"
-                                  ".js-feed-item-component"
-                                  ".js-yearly-contributions"
-                                  ".js-profile-editable-area div .mb-3"
-                                  ".starring-container"
-                                  "#js-contribution-activity"
-                                  "#year-list-container"
-                                  "a[href$=watchers]"
-                                  "a[href$=stargazers]"
-                                  "a[href$=followers]"
-                                  "a[href$=following]"
-                                  "a[href$=achievements]"
-                                  "[action*=follow]"))
-                 :display "none !important")
-                ("img[class*=avatar]"
-                 :visibility "hidden"))))))
-   (feature-nyxt-nx-router
-    #:media-enabled? #t
-    #:extra-routes
-    `((make-instance 'router:web-route
-                     :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
-                     :redirect-url "www.youtube.com"
-                     :resource (lambda (url)
-                                 (play-video-mpv url :formats nil :audio t :repeat t)))
-      (make-instance 'router:web-route
-                     :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
-                     :resource (lambda (url)
-                                 (play-video-mpv url :formats nil :audio t :repeat t)))
-      (make-instance 'router:opener
-                     :trigger (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
-                                           "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
-                     :resource (lambda (url)
-                                 (play-video-mpv url :formats nil)))
-      (make-instance 'router:opener
-                     :trigger (match-scheme "mailto" "magnet")
-                     :resource "xdg-open ~s")
-      (make-instance 'router:blocker
-                     :trigger (match-regex ".*eddit.*/.*")
-                     :instances 'make-teddit-instances
-                     :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))))
-   (feature-nyxt-nx-search-engines
-    #:extra-engines
-    '((engines:wordnet
-       :shortcut "wn"
-       :show-examples t
-       :show-word-frequencies t
-       :show-sense-numbers t)
-      (engines:github
-       :shortcut "gh"
-       :object :advanced)
-      (engines:startpage
-       :shortcut "sp")
-      (engines:sourcehut
-       :shortcut "sh")
-      (engines:libgen
-       :shortcut "lg"
-       :covers t
-       :results 100
-       :object :files
-       :fallback-url (quri:uri "http://libgen.gs")
-       :base-search-url "https://libgen.gs/index.php?req=~a")
-      (engines:google
-       :shortcut "go"
-       :safe-search nil
-       :results-number 50
-       :new-window t)
-      (engines:peertube
-       :shortcut "pt")
-      (engines:lemmy
-       :shortcut "le")
-      (engines:discourse
-       :shortcut "ae")
-      (engines:discourse
-       :shortcut "cv"
-       :fallback-url (quri:uri "https://clojureverse.org")
-       :base-search-url "https://clojureverse.org/search?q=~a")
-      (engines:discourse
-       :shortcut "oc"
-       :fallback-url (quri:uri "https://discuss.ocaml.org")
-       :base-search-url "https://discuss.ocaml.org/search?q=~a")
-      (engines:discourse
-       :shortcut "or"
-       :fallback-url (quri:uri "https://org-roam.discourse.group")
-       :base-search-url "https://org-roam.discourse.group/search?q=~a")
-      (engines:discourse
-       :shortcut "pc"
-       :fallback-url (quri:uri "https://community.penpot.app/latest")
-       :base-search-url "https://community.penpot.app/search?q=~a")
-      (engines:meetup
-       :shortcut "me")
-      (engines:gitea
-       :shortcut "gi")
-      (engines:gitea-users
-       :shortcut "giu")
-      (engines:hacker-news
-       :shortcut "hn"
-       :fallback-url (quri:uri "https://news.ycombinator.com")
-       :search-type :all)
-      (engines:lobsters
-       :shortcut "lo")
-      (make-instance
-       'search-engine
-       :shortcut "clj"
-       :search-url "https://clojars.org/search?q=~a"
-       :fallback-url "https://clojars.org")
-      (make-instance
-       'search-engine
-       :shortcut "et"
-       :search-url "https://www.etsy.com/search?q=~a"
-       :fallback-url "https://www.etsy.com")
-      (make-instance
-       'search-engine
-       :shortcut "to"
-       :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
-       :fallback-url "https://torrents-csv.ml")
-      (make-instance
-       'search-engine
-       :shortcut "mdn"
-       :search-url "https://developer.mozilla.org/en-US/search?q=~a"
-       :fallback-url "https://developer.mozilla.org")
-      (engines:whoogle
-       :shortcut "who"
-       :fallback-url (quri:uri "http://localhost:5000")
-       :base-search-url "http://localhost:5000/search?q=~a"
-       :theme :system
-       :alternatives nil
-       :lang-results :english
-       :lang-ui :english
-       :view-image t
-       :no-javascript t
-       :new-tab t)))
-   (feature-ocaml)
-   (feature-guile)
+   %multimedia-base-features
+   %emacs-desktop-base-features
+   %emacs-base-features
+   (feature-desktop-services
+    #:default-desktop-home-services
+    (append (@@ (rde features base) %rde-desktop-home-services)
+            (list
+             extra-shell-envs-service
+             (service home-udiskie-service-type)
+             (service home-redshift-service-type
+                      (home-redshift-configuration
+                       (dawn-time "07:00")
+                       (dusk-time "20:00"))))))
+   %desktop-base-features
+   (feature-pipewire)
+   %web-base-features
+   %mail-base-features
+   %security-base-features
+   %shell-base-features
+   %forge-base-features
+   %communication-base-features
+   %programming-base-features
+   %markup-base-features
+   (feature-emacs-dashboard
+    #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
+    #:logo-title "Welcome to GNU/Emacs"
+    #:item-generators '((recents . dashboard-insert-recents)
+                        (bookmarks . dashboard-insert-bookmarks)
+                        (agenda . dashboard-insert-agenda)
+                        (registers . dashboard-insert-registers))
+    #:items '((agenda . 7)
+              (bookmarks . 7)
+              (recents . 7))
+    #:navigator-buttons '((("☆" "Calendar" "Show calendar"
+                            (lambda (&rest _)
+                              (calendar)) diary "[" "]")))
+    #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
+    #:org-agenda-prefix-format "%?-12:c"
+    #:banner-max-height 320
+    #:banner-max-width 240
+    #:path-max-length 50
+    #:bookmarks-show-base? #f
+    #:path-style 'truncate-beginning
+    #:set-heading-icons? #t
+    #:set-file-icons? #f
+    #:set-footer? #f
+    #:set-init-info? #f)
+   (feature-emacs-polymode)
+   (feature-qmk
+    #:keyboard "dztech/dz65rgb/v1"
+    #:keymap "custom")
+   (feature-keyboard
+    #:keyboard-layout (@ (conses system) %default-keyboard-layout)
+    #:default-input-method "spanish-keyboard")
    (feature-guix
     #:authorized-directories
     '("~/src/projects/fdroid.el"
       "~/src/projects/nyxt.el"
-      "~/src/projects/dotfiles"))
+      "~/src/projects/dotfiles"
+      "~/src/projects/tau"))
    (feature-ssh
-    #:ssh-configuration
-    (home-ssh-configuration
-     (extra-config
-      (list
-       (ssh-host
-        (host "cygnus")
-        (options
-         `((host-name . ,(getenv "CYGNUS_HOST"))
-           (user . "root"))))
-       (ssh-host
-        (host "deneb")
-        (options
-         `((host-name . ,(getenv "CYGNUS_HOST"))
-           (user . "deneb"))))
-       (ssh-host
-        (host "hydri")
-        (options
-         `((host-name . ,(getenv "HYDRI_HOST"))
-           (user . "hydri"))))))))
-   (feature-forge-settings
-    #:forge-accounts
-    (list
-     (forge-account
-      (id 'sh)
-      (forge 'sourcehut)
-      (username (getenv "USERNAME"))
-      (email (getenv "SOURCEHUT_EMAIL"))
-      (token (getenv "SOURCEHUT_TOKEN")))
-     (forge-account
-      (id 'gh)
-      (forge 'github)
-      (username (getenv "GITHUB_USER"))
-      (email (getenv "GITHUB_EMAIL"))
-      (token (getenv "GITHUB_TOKEN")))))
-   (feature-sourcehut)
-   (feature-git
-    #:primary-forge-account-id 'sh
-    #:sign-commits? #t
-    #:global-ignores '("**/.direnv"
-                       "node_modules"
-                       "*.elc"
-                       ".log"))
-   (feature-xdg
-    #:xdg-user-directories-configuration
-    (home-xdg-user-directories-configuration
-     (desktop "$HOME")
-     (documents "$HOME/documents")
-     (download "$HOME/downloads")
-     (music "$HOME/music")
-     (pictures "$HOME/pictures")
-     (publicshare "$HOME")
-     (videos "$HOME/videos")
-     (templates "$HOME")))
-   (feature-pipewire)
-   (feature-emacs-cursor)
-   (feature-xorg)
-   (feature-qemu)
-   (feature-bash)))
+    #:ssh-configuration extra-ssh-config)
+   (feature-qemu)))
