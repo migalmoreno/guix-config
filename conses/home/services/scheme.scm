@@ -7,7 +7,7 @@
   #:use-module (gnu home services)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:use-module (rde serializers base)
+  #:use-module (rde serializers lisp)
   #:export (home-guix-service-type
             home-guix-configuration
             home-guile-service-type
@@ -26,7 +26,7 @@
 (define-configuration home-guix-configuration
   (channels
    (guile-config '())
-   "List of expressions as per @{lisp-config} that will place Guix's channel file
+   "List of expressions as per @{guile-config} that will place Guix's channel file
 in @file{channels.scm}.")
   (shell-authorized-directories
    (list '())
@@ -102,7 +102,7 @@ in ``@code{GUIX_PROFILE}''."))
     (package guile-3.0)
     "The @code{guile} package to use")
   (config
-   (lisp-config '())
+   (guile-config '())
    "List of expressions, where each expression can be Sexp or a Gexp. Sexp is a Lisp form.
 Strings don't require any conversion, but booleans do.
 Sexps can contain file-like objects, a string with path to a corresponding file in the store.

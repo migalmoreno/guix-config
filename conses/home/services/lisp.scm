@@ -5,7 +5,7 @@
   #:use-module (gnu packages lisp)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (rde serializers base)
+  #:use-module (rde serializers lisp)
   #:export (lisp-config?
             serialize-lisp-config
             home-lisp-configuration
