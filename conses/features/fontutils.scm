@@ -130,6 +130,7 @@
             (insert)))
 
         (define-key search-map "e" 'rde-fonts-insert-emoji)
+        (define-key minibuffer-mode-map (kbd "C-c C-e") 'rde-fonts-insert-emoji)
         (with-eval-after-load 'fontset
           (set-fontset-font t 'symbol ,(font-name font-unicode) nil 'append)
           (set-fontset-font t 'unicode ,(font-name font-unicode) nil 'append)
