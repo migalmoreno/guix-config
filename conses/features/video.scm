@@ -2,9 +2,6 @@
   #:use-module (conses utils)
   #:use-module (conses packages emacs-xyz)
   #:use-module (conses features web-browsers)
-  #:use-module (rde features)
-  #:use-module (rde features emacs)
-  #:use-module (rde features predicates)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
@@ -15,6 +12,9 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
+  #:use-module (rde features)
+  #:use-module (rde features emacs)
+  #:use-module (rde features predicates)
   #:export (feature-mpv
             feature-youtube-dl))
 
@@ -310,7 +310,7 @@ proxy url as per `rde-browse-url-mappings'."
                          (if (get-value 'emacs-all-the-icons config)
                              (list (get-value 'emacs-all-the-icons config))
                              '()))))
-     (if (get-value 'nyxt config)
+     (if (get-value 'nyxt-emacs config)
          (list
           (rde-nyxt-configuration-service
            f-name
