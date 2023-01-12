@@ -244,7 +244,7 @@ IPC interface.")
      #:recursive? #t))))
 
 (define-public emacs-pulseaudio-control-next
-  (let ((commit "2c939a0789b9a0f5e3691704afde512ada9c73f4")
+  (let ((commit "34a6114357dbbc6b6720aa013e0f8a48f3739403")
         (revision "0"))
     (package
       (inherit emacs-pulseaudio-control)
@@ -253,21 +253,11 @@ IPC interface.")
       (source (origin
                 (method git-fetch)
                 (uri (git-reference
-                      (url "https://github.com/flexibeast/pulseaudio-control")
+                      (url "https://git.sr.ht/~flexibeast/pulseaudio-control")
                       (commit commit)))
                 (file-name (git-file-name name version))
                 (sha256
-                 (base32 "18avxnpsriil91abx553201mignj9flqik73i5wmvhhi3z4jycff")))))))
-
-(define-public emacs-pulseaudio-control-next-local
-  (package
-    (inherit emacs-pulseaudio-control)
-    (version "0.1")
-    (source
-     (local-file
-      (string-append (dirname (dirname %project-root))
-                     "/elisp/pulseaudio-control")
-      #:recursive? #t))))
+                 (base32 "0wm312pqp0i5i6qh6g3nacnnvsrad58927cl2g42gxzrzlb3slv5")))))))
 
 (define-public emacs-circadian-next
   (package
