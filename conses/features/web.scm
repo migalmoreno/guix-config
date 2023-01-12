@@ -16,7 +16,8 @@
   #:export (feature-web-settings
             feature-nginx
             feature-certbot
-            feature-whoogle))
+            feature-whoogle
+            feature-alternative-frontends))
 
 (define-public %nginx-deploy-hook
   (program-file
@@ -188,3 +189,34 @@ privacy respecting metaseach engine."
    (name 'whoogle)
    (values `((whoogle . ,whoogle-search)))
    (system-services-getter get-system-services)))
+
+(define* (feature-alternative-frontends
+          #:key
+          (youtube-frontend "https://invidious.snopyta.org")
+          (reddit-frontend "https://teddit.net")
+          (instagram-frontend "https://picuki.com")
+          (quora-frontend "https://quora.vern.cc")
+          (google-frontend "https://search.sethforprivacy.com")
+          (imgur-frontend "https://i.bcow.xyz")
+          (medium-frontend "https://scribe.rip")
+          (twitter-frontend "https://nitter.namazso.eu")
+          (tiktok-frontend "https://tok.artemislena.eu")
+          (fandom-frontend "https://bw.vern.cc"))
+  (ensure-pred maybe-string? youtube-frontend)
+  (ensure-pred maybe-string? reddit-frontend)
+  (ensure-pred maybe-string? instagram-frontend)
+  (ensure-pred maybe-string? quora-frontend)
+  (ensure-pred maybe-string? google-frontend)
+  (ensure-pred maybe-string? imgur-frontend)
+  (ensure-pred maybe-string? medium-frontend)
+  (ensure-pred maybe-string? twitter-frontend)
+  (ensure-pred maybe-string? tiktok-frontend)
+  (ensure-pred maybe-string? fandom-frontend)
+
+  (feature
+   (name 'alternative-frontends)
+   (values (append
+            `((alternative-frontends . #t))
+            (make-feature-values
+             youtube-frontend reddit-frontend instagram-frontend quora-frontend google-frontend
+             imgur-frontend medium-frontend twitter-frontend tiktok-frontend fandom-frontend)))))

@@ -14,8 +14,7 @@
   #:use-module (guix packages)
   #:export (rde-nyxt-configuration-service
             feature-nyxt
-            feature-ungoogled-chromium
-            feature-proxy))
+            feature-ungoogled-chromium))
 
 
 ;;;
@@ -76,7 +75,7 @@
           (restore-session? #t))
   "Set up Nyxt, the hacker's power browser.
 DEFAULT-COOKIE-POLICY is either `:always' (accept all cookies),
-`:never' (reject all cookies), and `:no-third-party (only accept
+`:never' (reject all cookies), or `:no-third-party (only accept
 the current site's cookies)'.
 DEFAULT-NEW-BUFFER-URL is the default new page URL you'll be prompted with
 at browser startup if RESTORE-SESSION? is #f, otherwise you'll be shown the
@@ -126,11 +125,9 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
       (rde-nyxt-configuration-service
        'rde-nyxt
        config
-       `(,@(if (get-value 'lisp config)
-               '((let ((sbcl-init (merge-pathnames ".sbclrc" (user-homedir-pathname))))
-                   (when (probe-file sbcl-init)
-                     (load sbcl-init))))
-               '())
+       `((let ((sbcl-init (merge-pathnames ".sbclrc" (user-homedir-pathname))))
+           (when (probe-file sbcl-init)
+             (load sbcl-init)))
          (asdf:ensure-source-registry)
          (reset-asdf-registries)
          (use-nyxt-package-nicknames)
@@ -185,108 +182,74 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
              (nyxt-startup-flags . ,startup-flags)))
    (home-services-getter get-home-services)))
 
-(define* (feature-ungoogled-chromium
-          #:key
-          (ungoogled-chromium ungoogled-chromium)
-          (default-browser? #f)
-          (startup-flags '()))
-  "Configure the Chromium browser."
-  (ensure-pred any-package? ungoogled-chromium)
-  (ensure-pred boolean? default-browser?)
-  (ensure-pred list? startup-flags)
+;; (define* (feature-ungoogled-chromium
+;;           #:key
+;;           (ungoogled-chromium ungoogled-chromium)
+;;           (default-browser? #f)
+;;           (startup-flags '()))
+;;   "Configure the Chromium browser."
+;;   (ensure-pred any-package? ungoogled-chromium)
+;;   (ensure-pred boolean? default-browser?)
+;;   (ensure-pred list? startup-flags)
 
-  (define f-name 'ungoogled-chromium)
+;;   (define f-name 'ungoogled-chromium)
 
-  (define (get-home-services config)
-    "Return home services related to Ungoogled Chromium."
-    (append
-     (if default-browser?
-         (list
-          (simple-service
-           'home-chromium-environment-variables-service
-           home-environment-variables-service-type
-           `(("BROWSER" . ,(file-append ungoogled-chromium "/bin/chromium")))))
-         '())
-     (list
-      (simple-service
-       'home-chromium-profile-service
-       home-profile-service-type
-       (list
-        ungoogled-chromium
-        ublock-origin/chromium))
-      (simple-service
-       'home-chromium-xdg
-       home-xdg-mime-applications-service-type
-       (home-xdg-mime-applications-configuration
-        (desktop-entries
-         (list
-          (xdg-desktop-entry
-           (file "chromium")
-           (name "Chromium")
-           (type 'application)
-           (config
-            `((exec . ,#~(string-append
-                          #$(file-append ungoogled-chromium "/bin/chromium")
-                          " "
-                          #$(string-join startup-flags)
-                          " %U"))
-              (terminal . #f)
-              (comment . "Access the Internet"))))))))
-      (rde-elisp-configuration-service
-       f-name
-       config
-       `((require 'embark)
-         (with-eval-after-load 'browse-url
-           (setq browse-url-chromium-arguments ',startup-flags))
-         ,@(if (get-value 'emacs-embark config)
-               `((define-key embark-url-map "c" 'browse-url-chromium))
-               '()))
-       #:elisp-packages (if (get-value 'emacs-embark config)
-                            (list (get-value 'emacs-embark config))
-                            '())))
-     (if (and (get-value 'nyxt config) (get-value 'emacs config))
-         (list
-          (rde-nyxt-configuration-service
-           f-name
-           config
-           `((define-command open-with-chromium ()
-               "Open the current page with Chromium."
-               (eval-in-emacs
-                `(browse-url-chromium ,(render-url (url (current-buffer)))))))))
-         '())))
+;;   (define (get-home-services config)
+;;     "Return home services related to Ungoogled Chromium."
+;;     (append
+;;      (if default-browser?
+;;          (list
+;;           (simple-service
+;;            'set-default-browser-env
+;;            home-environment-variables-service-type
+;;            `(("BROWSER" . ,(file-append ungoogled-chromium "/bin/chromium")))))
+;;          '())
+;;      (list
+;;       (simple-service
+;;        'add-chromium-packages
+;;        home-profile-service-type
+;;        (list
+;;         ungoogled-chromium
+;;         ublock-origin/chromium))
+;;       (simple-service
+;;        'add-chromium-xdg-desktop-entry
+;;        home-xdg-mime-applications-service-type
+;;        (home-xdg-mime-applications-configuration
+;;         (desktop-entries
+;;          (list
+;;           (xdg-desktop-entry
+;;            (file "chromium")
+;;            (name "Chromium")
+;;            (type 'application)
+;;            (config
+;;             `((exec . ,#~(string-join
+;;                           (list #$(file-append ungoogled-chromium "/bin/chromium")
+;;                                 #$@startup-flags "%U")))
+;;               (terminal . #f)
+;;               (comment . "Access the Internet"))))))))
+;;       (rde-elisp-configuration-service
+;;        f-name
+;;        config
+;;        `((with-eval-after-load 'browse-url
+;;            (setq browse-url-chromium-arguments ',startup-flags))
+;;          ,@(if (get-value 'emacs-embark config)
+;;                `((with-eval-after-load 'embark
+;;                    (define-key embark-url-map "c" 'browse-url-chromium)))
+;;                '()))
+;;        #:elisp-packages (if (get-value 'emacs-embark config)
+;;                             (list (get-value 'emacs-embark config))
+;;                             '())))
+;;      (if (get-value 'nyxt-emacs config)
+;;          (list
+;;           (rde-nyxt-configuration-service
+;;            f-name
+;;            config
+;;            `((define-command open-with-chromium ()
+;;                (eval-in-emacs
+;;                 `(browse-url-chromium ,(render-url (url (current-buffer)))))))))
+;;          '())))
 
-  (feature
-   (name 'chromium)
-   (values `((ungoogled-chromium . ,ungoogled-chromium)))
-   (home-services-getter get-home-services)))
-
-(define* (feature-proxy
-          #:key
-          (youtube-proxy "https://invidious.snopyta.org")
-          (reddit-proxy "https://teddit.net")
-          (instagram-proxy "https://iganony.com")
-          (quora-proxy "https://quora.vern.cc")
-          (google-proxy "https://search.sethforprivacy.com")
-          (imgur-proxy "https://i.bcow.xyz")
-          (medium-proxy "https://scribe.rip")
-          (twitter-proxy "https://nitter.namazso.eu")
-          (tiktok-proxy "https://tok.artemislena.eu")
-          (fandom-proxy "https://bw.vern.cc"))
-  (ensure-pred maybe-string? youtube-proxy)
-  (ensure-pred maybe-string? reddit-proxy)
-  (ensure-pred maybe-string? instagram-proxy)
-  (ensure-pred maybe-string? quora-proxy)
-  (ensure-pred maybe-string? google-proxy)
-  (ensure-pred maybe-string? imgur-proxy)
-  (ensure-pred maybe-string? medium-proxy)
-  (ensure-pred maybe-string? twitter-proxy)
-  (ensure-pred maybe-string? tiktok-proxy)
-  (ensure-pred maybe-string? fandom-proxy)
-
-  (feature
-   (name 'proxy)
-   (values (append
-            `((proxy . #t))
-            (make-feature-values
-             youtube-proxy reddit-proxy instagram-proxy quora-proxy google-proxy
-             imgur-proxy medium-proxy twitter-proxy tiktok-proxy fandom-proxy)))))
+;;   (feature
+;;    (name 'chromium)
+;;    (values `((ungoogled-chromium . ,ungoogled-chromium)))
+;;    (home-services-getter get-home-services)))
