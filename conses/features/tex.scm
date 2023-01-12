@@ -27,7 +27,7 @@
     "Return home services related to TeX."
     (list
      (simple-service
-      'home-tex-profile-service
+      'add-tex-home-packages
       home-profile-service-type
       (append
         `(,texlive-base
@@ -36,7 +36,7 @@
             (list texlive-biblatex biber)
             '())))
      (simple-service
-      'home-tex-environment-variables-service
+      'add-tex-home-envs
       home-environment-variables-service-type
       '(("TEX_MFHOME" . "$XDG_DATA_HOME/texmf")
         ("TEX_MFVAR" . "$XDG_CACHE_HOME/texlive/texmf-var")

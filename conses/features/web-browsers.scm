@@ -110,7 +110,7 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
      (if default-browser?
          (list
           (simple-service
-           'home-nyxt-environment-variables-service
+           'set-nyxt-as-default-browser
            home-environment-variables-service-type
            `(("BROWSER" . ,(file-append nyxt "/bin/nyxt"))))
           (simple-service
@@ -173,7 +173,7 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
         (nyxt nyxt)
         (auto-mode-rules-lisp auto-mode-rules)))
       (simple-service
-       'home-nyxt-extensions
+       'add-nyxt-extensions
        home-nyxt-service-type
        (home-nyxt-extension
         (config-lisp extra-config-lisp))))))

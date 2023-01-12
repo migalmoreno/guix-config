@@ -49,11 +49,11 @@
     "Return home services related to Android tooling."
     (list
      (simple-service
-      'home-android-packages
+      'add-android-tools
       home-profile-service-type
       (list adb fastboot payload-dumper))
      (simple-service
-      'home-android-environment-variables
+      'add-android-envs
       home-environment-variables-service-type
       `(("ADB_VENDOR_KEYS" . "$XDG_CONFIG_HOME/android/adb")))))
 

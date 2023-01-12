@@ -41,7 +41,7 @@
         password-store-directory
         remote-password-store-url)))
      (simple-service
-      'home-password-packages
+      'add-password-store-packages
       home-profile-service-type
       (list pass-otp))
      (rde-elisp-configuration-service
@@ -65,7 +65,8 @@
           (setq password-cache t)
           (setq password-cache-expiry (* 60 10)))
         ,@(if (get-value 'emacs-embark config)
-              '((require 'embark)
+              '((eval-when-compile
+                 (require 'embark))
                 (with-eval-after-load 'embark
                   (embark-define-keymap embark-password-store-actions
                     "Kemaps for actions of password-store."
