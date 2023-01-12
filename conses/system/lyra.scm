@@ -51,6 +51,52 @@
     (target "system-root")
     (type luks-device-mapping))))
 
+(define %udev-rules
+  (list
+   (udev-rule
+    "50-spice.rules"
+    (string-append
+     "SUBSYSTEM==\"usb\", GROUP=\"spice\", MODE=\"0660\""
+     "\n"
+     "SUBSYSTEM==\"usb_device\", GROUP=\"spice\", MODE=\"0660\""))
+   (udev-rule
+    "90-backlight.rules"
+    (string-append
+     "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
+     "RUN+=\"/run/current-system/profile/bin/chgrp video /sys/class/backlight/%k/brightness\""
+     "\n"
+     "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
+     "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\""))))
+
+
+;;; Service extensions
+
+(define extra-etc-files-service
+  (simple-service
+   'add-etc-files
+   etc-service-type
+   `(("modprobe.d/ddcci.conf"
+      ,(plain-file
+        "ddcci.conf"
+        (string-append "options ddcci dyndbg delay=120" "\n"
+                       "options ddcci-backlight dyndbg")))
+     ("modprobe.d/v4l2loopback.conf"
+      ,(plain-file
+        "v4l2loopback.conf"
+        "options v4l2loopback exclusive_caps=1 max_buffers=2 video_nr=-1")))))
+
+(define extra-user-groups-service
+  (simple-service
+   'add-spice-user-group
+   account-service-type
+   (list
+    (user-group
+     (name "spice")
+     (system? #t)))))
+
+
+;;; System features
+
 (define-public %system-features
   (list
    (feature-kernel
@@ -68,30 +114,10 @@
       (name "vega")
       (create-database? #t))))
    (feature-custom-services
-    #:home-services
-    (list
-     (service home-udiskie-service-type)
-     (service
-      home-state-service-type
-      (append
-        (list
-         (state-git
-          (string-append (getenv "HOME") "/src/guix/guix")
-          "https://git.savannah.gnu.org/git/guix.git"))))
-     (simple-service
-      'home-custom-environment-variables
-      home-environment-variables-service-type
-      '(("GPG_TTY" . "$(tty)")
-        ("LESSHISTFILE" . "-"))))
     #:system-services
     (list
-     (simple-service
-      'add-spice-user-group
-      account-service-type
-      (list
-       (user-group
-        (name "spice")
-        (system? #t))))
+     extra-user-groups-service
+     extra-etc-files-service
      (service syncthing-service-type
               (syncthing-configuration (user "vega")))
      (service spice-vdagent-service-type)
@@ -100,18 +126,6 @@
               (libvirt-configuration
                (unix-sock-group "libvirt")
                (tls-port "16555")))
-     (simple-service
-      'ddcci-etc-service
-      etc-service-type
-      `(("modprobe.d/ddcci.conf"
-         ,(plain-file
-           "ddcci.conf"
-           (string-append "options ddcci dyndbg delay=120" "\n"
-                          "options ddcci-backlight dyndbg")))
-        ("modprobe.d/v4l2loopback.conf"
-         ,(plain-file
-           "v4l2loopback.conf"
-           "options v4l2loopback exclusive_caps=1 max_buffers=2 video_nr=-1"))))
      (service openssh-service-type
               (openssh-configuration
                (openssh openssh-sans-x)
@@ -126,22 +140,7 @@
      (service kernel-module-loader-service-type
               '("ddcci" "ddcci_backlight"))))
    (feature-base-services
-    #:udev-rules
-    (list
-     (udev-rule
-      "50-spice.rules"
-      (string-append
-       "SUBSYSTEM==\"usb\", GROUP=\"spice\", MODE=\"0660\""
-       "\n"
-       "SUBSYSTEM==\"usb_device\", GROUP=\"spice\", MODE=\"0660\""))
-     (udev-rule
-      "90-backlight.rules"
-      (string-append
-       "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
-       "RUN+=\"/run/current-system/profile/bin/chgrp video /sys/class/backlight/%k/brightness\""
-       "\n"
-       "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
-       "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\"")))
+    #:udev-rules %udev-rules
     #:guix-substitute-urls
     (list "https://substitutes.nonguix.org")
     #:guix-authorized-keys
@@ -168,9 +167,7 @@
    (feature-base-packages
     #:system-packages
     (strings->packages
-     "emacs-no-x" "git" "curl" "make"
-     "wireguard-tools" "binutils" "v4l-utils"
-     "nasm" "gcc-toolchain" "autoconf")
+     "emacs-no-x" "git" "curl" "make" "wireguard-tools" "binutils"
+     "v4l-utils" "nasm" "gcc-toolchain" "autoconf")
     #:home-packages
-    (strings->packages
-     "ddcutil" "light" "xclip"))))
+    (strings->packages "ddcutil" "light" "xclip"))))
