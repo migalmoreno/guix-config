@@ -1,4 +1,6 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; -*-
 #+OPTIONS: toc:nil
 * Dotfiles
-A set of configuration files centered around [[https://guix.gnu.org/][GNU Guix]] and [[https://sr.ht/~abcdw/rde/][RDE]].
+These are my personal set of configuration files built around [[https://guix.gnu.org/][GNU Guix]] and [[https://sr.ht/~abcdw/rde/][RDE]].
+
+The main goal behind this repository is to upstream most of the packages, services, and features to both of those projects, but there may be some leftovers that don't align with the projects' principles that I need to keep around to meet my needs.
