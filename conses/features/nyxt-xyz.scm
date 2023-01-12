@@ -2,8 +2,8 @@
   #:use-module (conses features fontutils)
   #:use-module (conses features web-browsers)
   #:use-module (conses packages emacs-xyz)
-  #:use-module (conses utils)
   #:use-module (conses home services lisp)
+  #:use-module (conses utils)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
@@ -436,11 +436,39 @@
    (values `((,f-name . #t)))
    (home-services-getter get-home-services)))
 
+(define %rde-nx-tailor-default-themes
+  '((tailor:make-theme
+     'modus-operandi
+     :background-color "white"
+     :on-background-color "black"
+     :primary-color "#e5e5e5"
+     :on-primary-color "black"
+     :secondary-color "#005a5f"
+     :on-secondary-color "black"
+     :accent-color "#0000c0"
+     :on-accent-color "white"
+     :font-family "Iosevka")
+    (tailor:make-theme
+     'modus-vivendi
+     :dark-p t
+     :background-color "black"
+     :on-background-color "white"
+     :primary-color "#212121"
+     :on-primary-color "#a8a8a8"
+     :secondary-color "#100f10"
+     :on-secondary-color "#6ae4b9"
+     :accent-color "#00bcff"
+     :on-accent-color "black"
+     :font-family "Iosevka")))
+
+(define-public (maybe-pair-or-string? x)
+  (or (pair? x) (string? x) (not x)))
+
 (define* (feature-nyxt-nx-tailor
           #:key
           (auto? #t)
           (dark-theme? #f)
-          (themes '())
+          (themes %rde-nx-tailor-default-themes)
           (main-themes #f))
   "Configure nx-tailor, a Nyxt theme manager."
   (ensure-pred maybe-symbol? auto?)
@@ -518,14 +546,122 @@
    (values `((,f-name . #t)))
    (home-services-getter get-home-services)))
 
+(define (default-nx-search-engines config)
+  `((engines:wordnet
+     :shortcut "wn"
+     :show-examples t
+     :show-word-frequencies t
+     :show-sense-numbers t)
+    (engines:github
+     :shortcut "gh"
+     :object :advanced)
+    (engines:startpage
+     :shortcut "sp")
+    (engines:sourcehut
+     :shortcut "sh")
+    (engines:libgen
+     :shortcut "lg"
+     :covers t
+     :results 100
+     :object :files
+     :fallback-url (quri:uri "http://libgen.gs")
+     :base-search-url "https://libgen.gs/index.php?req=~a")
+    (engines:lemmy
+     :shortcut "le")
+    (engines:discourse
+     :shortcut "ae")
+    (engines:discourse
+     :shortcut "cv"
+     :fallback-url (quri:uri "https://clojureverse.org")
+     :base-search-url "https://clojureverse.org/search?q=~a")
+    (engines:discourse
+     :shortcut "oc"
+     :fallback-url (quri:uri "https://discuss.ocaml.org")
+     :base-search-url "https://discuss.ocaml.org/search?q=~a")
+    (engines:discourse
+     :shortcut "or"
+     :fallback-url (quri:uri "https://org-roam.discourse.group")
+     :base-search-url "https://org-roam.discourse.group/search?q=~a")
+    (engines:discourse
+     :shortcut "pc"
+     :fallback-url (quri:uri "https://community.penpot.app/latest")
+     :base-search-url "https://community.penpot.app/search?q=~a")
+    (engines:meetup
+     :shortcut "me")
+    (engines:gitea
+     :shortcut "gi")
+    (engines:gitea-users
+     :shortcut "giu")
+    (engines:hacker-news
+     :shortcut "hn"
+     :fallback-url (quri:uri "https://news.ycombinator.com")
+     :search-type :all)
+    (engines:lobsters
+     :shortcut "lo")
+    (make-instance
+     'search-engine
+     :shortcut "clj"
+     :search-url "https://clojars.org/search?q=~a"
+     :fallback-url "https://clojars.org")
+    (make-instance
+     'search-engine
+     :shortcut "sc"
+     :search-url ,(string-append "https://" (getenv "TAU_URL") "/search?q=~a&serviceId=1")
+     :fallback-url ,(string-append "https://" (getenv "TAU_URL")))
+    (make-instance
+     'search-engine
+     :shortcut "yt"
+     :search-url ,(string-append "https://" (getenv "TAU_URL") "/search?q=~a&serviceId=0")
+     :fallback-url ,(string-append "https://" (getenv "TAU_URL")))
+    (make-instance
+     'search-engine
+     :shortcut "pt"
+     :search-url ,(string-append "https://" (getenv "TAU_URL") "/search?q=~a&serviceId=3")
+     :fallback-url ,(string-append "https://" (getenv "TAU_URL")))
+    (make-instance
+     'search-engine
+     :shortcut "et"
+     :search-url "https://www.etsy.com/search?q=~a"
+     :fallback-url "https://www.etsy.com")
+    (make-instance
+     'search-engine
+     :shortcut "to"
+     :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
+     :fallback-url "https://torrents-csv.ml")
+    (make-instance
+     'search-engine
+     :shortcut "mdn"
+     :search-url "https://developer.mozilla.org/en-US/search?q=~a"
+     :fallback-url "https://developer.mozilla.org")
+    ,@(if (get-value 'whoogle config)
+          `((engines:whoogle
+             :shortcut "who"
+             :fallback-url
+             (quri:uri ,(get-value 'google-frontend config))
+             :base-search-url
+             ,(string-append (get-value 'google-frontend config) "/search?q=~a")
+             :theme :system
+             :alternatives nil
+             :lang-results :english
+             :lang-ui :english
+             :view-image t
+             :no-javascript t
+             :new-tab t))
+          '((engines:google
+             :shortcut "go"
+             :safe-search nil
+             :lang-ui :english
+             :results-number 50
+             :new-window t)))))
+
 (define* (feature-nyxt-nx-search-engines
           #:key
-          (extra-engines '())
+          (engines default-nx-search-engines)
           (auto-complete? #f)
           (auto-complete-non-prefix? #f))
   "Configure nx-search-engines, a collection of easy-to-setup
 search engines for Nyxt."
-  (ensure-pred lisp-config? extra-engines)
+  (ensure-pred maybe-procedure? engines)
   (ensure-pred boolean? auto-complete?)
   (ensure-pred boolean? auto-complete-non-prefix?)
 
@@ -545,41 +681,16 @@ search engines for Nyxt."
             (append
              %slot-value%
              (list
-              ,@(if (get-value 'google-proxy config)
-                    `((engines:whoogle
-                       :shortcut "who"
-                       :fallback-url
-                       (quri:uri ,(get-value 'google-proxy config))
-                       :base-search-url
-                       ,(string-append (get-value 'google-proxy config)
-                                       "/search?q=~a")
-                       :theme :system
-                       :alternatives nil
-                       :lang-results :english
-                       :lang-ui :english
-                       :view-image t
-                       :no-javascript t
-                       :new-tab t))
-                    '())
-              ,@(if (get-value 'youtube-proxy config)
-                    `((engines:invidious
-                       :shortcut "yt"
-                       :fallback-url
-                       (quri:uri ,(get-value 'youtube-proxy config))
-                       :base-search-url
-                       ,(string-append (get-value 'youtube-proxy config)
-                                       "/search?q=~a")))
-                    '())
-              ,@(if (get-value 'reddit-proxy config)
+              ,@(if (get-value 'reddit-frontend config)
                     `((engines:teddit
                        :shortcut "re"
                        :fallback-url
-                       (quri:uri ,(get-value 'reddit-proxy config))
+                       (quri:uri ,(get-value 'reddit-frontend config))
                        :base-search-url
-                       ,(string-append (get-value 'reddit-proxy config)
+                       ,(string-append (get-value 'reddit-frontend config)
                                        "/search?q=~a")))
                     '())
-              ,@extra-engines))))))
+              ,@(engines config)))))))
       #:lisp-packages '(nx-search-engines))))
 
   (feature
@@ -590,11 +701,11 @@ search engines for Nyxt."
 (define* (feature-nyxt-nx-router
           #:key
           (media-enabled? #t)
-          (extra-routes '())
+          (extra-routes #f)
           (show-block-banner? #t))
   "Configure nx-router, a URL routing extension for Nyxt."
   (ensure-pred boolean? media-enabled?)
-  (ensure-pred list? extra-routes)
+  (ensure-pred maybe-procedure? extra-routes)
   (ensure-pred boolean? show-block-banner?)
 
   (define nyxt-f-name 'nx-router)
@@ -606,38 +717,56 @@ search engines for Nyxt."
      (rde-nyxt-configuration-service
       nyxt-f-name
       config
-      `((defun make-invidious-instances ()
-          "Return a list of Invidious instances."
-          (alex:when-let ((instances
-                           (handler-case (dex:get "https://api.invidious.io/instances.json")
-                             (usocket:ns-host-not-found-error ()
-                               (echo-warning "There's no Internet connection to retrieve instances")
-                               nil))))
+      `((defun fetch-instances (url)
+          (handler-case (dex:get url)
+            (usocket:ns-host-not-found-error ()
+              (echo-warning "There's no Internet connection to retrieve instances")
+              nil)))
+
+        (defun make-invidious-instances ()
+          (alex:when-let ((instances (fetch-instances "https://api.invidious.io/instances.json")))
             (mapcar 'first
                     (json:with-decoder-simple-list-semantics
                       (json:decode-json-from-string instances)))))
 
         (defun make-scribe-instances ()
-          "Return a list of Scribe instances."
-          (alex:when-let ((instances
-                           (handler-case (dex:get "https://git.sr.ht/~edwardloveall/scribe/blob/main/docs/instances.json")
-                             (usocket:ns-host-not-found-error ()
-                               (echo-warning "There's no Internet connection to retrieve instances")
-                               nil))))
+          (alex:when-let ((instances (fetch-instances
+                                      "https://git.sr.ht/~edwardloveall/scribe/blob/main/docs/instances.json")))
             (json:decode-json-from-string instances)))
 
-        (defun make-teddit-instances ()
-          "Return a list of Teddit instances."
+        (defun make-proxitok-instances ()
           (alex:when-let ((instances
-                           (handler-case (dex:get "https://teddit.namazso.eu/instances.json")
-                             (usocket:ns-host-not-found-error ()
-                               (echo-warning "There's no Internet connection to retrieve instances")
-                               nil))))
+                           (fetch-instances
+                            "https://raw.githubusercontent.com/libredirect/libredirect/master/src/instances/data.json")))
+            (rest (alex:assoc-value
+                   (alex:assoc-value
+                    (json:with-decoder-simple-list-semantics
+                      (json:decode-json-from-string instances))
+                    :proxi-tok)
+                   :clearnet))))
+
+        (defun make-teddit-instances ()
+          (alex:when-let ((instances (fetch-instances "https://teddit.namazso.eu/instances.json")))
             (mapcar (lambda (instance)
                       (unless (str:emptyp (alex:assoc-value instance :url))
                         (alex:assoc-value instance :url)))
                     (json:with-decoder-simple-list-semantics
                       (json:decode-json-from-string instances)))))
+
+        (defun make-libreddit-instances ()
+          (alex:when-let ((instances
+                           (fetch-instances
+                            "https://raw.githubusercontent.com/libreddit/libreddit-instances/master/instances.json")))
+            (mapcar (lambda (instance)
+                      (unless (str:emptyp (alex:assoc-value instance :url))
+                        (alex:assoc-value instance :url)))
+                    (alex:assoc-value
+                     (json:with-decoder-simple-list-semantics
+                       (json:decode-json-from-string instances))
+                     :instances))))
+
+        (defun make-reddit-alternative-instances ()
+          (delete nil (append (make-teddit-instances) (make-libreddit-instances))))
 
         (define-configuration (router:opener router:redirector)
           ((router:toplevel-p nil)))
@@ -648,71 +777,72 @@ search engines for Nyxt."
         (define-configuration router:router-mode
           ((router:routes
             (list
-             ,@extra-routes
-             ,@(if (get-value 'tiktok-proxy config)
+             ,@(when extra-routes
+                 (extra-routes config))
+             ,@(if (get-value 'tiktok-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "tiktok.com")
                                     :original-url "www.tiktok.com"
-                                    :redirect-url (quri:uri ,(get-value 'tiktok-proxy config))
+                                    :redirect-url (quri:uri ,(get-value 'tiktok-frontend config))
                                     :redirect-rule '(("/@placeholder/video/" . (not "/" "/@" "/t")))))
                    '())
-             ,@(if (get-value 'youtube-proxy config)
+             ,@(if (get-value 'youtube-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "youtube.com" "youtu.be")
                                     :original-url "www.youtube.com"
-                                    :redirect-url (quri:uri ,(get-value 'youtube-proxy config))))
+                                    :redirect-url (quri:uri ,(get-value 'youtube-frontend config))))
                    '())
-             ,@(if (get-value 'quora-proxy config)
+             ,@(if (get-value 'quora-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "quora.com")
                                     :original-url "www.quora.com"
-                                    :redirect-url (quri:uri ,(get-value 'quora-proxy config))))
+                                    :redirect-url (quri:uri ,(get-value 'quora-frontend config))))
                    '())
-             ,@(if (get-value 'imgur-proxy config)
+             ,@(if (get-value 'imgur-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "imgur.com")
                                     :original-url "imgur.com"
-                                    :redirect-url (quri:uri ,(get-value 'imgur-proxy config))))
+                                    :redirect-url (quri:uri ,(get-value 'imgur-frontend config))))
                    '())
-             ,@(if (get-value 'medium-proxy config)
+             ,@(if (get-value 'medium-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "medium.com")
                                     :original-url "www.medium.com"
-                                    :redirect-url (quri:uri ,(get-value 'medium-proxy config))
+                                    :redirect-url (quri:uri ,(get-value 'medium-frontend config))
                                     :instances 'make-scribe-instances))
                    '())
-             ,@(if (get-value 'twitter-proxy config)
+             ,@(if (get-value 'twitter-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "twitter.com")
                                     :original-url "www.twitter.com"
-                                    :redirect-url (quri:uri ,(get-value 'twitter-proxy config))))
+                                    :redirect-url (quri:uri ,(get-value 'twitter-frontend config))))
                    '())
-             ,@(if (get-value 'reddit-proxy config)
+             ,@(if (get-value 'reddit-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-domain "reddit.com")
                                     :original-url "www.reddit.com"
-                                    :redirect-url (quri:uri ,(get-value 'reddit-proxy config))
-                                    :instances 'make-teddit-instances))
+                                    :redirect-url (quri:uri ,(get-value 'reddit-frontend config))
+                                    :instances 'make-reddit-alternative-instances))
                    '())
-             ,@(if (get-value 'google-proxy config)
+             ,@(if (get-value 'google-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-regex "https://whoogle.*" "https://.*google.com/search.*")
                                     :original-url (quri:uri "https://www.google.com")
-                                    :redirect-url (quri:uri ,(get-value 'google-proxy config))))
+                                    :redirect-url (quri:uri ,(get-value 'google-frontend config))))
                    '())
-             ,@(if (get-value 'instagram-proxy config)
+             ,@(if (get-value 'instagram-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger (match-regex "https://(www.)?insta.*")
                                     :original-url "www.instagram.com"
-                                    :redirect-url (quri:uri ,(get-value 'instagram-proxy config))
+                                    :redirect-url (quri:uri ,(get-value 'instagram-frontend config))
                                     :redirect-rule '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
                                                      ("/media/" . "/p/"))))
                    '())
-             ,@(if (get-value 'fandom-proxy config)
+             ,@(if (get-value 'fandom-frontend config)
                    `((make-instance 'router:redirector
                                     :trigger "https://([\\w'-]+)\\.fandom.com/wiki/(.*)"
                                     :redirect-url (quri:uri ,(format #f "~a/\\1/wiki/\\2"
-                                                                     (get-value 'fandom-proxy config))))))))))
+                                                                     (get-value 'fandom-frontend config))))))))))
 
         (defmethod nyxt:on-signal-load-finished :around ((mode nyxt/history-mode:history-mode) url)
           (call-next-method mode (router:trace-url url)))
