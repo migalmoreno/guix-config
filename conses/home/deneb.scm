@@ -1,5 +1,6 @@
 (define-module (conses home deneb)
   #:use-module (conses features matrix)
+  #:use-module (conses features scheme)
   #:use-module (conses packages matrix)
   #:use-module (rde features base)
   #:use-module (gnu services)
@@ -18,4 +19,10 @@
    (feature-pantalaimon
     #:pantalaimon pantalaimon-next
     #:ignore-device-verification? #t
-    #:ssl? #f)))
+    #:ssl? #f)
+   (feature-guix
+    #:authorized-directories
+    '("~/src/projects/fdroid.el"
+      "~/src/projects/nyxt.el"
+      "~/src/projects/dotfiles"
+      "~/src/projects/tau"))))
