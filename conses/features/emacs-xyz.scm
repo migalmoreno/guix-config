@@ -48,7 +48,6 @@
             feature-emacs-browse-url
             feature-emacs-eww
             feature-emacs-webpaste
-            feature-emacs-time
             feature-emacs-dired
             feature-emacs-calc
             feature-emacs-tramp
@@ -2920,61 +2919,6 @@ be used in descending order of priority."
 ;;;
 ;;; Generic
 ;;;
-
-(define* (feature-emacs-time
-          #:key
-          (world-clock-timezones #f)
-          (world-clock-key "C")
-          (world-clock-time-format "%A %d %B %R %Z")
-          (display-time? #f)
-          (display-time-24hr? #f)
-          (display-time-date? #f))
-  "Configure time.el, an Emacs library to display the time.
-Choose the timezones you'll be prompted with upon calling `world-clock'
-with WORLD-CLOCK-TIMEZONES and change its format with WORLD-CLOCK-TIME-FORMAT
-(see `format-time-string' in Emacs for information on the format strings).
-If you want to display time on the mode line, set DISPLAY-TIME? to #t, and
-accordingly set its appearance with DISPLAY-TIME-24HR? and DISPLAY-TIME-DATE?."
-  (ensure-pred maybe-list? world-clock-timezones)
-  (ensure-pred string? world-clock-key)
-  (ensure-pred string? world-clock-time-format)
-  (ensure-pred boolean? display-time?)
-  (ensure-pred boolean? display-time-24hr?)
-  (ensure-pred boolean? display-time-date?)
-
-  (define emacs-f-name 'time)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to time.el."
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((eval-when-compile
-          (require 'time))
-        (with-eval-after-load 'rde-keymaps
-          (define-key rde-app-map (kbd ,world-clock-key) 'world-clock))
-        ,@(if world-clock-timezones
-              `((setq world-clock-list ',world-clock-timezones))
-              '())
-        (setq display-time-world-time-format ,world-clock-time-format)
-        (setq display-time-default-load-average nil)
-        (setq display-time-load-average-threshold 0)
-        ,@(if display-time-date?
-              '((setq display-time-day-and-date t))
-              '())
-        ,@(if display-time-24hr?
-              '((setq display-time-24hr-format t))
-              '())
-        ,@(if display-time?
-              '((display-time-mode))
-              '())))))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . #t)))
-   (home-services-getter get-home-services)))
 
 (define* (feature-emacs-dired
           #:key
