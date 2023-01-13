@@ -248,14 +248,13 @@ IPC interface.")
         (revision "0"))
     (package
       (inherit emacs-pulseaudio-control)
-      (name "emacs-pulseaudio-control-next")
       (version (git-version "0" revision commit))
       (source (origin
                 (method git-fetch)
                 (uri (git-reference
                       (url "https://git.sr.ht/~flexibeast/pulseaudio-control")
                       (commit commit)))
-                (file-name (git-file-name name version))
+                (file-name (git-file-name (package-name emacs-pulseaudio-control) version))
                 (sha256
                  (base32 "0wm312pqp0i5i6qh6g3nacnnvsrad58927cl2g42gxzrzlb3slv5")))))))
 
