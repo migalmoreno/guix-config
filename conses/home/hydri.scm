@@ -81,6 +81,11 @@
    home-environment-variables-service-type
    '(("GTK_THEME" . "postmarketos-oled"))))
 
+(define extra-home-packages
+  (strings->packages "nss-certs" "glibc-locales" "seahorse"
+                     "gnome-clocks" "gnome-console" "pinentry-tty"
+                     "portfolio" "pavucontrol" "srain" "geary"))
+
 
 ;;; Home features
 
@@ -93,9 +98,7 @@
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-base-packages
-    #:home-packages (strings->packages "nss-certs" "glibc-locales" "seahorse"
-                                       "gnome-clocks" "gnome-console" "pinentry-tty"
-                                       "portfolio" "pavucontrol" "srain"))
+    #:home-packages extra-home-packages)
    (feature-custom-services
     #:home-services
     (list
