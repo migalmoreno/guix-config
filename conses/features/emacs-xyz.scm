@@ -23,6 +23,7 @@
             feature-emacs-corfu
             feature-emacs-vertico
             feature-emacs-tempel
+            feature-emacs-wgrep
             feature-emacs-project
             feature-emacs-files
             feature-emacs-window
@@ -760,6 +761,30 @@ completion UI based on the default Emacs completion system."
   (feature
    (name f-name)
    (values `((,f-name . ,emacs-tempel)))
+   (home-services-getter get-home-services)))
+
+(define* (feature-emacs-wgrep
+          #:key
+          (emacs-wgrep emacs-wgrep))
+  "Configure wgrep.el, a package to make grep buffers writable and apply
+the changes to files."
+  (ensure-pred file-like? emacs-wgrep)
+
+  (define emacs-f-name 'wgrep)
+  (define f-name (symbol-append 'emacs- emacs-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to emacs-wgrep."
+    (list
+     (rde-elisp-configuration-service
+      emacs-f-name
+      config
+      `((add-hook 'grep-mode-hook 'wgrep-mode))
+      #:elisp-packages (list emacs-wgrep))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . ,emacs-wgrep)))
    (home-services-getter get-home-services)))
 
 
