@@ -5,10 +5,6 @@
   #:use-module (conses features databases)
   #:use-module (conses home hydri)
   #:use-module (conses home services linux)
-  #:use-module (rde packages)
-  #:use-module (rde features)
-  #:use-module (rde features base)
-  #:use-module (rde features system)
   #:use-module (gnu services)
   #:use-module (gnu services ssh)
   #:use-module (gnu services base)
@@ -33,7 +29,12 @@
   #:use-module (gnu home services)
   #:use-module (gnu home-services state)
   #:use-module (guix gexp)
-  #:use-module (nongnu packages linux))
+  #:use-module (nongnu packages linux)
+  #:use-module (rde packages)
+  #:use-module (rde features)
+  #:use-module (rde features base)
+  #:use-module (rde features system)
+  #:use-module (rde features networking))
 
 (define-public %lyra-ssh-key
   (plain-file
@@ -107,6 +108,7 @@
    (feature-host-info
     #:host-name "lyra"
     #:timezone %default-timezone)
+   (feature-networking)
    (feature-postgresql
     #:postgresql-roles
     (list
