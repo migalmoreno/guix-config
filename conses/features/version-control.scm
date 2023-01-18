@@ -135,6 +135,26 @@
               :parser 'json-read
               :complete (cl-function (lambda (&key symbol-status &allow-other-keys)
                                        (message "Set: %S" symbol-status))))))
+
+        (defconst rde-sourcehut-patch-control-codes
+          '("PROPOSED" "NEEDS_REVISION" "SUPERSEDED"
+            "APPROVED" "REJECTED" "APPLIED")
+          "Control codes for SourceHut patches.  See
+`rde-message-srht-add-email-control-code' for how to apply them.")
+
+        (defun rde-sourcehut-add-email-control-code (control-code)
+          "Add custom header for SourceHut email controls.  The CONTROL-CODE
+is among `rde-notmuch-patch-control-codes'."
+          (interactive
+           (list (completing-read "Select control code: "
+                                  rde-sourcehut-patch-control-codes nil t)))
+          (if (member control-code rde-sourcehut-patch-control-codes)
+              (unless (message-fetch-field "X-Sourcehut-Patchset-Update")
+                (message-add-header (format "X-Sourcehut-Patchset-Update: %s"
+                                            control-code)))
+            (user-error "%s is not specified in
+`rde-notmuch-patch-control-codes'" control-code)))
+
         (with-eval-after-load 'srht
           (setq srht-username ,(forge-account-username sourcehut-account))))
       #:elisp-packages (list emacs-srht
