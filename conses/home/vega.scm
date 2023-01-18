@@ -202,7 +202,8 @@
     '("~/src/projects/fdroid.el"
       "~/src/projects/nyxt.el"
       "~/src/projects/dotfiles"
-      "~/src/projects/tau"))
+      "~/src/projects/tubo"
+      "~/src/projects/dojo"))
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))

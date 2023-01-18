@@ -22,7 +22,4 @@
     #:ssl? #f)
    (feature-guix
     #:authorized-directories
-    '("~/src/projects/fdroid.el"
-      "~/src/projects/nyxt.el"
-      "~/src/projects/dotfiles"
-      "~/src/projects/tau"))))
+    '("~/src/tubo"))))
