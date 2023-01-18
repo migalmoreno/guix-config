@@ -33,9 +33,9 @@
    (list
     (nginx-server-configuration
      (listen '("443 ssl http2"))
-     (server-name (list (getenv "TAU_URL")))
-     (ssl-certificate (string-append "/etc/letsencrypt/live/" (getenv "TAU_URL") "/fullchain.pem"))
-     (ssl-certificate-key (string-append "/etc/letsencrypt/live/" (getenv "TAU_URL") "/privkey.pem"))
+     (server-name (list (getenv "TUBO_URL")))
+     (ssl-certificate (string-append "/etc/letsencrypt/live/" (getenv "TUBO_URL") "/fullchain.pem"))
+     (ssl-certificate-key (string-append "/etc/letsencrypt/live/" (getenv "TUBO_URL") "/privkey.pem"))
      (locations
       (list
        (nginx-location-configuration

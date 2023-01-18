@@ -87,9 +87,14 @@
     #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
+   (feature-gnupg
+    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
+    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
+    #:pinentry-flavor 'emacs
+    #:default-ttl 34560000)
    (feature-alternative-frontends
     #:google-frontend "http://localhost:5000"
-    #:youtube-frontend (string-append "https://" (getenv "TAU_URL"))
+    #:youtube-frontend (string-append "https://" (getenv "TUBO_URL"))
     #:reddit-frontend "https://teddit.namazso.eu")
    (feature-android)
    (feature-emacs-fdroid)

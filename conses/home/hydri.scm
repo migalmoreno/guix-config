@@ -126,7 +126,7 @@
                             ((margin-left . 125px))))))
    %emacs-completion-base-features
    (feature-alternative-frontends
-    #:youtube-frontend (getenv "TAU_URL")
+    #:youtube-frontend (getenv "TUBO_URL")
     #:google-frontend #f)
    (feature-nyxt
     #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)

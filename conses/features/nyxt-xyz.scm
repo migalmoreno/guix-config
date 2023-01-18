@@ -606,18 +606,18 @@
     (make-instance
      'search-engine
      :shortcut "sc"
-     :search-url ,(string-append "https://" (getenv "TAU_URL") "/search?q=~a&serviceId=1")
-     :fallback-url ,(string-append "https://" (getenv "TAU_URL")))
+     :search-url ,(string-append "https://" (getenv "TUBO_URL") "/search?q=~a&serviceId=1")
+     :fallback-url ,(string-append "https://" (getenv "TUBO_URL")))
     (make-instance
      'search-engine
      :shortcut "yt"
-     :search-url ,(string-append "https://" (getenv "TAU_URL") "/search?q=~a&serviceId=0")
-     :fallback-url ,(string-append "https://" (getenv "TAU_URL")))
+     :search-url ,(string-append "https://" (getenv "TUBO_URL") "/search?q=~a&serviceId=0")
+     :fallback-url ,(string-append "https://" (getenv "TUBO_URL")))
     (make-instance
      'search-engine
      :shortcut "pt"
-     :search-url ,(string-append "https://" (getenv "TAU_URL") "/search?q=~a&serviceId=3")
-     :fallback-url ,(string-append "https://" (getenv "TAU_URL")))
+     :search-url ,(string-append "https://" (getenv "TUBO_URL") "/search?q=~a&serviceId=3")
+     :fallback-url ,(string-append "https://" (getenv "TUBO_URL")))
     (make-instance
      'search-engine
      :shortcut "et"
