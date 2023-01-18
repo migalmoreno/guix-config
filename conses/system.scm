@@ -42,4 +42,5 @@
     (kernel-arguments %default-kernel-arguments)
     (keyboard-layout %default-keyboard-layout)
     (file-systems %base-file-systems)
-    (issue "This is the GNU system. Welcome.\n")))
+    (issue "This is the GNU system. Welcome.\n")
+    (sudoers-file #f)))
