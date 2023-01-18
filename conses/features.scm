@@ -25,8 +25,8 @@
   #:use-module (rde features shells)
   #:use-module ((rde features emacs-xyz) #:select (feature-emacs-eglot
                                                    feature-emacs-keycast
-                                                   feature-emacs-spelling))
-  #:use-module (rde features gnupg)
+                                                   feature-emacs-spelling
+                                                   feature-emacs-time))
   #:use-module (rde features irc)
   #:use-module ((rde features mail) #:select (feature-mail-settings
                                               feature-isync))
@@ -80,7 +80,8 @@
    (feature-emacs-all-the-icons)
    (feature-emacs-completion #:consult-initial-narrowing? #t)
    (feature-emacs-vertico)
-   (feature-emacs-corfu #:corfu-doc? #t)))
+   (feature-emacs-corfu #:corfu-doc? #t)
+   (feature-emacs-wgrep)))
 
 (define-public %emacs-base-features
   (list
@@ -223,7 +224,8 @@
      "texlive-hyperref" "texlive-fonts-ec"
      "texlive-latex-geometry" "texlive-listings"
      "texlive-xcolor" "texlive-ulem" "texlive-latex-preview"
-     "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"))
+     "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"
+     "texlive-titling" "texlive-latex-titlesec" "texlive-enumitem"))
    (feature-emacs-citar)))
 
 (define-public %communication-base-features
@@ -283,7 +285,7 @@
    (feature-bash)
    (feature-vterm)))
 
-(define gnus-topics
+(define %gnus-topic-alist
   '(("personal"
      "nnmaildir+personal:inbox"
      "nnmaildir+personal:drafts"
@@ -341,7 +343,7 @@
    (feature-emacs-ebdb
     #:ebdb-popup-size 0.2)
    (feature-emacs-gnus
-    #:topic-alist gnus-topics
+    #:topic-alist %gnus-topic-alist
     #:topic-topology
     '(("Gnus" visible)
       (("personal" visible nil))
@@ -361,11 +363,12 @@
     #:posting-styles
     `((".*"
        (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
+      ("^nnmaildir"
+       (signature ,(string-append "Best regards,\n" (getenv "MAIL_PERSONAL_FULLNAME"))))
       ((header "to" ".*@lists.sr.ht")
        (To rde-gnus-get-article-participants)
        (name ,(getenv "USERNAME"))
        (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
-       (In-Reply-To make-message-in-reply-to)
        (signature ,(string-append "Best regards,\n" (getenv "USERNAME"))))
       ("^nntp.+:"
        (To rde-gnus-get-article-participants)
@@ -514,9 +517,15 @@ EndSection"))
                    :resource (lambda (url)
                                (play-video-mpv url :formats nil)))
     (make-instance 'router:opener
+                   :trigger (match-scheme "mailto")
+                   :resource "xdg-open ~a")
+    (make-instance 'router:opener
                    :trigger (match-scheme "magnet" "torrent")
                    :resource (lambda (url)
                                (eval-with-emacs `(transmission-add ,url))))
+    (make-instance 'router:blocker
+                   :trigger (match-domain "lemmy.ml")
+                   :blocklist '(:path (:contains (not "/u/" "/post/"))))
     (make-instance 'router:blocker
                    :trigger (match-regex ,(string-append (get-value 'reddit-frontend config) "/.*"))
                    :instances 'make-teddit-instances
@@ -576,11 +585,6 @@ EndSection"))
 
 (define-public %security-base-features
   (list
-   (feature-gnupg
-    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
-    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
-    #:pinentry-flavor 'tty
-    #:default-ttl 34560000)
    (feature-password-store
     #:remote-password-store-url "git@git.sr.ht:~conses/pass")))
 
