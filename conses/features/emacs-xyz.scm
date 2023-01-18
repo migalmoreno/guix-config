@@ -2029,8 +2029,6 @@ and organizer for Emacs."
                   :store 'nyxt-store-link))
                '())
          (with-eval-after-load 'ox
-           (setq org-export-with-date nil)
-           (setq org-export-with-author nil)
            (setq org-export-preserve-breaks t)
            (setq org-html-postamble nil))
          (with-eval-after-load 'org-download
