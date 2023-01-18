@@ -15,6 +15,7 @@
   #:use-module (rde packages)
   #:use-module (rde features)
   #:use-module (rde features base)
+  #:use-module (rde features gnupg)
   #:use-module (rde features xdg)
   #:use-module (gnu services)
   #:use-module (gnu home services)
@@ -110,6 +111,11 @@
     #:emacs-server-mode? #f
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))
+   (feature-gnupg
+    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
+    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
+    #:pinentry-flavor 'tty
+    #:default-ttl 34560000)
    (feature-fonts)
    (feature-emacs-appearance
     #:header-line-as-mode-line? #f

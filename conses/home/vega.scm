@@ -17,6 +17,7 @@
   #:use-module (rde features ssh)
   #:use-module (rde features base)
   #:use-module (rde features linux)
+  #:use-module (rde features gnupg)
   #:use-module (rde features virtualization)
   #:use-module (gnu home)
   #:use-module (gnu services)
