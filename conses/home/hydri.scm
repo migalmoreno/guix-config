@@ -83,9 +83,10 @@
    '(("GTK_THEME" . "postmarketos-oled"))))
 
 (define extra-home-packages
-  (strings->packages "nss-certs" "glibc-locales" "seahorse"
-                     "gnome-clocks" "gnome-console" "pinentry-tty"
-                     "portfolio" "pavucontrol" "srain" "geary"))
+  (strings->packages
+   "nss-certs" "glibc-locales" "seahorse"
+   "gnome-clocks" "gnome-console" "pinentry-tty"
+   "portfolio" "pavucontrol" "geary" "gnome-maps" "nheko"))
 
 
 ;;; Home features
