@@ -1762,6 +1762,7 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
           (org-priority-faces #f)
           (org-capture-templates #f)
           (org-archive-location (format #f "~a/archive.org::* From %s" org-directory))
+          (org-rename-buffer-to-title? #t)
           (emacs-org-modern emacs-org-modern-next)
           (org-modern? #t)
           (org-indent? #t))
@@ -1774,6 +1775,7 @@ and organizer for Emacs."
   (ensure-pred maybe-list? org-priority-faces)
   (ensure-pred maybe-list? org-capture-templates)
   (ensure-pred path? org-archive-location)
+  (ensure-pred boolean? org-rename-buffer-to-title?)
   (ensure-pred any-package? emacs-org-modern)
   (ensure-pred boolean? org-modern?)
   (ensure-pred boolean? org-indent?)
@@ -1868,6 +1870,30 @@ and organizer for Emacs."
                  (org-promote))))
            (org-fix-position-after-promote))
 
+         (defun rde-org-rename-buffer-to-title (&optional end)
+           "Rename buffer to value of #+TITLE:.
+If END is non-nil search for #+TITLE: at `point' and
+delimit it to END.
+Start an unlimited search at `point-min' otherwise."
+           (interactive)
+           (let ((case-fold-search t)
+                 (beg (or (and end (point))
+                          (point-min))))
+             (save-excursion
+               (when end
+                 (goto-char end)
+                 (setq end (line-end-position)))
+               (goto-char beg)
+               (when (re-search-forward
+                      "^[[:space:]]*#\\+TITLE:[[:space:]]*\\(.*?\\)[[:space:]]*$"
+                      end t)
+                 (rename-buffer (match-string 1)))))
+           nil)
+
+         (defun rde-org-rename-buffer-to-title-config ()
+           "Configure Org to rename buffer to value of #+TITLE:."
+           (font-lock-add-keywords nil '(rde-org-rename-buffer-to-title)))
+
          (define-minor-mode rde-org-minimal-mode
            "Provide a minimal interface to Org mode."
            :group 'rde-org
@@ -1895,6 +1921,9 @@ and organizer for Emacs."
              (org-make-toc-mode -1)
              (setq-local fill-prefix nil)))
 
+         ,@(if org-rename-buffer-to-title?
+               '((add-hook 'org-mode-hook 'rde-org-rename-buffer-to-title-config))
+               '())
          (advice-add 'org-do-promote :override 'rde-org-do-promote)
          (add-hook 'org-mode-hook 'org-fragtog-mode)
          (add-hook 'org-mode-hook 'rde-org-minimal-mode)
