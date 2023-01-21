@@ -38,7 +38,7 @@
   (list
    (feature-transmission)
    (feature-youtube-dl
-    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next-local)
+    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
     #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
                       "--compat-options" "all")
     #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
@@ -46,7 +46,7 @@
    (feature-emacs-emms)
    (feature-mpv
     #:mpv (@ (conses packages video) mpv-34)
-    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next-local)
+    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next)
     #:extra-mpv-conf
     `((border . no)
       (volume . 100)

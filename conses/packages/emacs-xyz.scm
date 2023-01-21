@@ -130,16 +130,6 @@ The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}
                 (sha256
                  (base32 "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
 
-(define-public emacs-ytdl-next-local
-  (package
-    (inherit emacs-ytdl)
-    (name "emacs-ytdl-next-local")
-   (source
-    (local-file
-     (string-append (dirname (dirname %project-root))
-                    "/elisp/ytdl")
-     #:recursive? #t))))
-
 (define-public emacs-fontaine
   (package
    (name "emacs-fontaine")
@@ -211,13 +201,13 @@ and easily switch to and manipulate them.")
        (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))
     (build-system emacs-build-system)
     (home-page "https://github.com/kljohann/mpv.el")
-    (synopsis "Control mpv for easy note-taking.")
+    (synopsis "Control mpv for easy note-taking")
     (description "This package is a potpurri of helper functions to control a mpv process via its
 IPC interface.")
     (license license:gpl3+)))
 
 (define-public emacs-mpv-next
-  (let ((commit "17e509d20132aba393c57c4cbd51c132a375cc53")
+  (let ((commit "bfeb4697fbc1b796671bab2494a116e8e1d30201")
         (branch "feature-add-mode-line-display-modes"))
     (package
      (inherit emacs-mpv)
@@ -230,18 +220,7 @@ IPC interface.")
                      (commit commit)))
                (file-name (git-file-name name version))
                (sha256
-                (base32 "0wvq76plbs9n3blfimj9jypnm59j35zyr7h95glrji6adqv2fw4a")))))))
-
-(define-public emacs-mpv-next-local
-  (package
-   (inherit emacs-mpv)
-   (name "emacs-mpv-next-local")
-   (version "0.1")
-   (source
-    (local-file
-     (string-append (dirname (dirname %project-root))
-                    "/elisp/mpv")
-     #:recursive? #t))))
+                (base32 "0qcrvsrldcdbwqv13xlhz9zias56n13kx14wsvic9ylgdd60rb5v")))))))
 
 (define-public emacs-pulseaudio-control-next
   (let ((commit "34a6114357dbbc6b6720aa013e0f8a48f3739403")
