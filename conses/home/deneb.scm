@@ -22,4 +22,4 @@
     #:ssl? #f)
    (feature-guix
     #:authorized-directories
-    '("~/src/tubo"))))
+    (list "/home/deneb/src/tubo"))))

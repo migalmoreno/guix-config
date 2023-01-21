@@ -19,6 +19,7 @@
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
   #:use-module (rde features virtualization)
+  #:use-module (rde packages)
   #:use-module (gnu home)
   #:use-module (gnu services)
   #:use-module (gnu home services)
@@ -35,6 +36,23 @@
    home-environment-variables-service-type
    '(("GPG_TTY" . "$(tty)")
      ("LESSHISTFILE" . "-"))))
+
+(define extra-home-packages-service
+  (simple-service
+   'add-extra-home-packages
+   home-profile-service-type
+   (strings->packages "haunt" "emacs-ox-haunt")))
+
+(define guix-shell-authorized-directories
+  (map (lambda (dir)
+           (string-append (getenv "HOME") "/" dir))
+         (list
+          "src/projects/fdroid.el"
+          "src/projects/nyxt.el"
+          "src/projects/dotfiles"
+          "src/projects/tubo"
+          "src/projects/dojo"
+          "src/projects/blog")))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
@@ -151,6 +169,7 @@
     (append (@@ (rde features base) %rde-desktop-home-services)
             (list
              extra-shell-envs-service
+             extra-home-packages-service
              (service home-udiskie-service-type)
              (service home-redshift-service-type
                       (home-redshift-configuration
@@ -198,12 +217,7 @@
     #:keyboard-layout (@ (conses system) %default-keyboard-layout)
     #:default-input-method "spanish-keyboard")
    (feature-guix
-    #:authorized-directories
-    '("~/src/projects/fdroid.el"
-      "~/src/projects/nyxt.el"
-      "~/src/projects/dotfiles"
-      "~/src/projects/tubo"
-      "~/src/projects/dojo"))
+    #:authorized-directories guix-shell-authorized-directories)
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))
