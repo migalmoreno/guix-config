@@ -464,6 +464,9 @@
 (define-public (maybe-pair-or-string? x)
   (or (pair? x) (string? x) (not x)))
 
+(define-public (symbol-or-boolean? x)
+  (or (symbol? x) (boolean? x)))
+
 (define* (feature-nyxt-nx-tailor
           #:key
           (auto? #t)
@@ -471,7 +474,7 @@
           (themes %rde-nx-tailor-default-themes)
           (main-themes #f))
   "Configure nx-tailor, a Nyxt theme manager."
-  (ensure-pred maybe-symbol? auto?)
+  (ensure-pred symbol-or-boolean? auto?)
   (ensure-pred boolean? dark-theme?)
   (ensure-pred lisp-config? themes)
   (ensure-pred maybe-pair-or-string? main-themes)
