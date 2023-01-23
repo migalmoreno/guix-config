@@ -27,6 +27,9 @@
 
 (define %domain (getenv "DOMAIN"))
 
+
+;;; Service extensions
+
 (define extra-nginx-config-service
   (simple-service
    'add-extra-nginx-configuration
@@ -47,6 +50,31 @@
                "proxy_set_header HOST $http_host;")))
        %letsencrypt-acme-challenge))))))
 
+(define extra-system-packages
+  (strings->packages "git" "rsync"))
+
+(define extra-system-services
+  (list
+   extra-nginx-config-service
+   (service rsync-service-type
+            (rsync-configuration
+             (modules
+              (list
+               (rsync-module
+                (name "site")
+                (file-name "/srv/http/conses.eu"))))))
+   (service dhcp-client-service-type)
+   (service openssh-service-type
+            (openssh-configuration
+             (openssh (@ (gnu packages ssh) openssh-sans-x))
+             (password-authentication? #f)
+             (permit-root-login 'prohibit-password)
+             (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
+                                ("deneb" ,%default-ssh-key)))))))
+
+
+;;; System features
+
 (define-public %system-features
   (list
    (feature-host-info
@@ -62,7 +90,7 @@
      (targets '("/dev/vda"))
      (terminal-outputs '(console))))
    (feature-base-packages
-    #:system-packages (strings->packages "git"))
+    #:system-packages extra-system-packages)
    (feature-file-systems
     #:file-systems
     (list
@@ -75,17 +103,7 @@
      (swap-space
       (target (file-system-label "swap")))))
    (feature-custom-services
-    #:system-services
-    (list
-     extra-nginx-config-service
-     (service dhcp-client-service-type)
-     (service openssh-service-type
-              (openssh-configuration
-               (openssh (@ (gnu packages ssh) openssh-sans-x))
-               (password-authentication? #f)
-               (permit-root-login 'prohibit-password)
-               (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
-                                  ("deneb" ,%default-ssh-key)))))))
+    #:system-services extra-system-services)
    (feature-web-settings
     #:domain %domain)
    (feature-postgresql)
