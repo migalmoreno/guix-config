@@ -1,5 +1,5 @@
 (define-module (conses home hydri)
-  #:use-module (conses features)
+  #:use-module (conses feature-list)
   #:use-module (conses features gtk)
   #:use-module (conses features emacs)
   #:use-module (conses features nyxt-xyz)

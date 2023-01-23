@@ -1,5 +1,5 @@
 (define-module (conses home vega)
-  #:use-module (conses features)
+  #:use-module (conses feature-list)
   #:use-module (conses features android)
   #:use-module (conses features documentation)
   #:use-module (conses features emacs)

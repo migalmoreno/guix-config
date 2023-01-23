@@ -1,4 +1,4 @@
-(define-module (conses features)
+(define-module (conses feature-list)
   #:use-module (conses features bittorrent)
   #:use-module (conses features bluetooth)
   #:use-module (conses features clojure)
