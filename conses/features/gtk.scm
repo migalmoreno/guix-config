@@ -49,6 +49,10 @@ a single argument procedure that returns a list of CSS rules to be ingested by
     "Return home services related to GTK."
     (require-value 'fonts config)
 
+    (define dark-theme? (and dark-theme? (and=> (getenv "GTK_THEME")
+                                                (lambda (v)
+                                                  (null? (string-contains v ":light"))))))
+
     (list
      (simple-service
       'home-gtk-profile-service
