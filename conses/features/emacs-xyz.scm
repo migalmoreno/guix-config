@@ -205,7 +205,8 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((pixel-scroll-mode)
+      `((with-eval-after-load 'pixel-scroll
+          (pixel-scroll-precision-mode))
         (with-eval-after-load 'mouse
           (setq mouse-yank-at-point nil))
         (with-eval-after-load 'mwheel
