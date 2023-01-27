@@ -10,7 +10,7 @@
           #:key
           (emacs-bluetooth emacs-bluetooth)
           (auto-enable? #t)
-          (bluetooth-key "b"))
+          (bluetooth-key "B"))
   "Configure and set up Bluetooth."
   (ensure-pred boolean? auto-enable?)
   (ensure-pred string? bluetooth-key)
