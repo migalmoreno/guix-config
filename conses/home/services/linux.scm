@@ -1,5 +1,4 @@
 (define-module (conses home services linux)
-  #:use-module (conses packages linux)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)
