@@ -198,7 +198,8 @@
     #:navigator-buttons '((("☆" "Calendar" "Show calendar"
                             (lambda (&rest _)
                               (calendar)) diary "[" "]")))
-    #:banner (file-append (@ (conses packages misc) gnu-meditate-logo) "/meditate.png")
+    #:banner (file-append (@ (conses packages misc) gnu-meditate-logo)
+                          "/meditate.png")
     #:org-agenda-prefix-format "%?-12:c"
     #:banner-max-height 320
     #:banner-max-width 240
