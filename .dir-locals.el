@@ -1,4 +1,6 @@
-((nil . ((eval . (setq-local compile-command "make home"))))
+((nil . ((fill-column . 78)
+         (sentence-end-double-space . t)
+         (eval . (setq-local compile-command "make home"))))
  (scheme-mode . ((eval . (with-eval-after-load 'geiser-guile
                            (let ((project-root (directory-file-name
                                                 (locate-dominating-file default-directory ".dir-locals.el"))))
