@@ -13,16 +13,16 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:export (feature-goimapnotify
+  #:export (mail-acc
+            mail-lst
+            mail-directory-fn
+            feature-goimapnotify
             feature-emacs-ebdb
             feature-emacs-gnus
             feature-emacs-message
             feature-emacs-smtpmail
             feature-emacs-org-mime
-            %base-mail-features
-            mail-acc
-            mail-lst
-            mail-directory-fn))
+            feature-emacs-debbugs))
 
 (define* (mail-acc id user type #:optional pass-cmd)
   "Make a simple mail account."
@@ -106,11 +106,17 @@ is not provided, use all the mail accounts."
           #:key
           (emacs-ebdb emacs-ebdb)
           (ebdb-sources (list "~/documents/contacts"))
-          (ebdb-popup-size 0.4))
-  "Configure the EBDB contact management package for Emacs."
-  (ensure-pred any-package? emacs-ebdb)
+          (ebdb-popup-size 0.4)
+          (ebdb-key "b"))
+  "Configure the ebdb contact management package for Emacs.
+EBDB-SOURCES is a list of filenames to retrieve database
+information from.
+You can control the size of ebdb popup windows via EBDB-POPUP-SIZE
+with a floating-point value between 0 and 1."
+  (ensure-pred file-like? emacs-ebdb)
   (ensure-pred list-of-strings? ebdb-sources)
   (ensure-pred number? ebdb-popup-size)
+  (ensure-pred string? ebdb-key)
 
   (define emacs-f-name 'ebdb)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -121,14 +127,23 @@ is not provided, use all the mail accounts."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((let ((map mode-specific-map))
-          (define-key map "ba" 'ebdb-display-all-records)
-          (define-key map "bi" 'ebdb-create-record-extended))
+      `((defvar rde-ebdb-map nil
+          "Map to bind EBDB commands under.")
+        (define-prefix-command 'rde-ebdb-map)
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,ebdb-key) 'rde-ebdb-map)
+          (let ((map rde-ebdb-map))
+            (define-key map "a" 'ebdb-display-all-records)
+            (define-key map "c" 'ebdb-create-record-extended)))
         (with-eval-after-load 'ebdb
           (require 'ebdb-i18n)
           (require 'ebdb-vcard)
-          (require 'ebdb-org)
-          (require 'ebdb-mua)
+          ,@(if (get-value 'emacs-org config)
+                '((require 'ebdb-org))
+                '())
+          ,@(if (get-value 'mail-accounts config)
+                '((require 'ebdb-mua))
+                '())
           (setq ebdb-sources (list ,@ebdb-sources))
           (setq ebdb-default-country nil)
           (setq ebdb-default-window-size ,ebdb-popup-size)
@@ -352,8 +367,8 @@ but it won't appear on the right Maildir directory."
           (mail-account-ids #f)
           (message-archive-method #f)
           (message-archive-group #f))
-  "Configure the Gnus newsreader. If MAIL-ACCOUNT-IDS
-is not provided, use all the mail accounts."
+  "Configure the Gnus newsreader.
+If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
   (ensure-pred maybe-list? posting-styles)
   (ensure-pred path? gnus-directory)
   (ensure-pred maybe-list? group-parameters)
