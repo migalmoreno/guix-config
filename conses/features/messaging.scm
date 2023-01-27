@@ -60,7 +60,8 @@ how to retrieve it. This is only needed for tokens that start with @code{xoxc}."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'cl-seq)
+      `((eval-when-compile
+         (require 'cl-macs))
         (defgroup rde-slack nil
           "Utilities for slack.el, the Emacs Slack client."
           :group 'rde)
@@ -111,16 +112,16 @@ how to retrieve it. This is only needed for tokens that start with @code{xoxc}."
                       :token ,(slack-account-token slack-acc)
                       :cookie ,(or (slack-account-cookie slack-acc) 'nil)))
                   (get-value 'slack-accounts config))))
+        (with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,slack-key) 'rde-slack-map)
+          (define-key rde-slack-map "c" 'rde-slack-connect))
         (with-eval-after-load 'slack
           (setq slack-buffer-emojify t)
           (setq slack-prefer-current-team t)
           (setq slack-buffer-function 'switch-to-buffer)
-          (with-eval-after-load 'rde-keymaps
-            (define-key rde-app-map (kbd ,slack-key) 'rde-slack-map)
-            (let ((map rde-slack-map))
-              (define-key map "c" 'rde-slack-connect)
-              (define-key map "s" 'slack-channel-select)
-              (define-key map "t" 'slack-change-current-team)))
+          (let ((map rde-slack-map))
+            (define-key map "s" 'slack-channel-select)
+            (define-key map "t" 'slack-change-current-team))
           (set-face-attribute 'slack-preview-face nil :background 'unspecified)))
       #:elisp-packages (list emacs-slack))))
 
