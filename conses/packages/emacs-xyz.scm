@@ -190,22 +190,6 @@ all such presets.")
 and easily switch to and manipulate them.")
     (license license:gpl3+)))
 
-(define-public emacs-mpv
-  (package
-    (name "emacs-mpv")
-    (version "20220801.1917")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://melpa.org/packages/mpv-" version ".el"))
-       (sha256 (base32 "0lx1mx4wj97s4s72icl2gjldncyanwqszcckwwpk9h36al6j1hsr"))))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/kljohann/mpv.el")
-    (synopsis "Control mpv for easy note-taking")
-    (description "This package is a potpurri of helper functions to control a mpv process via its
-IPC interface.")
-    (license license:gpl3+)))
-
 (define-public emacs-mpv-next
   (let ((commit "bfeb4697fbc1b796671bab2494a116e8e1d30201")
         (branch "feature-add-mode-line-display-modes"))
@@ -237,32 +221,6 @@ IPC interface.")
                 (sha256
                  (base32 "0wm312pqp0i5i6qh6g3nacnnvsrad58927cl2g42gxzrzlb3slv5")))))))
 
-(define-public emacs-circadian-next
-  (package
-    (name "emacs-circadian")
-    (version "20181024.1256")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://melpa.org/packages/circadian-" version ".el"))
-       (sha256 (base32 "09pkyjb6h83xy6hq9ik98cfm8nfqhfjaa10s6yd81wi12bfaszas"))))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/guidoschmidt/circadian.el")
-    (synopsis "Theme-switching for Emacs based on daytime.")
-    (description "Circadian provides automated theme switching based on daytime.")
-    (license license:expat)))
-
-(define-public emacs-org-modern-next
-  (package
-    (inherit emacs-org-modern)
-    (version "20220821.1927")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://melpa.org/packages/org-modern-" version ".el"))
-       (sha256 (base32 "020smw3ck08v11bb8vackabawahcjazlr0ll00cwmv9bgz3hcqh8"))))
-    (build-system emacs-build-system)))
-
 (define-public emacs-calc-currency
   (let ((commit "7021d892ef38b01b875082aba4bae2517ce47ae6")
         (revision "0"))
@@ -285,30 +243,6 @@ IPC interface.")
       (synopsis "Add currency units to Emacs Calc.")
       (description "This package adds custom units to the Units Table in Emacs Calc by fetching
 exchange rates backends.")
-      (license license:gpl3+))))
-
-(define-public emacs-hydra-posframe
-  (let ((commit "343a269b52d6fb6e5ae6c09d91833ff4620490ec")
-        (revision "0"))
-    (package
-      (name "emacs-hydra-posframe")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/Ladicle/hydra-posframe")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256 (base32 "03f9r8glyjvbnwwy5dmy42643r21dr4vii0js8lzlds7h7qnd9jm"))))
-      (build-system emacs-build-system)
-      (propagated-inputs
-       (list emacs-hydra emacs-posframe))
-      (home-page "https://github.com/Ladicle/hydra-posframe")
-      (synopsis "Hydra extension which shows hydra hints on posframe.")
-      (description "This package adds a Hydra extension that lets the user see their hydras in a
- posframe, allowing them to be centered in the Emacs frame.")
       (license license:gpl3+))))
 
 (define-public emacs-capf-autosuggest
