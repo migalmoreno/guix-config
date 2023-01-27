@@ -212,7 +212,7 @@
         ;;   (define-key map "gS" 'guix-find-service-definition))
         (with-eval-after-load 'rde-keymaps
           (let ((map rde-app-map))
-            (define-key map "s" 'daemons)
+            (define-key map "D" 'daemons)
             (define-key map "S" 'rde-guix-daemons-root)))
         (with-eval-after-load 'daemons
           (setq daemons-init-system-submodules '(daemons-shepherd))
