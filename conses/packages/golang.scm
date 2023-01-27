@@ -8,32 +8,6 @@
   #:use-module (guix build-system go)
   #:use-module ((guix licenses) #:prefix license:))
 
-(define-public go-filippo-io-edwards25519
-  (let ((commit "383e08737b4a509c950b7c284100c55bb1816a16")
-        (revision "0"))
-    (package
-      (name "go-filippo-io-edwards25519")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/FiloSottile/edwards25519")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256
-          (base32 "04kaxiv2n0kphh8w7qfdfa45jwr4yvafly2ggllir1xwy6npdgi0"))))
-      (build-system go-build-system)
-      (arguments
-       '(#:import-path "filippo.io/edwards25519"))
-      (home-page "https://github.com/FiloSottile/edwards25519")
-      (synopsis "A safer, faster, and more powerful low-level
-edwards25519 Go implementation.")
-      (description "This library implements the edwards25519 elliptic curve, exposing
-the necessary APIs to build a wide array of higher-level primitives.")
-      (license license:bsd-3))))
-
 (define-public go-github-com-skip2-go-qrcode
   (let ((commit "da1b6568686e89143e94f980a98bc2dbd5537f13")
         (revision "0"))
