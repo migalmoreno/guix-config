@@ -535,10 +535,41 @@ is not provided, use all the mail accounts."
           (setq gnus-sorted-header-list gnus-visible-headers))
         ,#~"(with-eval-after-load 'gnus-art
 (define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
-(define-key gnus-article-mode-map [remap shr-browse-url] #'rde-gnus-shr-browse-url-new-window))")
-      #:elisp-packages (list emacs-debbugs))))
+(define-key gnus-article-mode-map [remap shr-browse-url] #'rde-gnus-shr-browse-url-new-window))"))))
 
   (feature
    (name f-name)
    (values `((,f-name . #t)))
+   (home-services-getter get-home-services)))
+
+
+;;;
+;;; feature-emacs-debbugs
+;;;
+
+(define* (feature-emacs-debbugs
+          #:key
+          (emacs-debbugs emacs-debbugs)
+          (debbugs-gnu-default-packages
+           (list "emacs" "guix" "guix-patches")))
+  "Configure the Debbugs user interface for Emacs."
+  (ensure-pred file-like? emacs-debbugs)
+  (ensure-pred list? debbugs-gnu-default-packages)
+
+  (define emacs-f-name 'debbugs)
+  (define f-name (symbol-append 'emacs- emacs-f-name))
+
+  (define (get-home-services config)
+    "Return home services related to Debbugs."
+    (list
+     (rde-elisp-configuration-service
+      emacs-f-name
+      config
+      `((with-eval-after-load 'debbugs
+          (setq debbugs-gnu-default-packages ,debbugs-gnu-default-packages)))
+      #:elisp-packages (list emacs-debbugs))))
+
+  (feature
+   (name f-name)
+   (values `((,f-name . ,emacs-debbugs)))
    (home-services-getter get-home-services)))
