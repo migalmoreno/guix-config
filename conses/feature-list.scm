@@ -361,9 +361,7 @@
       ("^nntp"
        (display . 1000)))
     #:posting-styles
-    `((".*"
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
-      ("^nnmaildir"
+    `(("^nnmaildir"
        (signature ,(string-append "Best regards,\n" (getenv "MAIL_PERSONAL_FULLNAME"))))
       ((header "to" ".*@lists.sr.ht")
        (To rde-gnus-get-article-participants)
