@@ -82,7 +82,7 @@
           (fringes #f)
           (mode-line-padding 4)
           (header-line-padding 4)
-          (tab-bar-padding 4)
+          (tab-bar-padding 2)
           (header-line-as-mode-line? #t))
   "Configure Emacs's appearance."
   (ensure-pred any-package? emacs-modus-themes)
@@ -1662,7 +1662,6 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
                                                     (e e)))))
           (setq dashboard-image-banner-max-height ,banner-max-height)
           (setq dashboard-image-banner-max-width ,banner-max-width)
-          '()
           ,@(if items
                 `((setq dashboard-items ',items))
                 '())
@@ -2065,8 +2064,7 @@ Start an unlimited search at `point-min' otherwise."
                   :store 'nyxt-store-link))
                '())
          (with-eval-after-load 'ox
-           (setq org-export-preserve-breaks t)
-           (setq org-html-postamble nil))
+           (setq org-export-preserve-breaks t))
          (with-eval-after-load 'org-download
            (setq org-download-image-dir "images")
            (setq org-download-image-org-width 300)))
