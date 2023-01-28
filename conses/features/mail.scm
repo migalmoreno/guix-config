@@ -77,8 +77,9 @@ is not provided, use all the mail accounts."
        (config
         `#(,@(map
               (lambda (mail-acc)
-                `((host . ,(assoc-ref (assoc-ref %default-msmtp-provider-settings
-                                                 (mail-account-type mail-acc))
+                `((host . ,(assoc-ref
+                            (assoc-ref %default-msmtp-provider-settings
+                                       (mail-account-type mail-acc))
                                       'host))
                   (port . 143)
                   (tls . #f)
@@ -89,12 +90,15 @@ is not provided, use all the mail accounts."
                   (alias . ,(mail-account-id mail-acc))
                   (trigger . 20)
                   (boxes . #(((mailbox . "Inbox")
-                              (onNewMail . ,(format #f "mbsync ~a" (mail-account-id mail-acc)))
-                              (onNewMailPost . ,(format #f "emacsclient -e '~s'"
-                                                        '(notifications-notify
-                                                          :app-name "goimapnotify"
-                                                          :title "New email received"
-                                                          :timeout 5000))))))))
+                              ,(cons 'onNewMail
+                                     (format #f "mbsync ~a"
+                                             (mail-account-id mail-acc)))
+                              ,(cons 'onNewMailPost
+                                     (format #f "emacsclient -e '~s'"
+                                             '(notifications-notify
+                                               :app-name "goimapnotify"
+                                               :title "New email received"
+                                               :timeout 5000))))))))
               mail-accounts)))))))
 
   (feature
@@ -202,8 +206,11 @@ with a floating-point value between 0 and 1."
       'home-message-emacs-tempel-service
       home-emacs-tempel-service-type
       `(,#~"text-mode"
-        (cut "--8<---------------cut here---------------start------------->8---" n r n
-             "--8<---------------cut here---------------end--------------->8---" n)
+        (cut
+         "--8<---------------cut here---------------start------------->8---"
+         n r n
+         "--8<---------------cut here---------------end--------------->8---"
+         n)
         (asciibox "+-" (make-string (length str) ?-) "-+" n
                   "| " (s str) " |" n
                   "+-" (make-string (length str) ?-) "-+" n)))
@@ -221,15 +228,16 @@ If this header is missing, the outgoing message will go through,
 but it won't appear on the right Maildir directory."
           (if (gnus-alive-p)
               (unless (message-fetch-field "Gcc")
-                (message-add-header (format "Gcc: %s"
-                                            (let ((groups
-                                                   (cl-remove-if-not
-                                                    (lambda (group)
-                                                      (string-match (rx "Sent" eol) group))
-                                                    (rde-gnus--get-topic-groups))))
-                                              (if (> 1 (length groups))
-                                                  (completing-read "Account: " groups)
-                                                (car groups))))))
+                (message-add-header
+                 (format "Gcc: %s"
+                         (let ((groups
+                                (cl-remove-if-not
+                                 (lambda (group)
+                                   (string-match (rx "Sent" eol) group))
+                                 (rde-gnus--get-topic-groups))))
+                           (if (> 1 (length groups))
+                               (completing-read "Account: " groups)
+                               (car groups))))))
             (error "Gnus is not running.  No GCC header will be inserted")))
 
         (define-minor-mode rde-message-mode
@@ -239,7 +247,8 @@ but it won't appear on the right Maildir directory."
               (display-line-numbers-mode -1)
             (display-line-numbers-mode 1)))
         ,@(if (get-value 'emacs-org-mime config)
-              `((add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart))
+              `((add-hook 'message-send-hook
+                          'org-mime-confirm-when-no-multipart))
               '())
 
         (add-hook 'message-mode-hook 'rde-message-mode)
@@ -257,10 +266,13 @@ but it won't appear on the right Maildir directory."
                    (_ 't)))
           ,@(cond
              ((get-value 'msmtp config)
-              `((setq sendmail-program ,(file-append (get-value 'msmtp config) "/bin/msmtp"))
-                (setq message-send-mail-function 'message-send-mail-with-sendmail)
+              `((setq sendmail-program
+                      ,(file-append (get-value 'msmtp config) "/bin/msmtp"))
+                (setq message-send-mail-function
+                      'message-send-mail-with-sendmail)
                 (setq message-sendmail-f-is-evil t)
-                (setq message-sendmail-extra-arguments '("--read-envelope-from"))))
+                (setq message-sendmail-extra-arguments
+                      '("--read-envelope-from"))))
              ((get-value 'emacs-smtpmail config)
               `((setq message-send-mail-function 'smtpmail-send-it)))
              (#t '())))))))
@@ -312,7 +324,8 @@ but it won't appear on the right Maildir directory."
         (let ((map message-mode-map))
           (define-key map (kbd "C-c M-z") 'org-mime-htmlize)
           (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode))
-        (setq org-mime-export-options '(:section-numbers nil :with-author nil :with-toc nil)))
+        (setq org-mime-export-options
+              '(:section-numbers nil :with-author nil :with-toc nil)))
       #:elisp-packages (list emacs-org-mime))))
 
   (feature
@@ -464,8 +477,9 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
                 `((setq gnus-novice-user nil))
               '())
           (setq gnus-interactive-exit nil)
-          (setq gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date
-                                             (not gnus-thread-sort-by-number)))
+          (setq gnus-thread-sort-functions
+                '(gnus-thread-sort-by-most-recent-date
+                  (not gnus-thread-sort-by-number)))
           (setq gnus-permanently-visible-groups "^nnmaildir")
           (setq gnus-parameters ',group-parameters)
           (setq gnus-directory ,gnus-directory)
@@ -487,20 +501,24 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
                       (map (lambda (mail-acc)
                              `(,(symbol->string (mail-account-id mail-acc))
                                (name ,(get-value 'full-name config))
-                               (signature ,(match (get-value 'message-signature config)
-                                             ((? procedure? e) (e config))
-                                             ((? string? e) e)
-                                             (#f 'nil)
-                                             (_ 't)))
+                               (signature
+                                ,(match (get-value 'message-signature config)
+                                   ((? procedure? e) (e config))
+                                   ((? string? e) e)
+                                   (#f 'nil)
+                                   (_ 't)))
                                ("X-Message-SMTP-Method"
-                                ,(format #f "smtp ~a ~a ~a"
-                                         (assoc-ref (assoc-ref %default-msmtp-provider-settings
-                                                               (mail-account-type mail-acc))
-                                                    'host)
-                                         (assoc-ref (assoc-ref %default-msmtp-provider-settings
-                                                               (mail-account-type mail-acc))
-                                                    'port)
-                                         (mail-account-fqda mail-acc)))))
+                                ,(format
+                                  #f "smtp ~a ~a ~a"
+                                  (assoc-ref
+                                   (assoc-ref %default-msmtp-provider-settings
+                                              (mail-account-type mail-acc))
+                                             'host)
+                                  (assoc-ref
+                                   (assoc-ref %default-msmtp-provider-settings
+                                              (mail-account-type mail-acc))
+                                   'port)
+                                  (mail-account-fqda mail-acc)))))
                            mail-accounts))
                   ,@posting-styles))
           (setq gnus-select-method '(nnnil))
@@ -509,24 +527,37 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
                         (map (lambda (mail-acc)
                                `(nnmaildir
                                  ,(symbol->string (mail-account-id mail-acc))
-                                 (directory ,(string-append mail-dir "/accounts/"
-                                                            (mail-account-fqda mail-acc)))))
+                                 (directory
+                                  ,(string-append
+                                    mail-dir "/accounts/"
+                                    (mail-account-fqda mail-acc)))))
                              mail-accounts)
                       '())
                   (nntp "gwene"
                         (nntp-address "news.gwene.org"))
                   (nnfolder "archive"
-                            (nnfolder-directory ,(string-append mail-dir "/archive"))
-                            (nnfolder-active-file ,(string-append mail-dir "/archive/active"))
+                            (nnfolder-directory
+                             ,(string-append mail-dir "/archive"))
+                            (nnfolder-active-file
+                             ,(string-append mail-dir "/archive/active"))
                             (nnfolder-get-new-mail nil)
                             (nnfolder-inhibit-expiry t)))))
         (with-eval-after-load 'mail-source
-          (setq mail-source-directory (expand-file-name "emacs/gnus/mail" (or (xdg-cache-home) "~/.cache")))
-          (setq mail-default-directory (expand-file-name "emacs/gnus" (or (xdg-cache-home) "~/.cache"))))
+          (setq mail-source-directory
+                (expand-file-name
+                 "emacs/gnus/mail" (or (xdg-cache-home) "~/.cache")))
+          (setq mail-default-directory
+                (expand-file-name
+                 "emacs/gnus" (or (xdg-cache-home) "~/.cache"))))
         (with-eval-after-load 'gnus-start
-          (setq gnus-dribble-directory (expand-file-name "emacs/gnus" (or (xdg-cache-home) "~/.cache")))
-          (setq gnus-startup-file (expand-file-name "emacs/gnus/.newsrc" (or (xdg-cache-home) "~/.cache")))
-          (setq gnus-subscribe-newsgroup-method 'gnus-subscribe-hierarchically)
+          (setq gnus-dribble-directory
+                (expand-file-name
+                 "emacs/gnus" (or (xdg-cache-home) "~/.cache")))
+          (setq gnus-startup-file
+                (expand-file-name
+                 "emacs/gnus/.newsrc" (or (xdg-cache-home) "~/.cache")))
+          (setq gnus-subscribe-newsgroup-method
+                'gnus-subscribe-hierarchically)
           (setq gnus-check-new-newsgroups nil)
           (setq gnus-save-killed-list nil))
         (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
@@ -534,14 +565,17 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
         (with-eval-after-load 'gnus-sum
           (setq gnus-thread-hide-subtree t))
         (with-eval-after-load 'nndraft-directory
-          (setq nndraft-directory (expand-file-name "emacs/gnus/mail/drafts" (or (xdg-cache-home) "~/.cache"))))
+          (setq nndraft-directory
+                (expand-file-name "emacs/gnus/mail/drafts"
+                                  (or (xdg-cache-home) "~/.cache"))))
         (add-hook 'gnus-topic-mode-hook 'rde-gnus-topic-mode)
         (with-eval-after-load 'gnus-topic
           (setq gnus-gcc-mark-as-read t)
-          (setq gnus-server-alist '(("archive" nnfolder "archive"
-                                     (nnfolder-directory ,(string-append mail-dir "/archive"))
-                                     (nnfolder-get-new-mail nil)
-                                     (nnfolder-inhibit-expiry t)))))
+          (setq gnus-server-alist
+                '(("archive" nnfolder "archive"
+                   (nnfolder-directory ,(string-append mail-dir "/archive"))
+                   (nnfolder-get-new-mail nil)
+                   (nnfolder-inhibit-expiry t)))))
         (with-eval-after-load 'gnus-art
           (setq gnus-visible-headers
                 '("^From:" "^To:" "^Cc:" "^Subject:" "^Newsgroups:" "^Date:"
@@ -549,8 +583,10 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
                   "^X-Mailer:" "^Message-ID:" "^In-Reply-To:" "^References:"))
           (setq gnus-sorted-header-list gnus-visible-headers))
         ,#~"(with-eval-after-load 'gnus-art
-(define-key gnus-article-mode-map [remap shr-mouse-browse-url] #'shr-mouse-browse-url-new-window)
-(define-key gnus-article-mode-map [remap shr-browse-url] #'rde-gnus-shr-browse-url-new-window))"))))
+(define-key gnus-article-mode-map [remap shr-mouse-browse-url]
+#'shr-mouse-browse-url-new-window)
+(define-key gnus-article-mode-map [remap shr-browse-url]
+#'rde-gnus-shr-browse-url-new-window))"))))
 
   (feature
    (name f-name)
@@ -566,10 +602,16 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
           #:key
           (emacs-debbugs emacs-debbugs)
           (debbugs-gnu-default-packages
-           (list "emacs" "guix" "guix-patches")))
-  "Configure the Debbugs user interface for Emacs."
+           (list "emacs" "guix" "guix-patches"))
+          (debbugs-gnu-default-severities
+           (list "serious" "important" "normal")))
+  "Configure the Debbugs user interface for Emacs.
+Set the default packages to retrieve bugs for with
+DEBBUGS-GNU-DEFAULT-PACKAGES and the default severities
+with which bugs should be filered with DEBBUGS-GNU-DEFAULT-SEVERITIES."
   (ensure-pred file-like? emacs-debbugs)
   (ensure-pred list? debbugs-gnu-default-packages)
+  (ensure-pred list? debbugs-gnu-default-severities)
 
   (define emacs-f-name 'debbugs)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -581,7 +623,10 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
       emacs-f-name
       config
       `((with-eval-after-load 'debbugs
-          (setq debbugs-gnu-default-packages ,debbugs-gnu-default-packages)))
+          (setq debbugs-gnu-default-packages
+                (list ,@debbugs-gnu-default-packages))
+          (setq debbugs-gnu-default-severities
+                (list ,@debbugs-gnu-default-severities))))
       #:elisp-packages (list emacs-debbugs))))
 
   (feature
