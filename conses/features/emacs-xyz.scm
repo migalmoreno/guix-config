@@ -381,7 +381,7 @@ themes for Emacs."
             '()))
       #:elisp-packages (append
                          (if auto?
-                             (list emacs-circadian-next)
+                             (list emacs-circadian)
                            '())
                          (if (get-value 'emacs-nyxt config)
                              (list (get-value 'emacs-nyxt config))
@@ -1764,7 +1764,7 @@ PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'.
           (org-capture-templates #f)
           (org-archive-location (format #f "~a/archive.org::* From %s" org-directory))
           (org-rename-buffer-to-title? #t)
-          (emacs-org-modern emacs-org-modern-next)
+          (emacs-org-modern emacs-org-modern)
           (org-modern? #t)
           (org-indent? #t))
   "Configure Org Mode, the outline-based note management tool
