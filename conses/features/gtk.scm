@@ -29,29 +29,38 @@
 
 (define* (feature-gtk3
           #:key
-          (custom-gtk-theme %default-gtk-theme)
-          (gtk-theme (make-theme "Numix" numix-gtk-theme))
-          (icon-theme (make-theme "Papirus-Dark" papirus-icon-theme))
-          (cursor-theme (make-theme "Bibata-Modern-Classic" bibata-cursor-theme))
           (dark-theme? #f)
+          (custom-gtk-theme %default-gtk-theme)
+          (gtk-theme (make-theme
+                      "Numix"
+                      numix-gtk-theme))
+          (icon-theme (make-theme
+                       "Papirus-Dark"
+                       papirus-icon-theme))
+          (cursor-theme (make-theme
+                         "Bibata-Modern-Classic"
+                         bibata-cursor-theme))
           (extra-gtk-settings '()))
   "Configure the GTK3 toolkit.
-You can change the GTK-THEME or override some of its styling via CUSTOM-GTK-THEME,
-a single argument procedure that returns a list of CSS rules to be ingested by
-@code{serialize-css-config}."
+You can change the GTK-THEME or override some of its styling via
+CUSTOM-GTK-THEME, a single argument procedure that returns a list
+of CSS rules to be ingested by @code{serialize-css-config}."
+  (ensure-pred boolean? dark-theme?)
   (ensure-pred maybe-procedure? custom-gtk-theme)
   (ensure-pred maybe-theme? gtk-theme)
   (ensure-pred maybe-theme? icon-theme)
   (ensure-pred maybe-theme? cursor-theme)
   (ensure-pred list? extra-gtk-settings)
 
+  (define gtk-dark-theme?
+    (or dark-theme?
+        (and=> (getenv "GTK_THEME")
+               (lambda (v)
+                 (null? (string-contains v ":light"))))))
+
   (define (get-home-services config)
     "Return home services related to GTK."
     (require-value 'fonts config)
-
-    (define dark-theme? (and dark-theme? (and=> (getenv "GTK_THEME")
-                                                (lambda (v)
-                                                  (null? (string-contains v ":light"))))))
 
     (list
      (simple-service
@@ -68,29 +77,35 @@ a single argument procedure that returns a list of CSS rules to be ingested by
        (if cursor-theme
            (list (theme-package cursor-theme))
            '())))
-     (service home-gtk3-service-type
-              (home-gtk3-configuration
-               (default-cursor (and=> cursor-theme theme-name))
-               (settings
-                `((Settings
-                   (,@(if gtk-theme
-                          `((gtk-theme-name . ,#~(format #f "~a" #$(theme-name gtk-theme))))
-                          '())
-                    ,@(if icon-theme
-                          `((gtk-icon-theme-name . ,#~(format #f "~a" #$(theme-name icon-theme))))
-                          '())
-                    ,@(if cursor-theme
-                          `((gtk-cursor-theme-name . ,#~(format #f "~a" #$(theme-name cursor-theme))))
-                          '())
-                    (gtk-font-name . ,#~(format #f "~a" #$(font-specification (get-value 'font-monospace config))))
-                    (gtk-application-prefer-dark-theme . ,dark-theme?)
-                    ,@extra-gtk-settings))))
-               (theme (and custom-gtk-theme (custom-gtk-theme config)))))))
+     (service
+      home-gtk3-service-type
+      (home-gtk3-configuration
+       (default-cursor (and=> cursor-theme theme-name))
+       (settings
+        `((Settings
+           (,@(if gtk-theme
+                  `(,(cons 'gtk-theme-name
+                           #~(format #f "~a" #$(theme-name gtk-theme))))
+                  '())
+            ,@(if icon-theme
+                  `(,(cons 'gtk-icon-theme-name
+                           #~(format #f "~a" #$(theme-name icon-theme))))
+                  '())
+            ,@(if cursor-theme
+                  `(,(cons 'gtk-cursor-theme-name
+                           #~(format #f "~a" #$(theme-name cursor-theme))))
+                  '())
+            (gtk-font-name . ,#~(format #f "~a"
+                                        #$(font-specification
+                                           (get-value 'font-monospace config))))
+            (gtk-application-prefer-dark-theme . ,gtk-dark-theme?)
+            ,@extra-gtk-settings))))
+       (theme (and custom-gtk-theme (custom-gtk-theme config)))))))
 
   (feature
    (name 'gtk)
    (values `((gtk . #t)
-             (gtk-dark-theme? . ,dark-theme?)
+             (gtk-dark-theme? . ,gtk-dark-theme?)
              (gtk-theme . ,gtk-theme)
              (gtk-icon-theme . ,icon-theme)
              (gtk-cursor-theme . ,cursor-theme)))
@@ -312,12 +327,14 @@ a single argument procedure that returns a list of CSS rules to be ingested by
       (scrolledwindow
        ((border-color . ,secondary-bg)
         (background . ,tertiary-bg)))
-      (#((scrolledwindow overshoot.top) (scrolledwindow overshoot.bottom))
+      (#((scrolledwindow overshoot.top)
+         (scrolledwindow overshoot.bottom))
        ((outline . none)
         (box-shadow . none)
         (background . none)
         (border . none)))
-      (#((stack scrolledwindow viewport) (window stack widget))
+      (#((stack scrolledwindow viewport)
+         (window stack widget))
        ((background . ,bg)
         (color . ,fg)))
       (box.view.vertical
@@ -451,7 +468,8 @@ a single argument procedure that returns a list of CSS rules to be ingested by
        ((background . ,secondary-bg)
         (border-color . ,secondary-bg)
         (outline . none)))
-      ((#{scale:not(.marks-after):not(.marks-before):not(:disabled)}# contents trough slider)
+      ((#{scale:not(.marks-after):not(.marks-before):not(:disabled)}#
+        contents trough slider)
        ((background . ,secondary-bg)
         (border-color . ,bg)
         (box-shadow . none)))
