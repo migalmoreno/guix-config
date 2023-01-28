@@ -39,10 +39,12 @@
    (feature-transmission)
    (feature-youtube-dl
     #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
-    #:music-dl-args '("-q" "-x"  "-f" "bestaudio" "--audio-format" "mp3" "--add-metadata"
-                      "--compat-options" "all")
-    #:video-dl-args '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-                      "--add-metadata" "--compat-options" "all"))
+    #:music-dl-args
+    '("-q" "-x" "-f" "bestaudio" "--audio-format" "mp3"
+      "--add-metadata" "--compat-options" "all")
+    #:video-dl-args
+    '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+      "--add-metadata" "--compat-options" "all"))
    (feature-emacs-emms)
    (feature-mpv
     #:mpv (@ (conses packages video) mpv-34)
@@ -50,7 +52,9 @@
     #:extra-mpv-conf
     `((border . no)
       (volume . 100)
-      (screenshot-directory . ,(string-append (or (getenv "XDG_DATA_HOME") "~/.local/share") "/mpv/screenshots"))
+      ,(cons 'screenshot-directory
+             (string-append (or (getenv "XDG_DATA_HOME") "~/.local/share")
+                            "/mpv/screenshots"))
       (autofit . 800x800)
       (osd-border-size . 2)
       (osd-bar . yes)
@@ -164,31 +168,17 @@
                 "%<%Y%m%d%H%M%S>-${slug}.org"
                 "#+title: ${title}\n#+filetags: :${Topic}:\n")
        :unnarrowed t)
-      ("e" "Programming Concept" plain
-       ,(string-append
-         "#+begin_src %^{Language|elisp|lisp|scheme"
-         "|clojure|ocaml|js}\n%?\n#+end_src\n")
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:DATA_TYPE: "
-                  "%^{Data Type|Function|Method|Variable|Macro|Procedure}"
-                  "\n:END:\n#+title: ${title}\n#+filetags: :${Topic}:"))
-       :unnarrowed t)
-      ("r" "Reference" plain "%?"
+      ("r" "reference" plain "%?"
        :if-new (file+head
                 "%<%Y%m%d%H%M%S>-${slug}.org"
                 ,(string-append
                   ":PROPERTIES:\n:ROAM_REFS: ${ref}\n:END:\n"
                   "#+title: ${title}\n#+filetags: :${Topic}:"))
        :unnarrowed t)
-      ("m" "Recipe" plain "* Ingredients\n- %?\n* Directions"
+      ("m" "recipe" plain "* Ingredients\n- %?\n* Directions"
        :if-new (file+head
                 "%<%Y%m%d%H%M%S>-${title}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:ROAM_REFS: %l\n"
-                  ":MEAL_TYPE: %^{Meal Type|Lunch\|Breakfast|Appetizer|Dessert}"
-                  "\n:END:\n#+title: ${title}\n#+filetags: :cooking:"))
+                "#+title: ${title}\n#+filetags: :cooking:\n")
        :unnarrowed t)
       ("b" "Book" plain
        "* Chapters\n%?"
@@ -328,18 +318,11 @@
     #:mail-accounts
     (list
      (mail-acc 'personal (getenv "MAIL_PERSONAL_EMAIL") 'gandi))
-    #:mail-directory-fn mail-directory-fn
-    #:mailing-lists
-    (list
-     (mail-lst 'guix-devel "guix-devel@gnu.org"
-               '("https://yhetil.org/guix-devel/0"))
-     (mail-lst 'guix-devel "guix-bugs@gnu.org"
-               '("https://yhetil.org/guix-bugs/0"))
-     (mail-lst 'guix-devel "guix-patches@gnu.org"
-               '("https://yhetil.org/guix-patches/1"))))
+    #:mail-directory-fn mail-directory-fn)
    (feature-isync)
    (feature-goimapnotify
-    #:goimapnotify (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
+    #:goimapnotify
+    (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
    (feature-emacs-ebdb
     #:ebdb-popup-size 0.2)
    (feature-emacs-gnus
@@ -362,7 +345,13 @@
        (display . 1000)))
     #:posting-styles
     `(("^nnmaildir"
-       (signature ,(string-append "Best regards,\n" (getenv "MAIL_PERSONAL_FULLNAME"))))
+       (signature ,(string-append
+                    "Best regards,\n" (getenv "MAIL_PERSONAL_FULLNAME"))))
+      ((header "cc" ".*@debbugs.gnu.org")
+       (To rde-gnus-get-article-participants)
+       (name ,(getenv "USERNAME"))
+       (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
+       (signature ,(string-append "Best regards,\n" (getenv "USERNAME"))))
       ((header "to" ".*@lists.sr.ht")
        (To rde-gnus-get-article-participants)
        (name ,(getenv "USERNAME"))
@@ -378,7 +367,8 @@
    (feature-emacs-org-mime)
    (feature-emacs-smtpmail
     #:smtp-user (getenv "MAIL_PERSONAL_EMAIL")
-    #:smtp-server (getenv "MAIL_PERSONAL_HOST"))))
+    #:smtp-server (getenv "MAIL_PERSONAL_HOST"))
+   (feature-emacs-debbugs)))
 
 (define-public %programming-base-features
   (list
@@ -396,15 +386,12 @@
    (feature-javascript
     #:node (@ (gnu packages node) node-lts))
    (feature-lisp
-    #:custom-sly-prompt? #t
     #:extra-lisp-packages
     (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk" "sbcl-lisp-unit2")
     #:extra-source-registry-entries
-    `(("common-lisp/source-registry.conf.d/10-home.conf"
-       ,(plain-file "10-home.conf"
-                    (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
-    #:extra-lisp-templates
-    '((do "(do (" p ")" n> r> ")")))
+    `(("common-lisp/source-registry.conf.d/20-projects.conf"
+       ,(plain-file "20-projects.conf"
+                    (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))
    (feature-ocaml)
    (feature-guile)
    (feature-go)
@@ -415,32 +402,6 @@
   (list
    (feature-emacs-ednc
     #:notifications-icon "")
-   (feature-emacs-exwm
-    #:window-configurations
-    '(((string= exwm-class-name "Nyxt")
-       char-mode t
-       workspace 1
-       simulation-keys nil
-       (exwm-layout-hide-mode-line))
-      ((string= exwm-instance-name "emacs")
-       char-mode t)
-      ((string-match "Android Emulator" exwm-title)
-       floating t)))
-   (feature-emacs-exwm-run-on-tty
-    #:emacs-exwm-tty-number 1
-    #:launch-arguments '("-mm" "--debug-init")
-    #:extra-xorg-config
-    (list
-     "Section \"Monitor\"
-  Identifier \"DP-3\"
-  Option \"DPMS\" \"false\"
-EndSection
-Section \"ServerFlags\"
-  Option \"BlankTime\" \"0\"
-EndSection"))
-   (feature-xorg)
-   (feature-emacs-pulseaudio-control
-    #:emacs-pulseaudio-control (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
    (feature-emacs-tab-bar
     #:modules-left
     `((make-rde-tab-bar-module
@@ -474,9 +435,37 @@ EndSection"))
       (make-rde-tab-bar-module
        :id 'battery
        :label 'battery-mode-line-string)))
+   (feature-emacs-exwm
+    #:window-configurations
+    '(((string= exwm-class-name "Nyxt")
+       char-mode t
+       workspace 1
+       simulation-keys nil
+       (exwm-layout-hide-mode-line))
+      ((string= exwm-instance-name "emacs")
+       char-mode t)
+      ((string-match "Android Emulator" exwm-title)
+       floating t)))
+   (feature-emacs-exwm-run-on-tty
+    #:emacs-exwm-tty-number 1
+    #:launch-arguments '("-mm" "--debug-init")
+    #:extra-xorg-config
+    (list
+     "Section \"Monitor\"
+  Identifier \"DP-3\"
+  Option \"DPMS\" \"false\"
+EndSection
+Section \"ServerFlags\"
+  Option \"BlankTime\" \"0\"
+EndSection"))
+   (feature-xorg)
+   (feature-emacs-pulseaudio-control
+    #:emacs-pulseaudio-control
+    (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
    (feature-emacs-battery)
    (feature-emacs-display-wttr
-    #:emacs-display-wttr (@ (conses packages emacs-xyz) emacs-display-wttr-next))))
+    #:emacs-display-wttr
+    (@ (conses packages emacs-xyz) emacs-display-wttr-next))))
 
 (define-public %desktop-base-features
   (list
@@ -500,41 +489,55 @@ EndSection"))
    (feature-fonts)))
 
 (define (nyxt-extra-routes config)
-  `((make-instance 'router:web-route
-                   :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
-                   :redirect-url (quri:uri "https://www.youtube.com")
-                   :resource (lambda (url)
-                               (play-video-mpv url :formats nil :audio t :repeat t)))
-    (make-instance 'router:web-route
-                   :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
-                   :resource (lambda (url)
-                               (play-video-mpv url :formats nil :audio t :repeat t)))
-    (make-instance 'router:opener
-                   :trigger (match-regex "https://gfycat.com/.*" "https://streamable.com/.*"
-                                         "https://.*/videos/watch/.*" ".*cloudfront.*master.m3u8")
-                   :resource (lambda (url)
-                               (play-video-mpv url :formats nil)))
-    (make-instance 'router:opener
-                   :trigger (match-scheme "mailto")
-                   :resource "xdg-open ~a")
-    (make-instance 'router:opener
-                   :trigger (match-scheme "magnet" "torrent")
-                   :resource (lambda (url)
-                               (eval-with-emacs `(transmission-add ,url))))
-    (make-instance 'router:blocker
-                   :trigger (match-domain "lemmy.ml")
-                   :blocklist '(:path (:contains (not "/u/" "/post/"))))
-    (make-instance 'router:blocker
-                   :trigger (match-regex ,(string-append (get-value 'reddit-frontend config) "/.*"))
-                   :instances 'make-teddit-instances
-                   :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))
-    (make-instance 'router:blocker
-                   :trigger (match-regex ,(string-append (get-value 'tiktok-frontend config) "/.*"))
-                   :instances 'make-proxitok-instances
-                   :blocklist '(:path (:contains (not "/video/" "/t/"))))
-    (make-instance 'router:blocker
-                   :trigger (match-regex ,(string-append (get-value 'instagram-frontend config) "/.*"))
-                   :blocklist '(:path (:contains (not "/media/"))))))
+  `((make-instance
+     'router:web-route
+     :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
+     :redirect-url (quri:uri "https://www.youtube.com")
+     :resource (lambda (url)
+                 (play-video-mpv url :formats nil :audio t :repeat t)))
+    (make-instance
+     'router:web-route
+     :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
+     :resource (lambda (url)
+                 (play-video-mpv url :formats nil :audio t :repeat t)))
+    (make-instance
+     'router:opener
+     :trigger (match-regex "https://gfycat.com/.*"
+                           "https://streamable.com/.*"
+                           "https://.*/videos/watch/.*"
+                           ".*cloudfront.*master.m3u8")
+     :resource (lambda (url)
+                 (play-video-mpv url :formats nil)))
+    (make-instance
+     'router:opener
+     :trigger (match-scheme "mailto")
+     :resource "xdg-open ~a")
+    (make-instance
+     'router:opener
+     :trigger (match-scheme "magnet" "torrent")
+     :resource (lambda (url)
+                 (eval-with-emacs `(transmission-add ,url))))
+    (make-instance
+     'router:blocker
+     :trigger (match-domain "lemmy.ml")
+     :blocklist '(:path (:contains (not "/u/" "/post/"))))
+    (make-instance
+     'router:blocker
+     :trigger (match-regex
+               ,(string-append (get-value 'reddit-frontend config) "/.*"))
+     :instances 'make-teddit-instances
+     :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))
+    (make-instance
+     'router:blocker
+     :trigger (match-regex
+               ,(string-append (get-value 'tiktok-frontend config) "/.*"))
+     :instances 'make-proxitok-instances
+     :blocklist '(:path (:contains (not "/video/" "/t/"))))
+    (make-instance
+     'router:blocker
+     :trigger (match-regex
+               ,(string-append (get-value 'instagram-frontend config) "/.*"))
+     :blocklist '(:path (:contains (not "/media/"))))))
 
 (define-public %nyxt-base-features
   (list
@@ -579,7 +582,8 @@ EndSection"))
    (feature-emacs-browse-url)
    (feature-emacs-eww)
    (feature-emacs-webpaste
-    #:webpaste-providers '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))))
+    #:webpaste-providers
+    '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))))
 
 (define-public %security-base-features
   (list
@@ -607,4 +611,5 @@ EndSection"))
    (feature-git
     #:primary-forge-account-id 'sh
     #:sign-commits? #t
-    #:global-ignores '("**/.direnv" "node_modules" "*.elc" ".log"))))
+    #:global-ignores
+    '("**/.direnv" "node_modules" "*.elc" ".log"))))
