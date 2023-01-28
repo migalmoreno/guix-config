@@ -41,7 +41,8 @@
   (simple-service
    'add-extra-home-packages
    home-profile-service-type
-   (strings->packages "haunt" "emacs-ox-haunt")))
+   (strings->packages
+    "haunt")))
 
 (define guix-shell-authorized-directories
   (map (lambda (dir)
@@ -97,39 +98,8 @@
 
 ;;; Home features
 
-(define-public %home-features
+(define %vega-nyxt-features
   (make-feature-list
-   (feature-user-info
-    #:user-name "vega"
-    #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
-    #:email (getenv "MAIL_PERSONAL_EMAIL")
-    #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
-    #:rde-advanced-user? #t
-    #:emacs-advanced-user? #t)
-   (feature-gnupg
-    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
-    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
-    #:pinentry-flavor 'emacs
-    #:default-ttl 34560000)
-   (feature-alternative-frontends
-    #:google-frontend "http://localhost:5000"
-    #:youtube-frontend (string-append "https://" (getenv "TUBO_URL"))
-    #:reddit-frontend "https://teddit.namazso.eu")
-   (feature-android)
-   (feature-emacs-fdroid)
-   (feature-manpages)
-   (feature-emacs
-    #:emacs (@ (gnu packages emacs) emacs-next)
-    #:default-application-launcher? #f
-    #:emacs-server-mode? #f
-    #:extra-init-el
-    '((add-hook 'after-init-hook 'server-start)))
-   %ui-base-features
-   (feature-gtk3
-    #:dark-theme? #t
-    #:gtk-theme #f
-    #:extra-gtk-settings extra-gtk-settings)
-   %emacs-completion-base-features
    (feature-nyxt
     #:scroll-distance 150
     #:temporary-history? #t
@@ -158,12 +128,12 @@
          (format-status-load-status status)
          (format-status-url status)))
        (:div :id "modes"
-             :title (nyxt::modes-string buffer)
+        :title (nyxt::modes-string buffer)
         (:raw
-         (format-status-modes status))))))
-   %multimedia-base-features
-   %emacs-desktop-base-features
-   %emacs-base-features
+         (format-status-modes status))))))))
+
+(define %vega-desktop-features
+  (make-feature-list
    (feature-desktop-services
     #:default-desktop-home-services
     (append (@@ (rde features base) %rde-desktop-home-services)
@@ -176,7 +146,50 @@
                        (dawn-time "07:00")
                        (dusk-time "20:00"))))))
    %desktop-base-features
-   (feature-pipewire)
+   (feature-pipewire)))
+
+(define-public %home-features
+  (make-feature-list
+   (feature-user-info
+    #:user-name "vega"
+    #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
+    #:email (getenv "MAIL_PERSONAL_EMAIL")
+    #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
+    #:rde-advanced-user? #t
+    #:emacs-advanced-user? #t)
+   (feature-gnupg
+    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
+    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
+    #:pinentry-flavor 'emacs
+    #:default-ttl 34560000)
+   (feature-alternative-frontends
+    #:google-frontend "http://localhost:5000"
+    #:youtube-frontend (string-append "https://" (getenv "TUBO_URL"))
+    #:reddit-frontend "https://teddit.namazso.eu")
+   (feature-android)
+   (feature-emacs-fdroid)
+   (feature-manpages)
+   (feature-emacs
+    #:emacs (@ (gnu packages emacs) emacs-next)
+    #:default-application-launcher? #f
+    #:emacs-server-mode? #f
+    #:extra-init-el
+    '((add-hook 'after-init-hook 'server-start))
+    #:additional-elisp-packages
+    (strings->packages
+     ;; "emacs-tempel-collection"
+     "emacs-ox-haunt"))
+   %ui-base-features
+   (feature-gtk3
+    #:dark-theme? #t
+    #:gtk-theme #f
+    #:extra-gtk-settings extra-gtk-settings)
+   %emacs-completion-base-features
+   %vega-nyxt-features
+   %multimedia-base-features
+   %emacs-desktop-base-features
+   %emacs-base-features
+   %vega-desktop-features
    %web-base-features
    %mail-base-features
    %security-base-features
