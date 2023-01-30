@@ -262,31 +262,6 @@ the first completion candidate for in-buffer completion as an overlay. Instead o
  hook completion-at-point-functions, this package uses its own hook capf-autosuggest-capf-functions.")
     (license license:gpl3+)))
 
-(define-public emacs-clj-deps-new
-  (let ((commit "183089e6d4ded90efff491916e1c87411ead0461")
-        (revision "0"))
-    (package
-      (name "emacs-clj-deps-new")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri (git-reference
-               (commit commit)
-               (url "https://github.com/jpe90/emacs-clj-deps-new")))
-         (file-name (git-file-name name version))
-         (sha256
-          (base32 "0a4fz838mxcv42z3r5h1i7nlqpl1ipqc6ljlgbhvz5hw6bd0p96w"))))
-      (build-system emacs-build-system)
-      (propagated-inputs
-       (list emacs-transient))
-      (home-page "https://github.com/jpe90/emacs-clj-deps-new")
-      (synopsis "Emacs interface to deps-new and clj-new.")
-      (description "Elisp wrapper around @code{deps-new,https://github.com/seancorfield/deps-new}
- and @url{clj-new,https://github.com/seancorfield/clj-new}. Create Clojure projects from templates
-within Emacs.")
-      (license license:gpl3))))
-
 (define-public emacs-hexrgb
   (let ((commit "90e5f07f14bdb9966648977965094c75072691d4")
         (revision "0"))
