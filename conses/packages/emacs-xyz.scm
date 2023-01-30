@@ -206,21 +206,6 @@ and easily switch to and manipulate them.")
                (sha256
                 (base32 "0qcrvsrldcdbwqv13xlhz9zias56n13kx14wsvic9ylgdd60rb5v")))))))
 
-(define-public emacs-pulseaudio-control-next
-  (let ((commit "34a6114357dbbc6b6720aa013e0f8a48f3739403")
-        (revision "0"))
-    (package
-      (inherit emacs-pulseaudio-control)
-      (version (git-version "0" revision commit))
-      (source (origin
-                (method git-fetch)
-                (uri (git-reference
-                      (url "https://git.sr.ht/~flexibeast/pulseaudio-control")
-                      (commit commit)))
-                (file-name (git-file-name (package-name emacs-pulseaudio-control) version))
-                (sha256
-                 (base32 "0wm312pqp0i5i6qh6g3nacnnvsrad58927cl2g42gxzrzlb3slv5")))))))
-
 (define-public emacs-calc-currency
   (let ((commit "7021d892ef38b01b875082aba4bae2517ce47ae6")
         (revision "0"))
