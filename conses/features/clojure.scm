@@ -21,9 +21,12 @@
 (define* (feature-clojure
           #:key
           (jdk (list openjdk17 "jdk"))
-          (clojure clojure))
+          (clojure clojure)
+          (emacs-clj-deps-new-key "J"))
   "Set up and configure tooling for Clojure."
+  (ensure-pred any-package? jdk)
   (ensure-pred any-package? clojure)
+  (ensure-pred string? emacs-clj-deps-new-key)
 
   (define f-name 'clojure)
 
@@ -39,27 +42,15 @@
             clojure-tools
             jdk))
      (simple-service
-      'home-clojure-envs
+      'add-clojure-home-envs
       home-environment-variables-service-type
       '(("LEIN_HOME" . "$XDG_DATA_HOME/lein")))
-     (simple-service
-      'home-clojure-templates
-      home-emacs-tempel-service-type
-      `(,#~"clojure-mode clojurescript-mode"
-           (var "(def " p ")")
-           (ns "(ns " p n "  (:require [" p " :as " p "]))")
-           (fn "(fn [" p "]" n> r> ")")
-           (defn "(defn " p n> "[" p "]" n> r> ")")
-           (let "(let [" p "]" n> r> ")")
-           (atom "(atom " p ")")
-           (record "(defrecord " p n> "[" p "])")))
      (rde-elisp-configuration-service
       f-name
       config
       `((with-eval-after-load 'rde-keymaps
           (let ((map rde-app-map))
-            (define-key map "j" 'cider-jack-in)
-            (define-key map "J" 'clj-deps-new)))
+            (define-key map (kbd ,emacs-clj-deps-new-key) 'clj-deps-new)))
         (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
         (with-eval-after-load 'cider
           (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
