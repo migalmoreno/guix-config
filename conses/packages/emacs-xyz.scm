@@ -389,21 +389,3 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (synopsis "Interact with Nyxt from Emacs.")
       (description "nyxt.el consists of custom logic to interact with Nyxt from Emacs.")
       (license license:gpl3+))))
-
-(define-public emacs-dashboard-next
-  (let ((commit "554dc6fac1362dd6b66318c8250eea8bd63aa92f")
-        (revision "0"))
-    (package
-      (inherit emacs-dashboard)
-      (name "emacs-dashboard-next")
-      (version (git-version "0" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri
-          (git-reference
-           (url "https://github.com/emacs-dashboard/emacs-dashboard")
-           (commit commit)))
-         (file-name (git-file-name name version))
-         (sha256
-          (base32 "00jbjryi6m6ah7ylf1w965n4zndm5l54jkfkhjd2y3vxyr706hr8")))))))
