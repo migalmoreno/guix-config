@@ -2,11 +2,11 @@
   #:use-module (conses features fontutils)
   #:use-module (conses features web-browsers)
   #:use-module (conses packages emacs-xyz)
-  #:use-module (conses home services lisp)
   #:use-module (conses utils)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
+  #:use-module (rde serializers lisp)
   #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)
   #:use-module (guix gexp)
@@ -20,6 +20,10 @@
             feature-nyxt-nx-tailor
             feature-nyxt-nx-router
             feature-nyxt-nx-search-engines))
+
+(define lisp-config? sexp-config?)
+(define lisp-serialize sexp-serialize)
+(define serialize-lisp-config serialize-sexp-config)
 
 (define* (feature-nyxt-status
           #:key
