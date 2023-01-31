@@ -28,11 +28,26 @@
                                                    feature-emacs-spelling
                                                    feature-emacs-time))
   #:use-module (rde features irc)
-  #:use-module ((rde features mail) #:select (feature-mail-settings
-                                              feature-isync))
+  #:use-module ((rde features mail) #:select (feature-isync
+                                              feature-mail-settings
+                                              mail-account))
   #:use-module (rde features terminals)
   #:use-module (rde features xdg)
   #:use-module (rde packages))
+
+
+;;; Helpers
+
+(define* (mail-acc id user type #:optional pass-cmd)
+  "Make a simple mail account."
+  (mail-account
+   (id id)
+   (fqda user)
+   (type type)
+   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
+
+
+;;; Base features
 
 (define-public %multimedia-base-features
   (list
