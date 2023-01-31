@@ -1,5 +1,5 @@
 (define-module (conses home services web-browsers)
-  #:use-module (conses home services lisp)
+  #:use-module (rde serializers base)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)
@@ -12,6 +12,10 @@
   #:export (home-nyxt-configuration
             home-nyxt-service-type
             home-nyxt-extension))
+
+(define lisp-config? sexp-config?)
+(define lisp-serialize sexp-serialize)
+(define serialize-lisp-config serialize-sexp-config)
 
 (define packages? (list-of package?))
 (define serialize-packages empty-serializer)
@@ -58,14 +62,15 @@ auto-rules serialization method} for information on how to write these rules."))
      (filter-fields field)))
 
   (append
-   (if (not (null? (home-nyxt-configuration-config-lisp config)))
+   (if (null? (home-nyxt-configuration-config-lisp config))
+       '()
        (list
         `(".config/nyxt/config.lisp"
           ,(mixed-text-file
             "config.lisp"
-            (serialize-field 'config-lisp))))
-       '())
-   (if (not (null? (home-nyxt-configuration-auto-mode-rules-lisp config)))
+            (serialize-field 'config-lisp)))))
+   (if (null? (home-nyxt-configuration-auto-mode-rules-lisp config))
+       '()
        (list
         `(".local/share/nyxt/auto-mode-rules.lisp"
           ,(mixed-text-file
@@ -73,8 +78,7 @@ auto-rules serialization method} for information on how to write these rules."))
             (serialize-lisp-config 'auto-mode-rules-lisp
                                    `(,#~"("
                                      ,@(home-nyxt-configuration-auto-mode-rules-lisp config)
-                                     ,#~")")))))
-       '())))
+                                     ,#~")"))))))))
 
 (define (home-nyxt-extensions original-config extension-configs)
   (let ((extensions (reverse extension-configs)))
