@@ -13,9 +13,7 @@
   #:use-module (gnu packages emacs-xyz)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:export (mail-acc
-            mail-lst
-            mail-directory-fn
+  #:export (mail-directory-fn
             feature-goimapnotify
             feature-emacs-ebdb
             feature-emacs-gnus
@@ -23,23 +21,6 @@
             feature-emacs-smtpmail
             feature-emacs-org-mime
             feature-emacs-debbugs))
-
-(define* (mail-acc id user type #:optional pass-cmd)
-  "Make a simple mail account."
-  (mail-account
-   (id id)
-   (fqda user)
-   (type type)
-   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
-
-(define (mail-lst id fqda urls)
-  "Make a simple mailing list."
-  (mailing-list
-   (id id)
-   (fqda fqda)
-   (config (l2md-repo
-            (name (symbol->string id))
-            (urls urls)))))
 
 (define (mail-directory-fn config)
   (string-append (getenv "XDG_STATE_HOME") "/mail"))
@@ -53,7 +34,7 @@
           #:key
           (mail-account-ids #f)
           (goimapnotify go-gitlab.com-shackra-goimapnotify))
-  "Set up and configure goimapnotify. If MAIL-ACCOUNT-IDS
+  "Set up and configure goimapnotify.  If MAIL-ACCOUNT-IDS
 is not provided, use all the mail accounts."
   (ensure-pred maybe-list? mail-account-ids)
   (ensure-pred any-package? goimapnotify)
