@@ -34,7 +34,7 @@
     "Return home services related to Clojure."
     (list
      (simple-service
-      'home-clojure-profile-service
+      'add-clojure-home-packages
       home-profile-service-type
       (list clojure
             leiningen
