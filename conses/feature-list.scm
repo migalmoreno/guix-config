@@ -290,7 +290,7 @@
    (feature-bash)
    (feature-vterm)))
 
-(define %gnus-topic-alist
+(define gnus-topic-alist
   '(("personal"
      "nnmaildir+personal:inbox"
      "nnmaildir+personal:drafts"
@@ -341,7 +341,7 @@
    (feature-emacs-ebdb
     #:ebdb-popup-size 0.2)
    (feature-emacs-gnus
-    #:topic-alist %gnus-topic-alist
+    #:topic-alist gnus-topic-alist
     #:topic-topology
     '(("Gnus" visible)
       (("personal" visible nil))
