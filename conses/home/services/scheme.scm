@@ -62,20 +62,20 @@ in ``@code{GUIX_PROFILE}''."))
      (filter-fields field)))
 
   (append
-   (if (not (null? (home-guix-configuration-channels config)))
+   (if (null? (home-guix-configuration-channels config))
+       '()
        (list
         `("guix/channels.scm"
           ,(mixed-text-file
             "channels.scm"
-            (serialize-field 'channels))))
-       '())
-   (if (not (null? (home-guix-configuration-shell-authorized-directories config)))
+            (serialize-field 'channels)))))
+   (if (null? (home-guix-configuration-shell-authorized-directories config))
+       '()
        (list
         `("guix/shell-authorized-directories"
           ,(mixed-text-file
             "shell-authorized-directories"
-            (serialize-field 'shell-authorized-directories))))
-       '())))
+            (serialize-field 'shell-authorized-directories)))))))
 
 (define home-guix-service-type
   (service-type
