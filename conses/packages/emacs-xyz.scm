@@ -151,23 +151,6 @@ set them on demand on graphical Emacs frames. The user option @code{fontaine-pre
 all such presets.")
    (license license:fdl1.3+)))
 
-(define-public emacs-ement-next
-  (let ((commit "2626e37b824cb2a2e8fb008991d140ac3351a909")
-        (revision "1"))
-    (package
-      (inherit emacs-ement)
-      (version (git-version "0.1-pre" revision commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri (git-reference
-               (url "https://github.com/alphapapa/ement.el")
-               (commit commit)))
-         (file-name (git-file-name (package-name emacs-ement) version))
-         (sha256
-          (base32
-           "1wkvx0hrbnlls8dd72g273fx7380jz2gb8ak9cyjbbnwr8a1j03f")))))))
-
 (define-public emacs-bufler
   (package
     (name "emacs-bufler")
