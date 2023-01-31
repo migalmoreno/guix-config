@@ -474,9 +474,7 @@ Section \"ServerFlags\"
   Option \"BlankTime\" \"0\"
 EndSection"))
    (feature-xorg)
-   (feature-emacs-pulseaudio-control
-    #:emacs-pulseaudio-control
-    (@ (conses packages emacs-xyz) emacs-pulseaudio-control-next))
+   (feature-emacs-pulseaudio-control)
    (feature-emacs-battery)
    (feature-emacs-display-wttr
     #:emacs-display-wttr
