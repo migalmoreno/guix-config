@@ -1,4 +1,4 @@
-(define-module (conses system)
+(define-module (conses hosts base)
   #:use-module (conses utils)
   #:use-module (gnu system)
   #:use-module (gnu system keyboard)
@@ -20,6 +20,12 @@
 (define-public %default-kernel linux)
 
 (define-public %default-timezone (getenv "TIMEZONE"))
+
+(define-public %default-email (getenv "MAIL_PERSONAL_EMAIL"))
+
+(define-public %default-domain (getenv "DOMAIN"))
+
+(define-public %tubo-host (getenv "TUBO_HOST"))
 
 (define-public %default-kernel-arguments
   (list "quiet" "net.ifnames=0"))

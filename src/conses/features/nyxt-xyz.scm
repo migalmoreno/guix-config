@@ -577,22 +577,6 @@
      :shortcut "le")
     (engines:discourse
      :shortcut "ae")
-    (engines:discourse
-     :shortcut "cv"
-     :fallback-url (quri:uri "https://clojureverse.org")
-     :base-search-url "https://clojureverse.org/search?q=~a")
-    (engines:discourse
-     :shortcut "oc"
-     :fallback-url (quri:uri "https://discuss.ocaml.org")
-     :base-search-url "https://discuss.ocaml.org/search?q=~a")
-    (engines:discourse
-     :shortcut "or"
-     :fallback-url (quri:uri "https://org-roam.discourse.group")
-     :base-search-url "https://org-roam.discourse.group/search?q=~a")
-    (engines:discourse
-     :shortcut "pc"
-     :fallback-url (quri:uri "https://community.penpot.app/latest")
-     :base-search-url "https://community.penpot.app/search?q=~a")
     (engines:meetup
      :shortcut "me")
     (engines:gitea
@@ -605,41 +589,6 @@
      :search-type :all)
     (engines:lobsters
      :shortcut "lo")
-    (make-instance
-     'search-engine
-     :shortcut "clj"
-     :search-url "https://clojars.org/search?q=~a"
-     :fallback-url "https://clojars.org")
-    (make-instance
-     'search-engine
-     :shortcut "sc"
-     :search-url ,(string-append "https://" (getenv "TUBO_URL") "/search?q=~a&serviceId=1")
-     :fallback-url ,(string-append "https://" (getenv "TUBO_URL")))
-    (make-instance
-     'search-engine
-     :shortcut "yt"
-     :search-url ,(string-append "https://" (getenv "TUBO_URL") "/search?q=~a&serviceId=0")
-     :fallback-url ,(string-append "https://" (getenv "TUBO_URL")))
-    (make-instance
-     'search-engine
-     :shortcut "pt"
-     :search-url ,(string-append "https://" (getenv "TUBO_URL") "/search?q=~a&serviceId=3")
-     :fallback-url ,(string-append "https://" (getenv "TUBO_URL")))
-    (make-instance
-     'search-engine
-     :shortcut "et"
-     :search-url "https://www.etsy.com/search?q=~a"
-     :fallback-url "https://www.etsy.com")
-    (make-instance
-     'search-engine
-     :shortcut "to"
-     :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
-     :fallback-url "https://torrents-csv.ml")
-    (make-instance
-     'search-engine
-     :shortcut "mdn"
-     :search-url "https://developer.mozilla.org/en-US/search?q=~a"
-     :fallback-url "https://developer.mozilla.org")
     ,@(if (get-value 'whoogle config)
           `((engines:whoogle
              :shortcut "who"
@@ -664,11 +613,17 @@
 (define* (feature-nyxt-nx-search-engines
           #:key
           (engines default-nx-search-engines)
+          (extra-engines #f)
           (auto-complete? #f)
           (auto-complete-non-prefix? #f))
   "Configure nx-search-engines, a collection of easy-to-setup
-search engines for Nyxt."
+search engines for Nyxt.
+
+You can pass additional search engines via EXTRA-ENGINES, a
+single argument procedure that takes the current rde configuration
+and returns Lisp configuration containing the engines."
   (ensure-pred maybe-procedure? engines)
+  (ensure-pred maybe-procedure? extra-engines)
   (ensure-pred boolean? auto-complete?)
   (ensure-pred boolean? auto-complete-non-prefix?)
 
@@ -696,6 +651,9 @@ search engines for Nyxt."
                        :base-search-url
                        ,(string-append (get-value 'reddit-frontend config)
                                        "/search?q=~a")))
+                    '())
+              ,@(if extra-engines
+                    (extra-engines config)
                     '())
               ,@(engines config)))))))
       #:lisp-packages '(nx-search-engines))))

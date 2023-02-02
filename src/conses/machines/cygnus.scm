@@ -1,12 +1,11 @@
-(define-module (conses deploy cygnus)
+(define-module (conses machines cygnus)
   #:use-module (conses utils)
-  #:use-module (conses system cygnus)
+  #:use-module (conses hosts cygnus)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
-  #:use-module (gnu system install)
-  #:export (%machine))
+  #:use-module (gnu system install))
 
-(define %machine
+(define-public %machine
   (machine
    (operating-system installation-os)
    (environment managed-host-environment-type)

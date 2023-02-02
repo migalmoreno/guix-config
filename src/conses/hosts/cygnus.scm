@@ -1,11 +1,11 @@
-(define-module (conses system cygnus)
+(define-module (conses hosts cygnus)
+  #:use-module (conses hosts base)
   #:use-module (conses features databases)
   #:use-module (conses features matrix)
   #:use-module (conses features web)
   #:use-module (conses packages web)
   #:use-module (conses packages matrix)
-  #:use-module (conses system)
-  #:use-module (conses system lyra)
+  #:use-module (conses hosts lyra)
   #:use-module (conses system services matrix)
   #:use-module (conses utils)
   #:use-module (rde features base)
@@ -25,7 +25,20 @@
   #:use-module (gnu bootloader grub)
   #:use-module (guix gexp))
 
-(define %domain (getenv "DOMAIN"))
+
+;;; Host-specific utilities
+
+(define cygnus-file-systems
+  (list
+   (file-system
+     (mount-point "/")
+     (device (file-system-label "root"))
+     (type "ext4"))))
+
+(define cygnus-swap-devices
+  (list
+   (swap-space
+    (target (file-system-label "swap")))))
 
 
 ;;; Service extensions
@@ -37,9 +50,11 @@
    (list
     (nginx-server-configuration
      (listen '("443 ssl http2"))
-     (server-name (list (getenv "TUBO_URL")))
-     (ssl-certificate (string-append "/etc/letsencrypt/live/" (getenv "TUBO_URL") "/fullchain.pem"))
-     (ssl-certificate-key (string-append "/etc/letsencrypt/live/" (getenv "TUBO_URL") "/privkey.pem"))
+     (server-name (list %tubo-host))
+     (ssl-certificate (string-append "/etc/letsencrypt/live/"
+                                     %tubo-host "/fullchain.pem"))
+     (ssl-certificate-key (string-append "/etc/letsencrypt/live/"
+                                         %tubo-host "/privkey.pem"))
      (locations
       (list
        (nginx-location-configuration
@@ -62,7 +77,7 @@
               (list
                (rsync-module
                 (name "site")
-                (file-name "/srv/http/conses.eu"))))))
+                (file-name (string-append "/srv/http/" %default-domain)))))))
    (service dhcp-client-service-type)
    (service openssh-service-type
             (openssh-configuration
@@ -72,10 +87,11 @@
              (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
                                 ("deneb" ,%default-ssh-key)))))))
 
-
-;;; System features
 
-(define-public %system-features
+
+;;; Host-specific features
+
+(define-public %cygnus-features
   (list
    (feature-host-info
     #:host-name "cygnus"
@@ -92,43 +108,35 @@
    (feature-base-packages
     #:system-packages extra-system-packages)
    (feature-file-systems
-    #:file-systems
-    (list
-     (file-system
-       (mount-point "/")
-       (device (file-system-label "root"))
-       (type "ext4")))
-    #:swap-devices
-    (list
-     (swap-space
-      (target (file-system-label "swap")))))
+    #:file-systems cygnus-file-systems
+    #:swap-devices cygnus-swap-devices)
    (feature-custom-services
     #:system-services extra-system-services)
    (feature-web-settings
-    #:domain %domain)
+    #:domain %default-domain)
    (feature-postgresql)
    (feature-nginx
     #:nginx nginx-with-dav)
    (feature-certbot
-    #:email (getenv "MAIL_PERSONAL_MAIL"))
+    #:email (getenv "MAIL_PERSONAL_EMAIL"))
    (feature-matrix-settings
-    #:homeserver (string-append "https://matrix." %domain)
+    #:homeserver (string-append "https://matrix." %default-domain)
     #:synapse-configuration
     (synapse-configuration
      (synapse synapse-next)
-     (server-name %domain)
+     (server-name %default-domain)
      (enable-registration? #f)
-     (public-base-url (string-append "https://matrix." %domain))
+     (public-base-url (string-append "https://matrix." %default-domain))
      (shared-secret (getenv "CYGNUS_SYNAPSE_SHARED_SECRET"))
      (postgresql-db? #t)
      (postgresql-db-password (getenv "CYGNUS_SYNAPSE_DB_PASSWORD")))
     #:mautrix-whatsapp-configuration
     (mautrix-whatsapp-configuration
-     (domain %domain)
+     (domain %default-domain)
      (postgresql-db? #t)
      (postgresql-db-password (getenv "CYGNUS_MAUTRIX_WHATSAPP_DB_PASSWORD"))
      (encryption? #t)
-     (permissions `((,%domain . user)
-                    (,(string-append "@admin:" %domain) . admin)))))
+     (permissions `((,%default-domain . user)
+                    (,(string-append "@admin:" %default-domain) . admin)))))
    (feature-synapse
     #:whatsapp-bridge? #t)))

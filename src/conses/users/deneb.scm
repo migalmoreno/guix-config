@@ -1,12 +1,14 @@
-(define-module (conses home deneb)
+(define-module (conses users deneb)
   #:use-module (conses features matrix)
   #:use-module (conses features scheme)
-  #:use-module (conses packages matrix)
-  #:use-module (rde features base)
   #:use-module (gnu services)
-  #:use-module (gnu services networking))
+  #:use-module (gnu services networking)
+  #:use-module (rde features base))
 
-(define-public %home-features
+
+;;; User-specific features
+
+(define-public %user-features
   (list
    (feature-user-info
     #:user-name "deneb"

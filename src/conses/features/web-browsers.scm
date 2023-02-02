@@ -1,10 +1,10 @@
 (define-module (conses features web-browsers)
   #:use-module (conses packages web-browsers)
-  #:use-module (conses home services lisp)
   #:use-module (conses home services web-browsers)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
+  #:use-module (rde serializers lisp)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services xdg)
@@ -15,6 +15,9 @@
   #:export (rde-nyxt-configuration-service
             feature-nyxt
             feature-ungoogled-chromium))
+
+(define lisp-config? sexp-config?)
+(define serialize-lisp-config serialize-sexp-config)
 
 
 ;;;

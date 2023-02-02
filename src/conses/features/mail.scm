@@ -221,12 +221,6 @@ but it won't appear on the right Maildir directory."
                                (car groups))))))
             (error "Gnus is not running.  No GCC header will be inserted")))
 
-        (define-minor-mode rde-message-mode
-          "Tweak the appearance of `message-mode' buffers."
-          :group 'rde-message
-          (if rde-message-mode
-              (display-line-numbers-mode -1)
-            (display-line-numbers-mode 1)))
         ,@(if (get-value 'emacs-org-mime config)
               `((add-hook 'message-send-hook
                           'org-mime-confirm-when-no-multipart))

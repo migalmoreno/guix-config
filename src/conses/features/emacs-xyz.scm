@@ -135,11 +135,6 @@
                           (":PROPERTIES:" . "")
                           ("# -*-" . "")
                           ("-*-" . ""))))
-        (add-hook 'text-mode-hook 'display-line-numbers-mode)
-        (add-hook 'conf-mode-hook 'display-line-numbers-mode)
-        (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-        (with-eval-after-load 'display-line-numbers
-          (setq display-line-numbers-type t))
         (tooltip-mode -1))
       #:early-init
       `((setq inhibit-splash-screen t)
@@ -231,12 +226,15 @@
           #:key
           (emacs-modus-themes emacs-modus-themes)
           (extra-after-load-theme-hooks '())
-          (dark? #f))
+          (dark? #f)
+          (deuteranopia? #f))
   "Configure modus-themes, a pair of elegant and highly accessible
-themes for Emacs."
+themes for Emacs.  DEUTERANOPIA replaces red/green tones with red/blue,
+which helps people with color blindness."
   (ensure-pred any-package? emacs-modus-themes)
   (ensure-pred list? extra-after-load-theme-hooks)
   (ensure-pred boolean? dark?)
+  (ensure-pred boolean? deuteranopia?)
 
   (define emacs-f-name 'modus-themes)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -247,59 +245,73 @@ themes for Emacs."
     (define mode-line-padding (get-value 'emacs-mode-line-padding config))
     (define header-line-padding (get-value 'emacs-header-line-padding config))
     (define tab-bar-padding (get-value 'emacs-tab-bar-padding config))
+    (define dark-theme
+      (if deuteranopia? 'modus-vivendi-deuteranopia 'modus-vivendi))
+    (define light-theme
+      (if deuteranopia? 'modus-operandi-deuteranopia 'modus-operandi))
+    (define theme
+      (if dark? dark-theme light-theme))
 
     (list
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'modus-themes)
+      `((eval-when-compile
+          (require 'modus-themes)
+          (require 'cl-seq))
+        (require ',(symbol-append theme '-theme))
+        (eval-when-compile
+         (enable-theme ',theme))
         (defgroup rde-modus-themes nil
           "Minor nits related to `modus-themes'."
           :group 'rde)
-
         (defcustom rde-modus-themes-tab-bar-padding 1
           "The padding of the tab bar."
           :type 'number
           :group 'rde-modus-themes)
-
         (defcustom rde-modus-themes-header-line-padding 1
           "The padding of the header line."
           :type 'number
           :group 'rde-modus-themes)
+        (defcustom rde-modus-themes-after-enable-theme-hook nil
+          "Normal hook run after enabling a theme."
+          :type 'hook
+          :group 'rde-modus-themes)
+
+        (defun rde-modus-themes-run-after-enable-theme-hook (&rest _args)
+          "Run `rde-modus-themes-after-enable-theme-hook'."
+          (run-hooks 'after-enable-theme-hook))
 
         (defun rde-modus-themes-set-custom-faces (&optional _theme)
           "Set faces based on the current theme or THEME."
           (interactive)
-          (modus-themes-with-colors
-            (custom-set-faces
-             `(tab-bar ((,class :background ,bg-header
-                                :box (:line-width ,rde-modus-themes-tab-bar-padding
-                                                  :color ,bg-header :style unspecified))))
-             `(header-line ((,class :box (:line-width ,rde-modus-themes-header-line-padding
-                                                      :color ,bg-header))))
-             `(aw-leading-char-face ((,class :height 1.0 :foreground ,blue-alt-other))))))
+          (when (modus-themes--current-theme)
+            (modus-themes-with-colors
+              (custom-set-faces
+               `(window-divider ((,c :foreground ,bg-main)))
+               `(window-divider-first-pixel ((,c :foreground ,bg-main)))
+               `(window-divider-last-pixel ((,c :foreground ,bg-main)))
+               `(vertical-border ((,c :foreground ,bg-main)))
+               `(tab-bar ((,c :background ,bg-header
+                              :box (:line-width ,rde-modus-themes-tab-bar-padding
+                                                :color ,bg-header
+                                                :style unspecified))))
+               `(header-line ((,c :box (:line-width ,rde-modus-themes-header-line-padding
+                                                    :color ,bg-header))))
+               `(git-gutter-fr:added ((,c :foreground ,bg-added-intense
+                                         :background ,bg-main)))
+               `(git-gutter-fr:deleted ((,c :foreground ,bg-removed-intense
+                                           :background ,bg-main)))
+               `(git-gutter-fr:modified ((,c :foreground ,bg-changed-intense
+                                            :background ,bg-main)))
+               `(aw-leading-char-face ((,c :height 1.0
+                                           :foreground ,blue-alt-other)))))))
 
         (defun rde-modus-themes--dark-theme-p (&optional theme)
           "Indicate if there is a curently-active dark THEME."
           (if theme
               (eq theme 'modus-vivendi)
             (eq (car custom-enabled-themes) 'modus-vivendi)))
-
-        (defun rde-modus-themes-set-info-faces ()
-          "Apply some extra appearance settings to `Info-mode' and `Info+-mode'."
-          (interactive)
-          (face-remap-add-relative 'default :inherit 'variable-pitch)
-          (modus-themes-with-colors
-            (custom-set-faces
-             `(info-reference-item ((,class :background unspecified :foreground "#00d3d0")))
-             `(info-function-ref-item ((,class :background unspecified :foreground "#b6a0ff")))
-             `(info-quoted-name ((,class :foreground "#b0d6f5")))
-             `(info-double-quoted-name ((,class :foreground "#b0d6f5")))
-             `(info-xref ((,class :foreground "#00bcff" :underline t)))
-             `(info-command-ref-item ((,class :background unspecified)))
-             `(info-macro-ref-item ((,class :background unspecified)))
-             `(info-variable-ref-item ((,class :background unspecified)))
-             `(info-string ((,class :foreground "#79a8ff"))))))
 
         ,@(if (get-value 'mpv config)
               '((require 'mpv)
@@ -314,7 +326,8 @@ themes for Emacs."
                     (mpv-set-property "background" "#ffffff")
                     (mpv-set-property "osd-color" "#323232")))
                 (add-hook 'mpv-started-hook 'rde-modus-themes-change-mpv-theme)
-                (add-hook 'modus-themes-after-load-theme-hook 'rde-modus-themes-change-mpv-theme))
+                (add-hook 'rde-modus-themes-after-enable-theme-hook
+                          'rde-modus-themes-change-mpv-theme))
               '())
 
         ,@(if (get-value 'nyxt-emacs config)
@@ -327,30 +340,33 @@ themes for Emacs."
                             (rde-modus-themes--dark-theme-p))
                         (nyxt-load-theme 'modus-vivendi)
                         (nyxt-load-theme 'modus-operandi))))
-                (add-hook 'modus-themes-after-load-theme-hook 'rde-modus-themes-load-nyxt-theme))
+                (add-hook 'rde-modus-themes-after-enable-theme-hook
+                          'rde-modus-themes-load-nyxt-theme))
               '())
-
 
         (setq rde-modus-themes-header-line-padding ,header-line-padding)
         (setq rde-modus-themes-tab-bar-padding ,tab-bar-padding)
+        (advice-add 'enable-theme :after 'rde-modus-themes-run-after-enable-theme-hook)
         ,@(map (lambda (hook)
-                 `(add-hook 'modus-themes-after-load-theme-hook ',hook))
+                 `(add-hook 'rde-modus-themes-after-enable-theme-hook ',hook))
                (append
                 '(rde-modus-themes-set-custom-faces)
                  extra-after-load-theme-hooks))
-        (modus-themes-load-themes)
+        (load-theme ',theme t)
+        (enable-theme ',theme)
+        (with-eval-after-load 'rde-keymaps
+            (define-key rde-toggle-map (kbd "t") 'modus-themes-toggle))
         (with-eval-after-load 'modus-themes
-          (with-eval-after-load 'rde-keymaps
-            (define-key rde-toggle-map "t" 'modus-themes-toggle))
+          (setq modus-themes-common-palette-overrides
+                `((border-mode-line-active unspecified)
+                  (border-mode-line-inactive unspecified)
+                  (fringe unspecified)
+                  (fg-line-number-inactive "gray50")
+                  (fg-line-number-active fg-main)
+                  (bg-line-number-inactive unspecified)
+                  (bg-line-number-active unspecified)))
+          (setq modus-themes-to-toggle '(,light-theme ,dark-theme))
           (setq modus-themes-mode-line '(borderless))
-          (setq modus-themes-operandi-color-overrides
-                '((fg-window-divider-inner . "#ffffff")
-                  (fg-window-divider-outer . "#ffffff")
-                  (vertical-border . "#ffffff")))
-          (setq modus-themes-vivendi-color-overrides
-                '((fg-window-divider-inner . "#000000")
-                  (fg-window-divider-outer . "#000000")
-                  (vertical-border . "#000000")))
           (setq modus-themes-italic-constructs t)
           (setq modus-themes-italic-constructs t)
           (setq modus-themes-bold-constructs t)
@@ -359,7 +375,6 @@ themes for Emacs."
           (setq modus-themes-region '(bg-only no-extend))
           (setq modus-themes-markup '(intense))
           (setq modus-themes-mixed-fonts t)
-          (setq modus-themes-subtle-line-numbers t)
           (setq modus-themes-headings (quote ((1 . (1.15))
                                               (2 . (1.1))
                                               (3 . (1.1))
@@ -368,13 +383,10 @@ themes for Emacs."
                                               (6 . (1.0))
                                               (7 . (0.9))
                                               (8 . (0.9))))))
-        ,@(if dark?
-              '((modus-themes-load-vivendi))
-              '((modus-themes-load-operandi)))
         ,@(if auto?
               '((require 'circadian)
-                (add-hook 'circadian-after-load-theme-hook 'rde-org-update-faces)
-                (add-hook 'circadian-after-load-theme-hook 'rde-modus-themes-set-theme-dependent-faces)
+                ;; (add-hook 'circadian-after-load-theme-hook 'rde-org-update-faces)
+                (add-hook 'circadian-after-load-theme-hook 'rde-modus-themes-set-custom-faces)
                 (setq circadian-themes '((:sunrise . modus-operandi)
                                          (:sunset . modus-vivendi)))
                 (circadian-setup))
@@ -391,7 +403,8 @@ themes for Emacs."
                              '())
                          (list emacs-modus-themes))
       #:summary "Modus Themes extensions"
-      #:commentary "Customizations to Modus Themes, the elegant, highly legible Emacs themes.")))
+      #:commentary "Customizations to Modus Themes, the elegant,
+highly legible Emacs themes.")))
 
   (feature
    (name f-name)
@@ -1791,8 +1804,6 @@ and organizer for Emacs."
 
   (define (get-home-services config)
     "Return home services related to Org Mode."
-
-
     (append
      (list
       (rde-elisp-configuration-service
@@ -1829,39 +1840,47 @@ and organizer for Emacs."
              (setq org-timer-mode-line-string (substring (org-timer-value-string) 0 -1))
              (force-mode-line-update)))
 
-         (defun rde-org-set-custom-faces ()
-           "Set Org mode's faces for `rde-org-minimal-mode'."
-           (interactive)
-           ,@(if (get-value 'emacs-modus-themes config)
-                 '((eval-when-compile
-                     (require 'modus-themes))
-                   (modus-themes-with-colors
-                     (custom-set-faces
-                      `(org-block ((,class :inherit modus-themes-fixed-pitch :weight normal)))
-                      `(org-verbatim ((,class :inherit (fixed-pitch modus-themes-markup-verbatim) :weight normal)))
-                      `(org-code ((,class :inherit (shadow fixed-pitch modus-themes-markup-code) :weight normal)))
-                      `(org-document-info ((,class :weight bold)))
-                      `(org-document-info ((,class :weight bold)))
-                      `(org-document-info-keyword ((,class :inherit (shadow fixed-pitch))))
-                      `(org-ellipsis ((,class :inherit (font-lock-comment-face)
-                                              :weight normal
-                                              :height ,(or (plist-get
-                                                            (alist-get fontaine--current-preset fontaine-presets)
-                                                            :default-height)
-                                                           1.0))))
-                      `(org-link ((,class :underline t)))
-                      `(org-meta-line ((,class :inherit (font-lock-comment-face fixed-pitch))))
-                      `(org-special-keyword ((,class :inherit (font-lock-comment-face))))
-                      `(org-headline-done ((,class :strike-through t)))
-                      `(org-table ((,class :inherit fixed-pitch)))
-                      `(org-indent ((,class :inherit (org-hide fixed-pitch)))))))
-               '()))
+         ;; ,@(if (get-value 'emacs-modus-themes config)
+         ;;       '((eval-when-compile
+         ;;           (require 'modus-themes)
+         ;;           (require 'cl-seq))
+         ;;         (defun rde-org-set-custom-faces ()
+         ;;           "Set Org mode's faces for `rde-org-minimal-mode'."
+         ;;           (interactive)
+         ;;           (when (modus-themes--current-theme)
+         ;;             (modus-themes-with-colors
+         ;;               (custom-set-faces
+         ;;                `(org-block ((,class :inherit modus-themes-fixed-pitch
+         ;;                                     :weight normal)))
+         ;;                `(org-verbatim ((,class :inherit (fixed-pitch modus-themes-markup-verbatim)
+         ;;                                        :weight normal)))
+         ;;                `(org-code ((,class :inherit (shadow fixed-pitch modus-themes-markup-code)
+         ;;                                    :weight normal)))
+         ;;                `(org-document-info ((,class :weight bold)))
+         ;;                `(org-document-info ((,class :weight bold)))
+         ;;                `(org-document-info-keyword ((,class :inherit (shadow fixed-pitch))))
+         ;;                `(org-ellipsis ((,class :inherit (font-lock-comment-face)
+         ;;                                        :weight normal
+         ;;                                        :height ,(or (plist-get
+         ;;                                                      (alist-get fontaine--current-preset
+         ;;                                                                 fontaine-presets)
+         ;;                                                      :default-height)
+         ;;                                                     1.0))))
+         ;;                `(org-link ((,class :underline t)))
+         ;;                `(org-meta-line ((,class :inherit (font-lock-comment-face fixed-pitch))))
+         ;;                `(org-special-keyword ((,class :inherit (font-lock-comment-face))))
+         ;;                `(org-headline-done ((,class :strike-through t)))
+         ;;                `(org-table ((,class :inherit fixed-pitch)))
+         ;;                `(org-indent ((,class :inherit (org-hide fixed-pitch))))))))
 
-         (defun rde-org-update-faces (&optional _theme)
-           "Apply appropriate faces to currently-active Org mode buffers."
-           (cl-loop for buffer in (org-buffer-list)
-                    do (with-current-buffer buffer
-                         (rde-org-set-custom-faces))))
+         ;;         (defun rde-org-update-faces (&optional _theme)
+         ;;           "Apply appropriate faces to currently-active Org mode buffers."
+         ;;           (cl-loop for buffer in (org-buffer-list)
+         ;;                    do (with-current-buffer buffer
+         ;;                         (rde-org-set-custom-faces))))
+
+         ;;         (add-hook 'org-mode-hook 'rde-org-set-custom-faces))
+         ;;       '())
 
          (cl-defun rde-org-do-promote (&optional (levels 1))
            "Allow promoting the current heading a number of LEVELS high up the tree."
@@ -1914,8 +1933,7 @@ Start an unlimited search at `point-min' otherwise."
                  (display-line-numbers-mode -1)
                  (org-appear-mode)
                  (org-make-toc-mode)
-                 (setq-local fill-prefix "")
-                 (rde-org-set-custom-faces))
+                 (setq-local fill-prefix ""))
              (corfu-mode 1)
              (electric-pair-local-mode)
              (org-indent-mode -1)
@@ -2077,14 +2095,11 @@ Start an unlimited search at `point-min' otherwise."
                           emacs-visual-fill-column
                           emacs-org-fragtog
                           emacs-org-download)
-                         (if (get-value 'emacs-all-the-icons config)
-                             (list (get-value 'emacs-all-the-icons config))
+                         (or (and=> (get-value 'emacs-all-the-icons config) list)
                              '())
-                         (if (get-value 'nyxt config)
-                             (list (get-value 'emacs-nyxt config))
+                         (or (and=> (get-value 'emacs-nyxt config) list)
                              '())
-                         (if (get-value 'emacs-modus-themes config)
-                             (list (get-value 'emacs-modus-themes config))
+                         (or (and=> (get-value 'emacs-modus-themes config) list)
                              '()))))
      (if (get-value 'nyxt config)
          (list
@@ -2675,19 +2690,43 @@ custom themeing.")))
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((with-eval-after-load 'info
+      `(;; ,@(if (get-value 'emacs-modus-themes config)
+        ;;       '((eval-when-compile
+        ;;          (require 'modus-themes)
+        ;;          (require 'cl-seq))
+        ;;         (defun rde-info-set-faces ()
+        ;;           "Apply more pleasant faces to `Info-mode' and `Info+-mode'."
+        ;;           (interactive)
+        ;;           (face-remap-add-relative 'default :inherit 'variable-pitch)
+        ;;           (when (modus-themes--current-theme)
+        ;;             (modus-themes-with-colors
+        ;;              (custom-set-faces
+        ;;               `(info-reference-item ((,class :background unspecified :foreground "#00d3d0")))
+        ;;               `(info-function-ref-item ((,class :background unspecified :foreground "#b6a0ff")))
+        ;;               `(info-quoted-name ((,class :foreground "#b0d6f5")))
+        ;;               `(info-double-quoted-name ((,class :foreground "#b0d6f5")))
+        ;;               `(info-xref ((,class :foreground "#00bcff" :underline t)))
+        ;;               `(info-command-ref-item ((,class :background unspecified)))
+        ;;               `(info-macro-ref-item ((,class :background unspecified)))
+        ;;               `(info-variable-ref-item ((,class :background unspecified)))
+        ;;               `(info-string ((,class :foreground "#79a8ff")))))))
+        ;;         (add-hook 'Info-mode-hook 'rde-info-set-faces))
+        ;;       '())
+        (with-eval-after-load 'info
           (define-key Info-mode-map "q" 'kill-this-buffer)
           (setq Info-use-header-line nil)
           (require 'info+)
           (add-hook 'Info-mode-hook 'visual-line-mode)
-          (add-hook 'Info-mode-hook 'rde-modus-themes-set-info-faces)
           (setq info-manual+node-buffer-name-mode t)
           (setq Info-persist-history-mode t)
           (setq Info-fontify-isolated-quote-flag nil)
           (setq Info-fontify-reference-items-flag t)
           (setq Info-fontify-quotations t)
           (setq Info-breadcrumbs-in-mode-line-mode nil)))
-      #:elisp-packages (list emacs-info-plus))))
+      #:elisp-packages (append
+                         (list emacs-info-plus)
+                         (or (and=> (get-value 'emacs-modus-themes config) list)
+                             '())))))
 
   (feature
    (name f-name)

@@ -1,4 +1,5 @@
-(define-module (conses home hydri)
+(define-module (conses users hydri)
+  #:use-module (conses hosts base)
   #:use-module (conses feature-list)
   #:use-module (conses features gtk)
   #:use-module (conses features emacs)
@@ -23,6 +24,9 @@
   #:use-module (gnu home services xdg)
   #:use-module (gnu packages emacs)
   #:use-module (guix gexp))
+
+
+;;; User-specific utilities
 
 (define-public %hydri-signing-key
   (project-file "conses/keys/hydri.pub"))
@@ -89,9 +93,9 @@
    "portfolio" "pavucontrol" "geary" "gnome-maps" "nheko"))
 
 
-;;; Home features
+;;; User-specific features
 
-(define-public %home-features
+(define-public %user-features
   (make-feature-list
    (feature-user-info
     #:user-name "hydri"
@@ -133,7 +137,7 @@
                             ((margin-left . 125px))))))
    %emacs-completion-base-features
    (feature-alternative-frontends
-    #:youtube-frontend (getenv "TUBO_URL")
+    #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend #f)
    (feature-nyxt
     #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)

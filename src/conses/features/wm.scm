@@ -124,8 +124,7 @@
 
         (defun rde-exwm--call-xrandr (&rest args)
           "Call `xrandr' with the supplied ARGS."
-          (apply 'start-process "xrandr" nil
-                 ,(file-append xrandr "/bin/xrandr") args))
+          (apply 'start-process "xrandr" nil ,xrandr args))
 
         (defun rde-exwm--get-resolution ()
           "Prompt the user for a list of available resolutions."
@@ -184,7 +183,7 @@
                         (list 0 (cadr outputs))))
               (rde-exwm--call-xrandr "--output" outputs "--auto")
               (with-temp-buffer
-                (call-process ,(file-append xrandr "/bin/xrandr")
+                (call-process ,xrandr
                               nil t nil "--listactivemonitors")
                 (goto-char (point-min))
                 (while (not (eobp))

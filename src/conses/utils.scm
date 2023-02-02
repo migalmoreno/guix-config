@@ -16,8 +16,7 @@
    (find (lambda (path)
            (every file-exists? (map (lambda (file)
                                       (string-append path "/" file))
-                                    (list ".dir-locals.el"
-                                          "conses"))))
+                                    (list ".dir-locals.el"))))
          %load-path)))
 
 (define-public (project-file subpath)

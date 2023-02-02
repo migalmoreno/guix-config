@@ -1,6 +1,5 @@
 (define-module (conses features clojure)
   #:use-module (conses utils)
-  #:use-module (conses packages emacs-xyz)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
@@ -20,12 +19,12 @@
 
 (define* (feature-clojure
           #:key
-          (jdk (list openjdk17 "jdk"))
           (clojure clojure)
+          (jdk (list openjdk17 "jdk"))
           (emacs-clj-deps-new-key "J"))
   "Set up and configure tooling for Clojure."
-  (ensure-pred any-package? jdk)
   (ensure-pred any-package? clojure)
+  ;; (ensure-pred file-like? jdk)
   (ensure-pred string? emacs-clj-deps-new-key)
 
   (define f-name 'clojure)
@@ -48,9 +47,8 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((with-eval-after-load 'rde-keymaps
-          (let ((map rde-app-map))
-            (define-key map (kbd ,emacs-clj-deps-new-key) 'clj-deps-new)))
+      `(;; (with-eval-after-load 'rde-keymaps
+        ;;   (define-key rde-app-map (kbd ,emacs-clj-deps-new-key) 'clj-deps-new))
         (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
         (with-eval-after-load 'cider
           (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
@@ -87,7 +85,8 @@
           (setq org-babel-clojure-backend 'cider)))
       #:elisp-packages (list emacs-clojure-mode
                              emacs-cider
-                             emacs-clj-deps-new))))
+                             ;; emacs-clj-deps-new
+                             ))))
 
   (feature
    (name f-name)

@@ -1,4 +1,4 @@
-(define-module (conses home vega)
+(define-module (conses users vega)
   #:use-module (conses feature-list)
   #:use-module (conses features android)
   #:use-module (conses features documentation)
@@ -12,12 +12,14 @@
   #:use-module (conses features web)
   #:use-module (conses features web-browsers)
   #:use-module (conses home services linux)
+  #:use-module (conses hosts base)
   #:use-module (conses utils)
   #:use-module (rde features)
   #:use-module (rde features ssh)
   #:use-module (rde features base)
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
+  #:use-module (rde features networking)
   #:use-module (rde features virtualization)
   #:use-module (rde packages)
   #:use-module (gnu home)
@@ -42,18 +44,20 @@
    'add-extra-home-packages
    home-profile-service-type
    (strings->packages
-    "haunt")))
+    "haunt" "ddcutil" "light" "xclip"
+    "nasm" "gcc-toolchain" "autoconf"
+    "v4l-utils" "binutils" "wireguard-tools")))
 
 (define guix-shell-authorized-directories
   (map (lambda (dir)
-           (string-append (getenv "HOME") "/" dir))
-         (list
-          "src/projects/fdroid.el"
-          "src/projects/nyxt.el"
-          "src/projects/dotfiles"
-          "src/projects/tubo"
-          "src/projects/dojo"
-          "src/projects/blog")))
+         (string-append (getenv "HOME") "/" dir))
+       (list
+        "src/projects/fdroid.el"
+        "src/projects/nyxt.el"
+        "src/projects/dotfiles"
+        "src/projects/tubo"
+        "src/projects/dojo"
+        "src/projects/blog")))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
@@ -96,9 +100,9 @@
          (user . "hydri"))))))))
 
 
-;;; Home features
+;;; User-specific features
 
-(define %vega-nyxt-features
+(define vega-nyxt-features
   (make-feature-list
    (feature-nyxt
     #:scroll-distance 150
@@ -132,8 +136,9 @@
         (:raw
          (format-status-modes status))))))))
 
-(define %vega-desktop-features
+(define vega-desktop-features
   (make-feature-list
+   %desktop-base-features
    (feature-desktop-services
     #:default-desktop-home-services
     (append (@@ (rde features base) %rde-desktop-home-services)
@@ -145,10 +150,10 @@
                       (home-redshift-configuration
                        (dawn-time "07:00")
                        (dusk-time "20:00"))))))
-   %desktop-base-features
+   (feature-networking)
    (feature-pipewire)))
 
-(define-public %home-features
+(define-public %user-features
   (make-feature-list
    (feature-user-info
     #:user-name "vega"
@@ -164,7 +169,7 @@
     #:default-ttl 34560000)
    (feature-alternative-frontends
     #:google-frontend "http://localhost:5000"
-    #:youtube-frontend (string-append "https://" (getenv "TUBO_URL"))
+    #:youtube-frontend (string-append "https://" %tubo-host)
     #:reddit-frontend "https://teddit.namazso.eu")
    (feature-android)
    (feature-emacs-fdroid)
@@ -177,7 +182,7 @@
     '((add-hook 'after-init-hook 'server-start))
     #:additional-elisp-packages
     (strings->packages
-     ;; "emacs-tempel-collection"
+     "emacs-tempel-collection"
      "emacs-ox-haunt"))
    %ui-base-features
    (feature-gtk3
@@ -185,11 +190,11 @@
     #:gtk-theme #f
     #:extra-gtk-settings extra-gtk-settings)
    %emacs-completion-base-features
-   %vega-nyxt-features
+   vega-nyxt-features
    %multimedia-base-features
    %emacs-desktop-base-features
    %emacs-base-features
-   %vega-desktop-features
+   vega-desktop-features
    %web-base-features
    %mail-base-features
    %security-base-features
@@ -199,8 +204,6 @@
    %programming-base-features
    %markup-base-features
    (feature-emacs-dashboard
-    #:emacs-dashboard (@ (conses packages emacs-xyz) emacs-dashboard-next)
-    #:logo-title "Welcome to GNU/Emacs"
     #:item-generators '((recents . dashboard-insert-recents)
                         (bookmarks . dashboard-insert-bookmarks)
                         (agenda . dashboard-insert-agenda)
@@ -208,9 +211,6 @@
     #:items '((agenda . 7)
               (bookmarks . 7)
               (recents . 7))
-    #:navigator-buttons '((("☆" "Calendar" "Show calendar"
-                            (lambda (&rest _)
-                              (calendar)) diary "[" "]")))
     #:banner (file-append (@ (conses packages misc) gnu-meditate-logo)
                           "/meditate.png")
     #:org-agenda-prefix-format "%?-12:c"
@@ -228,10 +228,10 @@
     #:keyboard "dztech/dz65rgb/v1"
     #:keymap "custom")
    (feature-keyboard
-    #:keyboard-layout (@ (conses system) %default-keyboard-layout)
+    #:keyboard-layout %default-keyboard-layout
     #:default-input-method "spanish-keyboard")
-   (feature-guix
-    #:authorized-directories guix-shell-authorized-directories)
+   ;; (feature-guix
+   ;;  #:authorized-directories guix-shell-authorized-directories)
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))

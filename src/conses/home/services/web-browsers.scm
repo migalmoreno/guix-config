@@ -1,5 +1,5 @@
 (define-module (conses home services web-browsers)
-  #:use-module (rde serializers base)
+  #:use-module (rde serializers lisp)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)

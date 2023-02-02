@@ -1,5 +1,5 @@
-(define-module (conses deploy)
-  #:use-module (conses system)
+(define-module (conses machines base)
+  #:use-module (conses hosts base)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh))
 

@@ -19,6 +19,7 @@
   #:use-module (conses features video)
   #:use-module (conses features wm)
   #:use-module (conses features xorg)
+  #:use-module (conses hosts base)
   #:use-module (contrib features javascript)
   #:use-module (guix gexp)
   #:use-module (rde features)
@@ -195,7 +196,7 @@
                 "%<%Y%m%d%H%M%S>-${title}.org"
                 "#+title: ${title}\n#+filetags: :cooking:\n")
        :unnarrowed t)
-      ("b" "Book" plain
+      ("b" "book" plain
        "* Chapters\n%?"
        :if-new (file+head
                 "%<%Y%M%d%H%M%S>-${slug}.org"
@@ -403,10 +404,11 @@
    (feature-lisp
     #:extra-lisp-packages
     (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk" "sbcl-lisp-unit2")
-    #:extra-source-registry-entries
-    `(("common-lisp/source-registry.conf.d/20-projects.conf"
-       ,(plain-file "20-projects.conf"
-                    (format #f "(:tree \"~a/src\")" (getenv "HOME"))))))
+    #:extra-source-registry-files
+    (list
+     (plain-file
+      "10-projects.conf"
+      (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
    (feature-ocaml)
    (feature-guile)
    (feature-go)
@@ -444,9 +446,9 @@
       (make-rde-tab-bar-module
        :id 'weather
        :label 'display-wttr-string)
-      (make-rde-tab-bar-module
-       :id 'volume-sink
-       :label 'pulseaudio-control-display-volume-string)
+      ;; (make-rde-tab-bar-module
+      ;;  :id 'volume-sink
+      ;;  :label 'pulseaudio-control-display-volume-string)
       (make-rde-tab-bar-module
        :id 'battery
        :label 'battery-mode-line-string)))
@@ -474,11 +476,9 @@ Section \"ServerFlags\"
   Option \"BlankTime\" \"0\"
 EndSection"))
    (feature-xorg)
-   (feature-emacs-pulseaudio-control)
+   ;; (feature-emacs-pulseaudio-control)
    (feature-emacs-battery)
-   (feature-emacs-display-wttr
-    #:emacs-display-wttr
-    (@ (conses packages emacs-xyz) emacs-display-wttr-next))))
+   (feature-emacs-display-wttr)))
 
 (define-public %desktop-base-features
   (list
@@ -501,7 +501,7 @@ EndSection"))
     #:auto-theme? #f)
    (feature-fonts)))
 
-(define (nyxt-extra-routes config)
+(define (nx-router-extra-routes config)
   `((make-instance
      'router:web-route
      :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
@@ -552,6 +552,62 @@ EndSection"))
                ,(string-append (get-value 'instagram-frontend config) "/.*"))
      :blocklist '(:path (:contains (not "/media/"))))))
 
+(define (nx-search-engines-extra-engines _)
+  `((make-instance
+     'search-engine
+     :shortcut "clj"
+     :search-url "https://clojars.org/search?q=~a"
+     :fallback-url "https://clojars.org")
+    (make-instance
+     'search-engine
+     :shortcut "et"
+     :search-url "https://www.etsy.com/search?q=~a"
+     :fallback-url "https://www.etsy.com")
+    (make-instance
+     'search-engine
+     :shortcut "to"
+     :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
+     :fallback-url "https://torrents-csv.ml")
+    (make-instance
+     'search-engine
+     :shortcut "mdn"
+     :search-url "https://developer.mozilla.org/en-US/search?q=~a"
+     :fallback-url "https://developer.mozilla.org")
+    (make-instance
+     'search-engine
+     :shortcut "sc"
+     :search-url
+     ,(string-append "https://" %tubo-host "/search?q=~a&serviceId=1")
+     :fallback-url ,(string-append "https://" %tubo-host))
+    (make-instance
+     'search-engine
+     :shortcut "yt"
+     :search-url
+     ,(string-append "https://" %tubo-host "/search?q=~a&serviceId=0")
+     :fallback-url ,(string-append "https://" %tubo-host))
+    (make-instance
+     'search-engine
+     :shortcut "pt"
+     :search-url
+     ,(string-append "https://" %tubo-host "/search?q=~a&serviceId=3")
+     :fallback-url ,(string-append "https://" %tubo-host))
+    (engines:discourse
+     :shortcut "cv"
+     :fallback-url (quri:uri "https://clojureverse.org")
+     :base-search-url "https://clojureverse.org/search?q=~a")
+    (engines:discourse
+     :shortcut "oc"
+     :fallback-url (quri:uri "https://discuss.ocaml.org")
+     :base-search-url "https://discuss.ocaml.org/search?q=~a")
+    (engines:discourse
+     :shortcut "or"
+     :fallback-url (quri:uri "https://org-roam.discourse.group")
+     :base-search-url "https://org-roam.discourse.group/search?q=~a")
+    (engines:discourse
+     :shortcut "pc"
+     :fallback-url (quri:uri "https://community.penpot.app/latest")
+     :base-search-url "https://community.penpot.app/search?q=~a")))
+
 (define-public %nyxt-base-features
   (list
    (feature-nyxt-nx-mosaic)
@@ -586,9 +642,10 @@ EndSection"))
                  :display "none !important")
                 ("img[class*=avatar]"
                  :visibility "hidden"))))))
-   (feature-nyxt-nx-search-engines)
+   (feature-nyxt-nx-search-engines
+    #:extra-engines nx-search-engines-extra-engines)
    (feature-nyxt-nx-router
-    #:extra-routes nyxt-extra-routes)))
+    #:extra-routes nx-router-extra-routes)))
 
 (define-public %web-base-features
   (list

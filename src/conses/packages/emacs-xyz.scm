@@ -88,31 +88,29 @@ was created based on the usage of ob-C.")
       (license #f))))
 
 (define-public emacs-display-wttr
-  (package
-    (name "emacs-display-wttr")
-    (version "20220907.1625")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://melpa.org/packages/display-wttr-" version ".el"))
-       (sha256 (base32 "1x397gqgai96r1vls6zjjnzc8p18xd6y7pygmmbdy25lkp6qzblk"))))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/josegpt/display-wttr")
-    (synopsis "Display wttr (weather) in the mode line")
-    (description "Display-wttr package contains a minor mode that can be toggled on/off. It
-fetches weather information based on your location or on a location set in
-@code{display-wttr-locations} from @url{https://wttr.in} and then displays it on the mode line.
-The entry point is @code{display-wttr}. Heavily inspired by: @code{display-time}.")
-    (license license:gpl3+)))
-
-(define-public emacs-display-wttr-next
-  (package
-    (inherit emacs-display-wttr)
-   (source
-    (local-file
-     (string-append (dirname (dirname %project-root))
-                    "/elisp/display-wttr")
-     #:recursive? #t))))
+  (let ((commit "7062953d034e27c297d58748cf74dad552aa2873")
+        (revision "0"))
+    (package
+      (name "emacs-display-wttr")
+      (version (git-version "2.1.0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/josegpt/display-wttr")
+               (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256 (base32 "1yppnxpzpwp3qkxfa9g8c0vzxg2s08qq4djk635hrml57adaya8g"))))
+      (build-system emacs-build-system)
+      (home-page "https://github.com/josegpt/display-wttr")
+      (synopsis "Display wttr (weather) in the mode line")
+      (description "This package contains a minor mode that can be toggled.
+It fetches weather information based on your location or on a location set in
+@code{display-wttr-locations} from @uref{https://wttr.in} and then displays it
+on the mode line.
+The entry point is @code{display-wttr}.
+Heavily inspired by: @code{display-time}.")
+      (license license:gpl3+))))
 
 (define-public emacs-ytdl-next
   (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
@@ -367,7 +365,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
       (license license:gpl3+))))
 
 (define-public emacs-nyxt
-  (let ((commit "c3e4717676c6b45b37aff3ceaf357e5e5b4adc18")
+  (let ((commit "c39a6645f7a62ea7045e0d0660cab450e5a9f6c9")
         (revision "0"))
     (package
       (name "emacs-nyxt")
@@ -381,7 +379,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "1qbgqx0izsb5xy3nak57wsv21yi42bajya2hfldz39d5yv19pm2k"))))
+          (base32 "1incvxvmxsyl85k8myh1y9ny7vsi11hfqqvi93yppgrcm94rhkgv"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-sly))

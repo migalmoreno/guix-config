@@ -1,4 +1,4 @@
-(define-module (conses system iso)
+(define-module (conses hosts live)
   #:use-module (conses utils)
   #:use-module (rde packages)
   #:use-module (rde features base)
@@ -6,22 +6,19 @@
   #:use-module (gnu system install)
   #:use-module (gnu services)
   #:use-module (guix gexp)
-  #:use-module (nongnu packages linux)
-  #:export (%system-features))
+  #:use-module (nongnu packages linux))
 
-(define %system-features
+
+;;; Host-specific features
+
+(define-public %host-features
   (list
    (feature-base-packages
     #:system-packages
     (strings->packages
-     "make" "gnupg"
+     "make" "gnupg" "curl"
      "emacs-no-x" "parted" "git"))
    (feature-custom-services
     #:system-services
-    (cons*
-     (simple-service
-      'channels-etc-service
-      etc-service-type
-      `(("channels.scm"
-         ,(project-file "channels"))))
+    (list
      (operating-system-user-services installation-os)))))
