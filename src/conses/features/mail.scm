@@ -15,7 +15,6 @@
   #:use-module (ice-9 match)
   #:export (mail-directory-fn
             feature-goimapnotify
-            feature-emacs-ebdb
             feature-emacs-gnus
             feature-emacs-message
             feature-emacs-smtpmail
@@ -85,67 +84,6 @@ is not provided, use all the mail accounts."
   (feature
    (name 'goimapnotify)
    (values `((goimapnotify . ,goimapnotify)))
-   (home-services-getter get-home-services)))
-
-(define* (feature-emacs-ebdb
-          #:key
-          (emacs-ebdb emacs-ebdb)
-          (ebdb-sources (list "~/documents/contacts"))
-          (ebdb-popup-size 0.4)
-          (ebdb-key "b"))
-  "Configure the ebdb contact management package for Emacs.
-EBDB-SOURCES is a list of filenames to retrieve database
-information from.
-You can control the size of ebdb popup windows via EBDB-POPUP-SIZE
-with a floating-point value between 0 and 1."
-  (ensure-pred file-like? emacs-ebdb)
-  (ensure-pred list-of-strings? ebdb-sources)
-  (ensure-pred number? ebdb-popup-size)
-  (ensure-pred string? ebdb-key)
-
-  (define emacs-f-name 'ebdb)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to EBDB."
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((defvar rde-ebdb-map nil
-          "Map to bind EBDB commands under.")
-        (define-prefix-command 'rde-ebdb-map)
-        (with-eval-after-load 'rde-keymaps
-          (define-key rde-app-map (kbd ,ebdb-key) 'rde-ebdb-map)
-          (let ((map rde-ebdb-map))
-            (define-key map "a" 'ebdb-display-all-records)
-            (define-key map "c" 'ebdb-create-record-extended)))
-        (with-eval-after-load 'ebdb
-          (require 'ebdb-i18n)
-          (require 'ebdb-vcard)
-          ,@(if (get-value 'emacs-org config)
-                '((require 'ebdb-org))
-                '())
-          ,@(if (get-value 'mail-accounts config)
-                '((require 'ebdb-mua))
-                '())
-          (setq ebdb-sources (list ,@ebdb-sources))
-          (setq ebdb-default-country nil)
-          (setq ebdb-default-window-size ,ebdb-popup-size)
-          (setq ebdb-dedicated-window 'ebdb)
-          (setq ebdb-mail-avoid-redundancy t)
-          (setq ebdb-complete-mail 'capf)
-          (setq ebdb-completion-display-record nil)
-          (setq ebdb-complete-mail-allow-cycling nil)
-          (setq ebdb-save-on-exit t)
-          (define-key ebdb-mode-map "q" 'kill-this-buffer))
-        (with-eval-after-load 'ebdb-mua
-          (setq ebdb-mua-pop-up nil)))
-      #:elisp-packages (list emacs-ebdb))))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . ,emacs-ebdb)))
    (home-services-getter get-home-services)))
 
 
@@ -226,11 +164,7 @@ but it won't appear on the right Maildir directory."
                           'org-mime-confirm-when-no-multipart))
               '())
 
-        (add-hook 'message-mode-hook 'rde-message-mode)
         (with-eval-after-load 'message
-          ,@(if (get-value 'emacs-ebdb config)
-                `((require 'ebdb-message))
-              '())
           (add-hook 'message-header-setup-hook 'rde-message-add-gcc-header)
           (setq message-kill-buffer-on-exit t)
           (setq message-signature
@@ -442,10 +376,6 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
           (define-key rde-app-map "g" 'gnus))
         (setq mail-user-agent 'gnus-user-agent)
         (with-eval-after-load 'gnus
-          ,@(if (get-value 'emacs-ebdb config)
-                '((with-eval-after-load 'ebdb
-                    (require 'ebdb-gnus)))
-              '())
           (setq gnus-use-full-window nil)
           (setq gnus-use-cache t)
           ,@(if (get-value 'emacs-advanced-user? config)
