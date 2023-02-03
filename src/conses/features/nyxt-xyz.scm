@@ -702,7 +702,7 @@ and returns Lisp configuration containing the engines."
         (defun make-proxitok-instances ()
           (alex:when-let ((instances
                            (fetch-instances
-                            "https://raw.githubusercontent.com/libredirect/libredirect/master/src/instances/data.json")))
+                            "https://raw.githubusercontent.com/libredirect/libredirect/master/src/config.json")))
             (rest (alex:assoc-value
                    (alex:assoc-value
                     (json:with-decoder-simple-list-semantics
