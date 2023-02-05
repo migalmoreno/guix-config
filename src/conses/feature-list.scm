@@ -430,6 +430,8 @@
   (list
    (feature-emacs-ednc
     #:notifications-icon "")
+   (feature-emacs-pulseaudio-control)
+   (feature-emacs-display-wttr)
    (feature-emacs-tab-bar
     #:modules-left
     `((make-rde-tab-bar-module
@@ -494,9 +496,7 @@ EndSection
 Section \"ServerFlags\"
   Option \"BlankTime\" \"0\"
 EndSection"))
-   (feature-emacs-pulseaudio-control)
-   (feature-emacs-battery)
-   (feature-emacs-display-wttr)))
+   (feature-emacs-battery)))
 
 (define-public %desktop-base-features
   (list
