@@ -175,14 +175,7 @@
         (defun rde-xorg-call-slock ()
           "Invoke a Slock process."
           (interactive)
-          (call-process (executable-find "slock")))
-
-        ,@(if (get-value 'emacs-exwm config)
-              '((with-eval-after-load 'exwm-autoloads
-                  (exwm-input-set-key (kbd "s-p") 'rde-xorg-take-screenshot)
-                  (exwm-input-set-key (kbd "s-v") 'rde-xorg-record-screencast)
-                  (exwm-input-set-key (kbd "s-l") 'rde-xorg-call-slock)))
-              '()))
+          (call-process (executable-find "slock"))))
       #:elisp-packages (list emacs-hexrgb)
       #:summary "Helpers for Xorg"
       #:commentary "Provide various helper functions for useful Xorg-related operations.")
