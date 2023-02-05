@@ -227,7 +227,8 @@
           (emacs-modus-themes emacs-modus-themes)
           (extra-after-load-theme-hooks '())
           (dark? #f)
-          (deuteranopia? #f))
+          (deuteranopia? #f)
+          (extra-modus-themes-overrides '()))
   "Configure modus-themes, a pair of elegant and highly accessible
 themes for Emacs.  DEUTERANOPIA replaces red/green tones with red/blue,
 which helps people with color blindness."
@@ -235,6 +236,7 @@ which helps people with color blindness."
   (ensure-pred list? extra-after-load-theme-hooks)
   (ensure-pred boolean? dark?)
   (ensure-pred boolean? deuteranopia?)
+  (ensure-pred elisp-config? extra-modus-themes-overrides)
 
   (define emacs-f-name 'modus-themes)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -263,8 +265,12 @@ which helps people with color blindness."
         (eval-when-compile
          (enable-theme ',theme))
         (defgroup rde-modus-themes nil
-          "Minor nits related to `modus-themes'."
+          "Configuration related to `modus-themes'."
           :group 'rde)
+        (defcustom rde-modus-themes-mode-line-padding 1
+          "The padding of the mode line."
+          :type 'number
+          :group 'rde-modus-themes)
         (defcustom rde-modus-themes-tab-bar-padding 1
           "The padding of the tab bar."
           :type 'number
@@ -280,7 +286,7 @@ which helps people with color blindness."
 
         (defun rde-modus-themes-run-after-enable-theme-hook (&rest _args)
           "Run `rde-modus-themes-after-enable-theme-hook'."
-          (run-hooks 'after-enable-theme-hook))
+          (run-hooks 'rde-modus-themes-after-enable-theme-hook))
 
         (defun rde-modus-themes-set-custom-faces (&optional _theme)
           "Set faces based on the current theme or THEME."
@@ -292,12 +298,16 @@ which helps people with color blindness."
                `(window-divider-first-pixel ((,c :foreground ,bg-main)))
                `(window-divider-last-pixel ((,c :foreground ,bg-main)))
                `(vertical-border ((,c :foreground ,bg-main)))
-               `(tab-bar ((,c :background ,bg-header
+               `(tab-bar ((,c :background ,bg-dim
                               :box (:line-width ,rde-modus-themes-tab-bar-padding
-                                                :color ,bg-header
+                                                :color ,bg-dim
                                                 :style unspecified))))
+               `(mode-line ((,c :box (:line-width ,rde-modus-themes-mode-line-padding
+                                                  :color ,bg-mode-line-active))))
+               `(mode-line-inactive ((,c :box (:line-width ,rde-modus-themes-mode-line-padding
+                                                           :color ,bg-mode-line-inactive))))
                `(header-line ((,c :box (:line-width ,rde-modus-themes-header-line-padding
-                                                    :color ,bg-header))))
+                                                    :color ,bg-dim))))
                `(git-gutter-fr:added ((,c :foreground ,bg-added-intense
                                          :background ,bg-main)))
                `(git-gutter-fr:deleted ((,c :foreground ,bg-removed-intense
@@ -305,7 +315,7 @@ which helps people with color blindness."
                `(git-gutter-fr:modified ((,c :foreground ,bg-changed-intense
                                             :background ,bg-main)))
                `(aw-leading-char-face ((,c :height 1.0
-                                           :foreground ,blue-alt-other)))))))
+                                           :foreground ,blue-cooler)))))))
 
         (defun rde-modus-themes--dark-theme-p (&optional theme)
           "Indicate if there is a curently-active dark THEME."
@@ -346,6 +356,7 @@ which helps people with color blindness."
 
         (setq rde-modus-themes-header-line-padding ,header-line-padding)
         (setq rde-modus-themes-tab-bar-padding ,tab-bar-padding)
+        (setq rde-modus-themes-mode-line-padding ,mode-line-padding)
         (advice-add 'enable-theme :after 'rde-modus-themes-run-after-enable-theme-hook)
         ,@(map (lambda (hook)
                  `(add-hook 'rde-modus-themes-after-enable-theme-hook ',hook))
@@ -358,22 +369,20 @@ which helps people with color blindness."
             (define-key rde-toggle-map (kbd "t") 'modus-themes-toggle))
         (with-eval-after-load 'modus-themes
           (setq modus-themes-common-palette-overrides
-                `((border-mode-line-active unspecified)
+                '((border-mode-line-active unspecified)
                   (border-mode-line-inactive unspecified)
                   (fringe unspecified)
                   (fg-line-number-inactive "gray50")
                   (fg-line-number-active fg-main)
                   (bg-line-number-inactive unspecified)
-                  (bg-line-number-active unspecified)))
+                  (bg-line-number-active unspecified)
+                  (bg-region bg-ochre)
+                  (fg-region unspecified)
+                  ,@extra-modus-themes-overrides))
           (setq modus-themes-to-toggle '(,light-theme ,dark-theme))
-          (setq modus-themes-mode-line '(borderless))
-          (setq modus-themes-italic-constructs t)
           (setq modus-themes-italic-constructs t)
           (setq modus-themes-bold-constructs t)
-          (setq modus-themes-mode-line '(borderless (padding ,mode-line-padding)))
           (setq modus-themes-org-blocks 'gray-background)
-          (setq modus-themes-region '(bg-only no-extend))
-          (setq modus-themes-markup '(intense))
           (setq modus-themes-mixed-fonts t)
           (setq modus-themes-headings (quote ((1 . (1.15))
                                               (2 . (1.1))
