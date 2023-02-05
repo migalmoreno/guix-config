@@ -948,9 +948,11 @@ on the current project."
 
 (define* (feature-emacs-window
           #:key
-          (emacs-ace-window emacs-ace-window))
+          (emacs-ace-window emacs-ace-window)
+          (ace-window-key "M-o"))
   "Configure tooling related to Emacs's window tree mechanism."
   (ensure-pred file-like? emacs-ace-window)
+  (ensure-pred string? ace-window-key)
 
   (define emacs-f-name 'window)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -964,13 +966,11 @@ on the current project."
       `((with-eval-after-load 'window
           (setq even-window-sizes nil)
           (setq split-window-keep-point t))
-        (setq window-divider-default-right-width ,(get-value 'emacs-margin config))
+        (setq window-divider-default-right-width
+              ,(get-value 'emacs-margin config))
         (window-divider-mode)
         (winner-mode)
-        ,@(if (get-value 'emacs-exwm config)
-              '((with-eval-after-load 'exwm-autoloads
-                  (exwm-input-set-key (kbd "M-o") 'ace-window)))
-              '((define-key global-map (kbd "M-o") 'ace-window)))
+        (define-key global-map (kbd ,ace-window-key) 'ace-window)
         (with-eval-after-load 'ace-window
           (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
           (setq aw-background nil)
