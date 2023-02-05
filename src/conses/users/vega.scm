@@ -46,7 +46,8 @@
    (strings->packages
     "haunt" "ddcutil" "light" "xclip"
     "nasm" "gcc-toolchain" "autoconf"
-    "v4l-utils" "binutils" "wireguard-tools")))
+    "v4l-utils" "binutils" "wireguard-tools"
+    "texinfo" "pass-otp")))
 
 (define guix-shell-authorized-directories
   (map (lambda (dir)
@@ -179,11 +180,23 @@
     #:default-application-launcher? #f
     #:emacs-server-mode? #f
     #:extra-init-el
-    '((add-hook 'after-init-hook 'server-start))
+    '((add-hook 'after-init-hook 'server-start)
+      (with-eval-after-load 'password-cache
+        (setq password-cache t)
+        (setq password-cache-expiry (* 60 10)))
+      (with-eval-after-load 'pass
+        (setq pass-show-keybindings nil))
+      (with-eval-after-load 'epg-config
+        (setq epg-pinentry-mode 'loopback))
+      (with-eval-after-load 'pinentry-autoloads
+        (add-hook 'after-init-hook 'pinentry-start))
+      (with-eval-after-load 'password-store
+        (setq password-store-time-before-clipboard-restore 60)))
     #:additional-elisp-packages
     (strings->packages
      "emacs-tempel-collection"
-     "emacs-ox-haunt"))
+     "emacs-ox-haunt"
+     "emacs-pinentry"))
    %ui-base-features
    (feature-gtk3
     #:dark-theme? #t
@@ -191,9 +204,9 @@
     #:extra-gtk-settings extra-gtk-settings)
    %emacs-completion-base-features
    vega-nyxt-features
-   %multimedia-base-features
-   %emacs-desktop-base-features
+   %multimedia-base-features   
    %emacs-base-features
+   %emacs-desktop-base-features
    vega-desktop-features
    %web-base-features
    %mail-base-features
@@ -230,8 +243,8 @@
    (feature-keyboard
     #:keyboard-layout %default-keyboard-layout
     #:default-input-method "spanish-keyboard")
-   ;; (feature-guix
-   ;;  #:authorized-directories guix-shell-authorized-directories)
+   (feature-guix
+    #:authorized-directories guix-shell-authorized-directories)
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))
