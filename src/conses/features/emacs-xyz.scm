@@ -1226,51 +1226,45 @@ operate on buffers like Dired."
     "Return home services related to PulseAudio Control."
     (define pactl (file-append (@ (gnu packages pulseaudio) pulseaudio) "/bin/pactl"))
 
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((with-eval-after-load 'pulseaudio-control-autoloads
-          (pulseaudio-control-default-keybindings))
-        ,@(if (get-value 'emacs-exwm config)
-              '((with-eval-after-load 'exwm
-                  (exwm-input-set-key (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
-                  (exwm-input-set-key (kbd "s-<prior>") 'pulseaudio-control-increase-sink-volume)))
-              '())
-        (with-eval-after-load 'pulseaudio-control
-          (define-key pulseaudio-control-map "L" 'pulseaudio-control-toggle-sink-input-mute-by-index)
-          ,@(if (get-value 'emacs-all-the-icons config)
-                '((eval-when-compile
-                   (require 'all-the-icons))
-                  (with-eval-after-load 'all-the-icons
-                    (let ((all-the-icons-default-adjust -0.15))
-                      (setq pulseaudio-control-sink-mute-string
-                            (all-the-icons-material "volume_off" :height 1))
-                      (setq pulseaudio-control-sink-volume-strings
-                            (list
-                             (all-the-icons-material "volume_mute" :height 1)
-                             (all-the-icons-material "volume_down" :height 1)
-                             (all-the-icons-material "volume_up" :height 1)))
-                      (setq pulseaudio-control-source-mute-string
-                            (all-the-icons-material "mic_off" :height 1))
-                      (setq pulseaudio-control-source-volume-strings
-                            (list
-                             (all-the-icons-material "mic_none" :height 1)
-                             (all-the-icons-material "mic" :height 1))))))
-                '())
-          (setq pulseaudio-control-pactl-path ,pactl)
-          (setq pulseaudio-control--volume-maximum '(("percent" . 100)
-                                                     ("decibels" . 10)
-                                                     ("raw" . 98000)))
-          (setq pulseaudio-control-volume-step ,volume-step)
-          (setq pulseaudio-control-volume-verbose nil)
-          (pulseaudio-control-default-sink-mode)
-          (pulseaudio-control-default-source-mode)
-          (pulseaudio-control-display-mode)))
-      #:elisp-packages (append (list emacs-pulseaudio-control)
-                               (if (get-value 'emacs-all-the-icons config)
-                                   (list (get-value 'emacs-all-the-icons config))
-                                   '())))))
+    (let ((emacs-all-the-icons (get-value 'emacs-all-the-icons config)))
+      (list
+       (rde-elisp-configuration-service
+        emacs-f-name
+        config
+        `((with-eval-after-load 'pulseaudio-control-autoloads
+            (pulseaudio-control-default-keybindings))
+          (with-eval-after-load 'pulseaudio-control
+            (define-key pulseaudio-control-map "L" 'pulseaudio-control-toggle-sink-input-mute-by-index)
+            ,@(if emacs-all-the-icons
+                  '((eval-when-compile
+                     (require 'all-the-icons))
+                    (with-eval-after-load 'all-the-icons
+                      (let ((all-the-icons-default-adjust -0.15))
+                        (setq pulseaudio-control-sink-mute-string
+                              (all-the-icons-material "volume_off" :height 1))
+                        (setq pulseaudio-control-sink-volume-strings
+                              (list
+                               (all-the-icons-material "volume_mute" :height 1)
+                               (all-the-icons-material "volume_down" :height 1)
+                               (all-the-icons-material "volume_up" :height 1)))
+                        (setq pulseaudio-control-source-mute-string
+                              (all-the-icons-material "mic_off" :height 1))
+                        (setq pulseaudio-control-source-volume-strings
+                              (list
+                               (all-the-icons-material "mic_none" :height 1)
+                               (all-the-icons-material "mic" :height 1))))))
+                  '())
+            (setq pulseaudio-control-pactl-path ,pactl)
+            (setq pulseaudio-control--volume-maximum '(("percent" . 100)
+                                                       ("decibels" . 10)
+                                                       ("raw" . 98000)))
+            (setq pulseaudio-control-volume-step ,volume-step)
+            (setq pulseaudio-control-volume-verbose nil)
+            (pulseaudio-control-default-sink-mode)
+            (pulseaudio-control-default-source-mode)
+            (pulseaudio-control-display-mode)))
+        #:elisp-packages (append (list emacs-pulseaudio-control)
+                                 (or (and=> emacs-all-the-icons list) '()))))))
 
   (feature
    (name f-name)
