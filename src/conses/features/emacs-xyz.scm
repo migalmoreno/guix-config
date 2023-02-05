@@ -2156,6 +2156,79 @@ Start an unlimited search at `point-min' otherwise."
    (values `((,f-name . ,emacs-org-recur)))
    (home-services-getter get-home-services)))
 
+(define (org-roam-todo config)
+  `((defun rde-org-roam-get-filetags ()
+      "Return the top-level tags for the current org-roam node."
+      (split-string
+       (or (cadr (assoc "FILETAGS"
+                        (org-collect-keywords '("filetags"))))
+           "")
+       ":" 'omit-nulls))
+
+    (defun rde-org-roam-todo-p ()
+      "Return non-nil if the current buffer has any to-do entry."
+      (org-element-map
+          (org-element-parse-buffer 'headline)
+          'headline
+        (lambda (h)
+          ,@(if (get-value 'emacs-org-recur config)
+                '((require 'org-recur)
+                  (or (eq (org-element-property :todo-type h) 'todo)
+                      (when (stringp (org-element-property :raw-value h))
+                        (string-match org-recur--regexp (org-element-property
+                                                         :raw-value h)))))
+              '((eq (org-element-property :todo-type h) 'todo))))
+        nil 'first-match))
+
+    (defun rde-org-roam-update-todo-tag ()
+      "Update the \"todo\" tag in the current buffer."
+      (when (and (not (active-minibuffer-window))
+                 (org-roam-file-p))
+        (org-with-point-at 1
+          (let* ((tags (rde-org-roam-get-filetags))
+                 (is-todo (rde-org-roam-todo-p)))
+            (cond ((and is-todo (not (member "todo" tags)))
+                   (org-roam-tag-add '("todo")))
+                  ((and (not is-todo) (member "todo" tags))
+                   (org-roam-tag-remove '("todo"))))))))
+
+    (defun rde-org-roam-list-todo-files ()
+      "Return a list of org-roam files containing the \"todo\" tag."
+      (org-roam-db-sync)
+      (let ((todo-nodes (cl-remove-if-not
+                         (lambda (n)
+                           (member "todo" (org-roam-node-tags n)))
+                         (org-roam-node-list))))
+        (delete-dups (mapcar 'org-roam-node-file todo-nodes))))
+
+    (defun rde-org-roam-update-todo-files (&rest _)
+      "Update the value of `org-agenda-files'."
+      (setq org-agenda-files (rde-org-roam-list-todo-files)))
+
+    (defun rde-org-roam-ref-add (ref node)
+      "Add REF to NODE.
+If NODE doesn't exist, create a new org-roam node with REF."
+      (interactive
+       (list
+        (read-string "Ref: ")
+        (org-roam-node-read)))
+      (if-let ((file (org-roam-node-file node)))
+          (with-current-buffer (or (find-buffer-visiting file)
+                                   (find-file-noselect file))
+            (org-roam-property-add "ROAM_REFS" ref)
+            (save-buffer)
+            (kill-current-buffer))
+        (org-roam-capture-
+         :keys "r"
+         :node node
+         :info `(:ref ,ref)
+         :templates org-roam-capture-templates
+         :props '(:finalize find-file))))
+
+    (add-hook 'org-roam-find-file-hook 'rde-org-roam-update-todo-tag)
+    (add-hook 'before-save-hook 'rde-org-roam-update-todo-tag)
+    (advice-add 'org-agenda :before 'rde-org-roam-update-todo-files)))
+
 (define* (feature-emacs-org-roam
           #:key
           (emacs-org-roam emacs-org-roam)
@@ -2204,73 +2277,6 @@ Start an unlimited search at `point-min' otherwise."
                  node-ref
                (error "No roam refs in this node"))))
 
-         (defun rde-org-roam-get-filetags ()
-           "Return the top-level tags for the current org-roam node."
-           (split-string
-            (or (cadr (assoc "FILETAGS"
-                             (org-collect-keywords '("filetags"))))
-                "")
-            ":" 'omit-nulls))
-
-         (defun rde-org-roam-todo-p ()
-           "Return non-nil if the current buffer has any to-do entry."
-           (org-element-map
-               (org-element-parse-buffer 'headline)
-               'headline
-             (lambda (h)
-               ,@(if (get-value 'emacs-org-recur config)
-                     '((require 'org-recur)
-                       (or (eq (org-element-property :todo-type h) 'todo)
-                           (when (stringp (org-element-property :raw-value h))
-                             (string-match org-recur--regexp (org-element-property :raw-value h)))))
-                     '((eq (org-element-property :todo-type h) 'todo))))
-             nil 'first-match))
-
-         (defun rde-org-roam-update-todo-tag ()
-           "Update the \"todo\" tag in the current buffer."
-           (when (and (not (active-minibuffer-window))
-                      (org-roam-file-p))
-             (org-with-point-at 1
-               (let* ((tags (rde-org-roam-get-filetags))
-                      (is-todo (rde-org-roam-todo-p)))
-                 (cond ((and is-todo (not (member "todo" tags)))
-                        (org-roam-tag-add '("todo")))
-                       ((and (not is-todo) (member "todo" tags))
-                        (org-roam-tag-remove '("todo"))))))))
-
-         (defun rde-org-roam-list-todo-files ()
-           "Return a list of org-roam files containing the \"todo\" tag."
-           (org-roam-db-sync)
-           (let ((todo-nodes (cl-remove-if-not
-                              (lambda (n)
-                                (member "todo" (org-roam-node-tags n)))
-                              (org-roam-node-list))))
-             (delete-dups (mapcar 'org-roam-node-file todo-nodes))))
-
-         (defun rde-org-roam-update-todo-files (&rest _)
-           "Update the value of `org-agenda-files'."
-           (setq org-agenda-files (rde-org-roam-list-todo-files)))
-
-         (defun rde-org-roam-ref-add (ref node)
-           "Add REF to NODE.
-If NODE doesn't exist, create a new org-roam node with REF."
-           (interactive
-            (list
-             (read-string "Ref: ")
-             (org-roam-node-read)))
-           (if-let ((file (org-roam-node-file node)))
-               (with-current-buffer (or (find-buffer-visiting file)
-                                        (find-file-noselect file))
-                 (org-roam-property-add "ROAM_REFS" ref)
-                 (save-buffer)
-                 (kill-current-buffer))
-             (org-roam-capture-
-              :keys "r"
-              :node node
-              :info `(:ref ,ref)
-              :templates org-roam-capture-templates
-              :props '(:finalize find-file))))
-
          (defun rde-org-roam-node-insert-immediate (arg &rest args)
            "Immediately insert new Org Roam node with ARG and ARGS in the buffer."
            (interactive "P")
@@ -2282,7 +2288,6 @@ If NODE doesn't exist, create a new org-roam node with REF."
              (apply 'org-roam-node-insert args)))
 
          (autoload 'org-roam-node-read "org-roam")
-         (setq org-roam-v2-ack t)
          ,@(if org-roam-directory
                `((setq org-roam-directory ,org-roam-directory))
                '())
@@ -2290,9 +2295,7 @@ If NODE doesn't exist, create a new org-roam node with REF."
                       `(,(rx "*org-roam*")
                         display-buffer-same-window))
          ,@(if org-roam-todo?
-               '((add-hook 'org-roam-find-file-hook 'rde-org-roam-update-todo-tag)
-                 (add-hook 'before-save-hook 'rde-org-roam-update-todo-tag)
-                 (advice-add 'org-agenda :before 'rde-org-roam-update-todo-files))
+               (org-roam-todo config)
                '())
          (let ((map mode-specific-map))
            (define-key map "nb" 'org-roam-buffer-toggle)
@@ -2340,17 +2343,15 @@ If NODE doesn't exist, create a new org-roam node with REF."
              (setq org-roam-node-annotation-function
                    (lambda (node) (marginalia--time (org-roam-node-file-mtime node)))))
            ,@(if (get-value 'emacs-embark config)
-                 '((eval-when-compile
-                    (require 'embark))
-                   (with-eval-after-load 'embark
-                     (embark-define-keymap embark-roam-ref-map
-                       "Keymap for actions to be triggered on org-roam refs."
+                 '((with-eval-after-load 'embark
+                     (defvar-keymap embark-roam-ref-map
+                       :doc "Keymap for actions to be triggered on org-roam refs."
                        :parent embark-url-map
-                       ("RET" browse-url-generic)
-                       ("c" browse-url-chromium)
-                       ("r" org-roam-ref-remove)
-                       ("v" 'rde-mpv-play-url)
-                       ("V" 'rde-mpv-play-url-other-window))
+                       "RET" 'browse-url-generic
+                       "c" 'browse-url-chromium
+                       "r" 'org-roam-ref-remove
+                       "v" 'rde-mpv-play-url
+                       "V" 'rde-mpv-play-url-other-window)
                      (add-to-list 'embark-keymap-alist '(org-roam-ref . embark-roam-ref-map))
                      (advice-add 'org-roam-ref-add :around 'rde-browse-url-trace-url)))
                  '())))
