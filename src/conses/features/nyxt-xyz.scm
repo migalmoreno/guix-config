@@ -21,10 +21,6 @@
             feature-nyxt-nx-router
             feature-nyxt-nx-search-engines))
 
-(define lisp-config? sexp-config?)
-(define lisp-serialize sexp-serialize)
-(define serialize-lisp-config serialize-sexp-config)
-
 (define* (feature-nyxt-status
           #:key
           (height 24)
