@@ -17,11 +17,13 @@
           #:key
           (ocaml ocaml)
           (emacs-tuareg emacs-tuareg)
+          (extra-init-ml '())
           (extra-packages '())
           (opam? #f))
   "Configure tooling and environment for OCaml."
   (ensure-pred any-package? ocaml)
   (ensure-pred file-like? emacs-tuareg)
+  (ensure-pred list-of-strings? extra-init-ml)
   (ensure-pred list-of-file-likes? extra-packages)
   (ensure-pred boolean? opam?)
 
@@ -75,13 +77,7 @@
                 (config
                  `((format #f "#directory \"~a/.guix-home/profile/lib/ocaml/site-lib/\""
                            ,(get-value 'home-directory config))
-                   "#directory \"_build\""
-                   "#use \"topfind\""
-                   "#thread"
-                   "#require \"core.top\""
-                   "#require \"ppx_fields_conv\""
-                   "#require \"str\""
-                   "open Core"))))
+                   ,@extra-init-ml))))
       (rde-elisp-configuration-service
        f-name
        config
