@@ -1,7 +1,6 @@
 (define-module (conses features scheme)
   #:use-module (conses utils)
   #:use-module (conses packages emacs-xyz)
-  #:use-module (conses home services lisp)
   #:use-module (conses home services scheme)
   #:use-module (rde features)
   #:use-module (rde features emacs)
@@ -39,16 +38,6 @@
           (load-compiled-path . ,(string-append
                                   "$XDG_CONFIG_HOME/guix/current/lib/guile/3.0/site-ccache:"
                                   "$GUILE_LOAD_COMPILED_PATH"))))))
-     (simple-service
-      'home-guile-templates-service
-      home-emacs-tempel-service-type
-      `(,#~"scheme-mode"
-        (lambda "(lambda (" p ")" n> r> ")")
-        (var "(define " p "\n" p ")")
-        (fun "(define (" p ")" n> r> ")")
-        (dmod "(define-module (" p ")" n> r> ")")
-        (umod "#:use-module (" p ")")
-        (ex "#:export (" p ")")))
      (simple-service
       'home-guile-profile-service
       home-profile-service-type
@@ -151,29 +140,6 @@
                (envs
                 `((profile . ,(string-append (getenv "HOME") "/.guix-profile"))
                   ,@extra-envs))))
-     (simple-service
-      'home-guix-templates
-      home-emacs-tempel-service-type
-      `(,#~"scheme-mode"
-        (pkg "(define-public " (p "" name) n>
-             "(package" n>
-             "(name \"" (s name) "\")" n>
-             "(version \"" p "\")" n>
-             "(source " n> p ")" n>
-             "(build-system " p ")" n>
-             "(home-page \"" p "\")" n>
-             "(synopsis \"" p "\")" n>
-             "(description \"" p "\")" n>
-             "(license " p ")))")
-        (gitref "(git-reference" n>
-                "(url \"" p "\")" n>
-                "(commit " (p "commit") "))")
-        (orig "(origin " n>
-              "(method " (p "git" method) "-fetch)" n>
-              "(uri " p ")" n>
-              "(file-name (" (s method) "-file-name name version))" n>
-              "(sha256" n>
-              "(base32 \"" p "\")))")))
      (rde-elisp-configuration-service
       emacs-f-name
       config
@@ -184,8 +150,9 @@
           "Directory that holds the GNU Guix home configuration."
           :type 'directory
           :group 'rde-guix)
+
         (defun rde-guix-daemons-root ()
-          "Invoke the `daemons' command as superuser to get the list of system daemons."
+          "Invoke `daemons' as superuser to get the list of system daemons."
           (interactive)
           (let ((default-directory (format "/sudo::%s" (make-temp-file nil t))))
             (daemons)))
@@ -221,10 +188,12 @@
                         ;; emacs-guix
                         emacs-daemons)
       #:summary "GNU Guix helpers for Emacs"
-      #:commentary "Provide utilities to work with the GNU Guix package manager from Emacs.")))
+      #:commentary "Provide utilities to work with the GNU Guix package\
+manager from Emacs.")))
 
   (feature
    (name 'guix)
-   (values `((shell-authorized-directories . ,authorized-directories)
-             (extra-envs . ,extra-envs)))
+   (values `((guix . #t)
+             (shell-authorized-directories . ,authorized-directories)
+             (guix-extra-envs . ,extra-envs)))
    (home-services-getter get-home-services)))
