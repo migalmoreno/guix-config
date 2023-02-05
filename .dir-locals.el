@@ -19,12 +19,14 @@
                        (require 'cl-lib)
                        (cl-pushnew
                         (expand-file-name "src" root-dir*)
+                        geiser-guile-load-path :test #'string-equal)
+                       (cl-pushnew
+                        "~/src/guile/rde/src/"
+                        geiser-guile-load-path :test #'string-equal)
+                       (cl-pushnew
+                        "~/src/guile/nonguix/"
                         geiser-guile-load-path :test #'string-equal)))))
-         (eval . (setq-local compile-command "make home"))
-         (eval . (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share/guile/site/3.0"))
-         (eval . (add-to-list 'geiser-guile-load-path "~/src/guile/guix/"))
-         (eval . (add-to-list 'geiser-guile-load-path "~/src/guile/rde/src/"))
-         (eval . (add-to-list 'geiser-guile-load-path "~/src/guile/nonguix/"))))
+         (eval . (setq-local compile-command "make home"))))
  (Texinfo-mode . ((fill-column . 72)
                   (indent-tabs-mode . nil)))
  (c-mode . ((c-file-style . "gnu")))
