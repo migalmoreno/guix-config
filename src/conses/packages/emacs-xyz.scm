@@ -340,7 +340,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
     (license license:gpl3+)))
 
 (define-public emacs-fdroid
-  (let ((commit "598549ffbbea4a015dca80fc2d061e6e01d77e40")
+  (let ((commit "fafacb77014d5c796f07c2c1ff501919d9f2f286")
         (revision "0"))
     (package
       (name "emacs-fdroid")
@@ -354,7 +354,7 @@ and hex color RGB color strings (such as \"#FC43A7912\").")
            (commit commit)))
          (file-name (git-file-name name version))
          (sha256
-          (base32 "0hpbi5nh0bkrb2l422kn60giin73fmsq7gsai9qc9aifa7k1anwv"))))
+          (base32 "1qw0v92j1d7f7d01y6wzgk1ckx1wz896fks79f36glbp1svassmq"))))
       (build-system emacs-build-system)
       (propagated-inputs
        (list emacs-consult emacs-embark))
