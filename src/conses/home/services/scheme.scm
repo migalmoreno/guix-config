@@ -1,13 +1,13 @@
 (define-module (conses home services scheme)
-  #:use-module (gnu services)
-  #:use-module (gnu services configuration)
+  #:use-module (rde serializers lisp)
+  #:use-module (gnu home services)
   #:use-module (gnu home services utils)
   #:use-module (guix packages)
   #:use-module (gnu packages guile)
-  #:use-module (gnu home services)
+  #:use-module (gnu services)
+  #:use-module (gnu services configuration)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:use-module (rde serializers lisp)
   #:export (home-guix-service-type
             home-guix-configuration
             home-guile-service-type
@@ -141,10 +141,13 @@ in ``@code{GUILE_LOAD_PATH}''."))
 
   (filter
    (compose not null?)
-   `((".guile"
-      ,(mixed-text-file
-        "guile"
-        (serialize-field 'config))))))
+   (list
+    (if (null? (home-guile-configuration-config config))
+        '()
+        `(".guile"
+          ,(mixed-text-file
+            "guile"
+            (serialize-field 'config)))))))
 
 (define (home-guile-profile-service config)
   (list (home-guile-configuration-guile config)))
