@@ -13,11 +13,12 @@
 
 (define-public %project-root
   (canonicalize-path
-   (find (lambda (path)
-           (every file-exists? (map (lambda (file)
-                                      (string-append path "/" file))
-                                    (list ".dir-locals.el"))))
-         %load-path)))
+   (dirname
+    (find (lambda (path)
+            (every file-exists? (map (lambda (file)
+                                       (string-append (dirname path) "/" file))
+                                     (list "src/conses"))))
+          %load-path))))
 
 (define-public (project-file subpath)
   (local-file (string-append %project-root "/" subpath)))
