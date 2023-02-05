@@ -47,8 +47,8 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `(;; (with-eval-after-load 'rde-keymaps
-        ;;   (define-key rde-app-map (kbd ,emacs-clj-deps-new-key) 'clj-deps-new))
+      `((with-eval-after-load 'rde-keymaps
+          (define-key rde-app-map (kbd ,emacs-clj-deps-new-key) 'clj-deps-new))
         (add-hook 'cider-docview-mode-hook 'toggle-truncate-lines)
         (with-eval-after-load 'cider
           (define-key cider-repl-mode-map (kbd "C-M-q") 'indent-sexp)
@@ -85,8 +85,7 @@
           (setq org-babel-clojure-backend 'cider)))
       #:elisp-packages (list emacs-clojure-mode
                              emacs-cider
-                             ;; emacs-clj-deps-new
-                             ))))
+                             emacs-clj-deps-new))))
 
   (feature
    (name f-name)
