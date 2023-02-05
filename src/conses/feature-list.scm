@@ -5,14 +5,11 @@
   #:use-module (conses features emacs-xyz)
   #:use-module (conses features fontutils)
   #:use-module (conses features golang)
-  #:use-module (conses features lisp)
   #:use-module (conses features mail)
   #:use-module (conses features matrix)
-  #:use-module (conses features messaging)
   #:use-module (conses features nyxt-xyz)
   #:use-module (conses features ocaml)
   #:use-module (conses features scheme)
-  #:use-module (conses features security)
   #:use-module (conses features shellutils)
   #:use-module (conses features tex)
   #:use-module (conses features version-control)
@@ -24,14 +21,18 @@
   #:use-module (guix gexp)
   #:use-module (rde features)
   #:use-module (rde features shells)
-  #:use-module ((rde features emacs-xyz) #:select (feature-emacs-eglot
+  #:use-module ((rde features emacs-xyz) #:select (feature-emacs-ebdb
+                                                   feature-emacs-eglot
                                                    feature-emacs-keycast
                                                    feature-emacs-spelling
                                                    feature-emacs-time))
   #:use-module (rde features irc)
+  #:use-module (rde features lisp)
   #:use-module ((rde features mail) #:select (feature-isync
                                               feature-mail-settings
                                               mail-account))
+  #:use-module (rde features messaging)
+  #:use-module (rde features password-utils)
   #:use-module (rde features terminals)
   #:use-module (rde features xdg)
   #:use-module (rde packages))
@@ -276,8 +277,8 @@
     (list
      (slack-account
       (workspace (getenv "SLACK_WORKSPACE"))
-      (token (getenv "SLACK_TOKEN"))
-      (cookie (getenv "SLACK_COOKIE")))))
+      (nick (getenv "SLACK_NICK"))
+      (cookie? #t))))
    (feature-emacs-slack)
    (feature-emacs-telega)))
 
@@ -339,18 +340,16 @@
    (feature-goimapnotify
     #:goimapnotify
     (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
-   (feature-emacs-ebdb
-    #:ebdb-popup-size 0.2)
    (feature-emacs-gnus
     #:topic-alist gnus-topic-alist
     #:topic-topology
     '(("Gnus" visible)
       (("personal" visible nil))
-      (("clojure" visible nil))
-      (("lisp" visible nil))
-      (("technology" visible nil))
-      (("emacs" visible nil))
-      (("guix" visible nil)))
+      (("lisp" visible nil)
+       (("clojure" visible nil))
+       (("emacs" visible nil))
+       (("guix" visible nil)))
+      (("technology" visible nil)))
     #:message-archive-method '(nnmaildir "personal")
     #:message-archive-group '((".*" "sent"))
     #:group-parameters
@@ -360,7 +359,9 @@
       ("^nntp"
        (display . 1000)))
     #:posting-styles
-    `(("^nnmaildir"
+    `((".*"
+       (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
+      ("^nnmaildir"
        (signature ,(string-append
                     "Best regards,\n" (getenv "MAIL_PERSONAL_FULLNAME"))))
       ((header "cc" ".*@debbugs.gnu.org")
@@ -384,7 +385,9 @@
    (feature-emacs-smtpmail
     #:smtp-user (getenv "MAIL_PERSONAL_EMAIL")
     #:smtp-server (getenv "MAIL_PERSONAL_HOST"))
-   (feature-emacs-debbugs)))
+   (feature-emacs-debbugs)
+   (feature-emacs-ebdb
+    #:ebdb-popup-size 0.2)))
 
 (define-public %programming-base-features
   (list
@@ -409,7 +412,15 @@
      (plain-file
       "10-projects.conf"
       (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
-   (feature-ocaml)
+   (feature-ocaml
+    #:extra-init-ml
+    (list "#directory \"_build\""
+          "#use \"topfind\""
+          "#thread"
+          "#require \"core.top\""
+          "#require \"ppx_fields_conv\""
+          "#require \"str\""
+          "open Core"))
    (feature-guile)
    (feature-go)
    (feature-emacs-yaml)
@@ -446,12 +457,13 @@
       (make-rde-tab-bar-module
        :id 'weather
        :label 'display-wttr-string)
-      ;; (make-rde-tab-bar-module
-      ;;  :id 'volume-sink
-      ;;  :label 'pulseaudio-control-display-volume-string)
+      (make-rde-tab-bar-module
+       :id 'volume-sink
+       :label 'pulseaudio-control-display-volume-string)
       (make-rde-tab-bar-module
        :id 'battery
        :label 'battery-mode-line-string)))
+   (feature-xorg)
    (feature-emacs-exwm
     #:window-configurations
     '(((string= exwm-class-name "Nyxt")
@@ -462,7 +474,14 @@
       ((string= exwm-instance-name "emacs")
        char-mode t)
       ((string-match "Android Emulator" exwm-title)
-       floating t)))
+       floating t))
+    #:extra-exwm-bindings
+    '((cons (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
+      (cons (kbd "s-<prior>") 'pulseaudio-control-increase-sink-volume)
+      (cons (kbd "s-p") 'rde-xorg-take-screenshot)
+      (cons (kbd "s-v") 'rde-xorg-record-screencast)
+      (cons (kbd "s-l") 'rde-xorg-call-slock)
+      (cons (kbd "M-o") 'ace-window)))
    (feature-emacs-exwm-run-on-tty
     #:emacs-exwm-tty-number 1
     #:launch-arguments '("-mm" "--debug-init")
@@ -475,8 +494,7 @@ EndSection
 Section \"ServerFlags\"
   Option \"BlankTime\" \"0\"
 EndSection"))
-   (feature-xorg)
-   ;; (feature-emacs-pulseaudio-control)
+   (feature-emacs-pulseaudio-control)
    (feature-emacs-battery)
    (feature-emacs-display-wttr)))
 
