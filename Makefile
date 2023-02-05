@@ -14,6 +14,11 @@ channels-lock.scm: channels.scm
 	describe -f channels > channels-lock-tmp.scm
 	mv channels-lock-tmp.scm channels-lock.scm
 
+channels-lock-local.scm: channels-local.scm
+	guix time-machine -C channels-local.scm -- \
+	describe -f channels > channels-lock-tmp.scm
+	mv channels-lock-tmp.scm channels-lock-local.scm
+
 guix: target/profiles/guix.lock
 
 target:
@@ -27,6 +32,9 @@ target/profiles/guix.lock: channels-lock.scm
 
 target/profiles/guix: target/profiles channels-lock.scm
 	guix pull --allow-downgrades -C channels-lock.scm -p ${GUIX_PROFILE}
+
+target/profiles/guix-local: target/profiles channels-lock-local.scm
+	guix pull --allow-downgrades -C channels-lock-local.scm -p ${GUIX_PROFILE}
 
 target/live.iso: guix target
 	RDE_TARGET=system RDE_HOST=live $(CHANNELS-LOCK) \
