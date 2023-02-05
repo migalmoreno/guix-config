@@ -18,13 +18,13 @@
           (ocaml ocaml)
           (emacs-tuareg emacs-tuareg)
           (extra-init-ml '())
-          (extra-packages '())
+          (extra-ocaml-packages '())
           (opam? #f))
   "Configure tooling and environment for OCaml."
   (ensure-pred any-package? ocaml)
   (ensure-pred file-like? emacs-tuareg)
   (ensure-pred list-of-strings? extra-init-ml)
-  (ensure-pred list-of-file-likes? extra-packages)
+  (ensure-pred list-of-file-likes? extra-ocaml-packages)
   (ensure-pred boolean? opam?)
 
   (define f-name 'ocaml)
@@ -36,7 +36,7 @@
       ((and opam? (get-value 'zsh config))
        (list
         (simple-service
-         'home-ocaml-bash-service
+         'set-opam-env-bash
          home-zsh-service-type
          (home-zsh-extension
           (zshrc
@@ -44,7 +44,7 @@
       ((and opam? (get-value 'bash config))
        (list
         (simple-service
-         'home-ocaml-bash-service
+         'set-opam-env-zsh
          home-bash-service-type
          (home-bash-extension
           (bashrc
@@ -53,13 +53,13 @@
      (if opam?
          (list
           (simple-service
-           'home-ocaml-environment-variables-service
+           'add-opam-home-envs
            home-environment-variables-service-type
            '(("OPAMROOT" . "$XDG_CACHE_HOME/opam"))))
          '())
      (list
       (simple-service
-       'home-ocaml-profile-service
+       'add-ocaml-home-packages
        home-profile-service-type
        (if opam?
            (list opam)
@@ -71,7 +71,7 @@
              ocaml-ocp-indent
              ocaml-merlin
              ocamlbuild)
-            extra-packages)))
+            extra-ocaml-packages)))
       (service home-ocaml-service-type
                (home-ocaml-configuration
                 (config
