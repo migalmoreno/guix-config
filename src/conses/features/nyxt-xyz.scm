@@ -318,6 +318,19 @@
                    'consult-bookmark-narrow
                    `(?n "Nyxt" ,'rde-browse-url-bookmark-jump))))
               '())
+
+        ,@(if (get-value 'emacs-modus-themes config)
+              '((defun rde-nyxt-load-theme (&optional theme)
+                  "Load Nyxt theme according to current theme or THEME."
+                  (interactive)
+                  (when nyxt-process
+                    (if (or (and theme (rde-modus-themes--dark-theme-p theme))
+                            (rde-modus-themes--dark-theme-p))
+                        (nyxt-load-theme 'modus-vivendi)
+                        (nyxt-load-theme 'modus-operandi))))
+                (add-hook 'rde-modus-themes-after-enable-theme-hook
+                          'rde-nyxt-load-theme))
+              '())
         (with-eval-after-load 'nyxt-autoloads
           (nyxt-default-keybindings))
         (with-eval-after-load 'nyxt
