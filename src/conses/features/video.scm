@@ -253,6 +253,23 @@ proxy url as per `rde-browse-url-mappings'."
                   map)
                 t))
 
+             ,@(if (get-value 'emacs-modus-themes config)
+                   '((defun rde-mpv-change-theme (&optional theme)
+                       "Set mpv theme according to system theme or THEME."
+                       (interactive)
+                       (if (or (and theme
+                                    (rde-modus-themes--dark-theme-p theme))
+                               (rde-modus-themes--dark-theme-p))
+                           (progn
+                             (mpv-set-property "background" "#000000")
+                             (mpv-set-property "osd-color" "#ffffff"))
+                         (mpv-set-property "background" "#ffffff")
+                         (mpv-set-property "osd-color" "#323232")))
+                     (add-hook 'mpv-started-hook 'rde-mpv-change-theme)
+                     (add-hook 'rde-modus-themes-after-enable-theme-hook
+                               'rde-mpv-change-theme))
+                   '())
+
              (advice-add 'mpv-kill :override 'rde-mpv-kill)
              (with-eval-after-load 'org
                (org-link-set-parameters
