@@ -14,10 +14,8 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (ice-9 match)
-  #:export (feature-emacs-appearance
-            feature-emacs-whitespace
+  #:export (feature-emacs-whitespace
             feature-emacs-cursor
-            feature-emacs-modus-themes
             feature-emacs-all-the-icons
             feature-emacs-completion
             feature-emacs-corfu
@@ -35,7 +33,6 @@
             feature-emacs-ednc
             feature-emacs-calendar
             feature-emacs-bookmark
-            feature-emacs-dashboard
             feature-emacs-markdown
             feature-emacs-org
             feature-emacs-org-roam
@@ -74,93 +71,6 @@
 ;;;
 ;;; UI
 ;;;
-
-(define* (feature-emacs-appearance
-          #:key
-          (margin 8)
-          (auto-theme? #t)
-          (fringes #f)
-          (mode-line-padding 4)
-          (header-line-padding 4)
-          (tab-bar-padding 2)
-          (header-line-as-mode-line? #t))
-  "Configure Emacs's appearance."
-  (ensure-pred any-package? emacs-modus-themes)
-  (ensure-pred number? margin)
-  (ensure-pred boolean? auto-theme?)
-  (ensure-pred maybe-integer? fringes)
-  (ensure-pred number? mode-line-padding)
-  (ensure-pred number? header-line-padding)
-  (ensure-pred number? tab-bar-padding)
-  (ensure-pred boolean? header-line-as-mode-line?)
-
-  (define emacs-f-name 'appearance)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to the appearance of Emacs."
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((setq-default frame-title-format '("%b - Emacs"))
-        (with-eval-after-load 'frame
-          (add-to-list 'initial-frame-alist '(fullscreen . maximized))
-          (set-frame-parameter (selected-frame) 'internal-border-width ,margin))
-        (with-eval-after-load 'minions-autoloads
-          (minions-mode))
-        (with-eval-after-load 'minions
-          (setq minions-mode-line-lighter ";"))
-        (setq mode-line-misc-info
-              (remove '(global-mode-string ("" global-mode-string)) mode-line-misc-info))
-        ,@(if header-line-as-mode-line?
-              '((setq-default header-line-format mode-line-format)
-                (setq-default mode-line-format nil))
-              '())
-        (setq use-file-dialog nil)
-        (setq use-dialog-box nil)
-        (with-eval-after-load 'fringe
-          (fringe-mode ,(or fringes 0)))
-        (setq echo-keystrokes 0)
-        (setq ring-bell-function 'ignore)
-        (setq visible-bell nil)
-        (setq mode-line-compact 'long)
-        (fset 'yes-or-no-p 'y-or-n-p)
-        (transient-mark-mode)
-        (delete-selection-mode)
-        (with-eval-after-load 'prog-mode
-          (setq prettify-symbols-unprettify-at-point 'right-edge)
-          (setq-default prettify-symbols-alist
-                        '((":LOGBOOK:" . "")
-                          (":PROPERTIES:" . "")
-                          ("# -*-" . "")
-                          ("-*-" . ""))))
-        (tooltip-mode -1))
-      #:early-init
-      `((setq inhibit-splash-screen t)
-        (setq inhibit-startup-message t)
-        (setq initial-scratch-message nil)
-        (setq x-gtk-use-system-tooltips nil)
-        (push '(menu-bar-lines . 0) default-frame-alist)
-        (push '(tool-bar-lines . 0) default-frame-alist)
-        (push (cons 'left-fringe ,(or fringes 0)) default-frame-alist)
-        (push (cons 'right-fringe ,(or fringes 0)) default-frame-alist)
-        (push '(vertical-scroll-bars) default-frame-alist)
-        (push '(no-special-glyphs) default-frame-alist)
-        (push '(undecorated) default-frame-alist)
-        (push '(horizontal-scroll-bars) default-frame-alist)
-        (push '(internal-border-width . ,margin) default-frame-alist))
-      #:elisp-packages (list emacs-minions))))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . #t)
-             (emacs-auto-theme? . ,auto-theme?)
-             (emacs-mode-line-padding . ,mode-line-padding)
-             (emacs-header-line-padding . ,header-line-padding)
-             (emacs-tab-bar-padding . ,tab-bar-padding)
-             (emacs-margin . ,margin)))
-   (home-services-getter get-home-services)))
 
 (define* (feature-emacs-whitespace
           #:key
@@ -212,212 +122,11 @@
           (setq scroll-conservatively 100)
           (setq mouse-autoselect-window nil)
           (setq what-cursor-show-names t)
-          (setq focus-follows-mouse t))
-        (with-eval-after-load 'frame
-          (setq-default cursor-in-non-selected-windows nil)
-          (blink-cursor-mode 0))))))
+          (setq focus-follows-mouse t))))))
 
   (feature
    (name f-name)
    (values `((emacs-cursor . #t)))
-   (home-services-getter get-home-services)))
-
-(define* (feature-emacs-modus-themes
-          #:key
-          (emacs-modus-themes emacs-modus-themes)
-          (extra-after-load-theme-hooks '())
-          (dark? #f)
-          (deuteranopia? #f)
-          (extra-modus-themes-overrides '()))
-  "Configure modus-themes, a pair of elegant and highly accessible
-themes for Emacs.  DEUTERANOPIA replaces red/green tones with red/blue,
-which helps people with color blindness."
-  (ensure-pred any-package? emacs-modus-themes)
-  (ensure-pred list? extra-after-load-theme-hooks)
-  (ensure-pred boolean? dark?)
-  (ensure-pred boolean? deuteranopia?)
-  (ensure-pred elisp-config? extra-modus-themes-overrides)
-
-  (define emacs-f-name 'modus-themes)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to modus-themes."
-    (define auto? (get-value 'emacs-auto-theme? config))
-    (define mode-line-padding (get-value 'emacs-mode-line-padding config))
-    (define header-line-padding (get-value 'emacs-header-line-padding config))
-    (define tab-bar-padding (get-value 'emacs-tab-bar-padding config))
-    (define dark-theme
-      (if deuteranopia? 'modus-vivendi-deuteranopia 'modus-vivendi))
-    (define light-theme
-      (if deuteranopia? 'modus-operandi-deuteranopia 'modus-operandi))
-    (define theme
-      (if dark? dark-theme light-theme))
-
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((eval-when-compile
-          (require 'modus-themes)
-          (require 'cl-seq))
-        (require ',(symbol-append theme '-theme))
-        (eval-when-compile
-         (enable-theme ',theme))
-        (defgroup rde-modus-themes nil
-          "Configuration related to `modus-themes'."
-          :group 'rde)
-        (defcustom rde-modus-themes-mode-line-padding 1
-          "The padding of the mode line."
-          :type 'number
-          :group 'rde-modus-themes)
-        (defcustom rde-modus-themes-tab-bar-padding 1
-          "The padding of the tab bar."
-          :type 'number
-          :group 'rde-modus-themes)
-        (defcustom rde-modus-themes-header-line-padding 1
-          "The padding of the header line."
-          :type 'number
-          :group 'rde-modus-themes)
-        (defcustom rde-modus-themes-after-enable-theme-hook nil
-          "Normal hook run after enabling a theme."
-          :type 'hook
-          :group 'rde-modus-themes)
-
-        (defun rde-modus-themes-run-after-enable-theme-hook (&rest _args)
-          "Run `rde-modus-themes-after-enable-theme-hook'."
-          (run-hooks 'rde-modus-themes-after-enable-theme-hook))
-
-        (defun rde-modus-themes-set-custom-faces (&optional _theme)
-          "Set faces based on the current theme or THEME."
-          (interactive)
-          (when (modus-themes--current-theme)
-            (modus-themes-with-colors
-              (custom-set-faces
-               `(window-divider ((,c :foreground ,bg-main)))
-               `(window-divider-first-pixel ((,c :foreground ,bg-main)))
-               `(window-divider-last-pixel ((,c :foreground ,bg-main)))
-               `(vertical-border ((,c :foreground ,bg-main)))
-               `(tab-bar ((,c :background ,bg-dim
-                              :box (:line-width ,rde-modus-themes-tab-bar-padding
-                                                :color ,bg-dim
-                                                :style unspecified))))
-               `(mode-line ((,c :box (:line-width ,rde-modus-themes-mode-line-padding
-                                                  :color ,bg-mode-line-active))))
-               `(mode-line-inactive ((,c :box (:line-width ,rde-modus-themes-mode-line-padding
-                                                           :color ,bg-mode-line-inactive))))
-               `(header-line ((,c :box (:line-width ,rde-modus-themes-header-line-padding
-                                                    :color ,bg-dim))))
-               `(git-gutter-fr:added ((,c :foreground ,bg-added-intense
-                                         :background ,bg-main)))
-               `(git-gutter-fr:deleted ((,c :foreground ,bg-removed-intense
-                                           :background ,bg-main)))
-               `(git-gutter-fr:modified ((,c :foreground ,bg-changed-intense
-                                            :background ,bg-main)))
-               `(aw-leading-char-face ((,c :height 1.0
-                                           :foreground ,blue-cooler)))))))
-
-        (defun rde-modus-themes--dark-theme-p (&optional theme)
-          "Indicate if there is a curently-active dark THEME."
-          (if theme
-              (eq theme 'modus-vivendi)
-            (eq (car custom-enabled-themes) 'modus-vivendi)))
-
-        ,@(if (get-value 'mpv config)
-              '((require 'mpv)
-                (defun rde-modus-themes-change-mpv-theme (&optional theme)
-                  "Set theme in current mpv process according to current system theme or THEME."
-                  (interactive)
-                  (if (or (and theme (rde-modus-themes--dark-theme-p theme))
-                          (rde-modus-themes--dark-theme-p))
-                      (progn
-                        (mpv-set-property "background" "#000000")
-                        (mpv-set-property "osd-color" "#ffffff"))
-                    (mpv-set-property "background" "#ffffff")
-                    (mpv-set-property "osd-color" "#323232")))
-                (add-hook 'mpv-started-hook 'rde-modus-themes-change-mpv-theme)
-                (add-hook 'rde-modus-themes-after-enable-theme-hook
-                          'rde-modus-themes-change-mpv-theme))
-              '())
-
-        ,@(if (get-value 'nyxt-emacs config)
-              '((require 'nyxt)
-                (defun rde-modus-themes-load-nyxt-theme (&optional theme)
-                  "Load theme in Nyxt according to current system theme or THEME."
-                  (interactive)
-                  (when nyxt-process
-                    (if (or (and theme (rde-modus-themes--dark-theme-p theme))
-                            (rde-modus-themes--dark-theme-p))
-                        (nyxt-load-theme 'modus-vivendi)
-                        (nyxt-load-theme 'modus-operandi))))
-                (add-hook 'rde-modus-themes-after-enable-theme-hook
-                          'rde-modus-themes-load-nyxt-theme))
-              '())
-
-        (setq rde-modus-themes-header-line-padding ,header-line-padding)
-        (setq rde-modus-themes-tab-bar-padding ,tab-bar-padding)
-        (setq rde-modus-themes-mode-line-padding ,mode-line-padding)
-        (advice-add 'enable-theme :after 'rde-modus-themes-run-after-enable-theme-hook)
-        ,@(map (lambda (hook)
-                 `(add-hook 'rde-modus-themes-after-enable-theme-hook ',hook))
-               (append
-                '(rde-modus-themes-set-custom-faces)
-                 extra-after-load-theme-hooks))
-        (load-theme ',theme t)
-        (enable-theme ',theme)
-        (with-eval-after-load 'rde-keymaps
-            (define-key rde-toggle-map (kbd "t") 'modus-themes-toggle))
-        (with-eval-after-load 'modus-themes
-          (setq modus-themes-common-palette-overrides
-                '((border-mode-line-active unspecified)
-                  (border-mode-line-inactive unspecified)
-                  (fringe unspecified)
-                  (fg-line-number-inactive "gray50")
-                  (fg-line-number-active fg-main)
-                  (bg-line-number-inactive unspecified)
-                  (bg-line-number-active unspecified)
-                  (bg-region bg-ochre)
-                  (fg-region unspecified)
-                  ,@extra-modus-themes-overrides))
-          (setq modus-themes-to-toggle '(,light-theme ,dark-theme))
-          (setq modus-themes-italic-constructs t)
-          (setq modus-themes-bold-constructs t)
-          (setq modus-themes-org-blocks 'gray-background)
-          (setq modus-themes-mixed-fonts t)
-          (setq modus-themes-headings (quote ((1 . (1.15))
-                                              (2 . (1.1))
-                                              (3 . (1.1))
-                                              (4 . (1.0))
-                                              (5 . (1.0))
-                                              (6 . (1.0))
-                                              (7 . (0.9))
-                                              (8 . (0.9))))))
-        ,@(if auto?
-              '((require 'circadian)
-                ;; (add-hook 'circadian-after-load-theme-hook 'rde-org-update-faces)
-                (add-hook 'circadian-after-load-theme-hook 'rde-modus-themes-set-custom-faces)
-                (setq circadian-themes '((:sunrise . modus-operandi)
-                                         (:sunset . modus-vivendi)))
-                (circadian-setup))
-            '()))
-      #:elisp-packages (append
-                         (if auto?
-                             (list emacs-circadian)
-                           '())
-                         (if (get-value 'emacs-nyxt config)
-                             (list (get-value 'emacs-nyxt config))
-                             '())
-                         (if (get-value 'emacs-mpv config)
-                             (list (get-value 'emacs-mpv config))
-                             '())
-                         (list emacs-modus-themes))
-      #:summary "Modus Themes extensions"
-      #:commentary "Customizations to Modus Themes, the elegant,
-highly legible Emacs themes.")))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . ,emacs-modus-themes)))
    (home-services-getter get-home-services)))
 
 (define* (feature-emacs-all-the-icons
@@ -1462,26 +1171,7 @@ operate on buffers like Dired."
           (setq appt-audible nil)
           (setq appt-message-warning-time 10)
           (setq appt-display-interval 2)
-          (setq appt-display-diary nil))
-        ,@(if (get-value 'emacs-auto-theme? config)
-              '((defun rde-calendar--get-geolocation ()
-                  "Fetch the current location's coordinates through Mozilla's Geolocation API."
-                  (with-current-buffer
-                      (ignore-errors
-                        (url-retrieve-synchronously
-                         "https://location.services.mozilla.com/v1/geolocate?key=geoclue" t))
-                    (goto-char (point-min))
-                    (re-search-forward (rx bol "\n") nil t)
-                    (delete-region (point) (point-min))
-                    (let* ((location (car (cdr (json-parse-string (buffer-string) :object-type 'plist))))
-                           (latitude (plist-get location :lat))
-                           (longitude (plist-get location :lng)))
-                      (cons longitude latitude))))
-
-                (with-eval-after-load 'solar
-                  (setq calendar-longitude (car (rde-calendar--get-geolocation)))
-                  (setq calendar-latitude (cdr (rde-calendar--get-geolocation)))))
-              '())))))
+          (setq appt-display-diary nil))))))
 
   (feature
    (name f-name)
@@ -1533,197 +1223,6 @@ operate on buffers like Dired."
   (feature
    (name f-name)
    (values `((,f-name . #t)))
-   (home-services-getter get-home-services)))
-
-(define (file-like-or-path-or-symbol-or-boolean? x)
-  (or (boolean? x) (symbol? x) (file-like-or-path? x)))
-
-(define* (feature-emacs-dashboard
-          #:key
-          (emacs-dashboard emacs-dashboard)
-          (page-separator "\n\n")
-          (logo-title "Welcome to Emacs!")
-          (center-content? #t)
-          (set-init-info? #t)
-          (init-info #f)
-          (items #f)
-          (item-generators #f)
-          (item-shortcuts #f)
-          (item-names #f)
-          (set-heading-icons? #f)
-          (heading-icons #f)
-          (set-file-icons? #f)
-          (navigator-buttons #f)
-          (banner 'logo)
-          (banner-max-height 0)
-          (banner-max-width 0)
-          (org-agenda-weekly? #t)
-          (org-agenda-prefix-format #f)
-          (set-footer? #t)
-          (footer #f)
-          (footer-messages #f)
-          (footer-icon #f)
-          (bookmarks-show-base? #f)
-          (recentf-show-base? #f)
-          (projects-backend 'project-el)
-          (projects-show-base? #f)
-          (path-style #f)
-          (path-max-length 70)
-          (path-shorten-string "...")
-          (dashboard-key "h"))
-  "Configure Emacs Dashboard, an extensible startup screen.
-Set up the visible sections via ITEMS, where each entry is
-of the form (LIST-TYPE . LIST-SIZE).  For the aforementioned to work,
-you also need to configure ITEM-GENERATORS, where each entry is of
-the form (LIST-TYPE . LIST-GENERATOR-FUNCTION). You can quickly navigate
-to each section with ITEM-SHORTCUTS and set a custom name for each one via
-ITEM-NAMES.
-
-In terms of visuals, you can choose whether you want icons to be displayed in
-the section headings via SET-HEADING-ICONS? and select what icon to show for each
-section with HEADING-ICONS, where each entry is of the form (LIST-TYPE . ICON-NAME-STRING).
-Choose if you want section entries to be shown alongside icons via SET-FILE-ICONS?.
-
-NAVIGATOR-BUTTONS are custom buttons that you can display below the BANNER, to include
-quick shortcuts to things like web bookmarks. BANNER can be either `official' for the
-official Emacs logo, #f to hide the banner, `logo' for an alternative Emacs logo, or a custom
-file path to an image whose dimensions you can constrain with BANNER-MAX-HEIGHT and BANNER-MAX-WIDTH.
-
-Remind yourself of tasks by setting ORG-AGENDA-WEEKLY? to #t and customize the format of
-each task entry with ORG-AGENDA-PREFIX-FORMAT (see the Emacs variable with the same name for
-information on the format strings).
-
-Choose whether to show the bookmark name, file name, and project name, respectively, for the
-entries in each section with BOOKMARKS-SHOW-BASE?, RECENTF-SHOW-BASE?, and PROJECTS-SHOW-BASE?.
-
-You can truncate paths whose character length is greater than PATH-MAX-LENGTH by setting
-PATH-STYLE to either `truncate-beginning', `truncate-middle', or `truncate-end'."
-  (ensure-pred file-like? emacs-dashboard)
-  (ensure-pred string? page-separator)
-  (ensure-pred string? logo-title)
-  (ensure-pred boolean? center-content?)
-  (ensure-pred boolean? set-init-info?)
-  (ensure-pred maybe-string? init-info)
-  (ensure-pred maybe-list? items)
-  (ensure-pred maybe-list? item-generators)
-  (ensure-pred maybe-list? item-shortcuts)
-  (ensure-pred maybe-list? item-names)
-  (ensure-pred boolean? set-heading-icons?)
-  (ensure-pred maybe-list? heading-icons)
-  (ensure-pred boolean? set-file-icons?)
-  (ensure-pred maybe-list? navigator-buttons)
-  (ensure-pred file-like-or-path-or-symbol-or-boolean? banner)
-  (ensure-pred number? banner-max-height)
-  (ensure-pred number? banner-max-width)
-  (ensure-pred boolean? org-agenda-weekly?)
-  (ensure-pred maybe-string? org-agenda-prefix-format)
-  (ensure-pred boolean? set-footer?)
-  (ensure-pred maybe-string? footer)
-  (ensure-pred maybe-list? footer-messages)
-  (ensure-pred maybe-string? footer-icon)
-  (ensure-pred boolean? bookmarks-show-base?)
-  (ensure-pred boolean? recentf-show-base?)
-  (ensure-pred symbol? projects-backend)
-  (ensure-pred boolean? projects-show-base?)
-  (ensure-pred maybe-symbol? path-style)
-  (ensure-pred integer? path-max-length)
-  (ensure-pred string? path-shorten-string)
-  (ensure-pred string? dashboard-key)
-
-  (define emacs-f-name 'dashboard)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((require 'dashboard)
-        (defun rde-dashboard-open ()
-          "Jump to a dashboard buffer, creating one if it doesn't exist."
-          (interactive)
-          (when (get-buffer-create dashboard-buffer-name)
-            (switch-to-buffer dashboard-buffer-name)
-            (dashboard-mode)
-            (dashboard-insert-startupify-lists)
-            (dashboard-refresh-buffer)))
-
-        (with-eval-after-load 'rde-keymaps
-          (define-key rde-app-map (kbd ,dashboard-key) 'rde-dashboard-open))
-        (with-eval-after-load 'dashboard
-          (setq dashboard-set-file-icons ,(if set-file-icons? 't 'nil))
-          (setq dashboard-projects-backend ',projects-backend)
-          (setq dashboard-projects-show-base ,(if projects-show-base? 't 'nil))
-          (setq dashboard-bookmarks-show-base ,(if bookmarks-show-base? 't 'nil))
-          (setq dashboard-recentf-show-base ,(if recentf-show-base? 't 'nil))
-          (setq dashboard-center-content ,(if center-content? 't 'nil))
-          ,@(if set-init-info?
-                (if init-info
-                    `((setq dashboard-init-info ,init-info))
-                    '())
-                '((setq dashboard-set-init-info nil)))
-          ,@(if (get-value 'emacs-advanced-user? config)
-                '((setq dashboard-show-shortcuts nil))
-                '())
-          (setq dashboard-page-separator ,page-separator)
-          ,@(if (and (get-value 'emacs-org-agenda config)
-                     org-agenda-weekly?)
-                '((setq dashboard-week-agenda t))
-                '())
-          (setq dashboard-banner-logo-title ,logo-title)
-          ,@(if (symbol? banner)
-                `((setq dashboard-startup-banner ',banner))
-                `((setq dashboard-startup-banner ,(match banner
-                                                    (#f 'nil)
-                                                    (e e)))))
-          (setq dashboard-image-banner-max-height ,banner-max-height)
-          (setq dashboard-image-banner-max-width ,banner-max-width)
-          ,@(if items
-                `((setq dashboard-items ',items))
-                '())
-          ,@(if item-generators
-                `((setq dashboard-item-generators ',item-generators))
-                '())
-          ,@(if item-shortcuts
-                `((setq dashboard-item-generators ',item-shortcuts))
-                '())
-          ,@(if item-names
-                `((setq dashboard-item-generators ',item-names))
-                '())
-          (setq dashboard-set-heading-icons ,(if set-heading-icons? 't 'nil))
-          ,@(if heading-icons
-                `((setq dashboard-heading-icons ',heading-icons))
-                '())
-          ,@(if navigator-buttons
-                `((setq dashboard-set-navigator t)
-                  (setq dashboard-navigator-buttons ',navigator-buttons))
-                '())
-          (setq dashboard-agenda-release-buffers t)
-          ,@(if org-agenda-prefix-format
-                `((setq dashboard-agenda-prefix-format ,org-agenda-prefix-format))
-                '())
-          ,@(if set-footer?
-                (append
-                 (if footer
-                     `((setq dashboard-footer ,footer))
-                     '())
-                 (if footer-messages
-                     `((setq dashboard-footer-messages ',footer-messages))
-                     '())
-                 (if footer-icon
-                     `((setq dashboard-footer-icon ,footer-icon))
-                     '()))
-                `((setq dashboard-set-footer nil)))
-          (setq dashboard-path-max-length ,path-max-length)
-          (setq dashboard-path-shorten-string ,path-shorten-string)
-          ,@(if path-style
-                `((setq dashboard-path-style ',path-style))
-                '())))
-      #:elisp-packages (list emacs-dashboard))))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . ,emacs-dashboard)))
    (home-services-getter get-home-services)))
 
 
@@ -1883,6 +1382,9 @@ and organizer for Emacs."
          ;;                         (rde-org-set-custom-faces))))
 
          ;;         (add-hook 'org-mode-hook 'rde-org-set-custom-faces))
+         ;;       '())
+         ;; ,@(if (get-value 'emacs-circadian? config)
+         ;;       '((add-hook 'circadian-after-load-theme-hook 'rde-org-update-faces))
          ;;       '())
 
          (cl-defun rde-org-do-promote (&optional (levels 1))
@@ -2079,10 +1581,10 @@ Start an unlimited search at `point-min' otherwise."
          (with-eval-after-load 'ol
            (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file))
          ,@(if (and (get-value 'emacs-exwm config) (get-value 'nyxt config))
-               '((require 'ol)
-                 (org-link-set-parameters
-                  "nyxt"
-                  :store 'nyxt-store-link))
+               '((with-eval-after-load 'ol
+                   (org-link-set-parameters
+                    "nyxt"
+                    :store 'nyxt-store-link)))
                '())
          (with-eval-after-load 'ox
            (setq org-export-preserve-breaks t))
@@ -2099,8 +1601,6 @@ Start an unlimited search at `point-min' otherwise."
                           emacs-org-fragtog
                           emacs-org-download)
                          (or (and=> (get-value 'emacs-all-the-icons config) list)
-                             '())
-                         (or (and=> (get-value 'emacs-nyxt config) list)
                              '())
                          (or (and=> (get-value 'emacs-modus-themes config) list)
                              '()))))
