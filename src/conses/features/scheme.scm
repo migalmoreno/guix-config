@@ -30,14 +30,16 @@
       (home-guile-configuration
        (guile guile)
        (envs
-        `((load-path . ,(string-append
-                         "$XDG_CONFIG_HOME/guix/current/share/guile/site/3.0:"
-                         "$HOME/.guix-profile/share/guile/site/3.0:"
-                         "$HOME/.guix-home/profile/share/guile/3.0:"
-                         "$GUILE_LOAD_PATH"))
-          (load-compiled-path . ,(string-append
-                                  "$XDG_CONFIG_HOME/guix/current/lib/guile/3.0/site-ccache:"
-                                  "$GUILE_LOAD_COMPILED_PATH"))))))
+        `(,(cons 'load-path
+                 (string-append
+                  "$XDG_CONFIG_HOME/guix/current/share/guile/site/3.0:"
+                  "$HOME/.guix-profile/share/guile/site/3.0:"
+                  "$HOME/.guix-home/profile/share/guile/3.0:"
+                  "$GUILE_LOAD_PATH"))
+          ,(cons 'load-compiled-path
+                 (string-append
+                  "$XDG_CONFIG_HOME/guix/current/lib/guile/3.0/site-ccache:"
+                  "$GUILE_LOAD_COMPILED_PATH"))))))
      (simple-service
       'home-guile-profile-service
       home-profile-service-type
@@ -45,21 +47,22 @@
      (rde-elisp-configuration-service
       f-name
       config
-      `((require 'geiser)
-        (require 'geiser-guile)
-        (require 'geiser-repl)
+      `((eval-when-compile
+         (require 'geiser)
+         (require 'geiser-guile)
+         (require 'geiser-repl))
         (require 'al-scheme nil t)
-        (defgroup rde-guile nil
-          "Tooling and environment tweaks to work with GNU Guile."
-          :group 'rde)
+
         (defun rde-scheme-geiser-autoconnect ()
           "Start a Geiser REPL unless an active connection is already present."
           (unless (geiser-repl--connection*)
             (save-window-excursion
               (run-guile))))
 
-        (setq scheme-imenu-generic-expression al/scheme-imenu-generic-expression)
-        (advice-add 'scheme-indent-function :override 'al/scheme-indent-function)
+        (setq scheme-imenu-generic-expression
+              al/scheme-imenu-generic-expression)
+        (advice-add 'scheme-indent-function
+                    :override 'al/scheme-indent-function)
         (add-hook 'scheme-mode-hook 'al/scheme-fix-docstring-font-lock)
         ,@(if (get-value 'emacs-flymake config)
               '((add-hook 'scheme-mode-hook 'flymake-mode))
@@ -92,15 +95,15 @@
         (with-eval-after-load 'geiser-repl
           (define-key geiser-repl-mode-map (kbd "C-M-q") 'indent-sexp)
           (setq geiser-repl-startup-time 5000)
-          (setq geiser-repl-history-filename (locate-user-emacs-file "geiser_history"))
+          (setq geiser-repl-history-filename
+                (locate-user-emacs-file "geiser_history"))
           (setq geiser-repl-query-on-kill-p nil)
           (setq geiser-repl-use-other-window nil)
           (setq geiser-repl-per-project-p t))
-        (with-eval-after-load 'rde-keymaps
-          (define-key rde-app-map "G" 'geiser-guile))
         (with-eval-after-load 'geiser-guile
-          (setq geiser-guile-load-path (and (getenv "GUILE_LOAD_PATH")
-                                            (split-string (getenv "GUILE_LOAD_PATH") ":")))
+          (setq geiser-guile-load-path
+                (and (getenv "GUILE_LOAD_PATH")
+                     (split-string (getenv "GUILE_LOAD_PATH") ":")))
           (setq geiser-guile-binary (executable-find "guile"))
           (setq geiser-guile-load-init-file-p t))
         (with-eval-after-load 'org
@@ -113,7 +116,8 @@
                              emacs-geiser-guile
                              emacs-al-scheme)
       #:summary "GNU Guile programming utilities"
-      #:commentary "Programming utilities and tooling to work with GNU Guile.")))
+      #:commentary "Programming utilities and tooling to work with GNU \
+Guile.")))
 
   (feature
    (name f-name)
