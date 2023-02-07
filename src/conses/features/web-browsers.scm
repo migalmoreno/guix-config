@@ -242,7 +242,7 @@ page, accessible via the command `manual' (C-h r), to discover more functionalit
 ;;        #:elisp-packages (if (get-value 'emacs-embark config)
 ;;                             (list (get-value 'emacs-embark config))
 ;;                             '())))
-;;      (if (get-value 'nyxt-emacs config)
+;;      (if (get-value 'nyxt config)
 ;;          (list
 ;;           (rde-nyxt-configuration-service
 ;;            f-name
