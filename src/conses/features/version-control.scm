@@ -275,7 +275,8 @@ Falls back to `default-directory'."
        #:elisp-packages (list
                          emacs-magit
                          emacs-forge
-                         emacs-git-email)))
+                         emacs-git-email
+                         emacs-piem)))
      (if (get-value 'nyxt config)
          (list
           (rde-nyxt-configuration-service
