@@ -129,8 +129,10 @@
             (:button :type "button" :class "button"
                      :title "Backwards"
                      :onclick (ps:ps (nyxt/ps:lisp-eval
-                                      (:title "history-backwards" :buffer status)
-                                      (nyxt/history-mode:history-backwards))) "⊲")))
+                                      (:title "history-backwards"
+                                       :buffer status)
+                                      (nyxt/history-mode:history-backwards)))
+                     "⊲")))
         (defmethod format-status-reload-button ((status status-buffer))
           (spinneret:with-html-string
             (:button :type "button" :class "button"
@@ -143,28 +145,33 @@
             (:button :type "button" :class "button"
                      :title "Forwards"
                      :onclick (ps:ps (nyxt/ps:lisp-eval
-                                      (:title "history-forwards" :buffer status)
-                                      (nyxt/history-mode:history-forwards))) "⊳")))
+                                      (:title "history-forwards"
+                                       :buffer status)
+                                      (nyxt/history-mode:history-forwards)))
+                     "⊳")))
         (defmethod format-status-execute-button ((status status-buffer))
           (spinneret:with-html-string
             (:button :type "button" :class "button"
                      :title "Execute"
                      :onclick (ps:ps (nyxt/ps:lisp-eval
-                                      (:title "execute-command" :buffer status)
+                                      (:title "execute-command"
+                                       :buffer status)
                                       (nyxt:execute-command))) "≡")))
         (defmethod format-status-close-button ((status status-buffer))
           (spinneret:with-html-string
             (:button :type "button" :class "button"
                      :title "Close Buffer"
                      :onclick (ps:ps (nyxt/ps:lisp-eval
-                                      (:title "close current buffer" :buffer status)
+                                      (:title "close current buffer"
+                                       :buffer status)
                                       (nyxt:delete-current-buffer))) "🞫")))
         (defmethod format-status-switch-buffer-button ((status status-buffer))
           (spinneret:with-html-string
             (:button :type "button" :class "button"
                      :title "Switch Buffers"
                      :onclick (ps:ps (nyxt/ps:lisp-eval
-                                      (:title "switch current buffer" :buffer status)
+                                      (:title "switch current buffer"
+                                       :buffer status)
                                       (nyxt:switch-buffer))) "◱")))
 
         (defmethod format-status-new-buffer-button ((status status-buffer))
@@ -176,12 +183,14 @@
                                       (nyxt:set-url-new-buffer))) "🞣")))
 
         ,@(if format-status-buttons
-              `((defmethod format-status-buttons :around ((status status-buffer))
+              `((defmethod format-status-buttons
+                           :around ((status status-buffer))
                   (spinneret:with-html-string
                     ,@format-status-buttons)))
               '())
         ,@(if format-status-load-status
-              `((defmethod format-status-load-status :around ((status status-buffer))
+              `((defmethod format-status-load-status
+                           :around ((status status-buffer))
                   (spinneret:with-html-string
                     ,@format-status-load-status)))
               '())
@@ -201,8 +210,10 @@
                     (spinneret:with-html-string ,@format-status))))
               '())
         ,@(if glyphs?
-              '((define-configuration nyxt/blocker-mode:blocker-mode ((glyph "⨂")))
-                (define-configuration nyxt/user-script-mode:user-script-mode ((glyph "★"))))
+              '((define-configuration nyxt/blocker-mode:blocker-mode
+                  ((glyph "⨂")))
+                (define-configuration nyxt/user-script-mode:user-script-mode
+                  ((glyph "★"))))
               '())
         (define-configuration status-buffer
           ((glyph-mode-presentation-p ,(if glyphs? 't 'nil))
@@ -307,7 +318,9 @@
              (list "emacsclient" "-e" s-exps-string)
              :output '(:string :stripped t))))
 
-        (define-configuration (web-buffer prompt-buffer nyxt/editor-mode:editor-buffer)
+        (define-configuration (web-buffer
+                               prompt-buffer
+                               nyxt/editor-mode:editor-buffer)
           ((default-modes `(nyxt/emacs-mode:emacs-mode ,@%slot-value%))))))
      (rde-elisp-configuration-service
       nyxt-f-name
@@ -350,7 +363,8 @@
    (home-services-getter get-home-services)))
 
 (define* (feature-nyxt-nx-mosaic)
-  "Configure nx-mosaic, an extensible and configurable new-buffer page for Nyxt."
+  "Configure nx-mosaic, an extensible and configurable new-buffer
+page for Nyxt."
 
   (define nyxt-f-name 'nx-mosaic)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
@@ -387,7 +401,8 @@
       nyxt-f-name
       config
       `((define-configuration web-buffer
-          ((default-modes `(nyxt/user-script-mode:user-script-mode ,@%slot-value%))))
+          ((default-modes `(nyxt/user-script-mode:user-script-mode
+                            ,@%slot-value%))))
         (define-configuration nyxt/user-script-mode:user-script-mode
           ((nyxt/user-script-mode:user-styles (list ,@userstyles))
            (nyxt/user-script-mode:user-scripts (list ,@userscripts))))))))
@@ -413,13 +428,15 @@
       nyxt-f-name
       config
       `((define-configuration web-buffer
-          ((default-modes `(nyxt/blocker-mode:blocker-mode ,@%slot-value%))))
+          ((default-modes `(nyxt/blocker-mode:blocker-mode
+                            ,@%slot-value%))))
         (define-configuration nyxt/blocker-mode:blocker-mode
-          ((nyxt/blocker-mode:hostlists (append
-                                         (list
-                                          (nyxt/blocker-mode:make-hostlist
-                                           :hosts ',blocked-hosts))
-                                         (list %slot-default%)))))))))
+          ((nyxt/blocker-mode:hostlists
+            (append
+              (list
+               (nyxt/blocker-mode:make-hostlist
+                :hosts ',blocked-hosts))
+              (list %slot-default%)))))))))
 
   (feature
    (name f-name)
@@ -497,11 +514,12 @@
 
   (define (get-home-services config)
     "Return home services related to nx-tailor."
-    (define system-timezone (when (file-exists? "/etc/timezone")
-                              (let* ((port (open-input-file "/etc/timezone"))
-                                     (res (read-line port)))
-                                (close-port port)
-                                res)))
+    (define system-timezone
+      (when (file-exists? "/etc/timezone")
+        (let* ((port (open-input-file "/etc/timezone"))
+               (res (read-line port)))
+          (close-port port)
+          res)))
     (define timezone (get-value 'timezone config system-timezone))
     (define font-sans (and=> (get-value 'font-sans config) font-name))
 
@@ -687,6 +705,16 @@ and returns Lisp configuration containing the engines."
 
   (define (get-home-services config)
     "Return home services related to nx-router."
+    (define invidious-endpoint
+      "https://api.invidious.io/instances.json")
+    (define scribe-endpoint
+      "https://git.sr.ht/~edwardloveall/scribe/blob/main/docs/instances.json")
+    (define libredirect-endpoint
+      "https://raw.githubusercontent.com/libredirect/libredirect/master/src/config.json")
+    (define libreddit-endpoint
+      "https://raw.githubusercontent.com/libreddit/libreddit-instances/master/instances.json")
+    (define teddit-endpoint "https://teddit.namazso.eu/instances.json")
+
     (list
      (rde-nyxt-configuration-service
       nyxt-f-name
@@ -694,24 +722,22 @@ and returns Lisp configuration containing the engines."
       `((defun fetch-instances (url)
           (handler-case (dex:get url)
             (usocket:ns-host-not-found-error ()
-              (echo-warning "There's no Internet connection to retrieve instances")
+              (echo-warning
+               "There's no Internet connection to retrieve instances")
               nil)))
 
         (defun make-invidious-instances ()
-          (alex:when-let ((instances (fetch-instances "https://api.invidious.io/instances.json")))
+          (alex:when-let ((instances (fetch-instances ,invidious-endpoint)))
             (mapcar 'first
                     (json:with-decoder-simple-list-semantics
                       (json:decode-json-from-string instances)))))
 
         (defun make-scribe-instances ()
-          (alex:when-let ((instances (fetch-instances
-                                      "https://git.sr.ht/~edwardloveall/scribe/blob/main/docs/instances.json")))
+          (alex:when-let ((instances (fetch-instances ,scribe-endpoint)))
             (json:decode-json-from-string instances)))
 
         (defun make-proxitok-instances ()
-          (alex:when-let ((instances
-                           (fetch-instances
-                            "https://raw.githubusercontent.com/libredirect/libredirect/master/src/config.json")))
+          (alex:when-let ((instances (fetch-instances ,libredirect-endpoint)))
             (rest (alex:assoc-value
                    (alex:assoc-value
                     (json:with-decoder-simple-list-semantics
@@ -720,7 +746,7 @@ and returns Lisp configuration containing the engines."
                    :clearnet))))
 
         (defun make-teddit-instances ()
-          (alex:when-let ((instances (fetch-instances "https://teddit.namazso.eu/instances.json")))
+          (alex:when-let ((instances (fetch-instances ,teddit-endpoint)))
             (mapcar (lambda (instance)
                       (unless (str:emptyp (alex:assoc-value instance :url))
                         (alex:assoc-value instance :url)))
@@ -728,9 +754,7 @@ and returns Lisp configuration containing the engines."
                       (json:decode-json-from-string instances)))))
 
         (defun make-libreddit-instances ()
-          (alex:when-let ((instances
-                           (fetch-instances
-                            "https://raw.githubusercontent.com/libreddit/libreddit-instances/master/instances.json")))
+          (alex:when-let ((instances (fetch-instances ,libreddit-endpoint)))
             (mapcar (lambda (instance)
                       (unless (str:emptyp (alex:assoc-value instance :url))
                         (alex:assoc-value instance :url)))
@@ -754,74 +778,100 @@ and returns Lisp configuration containing the engines."
              ,@(when extra-routes
                  (extra-routes config))
              ,@(if (get-value 'tiktok-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "tiktok.com")
-                                    :original-url "www.tiktok.com"
-                                    :redirect-url (quri:uri ,(get-value 'tiktok-frontend config))
-                                    :redirect-rule '(("/@placeholder/video/" . (not "/" "/@" "/t")))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "tiktok.com")
+                      :original-url "www.tiktok.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'tiktok-frontend config))
+                      :redirect-rule '(("/@placeholder/video/" .
+                                        (not "/" "/@" "/t")))))
                    '())
              ,@(if (get-value 'youtube-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "youtube.com" "youtu.be")
-                                    :original-url "www.youtube.com"
-                                    :redirect-url (quri:uri ,(get-value 'youtube-frontend config))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "youtube.com" "youtu.be")
+                      :original-url "www.youtube.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'youtube-frontend config))))
                    '())
              ,@(if (get-value 'quora-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "quora.com")
-                                    :original-url "www.quora.com"
-                                    :redirect-url (quri:uri ,(get-value 'quora-frontend config))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "quora.com")
+                      :original-url "www.quora.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'quora-frontend config))))
                    '())
              ,@(if (get-value 'imgur-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "imgur.com")
-                                    :original-url "imgur.com"
-                                    :redirect-url (quri:uri ,(get-value 'imgur-frontend config))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "imgur.com")
+                      :original-url "imgur.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'imgur-frontend config))))
                    '())
              ,@(if (get-value 'medium-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "medium.com")
-                                    :original-url "www.medium.com"
-                                    :redirect-url (quri:uri ,(get-value 'medium-frontend config))
-                                    :instances 'make-scribe-instances))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "medium.com")
+                      :original-url "www.medium.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'medium-frontend config))
+                      :instances 'make-scribe-instances))
                    '())
              ,@(if (get-value 'twitter-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "twitter.com")
-                                    :original-url "www.twitter.com"
-                                    :redirect-url (quri:uri ,(get-value 'twitter-frontend config))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "twitter.com")
+                      :original-url "www.twitter.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'twitter-frontend config))))
                    '())
              ,@(if (get-value 'reddit-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-domain "reddit.com")
-                                    :original-url "www.reddit.com"
-                                    :redirect-url (quri:uri ,(get-value 'reddit-frontend config))
-                                    :instances 'make-reddit-alternative-instances))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-domain "reddit.com")
+                      :original-url "www.reddit.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'reddit-frontend config))
+                      :instances 'make-reddit-alternative-instances))
                    '())
              ,@(if (get-value 'google-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-regex "https://whoogle.*" "https://.*google.com/search.*")
-                                    :original-url (quri:uri "https://www.google.com")
-                                    :redirect-url (quri:uri ,(get-value 'google-frontend config))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-regex "https://whoogle.*"
+                                            "https://.*google.com/search.*")
+                      :original-url (quri:uri "https://www.google.com")
+                      :redirect-url (quri:uri
+                                     ,(get-value 'google-frontend config))))
                    '())
              ,@(if (get-value 'instagram-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger (match-regex "https://(www.)?insta.*")
-                                    :original-url "www.instagram.com"
-                                    :redirect-url (quri:uri ,(get-value 'instagram-frontend config))
-                                    :redirect-rule '(("/profile/" . (not "/" "/p/" "/tv/" "/reels/"))
-                                                     ("/media/" . "/p/"))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger (match-regex "https://(www.)?insta.*")
+                      :original-url "www.instagram.com"
+                      :redirect-url (quri:uri
+                                     ,(get-value 'instagram-frontend config))
+                      :redirect-rule '(("/profile/"
+                                        . (not "/" "/p/" "/tv/" "/reels/"))
+                                       ("/media/" . "/p/"))))
                    '())
              ,@(if (get-value 'fandom-frontend config)
-                   `((make-instance 'router:redirector
-                                    :trigger "https://([\\w'-]+)\\.fandom.com/wiki/(.*)"
-                                    :redirect-url (quri:uri ,(format #f "~a/\\1/wiki/\\2"
-                                                                     (get-value 'fandom-frontend config))))))))))
+                   `((make-instance
+                      'router:redirector
+                      :trigger "https://([\\w'-]+)\\.fandom.com/wiki/(.*)"
+                      :redirect-url (quri:uri
+                                     ,(format #f "~a/\\1/wiki/\\2"
+                                              (get-value 'fandom-frontend
+                                                         config))))))))))
 
-        (defmethod nyxt:on-signal-load-finished :around ((mode nyxt/history-mode:history-mode) url)
+        (defmethod nyxt:on-signal-load-finished
+                   :around ((mode nyxt/history-mode:history-mode) url)
           (call-next-method mode (router:trace-url url)))
 
-        (defmethod nyxt/bookmark-mode:bookmark-current-url :around (&optional (buffer (current-buffer)))
+        (defmethod nyxt/bookmark-mode:bookmark-current-url
+                   :around (&optional (buffer (current-buffer)))
           (setf (url buffer) (router:trace-url (url buffer)))
           (call-next-method buffer))
 
