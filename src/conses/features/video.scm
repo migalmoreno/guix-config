@@ -37,16 +37,19 @@
     (require-value 'fonts config)
 
     (define (run-with-emacs command)
-      (format #f (match command
-                   ((? string? e) "run \"/bin/sh\" \"-c\" \"emacsclient -e ~a\"'")
-                   (_ "run \"/bin/sh\" \"-c\" \"emacsclient -e '~s'\"")) command))
+      (format #f (string-append
+                  "run \"/bin/sh\" \"-c\" \"emacsclient -e"
+                  (if (string? command)
+                      "~a\""
+                      "'~s'\""))
+              command))
     (define gtk-light-theme? (get-value 'gtk-dark-theme? config))
     (define font-sans-serif (get-value 'font-sans-serif config))
 
     (append
      (list
       (simple-service
-       'home-mpv-mime-applications-service
+       'add-mpv-mime-entries
        home-xdg-mime-applications-service-type
        (home-xdg-mime-applications-configuration
         (default
@@ -88,14 +91,17 @@ You can specify whether to PLAY the file as AUDIO, if you want to be
 prompted for FORMATS or use FORMAT, to REPEAT the file, manually SELECT what to
 do with the file, and whether to add the file to the current PLAYLIST."
                (interactive "sURI: ")
-               (let* ((sel-format (or format (and formats (ytdl-select-format url))))
-                      (extra-args (split-string
-                                   (concat
-                                    (format "--ytdl-format=%s" (or sel-format "best"))
-                                    (and audio " --video=no")
-                                    (and repeat " --loop-file=inf")))))
+               (let* ((sel-format (or format
+                                      (and formats (ytdl-select-format url))))
+                      (extra-args
+                       (split-string
+                        (concat
+                         (format "--ytdl-format=%s" (or sel-format "best"))
+                         (and audio " --video=no")
+                         (and repeat " --loop-file=inf")))))
                  (if (and select (mpv-get-property "playlist"))
-                     (pcase (completing-read "Play or Enqueue: " '("Play" "Enqueue"))
+                     (pcase (completing-read "Play or Enqueue: "
+                                             '("Play" "Enqueue"))
                        ("Play" (apply 'mpv-start url extra-args))
                        ("Enqueue" (apply 'mpv-playlist-append-url url extra-args)))
                    (if (and playlist (mpv-get-property "playlist"))
@@ -159,8 +165,9 @@ do with the file, and whether to add the file to the current PLAYLIST."
                "Store and capture the current mpv playback link."
                (interactive)
                (with-current-buffer
-                   (car (cl-remove-if-not (lambda (buffer)
-                                            (string-match "mpv:" (buffer-name buffer)))
+                   (car (cl-remove-if-not
+                         (lambda (buffer)
+                           (string-match "mpv:" (buffer-name buffer)))
                                           (buffer-list)))
                  (org-store-link t t)
                  (org-capture nil "tv")))
@@ -202,14 +209,15 @@ do with the file, and whether to add the file to the current PLAYLIST."
                       (mpv-kill))
                     (run-hooks 'mpv-on-exit-hook))))
                (unless mpv--queue
-                 (setq mpv--queue (tq-create (make-network-process
-                                              :name "emms-mpv-socket"
-                                              :family 'local
-                                              :service emms-player-mpv-ipc-socket
-                                              :coding '(utf-8 . utf-8)
-                                              :noquery t
-                                              :filter 'emms-player-mpv-ipc-filter
-                                              :sentinel 'emms-player-mpv-ipc-sentinel)))
+                 (setq mpv--queue
+                       (tq-create (make-network-process
+                                   :name "emms-mpv-socket"
+                                   :family 'local
+                                   :service emms-player-mpv-ipc-socket
+                                   :coding '(utf-8 . utf-8)
+                                   :noquery t
+                                   :filter 'emms-player-mpv-ipc-filter
+                                   :sentinel 'emms-player-mpv-ipc-sentinel)))
                  (set-process-filter
                   (tq-process mpv--queue)
                   (lambda (_proc string)
@@ -236,11 +244,14 @@ proxy url as per `rde-browse-url-mappings'."
                  (yes-or-no-p "Copy original URL?")))
                (when-let* ((title (mpv-get-property "media-title"))
                            (url (mpv-get-property "path"))
-                           (original-url (if original-p
-                                             (rde-browse-url--transform-host url)
-                                           (rde-browse-url--transform-host url :alt nil))))
+                           (original-url
+                            (if original-p
+                                (rde-browse-url--transform-host url)
+                              (rde-browse-url--transform-host
+                               url :alt nil))))
                  (kill-new original-url)
-                 (message (format "Copied \"%s\" to the system clipboard" title))))
+                 (message (format "Copied \"%s\" to the system clipboard"
+                                  title))))
 
              (defun rde-mpv-set-transient-map ()
                "Set a transient map for transient MPV commands."
@@ -305,13 +316,17 @@ proxy url as per `rde-browse-url-mappings'."
                          (require 'all-the-icons))
                        (with-eval-after-load 'all-the-icons
                          (setq mpv-display-prev-file-indicator
-                               (all-the-icons-material "skip_previous" :v-adjust -0.1 :height 1))
+                               (all-the-icons-material
+                                "skip_previous" :v-adjust -0.1 :height 1))
                          (setq mpv-display-next-file-indicator
-                               (all-the-icons-material "skip_next" :v-adjust -0.1 :height 1))
+                               (all-the-icons-material
+                                "skip_next" :v-adjust -0.1 :height 1))
                          (setq mpv-display-pause-indicator
-                               (all-the-icons-material "pause" :v-adjust -0.14 :height 1))
+                               (all-the-icons-material
+                                "pause" :v-adjust -0.14 :height 1))
                          (setq mpv-display-resume-indicator
-                               (all-the-icons-material "play_arrow" :v-adjust -0.14 :height 1))))
+                               (all-the-icons-material
+                                "play_arrow" :v-adjust -0.14 :height 1))))
                    '()))
              ,@(if emacs-embark
                    `((with-eval-after-load 'embark
@@ -320,57 +335,70 @@ proxy url as per `rde-browse-url-mappings'."
                          (let ((map (make-sparse-keymap)))
                            (define-key map "r" 'mpv-set-chapter-ab-loop)))
                        (add-to-list 'embark-keymap-alist
-                                    '(mpv-chapter . rde-mpv-chapter-embark-actions))
+                                    (cons 'mpv-chapter
+                                          'rde-mpv-chapter-embark-actions))
                        (defvar rde-mpv-file-embark-actions
                          (let ((map (make-sparse-keymap)))
                            (define-key map "d" 'mpv-remove-playlist-entry)))
                        (add-to-list 'embark-keymap-alist
-                                    '(mpv-file . rde-mpv-file-embark-actions))))
+                                    (cons 'mpv-file
+                                          'rde-mpv-file-embark-actions))))
                  '()))
            #:elisp-packages (append
                              (list emacs-mpv)
                              (or (and=> emacs-embark list) '())
                              (or (and=> emacs-all-the-icons list) '()))))))
-     (if (get-value 'nyxt-emacs config)
+     (if (get-value 'nyxt config)
          (list
           (rde-nyxt-configuration-service
            f-name
            config
-           '((defun play-video-mpv (url &rest extra-args &key &allow-other-keys)
-               "Play stream from URL with EXTRA-ARGS in an Emacs-controlled mpv process."
+           '((defun play-video (url &rest extra-args &key &allow-other-keys)
+               "Play stream from URL with EXTRA-ARGS in an Emacs mpv process."
                (let* ((nyxt::*interactive-p* t)
                       (url (render-url (quri:uri url)))
-                      (playlist (null (member (eval-in-emacs '(mpv-get-property "playlist"))
+                      (playlist (null (member (eval-in-emacs
+                                               '(mpv-get-property "playlist"))
                                               '("nil" "[]") :test 'string=)))
-                      (play-or-enqueue (when playlist
-                                         (nyxt:prompt1
-                                          :prompt "Select"
-                                          :sources (make-instance 'prompter:yes-no-source
-                                                                  :constructor '("Play" "Enqueue")))))
+                      (play-or-enqueue
+                       (when playlist
+                         (nyxt:prompt1
+                          :prompt "Select"
+                          :sources (make-instance
+                                    'prompter:yes-no-source
+                                    :constructor '("Play" "Enqueue")))))
                       (formats (delete-duplicates
-                                (remove-if-not (lambda (f)
-                                                 (ppcre:scan "\\d+x\\d+" f))
-                                               (mapcar (lambda (f) (getf f :resolution))
-                                                       (with-input-from-string (s (eval-in-emacs
-                                                                                   `(ytdl--list-formats ,url)))
-                                                         (read s))))
+                                (remove-if-not
+                                 (lambda (f)
+                                   (ppcre:scan "\\d+x\\d+" f))
+                                 (mapcar (lambda (f) (getf f :resolution))
+                                         (with-input-from-string
+                                             (s (eval-in-emacs
+                                                 `(ytdl--list-formats ,url)))
+                                           (read s))))
                                 :test 'equal))
                       (format (when formats
                                 (ppcre:register-groups-bind (height)
                                     ("\\d+x(\\d+)"
                                      (nyxt:prompt1
                                       :prompt "Format"
-                                      :sources (make-instance 'prompter:source
-                                                              :name "Formats"
-                                                              :constructor formats)))
+                                      :sources (make-instance
+                                                'prompter:source
+                                                :name "Formats"
+                                                :constructor formats)))
                                   (format nil "best[height<=~a]" height))))
-                      (res (and play-or-enqueue (string= play-or-enqueue "Enqueue"))))
+                      (res (and play-or-enqueue
+                                (string= play-or-enqueue "Enqueue"))))
                  (eval-in-emacs
-                  `(apply 'rde-mpv-play-url ,url ,format :select nil :playlist ,res ',extra-args))))
-             (define-command play-video-mpv-current-buffer (&optional (buffer (current-buffer)))
+                  `(apply 'rde-mpv-play-url ,url ,format
+                          :select nil :playlist ,res ',extra-args))))
+
+             (define-command play-video-current (&optional
+                                                 (buffer (current-buffer)))
                "Play contents of BUFFER in an Emacs-controlled mpv process."
-               (play-video-mpv (render-url (url buffer))))
-             (define-key *rde-keymap* "C-c v" 'play-video-mpv-current-buffer))))
+               (play-video (render-url (url buffer))))
+
+             (define-key *rde-keymap* "C-c v" 'play-video-current))))
          '())))
 
   (feature
