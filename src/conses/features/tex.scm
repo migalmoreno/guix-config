@@ -11,12 +11,12 @@
 
 (define* (feature-tex
           #:key
-          extra-packages
+          extra-tex-packages
           (biblatex? #t)
           (listings? #t)
           (listings-options '()))
   "Configure the TeX typesetting system."
-  (ensure-pred list-of-file-likes? extra-packages)
+  (ensure-pred list-of-file-likes? extra-tex-packages)
   (ensure-pred boolean? biblatex?)
   (ensure-pred boolean? listings?)
   (ensure-pred elisp-config? listings-options)
@@ -31,7 +31,7 @@
       home-profile-service-type
       (append
         `(,texlive-base
-          ,@extra-packages)
+          ,@extra-tex-packages)
         (if biblatex?
             (list texlive-biblatex biber)
             '())))
