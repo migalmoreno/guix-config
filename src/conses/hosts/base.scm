@@ -5,8 +5,8 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
-  #:use-module (nongnu packages linux)
   #:use-module (guix gexp)
+  #:use-module (nongnu packages linux)
   #:use-module (ice-9 pretty-print))
 
 (define-public %nonguix-signing-key
@@ -22,6 +22,10 @@
 (define-public %default-timezone (getenv "TIMEZONE"))
 
 (define-public %default-email (getenv "MAIL_PERSONAL_EMAIL"))
+
+(define-public %default-fullname (getenv "MAIL_PERSONAL_FULLNAME"))
+
+(define-public %default-username (getenv "USERNAME"))
 
 (define-public %default-domain (getenv "DOMAIN"))
 
