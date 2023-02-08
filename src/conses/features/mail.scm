@@ -136,10 +136,7 @@ is not provided, use all the mail accounts."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup rde-message nil
-          "Message mode tweaks."
-          :group 'rde)
-        (defun rde-message-add-gcc-header ()
+      `((defun rde-message-add-gcc-header ()
           "Prompt for a Gcc header from `rde-gnus-topic-alist'.
 This will allow a message to be stored in the right directory
 of the IMAP server (usually \"Sent\").
