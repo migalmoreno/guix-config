@@ -296,7 +296,7 @@ If ACCOUNT-ID is not provided, it will use the first mail account."
           #:key
           (posting-styles #f)
           (group-parameters #f)
-          (gnus-directory "~/.cache/gnus/News")
+          (gnus-directory "~/.cache/emacs/gnus/news")
           (topic-alist #f)
           (topic-topology #f)
           (mail-account-ids #f)
@@ -402,9 +402,9 @@ If MAIL-ACCOUNT-IDS is not provided, use all the mail accounts."
           (setq gnus-parameters ',group-parameters)
           (setq gnus-directory ,gnus-directory)
           (setq gnus-home-directory (locate-user-emacs-file "gnus"))
-          (setq gnus-cache-directory "~/.cache/gnus/News/cache/")
-          (setq gnus-kill-files-directory "~/.cache/gnus/News/")
-          (setq gnus-article-save-directory "~/.cache/gnus/News/")
+          (setq gnus-cache-directory "~/.cache/emacs/gnus/news/cache/")
+          (setq gnus-kill-files-directory "~/.cache/emacs/gnus/news/")
+          (setq gnus-article-save-directory "~/.cache/emacs/gnus/news/")
           (setq gnus-large-newsgroup 100)
           ,@(if message-archive-method
                 `((setq gnus-message-archive-method ',message-archive-method))
