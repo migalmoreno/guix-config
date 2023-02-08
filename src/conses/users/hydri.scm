@@ -1,28 +1,29 @@
 (define-module (conses users hydri)
   #:use-module (conses hosts base)
   #:use-module (conses feature-list)
-  #:use-module (conses features gtk)
   #:use-module (conses features emacs)
-  #:use-module (conses features nyxt-xyz)
   #:use-module (conses features fontutils)
-  #:use-module (conses features bluetooth)
   #:use-module (conses features emacs-xyz)
-  #:use-module (conses features bittorrent)
   #:use-module (conses features shellutils)
   #:use-module (conses features version-control)
-  #:use-module (conses features web)
-  #:use-module (conses features web-browsers)
   #:use-module (conses utils)
   #:use-module (rde packages)
   #:use-module (rde features)
   #:use-module (rde features base)
+  #:use-module (rde features bittorrent)
+  #:use-module (rde features bluetooth)
   #:use-module (rde features gnupg)
+  #:use-module (rde features gtk)
+  #:use-module (rde features nyxt-xyz)
   #:use-module (rde features xdg)
+  #:use-module (rde features web)
+  #:use-module (rde features web-browsers)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
   #:use-module (gnu packages emacs)
+  #:use-module (gnu packages package-management)
   #:use-module (guix gexp))
 
 
@@ -53,14 +54,17 @@
        (config
         `((exec . #~(string-join
                      (list
-                      "guix" "shell"
+                      #$(file-append current-guix "/bin/guix")
+                      "shell"
                       (@ (gnu packages gstreamer) gst-plugins-good)
                       (@ (gnu packages gstreamer) gst-plugins-bad)
                       (@ (gnu packages gstreamer) gst-plugins-ugly)
                       (@ (gnu packages gstreamer) gst-plugins-base)
                       (@ (gnu packages gstreamer) gst-libav)
                       "--"
-                      #$(file-append (@ (conses packages web-browsers) nyxt-next-sans-gst) "/bin/nyxt"))
+                      #$(file-append (@ (conses packages web-browsers)
+                                        nyxt-next-sans-gst)
+                                     "/bin/nyxt"))
                      "%U"))
           (terminal . #f)
           (icon . "nyxt")
@@ -75,7 +79,8 @@
      (provision '(syncthing))
      (documentation "Run syncthing.")
      (start #~(make-forkexec-constructor
-               (list #$(file-append (@ (gnu packages syncthing) syncthing) "/bin/syncthing")
+               (list #$(file-append (@ (gnu packages syncthing) syncthing)
+                                    "/bin/syncthing")
                      "-no-browser" "-no-restart")))
      (respawn? #f)
      (stop #~(make-kill-destructor))))))
@@ -99,8 +104,8 @@
   (make-feature-list
    (feature-user-info
     #:user-name "hydri"
-    #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
-    #:email (getenv "MAIL_PERSONAL_EMAIL")
+    #:full-name %default-fullname
+    #:email %default-email
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-base-packages
@@ -117,21 +122,24 @@
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))
    (feature-gnupg
-    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
+    #:gpg-primary-key "5F23F458"
     #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
     #:pinentry-flavor 'tty
     #:default-ttl 34560000)
    (feature-fonts)
    (feature-emacs-appearance
     #:header-line-as-mode-line? #f
-    #:auto-theme? #f
     #:margin 0)
    (feature-emacs-tab-bar
     #:modules-center %rde-mpv-tab-bar-modules)
    (feature-gtk3
     #:dark-theme? #t
-    #:gtk-theme (make-theme "postmarketos-oled" (@ (conses packages gnome-xyz) postmarketos-theme))
-    #:icon-theme (make-theme "Adwaita" (@ (gnu packages gnome) adwaita-icon-theme))
+    #:gtk-theme (make-theme
+                 "postmarketos-oled"
+                 (@ (conses packages gnome-xyz) postmarketos-theme))
+    #:icon-theme (make-theme
+                  "Adwaita"
+                  (@ (gnu packages gnome) adwaita-icon-theme))
     #:custom-gtk-theme (lambda _
                          `((.phosh-topbar-clock
                             ((margin-left . 125px))))))

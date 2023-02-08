@@ -1,15 +1,13 @@
 (define-module (conses hosts cygnus)
   #:use-module (conses hosts base)
-  #:use-module (conses features databases)
-  #:use-module (conses features matrix)
-  #:use-module (conses features web)
-  #:use-module (conses packages web)
   #:use-module (conses packages matrix)
   #:use-module (conses hosts lyra)
-  #:use-module (conses system services matrix)
-  #:use-module (conses utils)
   #:use-module (rde features base)
+  #:use-module (rde features databases)
+  #:use-module (rde features matrix)
   #:use-module (rde features system)
+  #:use-module (rde features web)
+  #:use-module (rde system services matrix)
   #:use-module (rde packages)
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
@@ -115,10 +113,9 @@
    (feature-web-settings
     #:domain %default-domain)
    (feature-postgresql)
-   (feature-nginx
-    #:nginx nginx-with-dav)
+   (feature-nginx)
    (feature-certbot
-    #:email (getenv "MAIL_PERSONAL_EMAIL"))
+    #:email %default-email)
    (feature-matrix-settings
     #:homeserver (string-append "https://matrix." %default-domain)
     #:synapse-configuration

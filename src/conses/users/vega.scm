@@ -1,31 +1,31 @@
 (define-module (conses users vega)
   #:use-module (conses feature-list)
-  #:use-module (conses features android)
-  #:use-module (conses features documentation)
   #:use-module (conses features emacs)
   #:use-module (conses features emacs-xyz)
-  #:use-module (conses features gtk)
   #:use-module (conses features keyboard)
-  #:use-module (conses features nyxt-xyz)
-  #:use-module (conses features scheme)
   #:use-module (conses features video)
-  #:use-module (conses features web)
-  #:use-module (conses features web-browsers)
-  #:use-module (conses home services linux)
   #:use-module (conses hosts base)
   #:use-module (conses utils)
   #:use-module (rde features)
-  #:use-module (rde features ssh)
+  #:use-module (rde features android)
   #:use-module (rde features base)
+  #:use-module (rde features documentation)
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
+  #:use-module (rde features gtk)
   #:use-module (rde features networking)
+  #:use-module (rde features nyxt-xyz)
+  #:use-module (rde features scheme)
+  #:use-module (rde features ssh)
   #:use-module (rde features virtualization)
+  #:use-module (rde features web)
+  #:use-module (rde features web-browsers)
   #:use-module (rde packages)
   #:use-module (gnu home)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services desktop)
+  #:use-module (gnu home services linux)
   #:use-module (gnu system keyboard)
   #:use-module (guix gexp))
 
@@ -105,14 +105,6 @@
 
 (define vega-nyxt-features
   (make-feature-list
-   (feature-nyxt
-    #:scroll-distance 150
-    #:temporary-history? #t
-    #:smooth-scrolling? #t
-    #:autostart-slynk? #t
-    #:default-browser? #t
-    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
-    #:restore-session? #f)
    %nyxt-base-features
    (feature-nyxt-prompt #:mouse-support? #f)
    (feature-nyxt-status
@@ -158,14 +150,14 @@
   (make-feature-list
    (feature-user-info
     #:user-name "vega"
-    #:full-name (getenv "MAIL_PERSONAL_FULLNAME")
-    #:email (getenv "MAIL_PERSONAL_EMAIL")
+    #:full-name %default-fullname
+    #:email %default-email
     #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-gnupg
-    #:gpg-primary-key (getenv "GPG_PUBLIC_KEY")
-    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
+    #:gpg-primary-key "5F23F458"
+    #:ssh-keys '(("D6B4894a600BB392AB2AEDE499CBBCF3E0620B7F6"))
     #:pinentry-flavor 'emacs
     #:default-ttl 34560000)
    (feature-alternative-frontends
@@ -191,23 +183,51 @@
       (with-eval-after-load 'pinentry-autoloads
         (add-hook 'after-init-hook 'pinentry-start))
       (with-eval-after-load 'password-store
-        (setq password-store-time-before-clipboard-restore 60)))
+        (setq password-store-time-before-clipboard-restore 60))
+      (setq-default frame-title-format '("%b - Emacs"))
+      (with-eval-after-load 'frame
+        (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
+      (setq mode-line-misc-info
+            (remove '(global-mode-string ("" global-mode-string))
+                    mode-line-misc-info))
+      (setq echo-keystrokes 0)
+      (setq ring-bell-function 'ignore)
+      (setq visible-bell nil)
+      (fset 'yes-or-no-p 'y-or-n-p)
+      (transient-mark-mode)
+      (delete-selection-mode)
+      (tooltip-mode -1)
+      (with-eval-after-load 'prog-mode
+        (setq prettify-symbols-unprettify-at-point 'right-edge)
+        (setq-default prettify-symbols-alist
+                      '((":LOGBOOK:" . "")
+                        (":PROPERTIES:" . "")
+                        ("# -*-" . "")
+                        ("-*-" . ""))))
+      (with-eval-after-load 'rde-completion
+        (add-to-list 'rde-completion-initial-narrow-alist '(cider-repl-mode . ?c))))
     #:additional-elisp-packages
     (strings->packages
-     "emacs-tempel-collection"
-     "emacs-ox-haunt"
-     "emacs-pinentry"))
+     "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"))
+   (feature-nyxt
+    #:scroll-distance 150
+    #:temporary-history? #t
+    #:smooth-scrolling? #t
+    #:autostart-slynk? #t
+    #:default-browser? #t
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
+    #:restore-session? #f)
    %ui-base-features
    (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme #f
     #:extra-gtk-settings extra-gtk-settings)
    %emacs-completion-base-features
-   vega-nyxt-features
-   %multimedia-base-features   
    %emacs-base-features
    %emacs-desktop-base-features
+   vega-nyxt-features
    vega-desktop-features
+   %multimedia-base-features
    %web-base-features
    %mail-base-features
    %security-base-features
@@ -217,25 +237,17 @@
    %programming-base-features
    %markup-base-features
    (feature-emacs-dashboard
-    #:item-generators '((recents . dashboard-insert-recents)
-                        (bookmarks . dashboard-insert-bookmarks)
-                        (agenda . dashboard-insert-agenda)
-                        (registers . dashboard-insert-registers))
-    #:items '((agenda . 7)
-              (bookmarks . 7)
-              (recents . 7))
-    #:banner (file-append (@ (conses packages misc) gnu-meditate-logo)
-                          "/meditate.png")
-    #:org-agenda-prefix-format "%?-12:c"
-    #:banner-max-height 320
-    #:banner-max-width 240
-    #:path-max-length 50
-    #:bookmarks-show-base? #f
-    #:path-style 'truncate-beginning
-    #:set-heading-icons? #t
-    #:set-file-icons? #f
-    #:set-footer? #f
-    #:set-init-info? #f)
+    #:item-generators
+    '((recents . dashboard-insert-recents)
+      (bookmarks . dashboard-insert-bookmarks)
+      (agenda . dashboard-insert-agenda)
+      (registers . dashboard-insert-registers))
+    #:items
+    '((agenda . 7)
+      (bookmarks . 7)
+      (recents . 7))
+    #:dashboard-agenda-prefix-format "%?-12:c"
+    #:path-max-length 50)
    (feature-emacs-polymode)
    (feature-qmk
     #:keyboard "dztech/dz65rgb/v1"
@@ -244,7 +256,7 @@
     #:keyboard-layout %default-keyboard-layout
     #:default-input-method "spanish-keyboard")
    (feature-guix
-    #:authorized-directories guix-shell-authorized-directories)
+    #:shell-authorized-directories guix-shell-authorized-directories)
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))

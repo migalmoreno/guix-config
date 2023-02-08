@@ -1,10 +1,5 @@
 (define-module (conses hosts lyra)
   #:use-module (conses hosts base)
-  #:use-module (conses features databases)
-  #:use-module (conses features matrix)
-  #:use-module (conses features scheme)
-  #:use-module (conses features web)
-  #:use-module (conses home services linux)
   #:use-module (conses users hydri)
   #:use-module (conses utils)
   #:use-module (gnu services)
@@ -29,13 +24,17 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu home services)
-  #:use-module (gnu home-services state)
+  #:use-module (gnu home services linux)
   #:use-module (guix gexp)
   #:use-module (nongnu packages linux)
   #:use-module (rde packages)
   #:use-module (rde features)
   #:use-module (rde features base)
-  #:use-module (rde features system))
+  #:use-module (rde features databases)
+  #:use-module (rde features matrix)
+  #:use-module (rde features scheme)
+  #:use-module (rde features system)
+  #:use-module (rde features web))
 
 
 ;;; Service extensions
