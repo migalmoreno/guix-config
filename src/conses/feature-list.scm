@@ -1,39 +1,45 @@
 (define-module (conses feature-list)
-  #:use-module (conses features bittorrent)
-  #:use-module (conses features bluetooth)
-  #:use-module (conses features clojure)
   #:use-module (conses features emacs-xyz)
   #:use-module (conses features fontutils)
-  #:use-module (conses features golang)
   #:use-module (conses features mail)
-  #:use-module (conses features matrix)
-  #:use-module (conses features nyxt-xyz)
-  #:use-module (conses features ocaml)
-  #:use-module (conses features scheme)
   #:use-module (conses features shellutils)
-  #:use-module (conses features tex)
   #:use-module (conses features version-control)
   #:use-module (conses features video)
-  #:use-module (conses features wm)
-  #:use-module (conses features xorg)
   #:use-module (conses hosts base)
   #:use-module (contrib features javascript)
+  #:use-module (contrib features wm)
+  #:use-module (contrib features xorg)
   #:use-module (guix gexp)
   #:use-module (rde features)
-  #:use-module (rde features shells)
-  #:use-module ((rde features emacs-xyz) #:select (feature-emacs-ebdb
-                                                   feature-emacs-eglot
-                                                   feature-emacs-keycast
-                                                   feature-emacs-spelling
-                                                   feature-emacs-time))
+  #:use-module (rde features bittorrent)
+  #:use-module (rde features bluetooth)
+  #:use-module (rde features clojure)
+  #:use-module ((rde features emacs-xyz)
+                #:select (feature-emacs-appearance
+                          feature-emacs-circadian
+                          feature-emacs-ebdb
+                          feature-emacs-eglot
+                          feature-emacs-keycast
+                          feature-emacs-minions
+                          feature-emacs-modus-themes
+                          feature-emacs-spelling
+                          feature-emacs-time))
+  #:use-module (rde features golang)
   #:use-module (rde features irc)
   #:use-module (rde features lisp)
   #:use-module ((rde features mail) #:select (feature-isync
                                               feature-mail-settings
                                               mail-account))
+  #:use-module (rde features matrix)
   #:use-module (rde features messaging)
+  #:use-module (rde features nyxt-xyz)
+  #:use-module (rde features ocaml)
   #:use-module (rde features password-utils)
+  #:use-module (rde features scheme)
+  #:use-module (rde features shells)
+  #:use-module (rde features shellutils)
   #:use-module (rde features terminals)
+  #:use-module (rde features tex)
   #:use-module (rde features xdg)
   #:use-module (rde packages))
 
@@ -108,6 +114,7 @@
   (list
    (feature-emacs-modus-themes
     #:dark? #t)
+   (feature-emacs-circadian)
    (feature-emacs-pdf-tools)
    (feature-emacs-tempel)
    (feature-emacs-files)
@@ -293,20 +300,20 @@
    (feature-vterm)))
 
 (define gnus-topic-alist
-  '(("personal"
+  '(("Personal"
      "nnmaildir+personal:inbox"
      "nnmaildir+personal:drafts"
      "nnmaildir+personal:sent"
      "nnmaildir+personal:spam"
      "nnmaildir+personal:trash")
-    ("clojure"
+    ("Clojure"
      "nntp+gwene:gwene.clojure.planet"
      "nntp+gwene:gwene.com.google.groups.clojure")
-    ("lisp"
+    ("Common Lisp"
      "nntp+gwene:gwene.org.lisp.planet"
      "nntp+gwene:gwene.engineer.atlas.nyxt"
      "nntp+gwene:gwene.org.wingolog")
-    ("technology"
+    ("Technology"
      "nntp+gwene:gwene.org.fsf.news"
      "nntp+gwene:gwene.rs.lobste"
      "nntp+gwene:gwene.org.hnrss.newest.points"
@@ -317,16 +324,19 @@
      "nntp+gwene:gwene.org.sourcehut.blog"
      "nntp+gwene:gwene.cc.tante"
      "nntp+gwene:gwene.org.matrix.blog")
-    ("emacs"
+    ("Emacs"
      "nntp+gwene:gmane.emacs.devel"
      "nntp+gwene:gmane.emacs.erc.general"
      "nntp+gwene:gwene.com.oremacs"
      "nntp+gwene:gwene.org.emacslife.planet"
      "nntp+gwene:gwene.group.discourse.org-roam.latest")
-    ("guix"
+    ("Guix"
      "nntp+gwene:gmane.comp.gnu.guix.bugs"
      "nntp+gwene:gmane.comp.gnu.guix.patches"
      "nntp+gwene:gwene.org.gnu.guix.feeds.blog")
+    ("Inbox")
+    ("Lisp")
+    ("News")
     ("Gnus")))
 
 (define-public %mail-base-features
@@ -334,7 +344,7 @@
    (feature-mail-settings
     #:mail-accounts
     (list
-     (mail-acc 'personal (getenv "MAIL_PERSONAL_EMAIL") 'gandi))
+     (mail-acc 'personal %default-email 'gandi))
     #:mail-directory-fn mail-directory-fn)
    (feature-isync)
    (feature-goimapnotify
@@ -344,12 +354,15 @@
     #:topic-alist gnus-topic-alist
     #:topic-topology
     '(("Gnus" visible)
-      (("personal" visible nil))
-      (("lisp" visible nil)
-       (("clojure" visible nil))
-       (("emacs" visible nil))
-       (("guix" visible nil)))
-      (("technology" visible nil)))
+      (("Inbox" visible)
+       (("Personal" visible nil)))
+      (("Lisp" visible)
+       (("Common Lisp" visible nil))
+       (("Clojure" visible nil))
+       (("Emacs" visible nil))
+       (("Guix" visible nil)))
+      (("News" visible)
+       (("Technology" visible nil))))
     #:message-archive-method '(nnmaildir "personal")
     #:message-archive-group '((".*" "sent"))
     #:group-parameters
@@ -360,33 +373,32 @@
        (display . 1000)))
     #:posting-styles
     `((".*"
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL")))
+       (cc ,%default-email))
       ("^nnmaildir"
        (signature ,(string-append
-                    "Best regards,\n" (getenv "MAIL_PERSONAL_FULLNAME"))))
+                    "Best regards,\n" %default-fullname)))
       ((header "cc" ".*@debbugs.gnu.org")
        (To rde-gnus-get-article-participants)
-       (name ,(getenv "USERNAME"))
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
-       (signature ,(string-append "Best regards,\n" (getenv "USERNAME"))))
+       (name ,%default-username)
+       (cc ,%default-email)
+       (signature ,(string-append "Best regards,\n" %default-username)))
       ((header "to" ".*@lists.sr.ht")
        (To rde-gnus-get-article-participants)
-       (name ,(getenv "USERNAME"))
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
-       (signature ,(string-append "Best regards,\n" (getenv "USERNAME"))))
+       (name ,%default-username)
+       (cc ,%default-email)
+       (signature ,(string-append "Best regards,\n" %default-username)))
       ("^nntp.+:"
        (To rde-gnus-get-article-participants)
-       (name ,(getenv "USERNAME"))
-       (cc ,(getenv "MAIL_PERSONAL_EMAIL"))
-       (signature ,(string-append "Best regards,\n" (getenv "USERNAME"))))))
+       (name ,%default-username)
+       (cc ,%default-email)
+       (signature ,(string-append "Best regards,\n" %default-username)))))
    (feature-emacs-message
-    #:message-signature (string-append "Best regards,\n" (getenv "USERNAME")))
+    #:message-signature (string-append "Best regards,\n" %default-username))
    (feature-emacs-org-mime)
-   (feature-emacs-smtpmail
-    #:smtp-user (getenv "MAIL_PERSONAL_EMAIL")
-    #:smtp-server (getenv "MAIL_PERSONAL_HOST"))
+   (feature-emacs-smtpmail)
    (feature-emacs-debbugs)
    (feature-emacs-ebdb
+    #:ebdb-sources (list "~/documents/contacts")
     #:ebdb-popup-size 0.2)))
 
 (define-public %programming-base-features
@@ -515,8 +527,8 @@ EndSection"))
 
 (define-public %ui-base-features
   (list
-   (feature-emacs-appearance
-    #:auto-theme? #f)
+   (feature-emacs-minions)
+   (feature-emacs-appearance)
    (feature-fonts)))
 
 (define (nx-router-extra-routes config)
@@ -525,12 +537,12 @@ EndSection"))
      :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
      :redirect-url (quri:uri "https://www.youtube.com")
      :resource (lambda (url)
-                 (play-video-mpv url :formats nil :audio t :repeat t)))
+                 (play-video url :formats nil :audio t :repeat t)))
     (make-instance
      'router:web-route
      :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
      :resource (lambda (url)
-                 (play-video-mpv url :formats nil :audio t :repeat t)))
+                 (play-video url :formats nil :audio t :repeat t)))
     (make-instance
      'router:opener
      :trigger (match-regex "https://gfycat.com/.*"
@@ -538,7 +550,7 @@ EndSection"))
                            "https://.*/videos/watch/.*"
                            ".*cloudfront.*master.m3u8")
      :resource (lambda (url)
-                 (play-video-mpv url :formats nil)))
+                 (play-video url :formats nil)))
     (make-instance
      'router:opener
      :trigger (match-scheme "mailto")
