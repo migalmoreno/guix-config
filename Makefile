@@ -7,7 +7,7 @@ HOST := $(shell hostname)
 USER := $(shell whoami)
 
 .PHONY: all
-all: pull upgrade home system iso
+all: guix pull upgrade home system iso
 
 channels-lock.scm: channels.scm
 	guix time-machine -C channels.scm -- \
@@ -41,30 +41,6 @@ target/live.iso: guix target
 	system -L . image -t iso9660 $(CONFIG) -r target/live-tmp.iso \
 	mv target/live-tmp.iso target/live.iso
 
-system/init/%:
-	RDE_TARGET=system RDE_HOST=$* RDE_HE_IN_OS=true \
-	$(CHANNELS_LOCK) init $(CONFIG) /mnt
-
-home: home/reconfigure/${USER}
-
-home/reconfigure/%: guix
-	RDE_TARGET=home RDE_USER=$* $(CHANNELS_LOCK) home --allow-downgrades \
-	reconfigure $(CONFIG)
-
-system: system/reconfigure/${HOST}
-
-system/reconfigure/%: guix
-	RDE_TARGET=system RDE_HOST=$* sudo -E $(CHANNELS_LOCK) \
-	system reconfigure $(CONFIG)
-
-home/build/%: guix
-	RDE_TARGET=home RDE_HOST= RDE_USER=$* $(CHANNELS_LOCK) \
-	home build $(CONFIG)
-
-system/build/%: guix
-	RDE_TARGET=system RDE_HOST=$* RDE_USER= $(CHANNELS_LOCK) \
-	system build $(CONFIG)
-
 build/%: guix
 	RDE_TARGET=system $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )\
 	RDE_USER=$(word 3, $(subst /, ,$@)) \
@@ -76,3 +52,27 @@ deploy/%: guix
 	RDE_USER=$(word 3, $(subst /, ,$@)) \
 	RDE_SYSTEM=$(word 2, $(subst /, ,$@)) $(CHANNELS_LOCK) \
 	deploy $(CONFIG)
+
+home: home/reconfigure/${USER}
+
+home/build/%: guix
+	RDE_TARGET=home RDE_HOST= RDE_USER=$* $(CHANNELS_LOCK) \
+	home build $(CONFIG)
+
+home/reconfigure/%: guix
+	RDE_TARGET=home RDE_USER=$* $(CHANNELS_LOCK) home --allow-downgrades \
+	reconfigure $(CONFIG)
+
+system: system/reconfigure/${HOST}
+
+system/init/%:
+	RDE_TARGET=system RDE_HOST=$* RDE_HE_IN_OS=true \
+	$(CHANNELS_LOCK) init $(CONFIG) /mnt
+
+system/build/%: guix
+	RDE_TARGET=system RDE_HOST=$* RDE_USER= $(CHANNELS_LOCK) \
+	system build $(CONFIG)
+
+system/reconfigure/%: guix
+	RDE_TARGET=system RDE_HOST=$* sudo -E $(CHANNELS_LOCK) \
+	system reconfigure $(CONFIG)
