@@ -17,16 +17,6 @@
   #:use-module (guix build-system python)
   #:use-module ((guix licenses) #:prefix license:))
 
-(define-public nginx-with-dav
-  (package
-    (inherit nginx)
-    (name "nginx-with-dav")
-    (arguments
-     (substitute-keyword-arguments (package-arguments nginx)
-         ((#:configure-flags configure-flags)
-          #~(cons* "--with-http_dav_module"
-                   #$configure-flags))))))
-
 (define-public jellyfin
   (package
     (name "jellyfin")
