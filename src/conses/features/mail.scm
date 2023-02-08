@@ -245,26 +245,42 @@ but it won't appear on the right Maildir directory."
 ;;;
 
 (define* (feature-emacs-smtpmail
-          #:key smtp-server smtp-user)
-  "Configure smtpmail, a simple mail protocol for sending mail from Emacs."
+          #:key
+          (mail-account-id #f))
+  "Configure smtpmail, a simple mail protocol for sending mail from Emacs.
+If ACCOUNT-ID is not provided, it will use the first mail account."
+  (ensure-pred maybe-symbol? mail-account-id)
 
   (define emacs-f-name 'smtpmail)
   (define f-name (symbol-append 'emacs- emacs-f-name))
 
   (define (get-home-services config)
-    "Return home services related to smtpmail.el."
+    "Return home services related to smtpmail."
+    (require-value 'mail-accounts config)
+
+    (define mail-acc
+      (filter (lambda (acc)
+                (= (mail-account-id ac) mail-account-id))
+              (get-value 'mail-accounts config)))
+    (define smtp-provider
+      (assoc-ref %default-msmtp-provider-settings
+                 (mail-account-type mail-acc)))
+    (define smtp-host (assoc-ref smtp-provider 'host))
+    (define smtp-port (assoc-ref smtp-provider 'port))
+
     (list
      (rde-elisp-configuration-service
       emacs-f-name
       config
       `((with-eval-after-load 'smtpmail
-          (setq smtpmail-smtp-user ,smtp-user)
-          (setq smtpmail-smtp-service 587)
+          (setq smtpmail-smtp-user ,(or (mail-account-user mail-acc)
+                                        (mail-account-fqda mail-acc)))
+          (setq smtpmail-smtp-service ,smtp-port)
           (setq smtpmail-stream-type 'starttls)
-          (setq smtpmail-queue-dir "~/.cache/gnus/Mail/queued-mail")
+          (setq smtpmail-queue-dir "~/.cache/emacs/smtpmail/queued-mail")
           (setq smtpmail-debug-info t)
-          (setq smtpmail-smtp-server ,smtp-server)
-          (setq smtpmail-default-smtp-server ,smtp-server))))))
+          (setq smtpmail-smtp-server ,smtp-host)
+          (setq smtpmail-default-smtp-server ,smtp-host))))))
 
   (feature
    (name f-name)
