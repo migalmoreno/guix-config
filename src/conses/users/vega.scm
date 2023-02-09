@@ -1,6 +1,5 @@
 (define-module (conses users vega)
   #:use-module (conses feature-list)
-  #:use-module (conses features emacs)
   #:use-module (conses features emacs-xyz)
   #:use-module (conses features keyboard)
   #:use-module (conses features video)
@@ -10,6 +9,7 @@
   #:use-module (rde features android)
   #:use-module (rde features base)
   #:use-module (rde features documentation)
+  #:use-module (rde features emacs)
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
   #:use-module (rde features gtk)
@@ -100,6 +100,91 @@
        `((host-name . ,(getenv "HYDRI_HOST"))
          (user . "hydri"))))))))
 
+(define extra-init-el
+  '((add-hook 'after-init-hook 'server-start)
+    (with-eval-after-load 'password-cache
+      (setq password-cache t)
+      (setq password-cache-expiry (* 60 10)))
+    (with-eval-after-load 'pass
+      (setq pass-show-keybindings nil))
+    (with-eval-after-load 'epg-config
+      (setq epg-pinentry-mode 'loopback))
+    (with-eval-after-load 'pinentry-autoloads
+      (add-hook 'after-init-hook 'pinentry-start))
+    (with-eval-after-load 'password-store
+      (setq password-store-time-before-clipboard-restore 60))
+    (setq-default frame-title-format '("%b - Emacs"))
+    (with-eval-after-load 'frame
+      (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
+    (setq mode-line-misc-info
+          (remove '(global-mode-string ("" global-mode-string))
+                  mode-line-misc-info))
+    (setq echo-keystrokes 0)
+    (setq ring-bell-function 'ignore)
+    (setq visible-bell nil)
+    (fset 'yes-or-no-p 'y-or-n-p)
+    (transient-mark-mode)
+    (delete-selection-mode)
+    (tooltip-mode -1)
+    (with-eval-after-load 'prog-mode
+      (setq prettify-symbols-unprettify-at-point 'right-edge)
+      (setq-default prettify-symbols-alist
+                    '((":LOGBOOK:" . "")
+                      (":PROPERTIES:" . "")
+                      ("# -*-" . "")
+                      ("-*-" . ""))))
+    (with-eval-after-load 'rde-completion
+      (add-to-list 'rde-completion-initial-narrow-alist
+                   '(cider-repl-mode . ?c)))
+    (with-eval-after-load 'rde-keymaps
+      (let ((map rde-app-map))
+        (define-key map (kbd "Si") 'text-scale-increase)
+        (define-key map (kbd "Sd") 'text-scale-decrease)))
+    (with-eval-after-load 'face-remap
+      (setq text-scale-mode-step 1.075))
+    (with-eval-after-load 'comp
+      (setq native-comp-async-report-warnings-errors nil))
+    (setq-default tab-width 2)
+    (with-eval-after-load 'indent
+      (setq tab-always-indent 'complete))
+    (global-so-long-mode)
+    (require 'warnings)
+    (setq warning-suppress-types '((diary) (auto-save) (org-babel)))
+    (setq warning-suppress-log-types '((comp org-babel)))
+    (setq warning-minimum-level :error)
+    (with-eval-after-load 'autorevert
+      (setq auto-revert-remote-files nil))
+    (setq auto-save-file-name-transforms
+          `(,(cons "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+                   (expand-file-name "emacs/auto-save-list/\\2"
+                                     (xdg-data-home)) t)))
+    (setq auto-save-no-message t)
+    (setq create-lockfiles nil)
+    (setq delete-old-versions t)
+    (setq kept-new-versions 3)
+    (setq kept-old-versions 2)
+    (setq version-control t)
+    (setq remote-file-name-inhibit-cache nil)
+    (add-hook 'before-save-hook 'delete-trailing-whitespace)
+    (with-eval-after-load 'mwheel
+      (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
+                                          ((control) . 1)))
+      (setq mouse-wheel-progressive-speed nil)
+      (setq mouse-wheel-follow-mouse t)
+      (setq scroll-conservatively 100)
+      (setq mouse-autoselect-window nil)
+      (setq what-cursor-show-names t)
+      (setq focus-follows-mouse t))))
+
+(define extra-early-init-el
+  '((require 'xdg)
+    (setq package-native-compile t)
+    (setq package-user-dir
+          (expand-file-name "emacs/elpa" (xdg-data-home)))
+    (setq auto-save-list-file-prefix
+          (expand-file-name "emacs/auto-save-list/.saves-"
+                            (xdg-data-home)))))
+
 
 ;;; User-specific features
 
@@ -169,43 +254,10 @@
    (feature-manpages)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
-    #:default-application-launcher? #f
+    #:default-application-launcher? #t
     #:emacs-server-mode? #f
-    #:extra-init-el
-    '((add-hook 'after-init-hook 'server-start)
-      (with-eval-after-load 'password-cache
-        (setq password-cache t)
-        (setq password-cache-expiry (* 60 10)))
-      (with-eval-after-load 'pass
-        (setq pass-show-keybindings nil))
-      (with-eval-after-load 'epg-config
-        (setq epg-pinentry-mode 'loopback))
-      (with-eval-after-load 'pinentry-autoloads
-        (add-hook 'after-init-hook 'pinentry-start))
-      (with-eval-after-load 'password-store
-        (setq password-store-time-before-clipboard-restore 60))
-      (setq-default frame-title-format '("%b - Emacs"))
-      (with-eval-after-load 'frame
-        (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
-      (setq mode-line-misc-info
-            (remove '(global-mode-string ("" global-mode-string))
-                    mode-line-misc-info))
-      (setq echo-keystrokes 0)
-      (setq ring-bell-function 'ignore)
-      (setq visible-bell nil)
-      (fset 'yes-or-no-p 'y-or-n-p)
-      (transient-mark-mode)
-      (delete-selection-mode)
-      (tooltip-mode -1)
-      (with-eval-after-load 'prog-mode
-        (setq prettify-symbols-unprettify-at-point 'right-edge)
-        (setq-default prettify-symbols-alist
-                      '((":LOGBOOK:" . "")
-                        (":PROPERTIES:" . "")
-                        ("# -*-" . "")
-                        ("-*-" . ""))))
-      (with-eval-after-load 'rde-completion
-        (add-to-list 'rde-completion-initial-narrow-alist '(cider-repl-mode . ?c))))
+    #:extra-early-init-el extra-early-init-el
+    #:extra-init-el extra-init-el
     #:additional-elisp-packages
     (strings->packages
      "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"))
