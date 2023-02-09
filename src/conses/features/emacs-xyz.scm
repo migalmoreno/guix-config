@@ -14,16 +14,13 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (ice-9 match)
-  #:export (feature-emacs-whitespace
-            feature-emacs-cursor
-            feature-emacs-all-the-icons
+  #:export (feature-emacs-all-the-icons
             feature-emacs-completion
             feature-emacs-corfu
             feature-emacs-vertico
             feature-emacs-tempel
             feature-emacs-wgrep
             feature-emacs-project
-            feature-emacs-files
             feature-emacs-window
             feature-emacs-ibuffer
             feature-emacs-emms
@@ -71,63 +68,6 @@
 ;;;
 ;;; UI
 ;;;
-
-(define* (feature-emacs-whitespace
-          #:key
-          (global-modes '()))
-  "Configure whitespace, a minor mode to visualize whitespace characters."
-  (ensure-pred list? global-modes)
-
-  (define emacs-f-name 'whitespace)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to whitespace-mode."
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((add-hook 'before-save-hook 'delete-trailing-whitespace)
-        (global-whitespace-mode)
-        (with-eval-after-load 'whitespace
-          (setq whitespace-style '(face tabs tab-mark))
-          (setq whitespace-global-modes ',global-modes))))))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . #t)))
-   (home-services-getter get-home-services)))
-
-(define* (feature-emacs-cursor)
-  "Configure the Emacs graphical cursor."
-
-  (define emacs-f-name 'cursor)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to the cursor."
-    (list
-     (rde-elisp-configuration-service
-      f-name
-      config
-      `((with-eval-after-load 'pixel-scroll
-          (pixel-scroll-precision-mode))
-        (with-eval-after-load 'mouse
-          (setq mouse-yank-at-point nil))
-        (with-eval-after-load 'mwheel
-          (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
-                                              ((control) . 1)))
-          (setq mouse-wheel-progressive-speed nil)
-          (setq mouse-wheel-follow-mouse t)
-          (setq scroll-conservatively 100)
-          (setq mouse-autoselect-window nil)
-          (setq what-cursor-show-names t)
-          (setq focus-follows-mouse t))))))
-
-  (feature
-   (name f-name)
-   (values `((emacs-cursor . #t)))
-   (home-services-getter get-home-services)))
 
 (define* (feature-emacs-all-the-icons
           #:key
@@ -612,48 +552,6 @@ on the current project."
 ;;;
 ;;; Structures
 ;;;
-
-(define* (feature-emacs-files)
-  "Configure Emacs's file- and directory-handling facilities."
-
-  (define emacs-f-name 'files)
-  (define f-name (symbol-append 'emacs- emacs-f-name))
-
-  (define (get-home-services config)
-    "Return home services related to file handling in Emacs."
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((with-eval-after-load 'files
-          (setq backup-directory-alist
-                `((".*" . "/tmp")))
-          (setq auto-save-file-name-transforms
-                `((".*" "/tmp" t)))
-          (setq auto-save-no-message t)
-          (setq create-lockfiles nil)
-          (setq delete-old-versions t)
-          (setq kept-new-versions 3)
-          (setq kept-old-versions 2)
-          (setq version-control t)
-          (setq remote-file-name-inhibit-cache nil))
-        (setq custom-file (expand-file-name (format "emacs/custom-%s.el" (user-uid)) (xdg-cache-home)))
-        (with-eval-after-load 'custom
-          (setq custom-safe-themes t)
-          (when (file-exists-p custom-file)
-            (load custom-file)))
-        (add-hook 'after-init-hook 'recentf-mode)
-        (with-eval-after-load 'recentf
-          (add-hook 'after-init-hook 'recentf-save-list)
-          (setq recent-save-file (expand-file-name "emacs/recentf" (or (xdg-cache-home) "~/.cache"))))
-        (global-auto-revert-mode)
-        (with-eval-after-load 'autorevert
-          (setq auto-revert-remote-files nil))))))
-
-  (feature
-   (name f-name)
-   (values `((,f-name . #t)))
-   (home-services-getter get-home-services)))
 
 (define* (feature-emacs-window
           #:key
