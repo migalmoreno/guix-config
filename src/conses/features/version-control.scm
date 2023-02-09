@@ -1,9 +1,9 @@
 (define-module (conses features version-control)
   #:use-module (conses packages emacs-xyz)
-  #:use-module (conses features web-browsers)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
+  #:use-module (rde features web-browsers)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
@@ -30,8 +30,7 @@
    forge-account-full-name
    (thunked)
    (default (forge-account-username this-forge-account)))
-  (email forge-account-email)
-  (token forge-account-token))
+  (email forge-account-email))
 
 (define (list-of-forge-accounts? lst)
   (and (list? lst) (every forge-account? lst)))
@@ -48,9 +47,12 @@
 
 (define* (feature-sourcehut
           #:key
-          sourcehut-id
+          (sourcehut-id #f)
           (emacs-srht emacs-srht))
-  "Configure Sourcehut, the hacker's forge."
+  "Configure Sourcehut, the hacker's forge.
+SOURCEHUT-ID is the id of the @code{forge-account} that you wish to set
+this feature up for."
+  (ensure-pred maybe-symbol? sourcehut-id)
   (ensure-pred file-like? emacs-srht)
 
   (define f-name 'sourcehut)
@@ -59,7 +61,7 @@
     "Return home services related to Sourcehut."
     (require-value 'forge-accounts config)
 
-    (define sourcehut-account
+    (define srht-account
       (car (filter (if sourcehut-id
                        (lambda (forge-acc)
                          (equal? (forge-account-id forge-acc)
@@ -74,45 +76,67 @@
       f-name
       config
       `((require 'request)
-        (defun rde-sourcehut-repo-id (name)
+        (defconst rde-sourcehut-patch-control-codes
+          '("PROPOSED" "NEEDS_REVISION" "SUPERSEDED"
+            "APPROVED" "REJECTED" "APPLIED")
+          "Control codes for SourceHut patches.  See
+`rde-message-srht-add-email-control-code' for how to apply them.")
+
+        (defun rde-sourcehut--get-repo-id (name)
           "Return the ID associated with the sourcehut repository NAME."
           (interactive "sRepo name: ")
-          (let* ((srht-token ,(forge-account-token sourcehut-account))
+          (let* ((srht-token (auth-source-pick-first-password
+                              :host ,(symbol->string
+                                      (forge-account-forge srht-account))
+                              :user ,(forge-account-username srht-account)))
                  (oauth2-token (concat "Bearer " srht-token))
-                 (id (assoc-default
-                      'id
-                      (assoc-default
-                       'repository
-                       (assoc-default
-                        'me
-                        (assoc-default
-                         'data
-                         (request-response-data
-                          (request
-                            "https://git.sr.ht/query"
-                            :params (list (cons "query" (concat "query { me { repository(name:\"" name "\") { id } } }")))
-                            :type "GET"
-                            :headers (list (cons "Authorization" oauth2-token))
-                            :parser 'json-read
-                            :sync t
-                            :timeout 2
-                            :error (cl-function
-                                    (lambda (&key error-thrown &allow-other-keys) (message "Error %S" error-thrown)))))))))))
+                 (id
+                  (assoc-default
+                   'id
+                   (assoc-default
+                    'repository
+                    (assoc-default
+                     'me
+                     (assoc-default
+                      'data
+                      (request-response-data
+                       (request
+                         "https://git.sr.ht/query"
+                         :params (list
+                                  (cons
+                                   "query"
+                                   (concat "query { me { repository(name:\""
+                                           name "\") { id } } }")))
+                         :type "GET"
+                         :headers (list (cons "Authorization" oauth2-token))
+                         :parser 'json-read
+                         :sync t
+                         :timeout 2
+                         :error (cl-function
+                                 (lambda (&key error-thrown &allow-other-keys)
+                                   (message "Error %S" error-thrown)))))))))))
             id))
 
         (defun rde-sourcehut-set-readme (id)
-          "Export the current file to html and set it as readme for the Sourcehut repo ID."
+          "Export the current file to html and set it as readme for the
+Sourcehut repo ID."
           (interactive
            (list (if-let* ((project (project-current t))
                            (dir (project-root project))
-                           (name (string-match (rx "/" (group (+ (not "/"))) "/" eol) dir)))
-                          (rde-sourcehut-repo-id (match-string 1 dir))
-                   (call-interactively 'rde-sourcehut-repo-id))))
-          (let* ((srht-token ,(forge-account-token sourcehut-account))
+                           (name (string-match
+                                  (rx "/" (group (+ (not "/"))) "/" eol) dir)))
+                          (rde-sourcehut--get-repo-id (match-string 1 dir))
+                   (call-interactively 'rde-sourcehut--get-repo-id))))
+          (let* ((srht-token (auth-source-pick-first-password
+                              :host ,(symbol->string
+                                      (forge-account-forge srht-account))
+                              :user ,(forge-account-username srht-account)))
                  (oauth2-token (concat "Bearer " srht-token))
                  (readme (if (derived-mode-p 'html-mode)
-                             (buffer-substring-no-properties (point-min) (point-max))
-                           (org-export-as (org-export-get-backend 'html) nil nil t)))
+                             (buffer-substring-no-properties
+                              (point-min) (point-max))
+                           (org-export-as
+                            (org-export-get-backend 'html) nil nil t)))
                  (json-object-type 'hash-table)
                  (json-array-type 'list)
                  (json-key-type 'string)
@@ -124,23 +148,19 @@
              "query"
              (concat
               "mutation UpdateRepo($id: Int!, $readme: String!) "
-              "{ updateRepository(id: $id, input: { readme: $readme }) { id } }")
+              "{ updateRepository(id: $id, input: {readme: $readme}) { id } }")
              query)
             (puthash "variables" variables query)
             (request
               "https://git.sr.ht/query"
               :type "POST"
               :data (json-serialize query)
-              :headers (list (cons "Content-Type" "application/json") (cons "Authorization" oauth2-token))
+              :headers (list (cons "Content-Type" "application/json")
+                             (cons "Authorization" oauth2-token))
               :parser 'json-read
-              :complete (cl-function (lambda (&key symbol-status &allow-other-keys)
-                                       (message "Set: %S" symbol-status))))))
-
-        (defconst rde-sourcehut-patch-control-codes
-          '("PROPOSED" "NEEDS_REVISION" "SUPERSEDED"
-            "APPROVED" "REJECTED" "APPLIED")
-          "Control codes for SourceHut patches.  See
-`rde-message-srht-add-email-control-code' for how to apply them.")
+              :complete (cl-function
+                         (lambda (&key symbol-status &allow-other-keys)
+                           (message "Set: %S" symbol-status))))))
 
         (defun rde-sourcehut-add-email-control-code (control-code)
           "Add custom header for SourceHut email controls.  The CONTROL-CODE
@@ -156,7 +176,7 @@ is among `rde-notmuch-patch-control-codes'."
 `rde-notmuch-patch-control-codes'" control-code)))
 
         (with-eval-after-load 'srht
-          (setq srht-username ,(forge-account-username sourcehut-account))))
+          (setq srht-username ,(forge-account-username srht-account))))
       #:elisp-packages (list emacs-srht
                              emacs-request))))
 
