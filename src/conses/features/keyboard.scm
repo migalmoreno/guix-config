@@ -1,9 +1,8 @@
 (define-module (conses features keyboard)
-  #:use-module (conses utils)
-  #:use-module (conses home services keyboard)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
+  #:use-module (rde home services keyboard)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu packages avr)
@@ -31,19 +30,21 @@
             avr-toolchain
             dfu-util
             dfu-programmer))
-     (service home-qmk-service-type
-              (home-qmk-configuration
-               (settings
-                `((user
-                   ((qmk-home . "~/.local/share/qmk_firmware")
-                    (keyboard . ,keyboard)
-                    (keymap . ,keymap)))
-                  (general
-                   ((verbose . #f)
-                    (datetime-fmt . "%Y-%m-%d %H:%M:%S")
-                    (log-fmt . "%(levelname)s %(message)s")
-                    (log-file-fmt . "[%(asctime)s] [file:%(pathname)s] [line:%(lineno)d] %(message)s")
-                    (color . #t)))))))))
+     (service
+      home-qmk-service-type
+      (home-qmk-configuration
+       (settings
+        `((user
+           ((qmk-home . "~/.local/share/qmk_firmware")
+            (keyboard . ,keyboard)
+            (keymap . ,keymap)))
+          (general
+           ((verbose . #f)
+            (datetime-fmt . "%Y-%m-%d %H:%M:%S")
+            (log-fmt . "%(levelname)s %(message)s")
+            ,(cons 'log-file-fmt
+                   "[%(asctime)s] [file:%(pathname)s] [line:%(lineno)d] %(message)s")
+            (color . #t)))))))))
 
   (feature
    (name 'qmk)
