@@ -198,6 +198,7 @@ but it won't appear on the right Maildir directory."
           #:key
           (emacs-org-mime emacs-org-mime))
   "Configure org-mime, an Org HTML export for text/html MIME emails."
+  (ensure-pred file-like? emacs-org-mime)
 
   (define emacs-f-name 'org-mime)
   (define f-name (symbol-append 'emacs- emacs-f-name))
@@ -208,10 +209,8 @@ but it won't appear on the right Maildir directory."
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((require 'org-mime)
-        (defgroup rde-org-mime nil
-          "Minor tweaks for Org Mime."
-          :group 'rde)
+      `((eval-when-compile
+         (require 'org-mime))
         (defun rde-org-mime-darken-codeblocks ()
           "Apply a dark background to HTML email body codeblocks."
           (org-mime-change-element-style
@@ -273,11 +272,14 @@ If ACCOUNT-ID is not provided, it will use the first mail account."
       emacs-f-name
       config
       `((with-eval-after-load 'smtpmail
+          (require 'xdg)
           (setq smtpmail-smtp-user ,(or (mail-account-user mail-acc)
                                         (mail-account-fqda mail-acc)))
           (setq smtpmail-smtp-service ,smtp-port)
           (setq smtpmail-stream-type 'starttls)
-          (setq smtpmail-queue-dir "~/.cache/emacs/smtpmail/queued-mail")
+          (setq smtpmail-queue-dir
+                (expand-file-name "emacs/smtpmail/queued-mail"
+                                  (xdg-cache-home)))
           (setq smtpmail-debug-info t)
           (setq smtpmail-smtp-server ,smtp-host)
           (setq smtpmail-default-smtp-server ,smtp-host))))))
