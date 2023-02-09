@@ -72,7 +72,7 @@
   (match target
     ("home" %he)
     ("system" %os)
-    ("deploy" %machine)
+    ("deploy" %machines)
     (_ %he)))
 
 (dispatcher)
