@@ -2345,15 +2345,18 @@ is the preferred host of the alternative service to rewrite urls to."
           :group 'rde-browse-url)
 
         (cl-defun rde-browse-url--transform-host (url &key (alt t))
-          "Transform URL to its currently set proxy in `rde-browse-url-mappings'.
-If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
+          "Transform URL to its respective proxy in `rde-browse-url-mappings'.
+If ALT is non-nil, URL is a proxy URL, so find the original service url."
           (string-match (rx (group (+ any) "://" (+ (not "/"))) (+ any)) url)
           (if-let* ((service-url (match-string 1 url))
                     (mapping (if alt
-                                 (cl-rassoc service-url rde-browse-url-mappings
-                                            :test (lambda (url privacy-map)
-                                                    (string-match-p (car privacy-map) url)))
-                               (assoc-string service-url rde-browse-url-mappings))))
+                                 (cl-rassoc
+                                  service-url rde-browse-url-mappings
+                                  :test (lambda (url privacy-map)
+                                          (string-match-p (car privacy-map)
+                                                          url)))
+                               (assoc-string service-url
+                                             rde-browse-url-mappings))))
               (if alt
                   (replace-regexp-in-string
                    service-url
@@ -2388,12 +2391,13 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
             (rde-browse-url-bookmark-jump bookmark)))
 
         (defun rde-browse-url-with-cookies (cookies &optional url)
-          "Fetch and open URL with corresponding external application and COOKIES."
+          "Open URL with corresponding external application and COOKIES."
           (interactive "\nsURL: ")
           (let ((url-request-extra-headers
                  `(("Cookie"
                     ,(cl-loop for (field cookie) in cookies
-                              collect (format " %s=%s;" field cookie) into headers
+                              collect (format " %s=%s;" field cookie)
+                              into headers
                               finally (return (string-join headers))))))
                 (filename (concat temporary-file-directory
                                   (car (last (split-string url "/"))))))
@@ -2408,14 +2412,14 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
             (consult-file-externally filename)))
 
         (defun rde-browse-url-add-scheme (fun url &rest args)
-          "Add an HTTPS scheme to URL if missing and invoke FUN and ARGS with it."
+          "Add HTTPS scheme to URL if missing and invoke FUN and ARGS with it."
           (let ((link (if (string-match (rx bol (+ (in (?A . ?Z))) ":") url)
                           url
                         (concat "https:" url))))
             (apply fun link args)))
 
         (defun rde-browse-url-trace-url (fun url &rest args)
-          "Transform mapped URL to its original host and invoke FUN and ARGS with it."
+          "Transform URL to its original host and invoke FUN and ARGS with it."
           (let ((link (rde-browse-url--transform-host url)))
             (apply fun link args)))
 
@@ -2423,25 +2427,39 @@ If ALT is non-nil, URL is a proxy URL, so try to find the original service url."
               (append
                (list
                 ,@(if (get-value 'youtube-frontend config)
-                      `((cons "https://www.youtube.com" (cons "^invidio.*" ,(get-value 'youtube-frontend config))))
+                      `((cons "https://www.youtube.com"
+                              (cons "^invidio.*"
+                                    ,(get-value 'youtube-frontend config))))
                       '())
                 ,@(if (get-value 'reddit-frontend config)
-                      `((cons "https://www.reddit.com" (cons ".*teddit.*" ,(get-value 'reddit-frontend config))))
+                      `((cons "https://www.reddit.com"
+                              (cons ".*teddit.*"
+                                    ,(get-value 'reddit-frontend config))))
                       '())
                 ,@(if (get-value 'quora-frontend config)
-                      `((cons "https://quora.com" (cons ".*quora.*" ,(get-value 'quora-frontend config))))
+                      `((cons "https://quora.com"
+                              (cons ".*quora.*"
+                                    ,(get-value 'quora-frontend config))))
                       '())
                 ,@(if (get-value 'twitter-frontend config)
-                      `((cons "https://twitter.com" (cons ".*nitter.*" ,(get-value 'twitter-frontend config))))
+                      `((cons "https://twitter.com"
+                              (cons ".*nitter.*"
+                                    ,(get-value 'twitter-frontend config))))
                       '())
                 ,@(if (get-value 'imgur-frontend config)
-                      `((cons "https://imgur.com" (cons ".*imgin.*" ,(get-value 'imgur-frontend config))))
+                      `((cons "https://imgur.com"
+                              (cons ".*imgin.*"
+                                    ,(get-value 'imgur-frontend config))))
                       '())
                 ,@(if (get-value 'google-frontend config)
-                      `((cons "https://www.google.com" (cons ".*whoogle.*" ,(get-value 'google-frontend config))))
+                      `((cons "https://www.google.com"
+                              (cons ".*whoogle.*"
+                                    ,(get-value 'google-frontend config))))
                       '())
                 ,@(if (get-value 'medium-frontend config)
-                      `((cons "https://medium.com" (cons ".*scribe.*" ,(get-value 'medium-frontend config))))
+                      `((cons "https://medium.com"
+                              (cons ".*scribe.*"
+                                    ,(get-value 'medium-frontend config))))
                       '()))
                ',extra-url-mappings))
         (advice-add 'browse-url-xdg-open :around 'rde-browse-url-add-scheme)
