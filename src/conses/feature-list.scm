@@ -105,7 +105,7 @@
 (define-public %emacs-completion-base-features
   (list
    (feature-emacs-all-the-icons)
-   (feature-emacs-completion #:consult-initial-narrowing? #t)
+   (feature-emacs-completion)
    (feature-emacs-vertico)
    (feature-emacs-corfu #:corfu-doc? #t)
    (feature-emacs-wgrep)))
@@ -117,7 +117,6 @@
    (feature-emacs-circadian)
    (feature-emacs-pdf-tools)
    (feature-emacs-tempel)
-   (feature-emacs-files)
    (feature-emacs-ibuffer)
    (feature-emacs-graphviz)
    (feature-emacs-calendar #:week-numbers? #t)
@@ -154,8 +153,7 @@
           org-capture-mode dired-mode eshell-mode magit-status-mode
           diary-mode magit-diff-mode text-mode pass-view-mode erc-mode))
    (feature-emacs-project)
-   (feature-emacs-keycast)
-   (feature-emacs-cursor)))
+   (feature-emacs-keycast)))
 
 (define-public %markup-base-features
   (list
@@ -240,7 +238,8 @@
      "texlive-xcolor" "texlive-ulem" "texlive-latex-preview"
      "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"
      "texlive-titling" "texlive-latex-titlesec" "texlive-enumitem"))
-   (feature-emacs-citar)))
+   (feature-emacs-citar
+    #:global-bibliography (list "~/documents/references.bib"))))
 
 (define-public %communication-base-features
   (list
@@ -699,17 +698,18 @@ EndSection"))
       (id 'sh)
       (forge 'sourcehut)
       (username (getenv "USERNAME"))
-      (email (getenv "SOURCEHUT_EMAIL"))
-      (token (getenv "SOURCEHUT_TOKEN")))
+      (email (getenv "SOURCEHUT_EMAIL")))
      (forge-account
       (id 'gh)
       (forge 'github)
       (username (getenv "GITHUB_USER"))
-      (email (getenv "GITHUB_EMAIL"))
-      (token (getenv "GITHUB_TOKEN")))))
+      (email (getenv "GITHUB_EMAIL")))))
    (feature-sourcehut)
    (feature-git
     #:primary-forge-account-id 'sh
-    #:sign-commits? #t
+    #:extra-config
+    '((sendemail
+       (cc . ,%default-email)
+       (thread . #t)))
     #:global-ignores
     '("**/.direnv" "node_modules" "*.elc" ".log"))))
