@@ -209,19 +209,22 @@ is among `rde-notmuch-patch-control-codes'."
     "Return home services related to the Git VCS."
     (require-value 'forge-accounts config)
 
-    (define main-account (car (filter (lambda (forge-acc)
-                                   (equal? (forge-account-id forge-acc)
-                                           primary-forge-account-id))
-                                 (get-value 'forge-accounts config))))
+    (define main-account
+      (car (filter (lambda (forge-acc)
+                     (equal? (forge-account-id forge-acc)
+                             primary-forge-account-id))
+                   (get-value 'forge-accounts config))))
     (define full-name (forge-account-full-name main-account))
     (define email (forge-account-email main-account))
-    (define gpg-sign-key (or git-gpg-sign-key (get-value 'gpg-primary-key config)))
-    (define github-user (let ((gh-account (filter (lambda (forge-acc)
-                                                    (equal? (forge-account-forge forge-acc)
-                                                            'github))
-                                                  (get-value 'forge-accounts config))))
-                          (unless (nil? gh-account)
-                            (forge-account-username (car gh-account)))))
+    (define gpg-sign-key
+      (or git-gpg-sign-key (get-value 'gpg-primary-key config)))
+    (define github-user
+      (let ((gh-account (filter (lambda (forge-acc)
+                                  (equal? (forge-account-forge forge-acc)
+                                          'github))
+                                (get-value 'forge-accounts config))))
+        (unless (nil? gh-account)
+          (forge-account-username (car gh-account)))))
 
     (append
      (list
@@ -240,63 +243,81 @@ is among `rde-notmuch-patch-control-codes'."
                      ,@(if sign-commits?
                            `((signing-key . ,gpg-sign-key))
                            '())))
-                   (sendemail
-                    ((annotate . "yes")
-                     (cc . ,email)
-                     (thread . #f)))
+                   (merge
+                    ;; diff3 makes it easier to solve conflicts with smerge, zdiff3
+                    ;; should make a conflict scope smaller, but guile-git fails if
+                    ;; this option is set.
+                    ((conflictStyle . diff3)))
+                   (diff
+                    ;; histogram should be smarter about diff generation.
+                    ((algorithm . histogram)))
                    (commit
-                    ((gpg-sign . #t)))
+                    (,@(if sign-commits?
+                           '((gpgsign . #t))
+                           '())))
                    ,@(if (and github-user (not (unspecified? github-user)))
                          `((github
                             ((user . ,github-user))))
-                         '())))
+                         '())
+                   (sendemail
+                    ((annotate . #t)))
+
+                   ,@extra-config))
                 (ignore global-ignores)))
-      (rde-elisp-configuration-service
-       f-name
-       config
-       `((defun rde-git-email--get-current-project ()
-           "Return the path of the current project.
+      (if (get-value 'emacs config)
+          (list
+           (rde-elisp-configuration-service
+            f-name
+            config
+            `((defun rde-git-email--get-current-project ()
+                "Return the path of the current project.
 Falls back to `default-directory'."
-           (let ((dir (or (and (bound-and-true-p projectile-known-projects)
-                               (projectile-project-root))
-                          (and (bound-and-true-p project-list-file)
-                               (if (and (not (consp (project-current))) (> (length (project-current)) 2))
-                                   (car (last (project-current)))
-                                 (cdr (project-current))))
-                          (vc-root-dir)
-                          default-directory)))
-             dir))
-         (advice-add 'git-email--get-current-project :override 'rde-git-email--get-current-project)
-         (define-key ctl-x-map "g" 'magit)
-         (add-hook 'magit-mode-hook 'toggle-truncate-lines)
-         ,@(if (get-value 'emacs-project config)
-               '((define-key project-prefix-map "m" 'magit-status)
-                 (add-to-list 'project-switch-commands '(magit-status "Show Magit Status")))
-               '())
-         (with-eval-after-load 'magit
-           (require 'git-email-magit)
-           (define-key magit-mode-map "q" 'magit-kill-this-buffer)
-           (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
-           (setq magit-pull-or-fetch t)
-           (magit-define-popup-switch 'magit-branch-popup ?o "Create an orphan branch" "--orphan")
-           (require 'forge))
-         (with-eval-after-load 'vc
-           (setq vc-follow-symlinks t)
-           (setq vc-ignore-dir-regexp (format "%s\\|%s" vc-ignore-dir-regexp tramp-file-name-regexp)))
-         (with-eval-after-load 'ediff
-           (setq ediff-window-setup-function 'ediff-setup-windows-plain))
-         (define-key vc-prefix-map "W" 'git-email-format-patch)
-         (with-eval-after-load 'git-email
-           (require 'git-email-magit)
-           (setq git-email-format-patch-default-args "-o ~/src/patches")
-           ,@(if (get-value 'emacs-gnus config)
-                 '((git-email-gnus-mode 1))
-                 '())))
-       #:elisp-packages (list
-                         emacs-magit
-                         emacs-forge
-                         emacs-git-email
-                         emacs-piem)))
+                (let ((dir (or (and (bound-and-true-p projectile-known-projects)
+                                    (projectile-project-root))
+                               (and (bound-and-true-p project-list-file)
+                                    (if (and (not (consp (project-current)))
+                                             (> (length (project-current)) 2))
+                                        (car (last (project-current)))
+                                      (cdr (project-current))))
+                               (vc-root-dir)
+                               default-directory)))
+                  dir))
+              (advice-add 'git-email--get-current-project
+                          :override 'rde-git-email--get-current-project)
+              (define-key ctl-x-map "g" 'magit)
+              (add-hook 'magit-mode-hook 'toggle-truncate-lines)
+              ,@(if (get-value 'emacs-project config)
+                    '((define-key project-prefix-map "m" 'magit-status)
+                      (add-to-list 'project-switch-commands
+                                   '(magit-status "Show Magit Status")))
+                  '())
+              (with-eval-after-load 'magit
+                (require 'git-email-magit)
+                (define-key magit-mode-map "q" 'magit-kill-this-buffer)
+                (setq magit-display-buffer-function
+                      'magit-display-buffer-same-window-except-diff-v1)
+                (setq magit-pull-or-fetch t)
+                (require 'forge))
+              (with-eval-after-load 'vc
+                (setq vc-follow-symlinks t)
+                (setq vc-ignore-dir-regexp
+                      (format "%s\\|%s"
+                              vc-ignore-dir-regexp tramp-file-name-regexp)))
+              (with-eval-after-load 'ediff
+                (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+              (define-key vc-prefix-map "W" 'git-email-format-patch)
+              (with-eval-after-load 'git-email
+                (require 'git-email-magit)
+                (setq git-email-format-patch-default-args "-o ~/src/patches")
+                ,@(if (get-value 'emacs-gnus config)
+                      '((git-email-gnus-mode 1))
+                    '())))
+            #:elisp-packages (list
+                              emacs-magit
+                              emacs-forge
+                              emacs-git-email
+                              emacs-piem)))
+          '()))
      (if (get-value 'nyxt config)
          (list
           (rde-nyxt-configuration-service
@@ -309,9 +330,11 @@ Falls back to `default-directory'."
                             "src/"
                             (car (last
                                   (str:split
-                                   "/" (quri:uri-path (url (current-buffer)))))))))
+                                   "/" (quri:uri-path
+                                        (url (current-buffer)))))))))
                  (if (uiop:directory-exists-p path)
-                     (echo "Error: Directory ~a already exists." (namestring path))
+                     (echo "Error: Directory ~a already exists."
+                           (namestring path))
                      (eval-in-emacs
                       '(require 'magit)
                       `(magit-clone-internal
