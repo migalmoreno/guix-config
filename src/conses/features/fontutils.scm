@@ -1,11 +1,11 @@
 (define-module (conses features fontutils)
-  #:use-module (conses home services fonts)
   #:use-module (conses packages emacs-xyz)
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home services fonts)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages fontutils)
   #:use-module (guix gexp)
@@ -104,20 +104,26 @@
       `((require 'xdg)
         (eval-when-compile
          (require 'cl-macs))
+        (defvar rde-fonts-emoji-list nil
+          "Cached list of emojis.")
+
         (defun rde-fonts--build-emojis ()
-          "Create an emoji list by looping over the corresponding range of characters."
+          "Create an emoji list by looping over the total range of characters."
           (delete
            nil
            (cl-loop with range = '(#x1f000 . #x1f9ff)
                     for i upto (- (cdr range) (car range))
                     collect (when-let* ((codepoint (+ (car range) i))
-                                        (name (get-char-code-property codepoint 'name)))
+                                        (name (get-char-code-property
+                                               codepoint 'name)))
                               (thread-last
-                                (replace-regexp-in-string " " "-" (downcase name))
+                                (replace-regexp-in-string
+                                 " " "-" (downcase name))
                                 (format ":%s:")
-                                (format "%s %s" (char-to-string (char-from-name name))))))))
-        (defvar rde-fonts-emoji-list nil
-          "Cached list of emojis.")
+                                (format
+                                 "%s %s"
+                                 (char-to-string (char-from-name name))))))))
+
         (defun rde-fonts-insert-emoji ()
           "Insert an emoji character to the current buffer."
           (interactive)
@@ -134,13 +140,15 @@
         (with-eval-after-load 'fontset
           (set-fontset-font t 'symbol ,(font-name font-unicode) nil 'append)
           (set-fontset-font t 'unicode ,(font-name font-unicode) nil 'append)
-          (set-fontset-font "fontset-default" nil (font-spec :name ,(font-name font-unicode))))
+          (set-fontset-font "fontset-default" nil
+                            (font-spec :name ,(font-name font-unicode))))
         (setq use-default-font-for-symbols nil)
         (require 'fontaine)
         (setq fontaine-presets
               '((docked
                  :default-family ,(font-name font-monospace)
-                 :default-height ,(inexact->exact (* (font-docked-size font-monospace) 10))
+                 :default-height ,(inexact->exact
+                                   (* (font-docked-size font-monospace) 10))
                  :fixed-pitch-family ,(font-name font-monospace)
                  :fixed-pitch-height 1.0
                  :variable-pitch-family ,(font-name font-sans)
@@ -148,22 +156,31 @@
                  :variable-pitch-weight ,(font-weight font-sans))
                 (headless
                  :default-family ,(font-name font-monospace)
-                 :default-height ,(inexact->exact (* (font-headless-size font-monospace) 10))
+                 :default-height ,(inexact->exact
+                                   (* (font-headless-size font-monospace) 10))
                  :fixed-pitch-family ,(font-name font-monospace)
                  :fixed-pitch-height 1.0
                  :variable-pitch-family ,(font-name font-sans)
                  :variable-pitch-height 1.0
                  :variable-pitch-weight ,(font-weight font-sans))
                 ,@extra-fontaine-presets))
-        (setq fontaine-latest-state-file (expand-file-name "emacs/fontaine-latest.state.eld" (xdg-cache-home)))
+        (setq fontaine-latest-state-file
+              (expand-file-name "emacs/fontaine-latest.state.eld"
+                                (xdg-cache-home)))
         (when (display-graphic-p)
           (fontaine-set-preset ',default-fontaine-preset)))
       #:elisp-packages (list emacs-fontaine))
      (service home-font-service-type
               (home-font-configuration
-               (sans-serif (make-font-spec (font-package font-sans) (font-name font-sans)))
-               (serif (make-font-spec (font-package font-serif) (font-name font-serif)))
-               (monospace (make-font-spec (font-package font-monospace) (font-name font-monospace)))))))
+               (sans-serif
+                (make-font-spec
+                 (font-package font-sans) (font-name font-sans)))
+               (serif
+                (make-font-spec
+                 (font-package font-serif) (font-name font-serif)))
+               (monospace
+                (make-font-spec
+                 (font-package font-monospace) (font-name font-monospace)))))))
 
   (feature
    (name f-name)
