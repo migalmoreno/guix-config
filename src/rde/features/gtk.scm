@@ -1,5 +1,6 @@
 (define-module (rde features gtk)
   #:use-module (rde features)
+  #:use-module (rde features predicates)
   #:use-module (rde home services gtk)
   #:use-module (conses features fontutils)
   #:use-module (conses packages desktop)
