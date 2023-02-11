@@ -193,7 +193,7 @@ is among `rde-notmuch-patch-control-codes'."
           (git-gpg-sign-key #f)
           (sign-commits? #t)
           (extra-config '())
-          (global-ignores '()))
+          (extra-global-ignores '()))
   "Configure Git, a fast, scalable, distributed revision control system."
   (ensure-pred symbol? primary-forge-account-id)
   (ensure-pred any-package? git)
@@ -201,7 +201,7 @@ is among `rde-notmuch-patch-control-codes'."
   (ensure-pred maybe-string? git-gpg-sign-key)
   (ensure-pred boolean? sign-commits?)
   (ensure-pred alist? extra-config)
-  (ensure-pred list? global-ignores)
+  (ensure-pred list? extra-global-ignores)
 
   (define f-name 'git)
 
@@ -263,7 +263,7 @@ is among `rde-notmuch-patch-control-codes'."
                     ((annotate . #t)))
 
                    ,@extra-config))
-                (ignore global-ignores)))
+                (ignore extra-global-ignores)))
       (if (get-value 'emacs config)
           (list
            (rde-elisp-configuration-service
@@ -316,7 +316,8 @@ Falls back to `default-directory'."
                               emacs-magit
                               emacs-forge
                               emacs-git-email
-                              emacs-piem)))
+                              emacs-piem
+                              b4)))
           '()))
      (if (get-value 'nyxt config)
          (list
