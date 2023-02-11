@@ -1,7 +1,6 @@
 (define-module (conses users hydri)
   #:use-module (conses hosts base)
   #:use-module (conses feature-list)
-  #:use-module (conses features emacs)
   #:use-module (conses features fontutils)
   #:use-module (conses features emacs-xyz)
   #:use-module (conses features shellutils)
@@ -12,6 +11,7 @@
   #:use-module (rde features base)
   #:use-module (rde features bittorrent)
   #:use-module (rde features bluetooth)
+  #:use-module (rde features emacs)
   #:use-module (rde features gnupg)
   #:use-module (rde features gtk)
   #:use-module (rde features nyxt-xyz)
@@ -62,7 +62,7 @@
                       (@ (gnu packages gstreamer) gst-plugins-base)
                       (@ (gnu packages gstreamer) gst-libav)
                       "--"
-                      #$(file-append (@ (conses packages web-browsers)
+                      #$(file-append (@ (rde packages web-browsers)
                                         nyxt-next-sans-gst)
                                      "/bin/nyxt"))
                      "%U"))
@@ -123,7 +123,7 @@
     '((add-hook 'after-init-hook 'server-start)))
    (feature-gnupg
     #:gpg-primary-key "5F23F458"
-    #:ssh-keys '(("D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6"))
+    #:ssh-keys `((,%default-ssh-keygrip))
     #:pinentry-flavor 'tty
     #:default-ttl 34560000)
    (feature-fonts)
@@ -148,7 +148,7 @@
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend #f)
    (feature-nyxt
-    #:nyxt (@ (conses packages web-browsers) nyxt-next-sans-gst)
+    #:nyxt (@ (rde packages web-browsers) nyxt-next-sans-gst)
     #:default-browser? #t
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:restore-session? #f
