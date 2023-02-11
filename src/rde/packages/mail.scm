@@ -1,11 +1,7 @@
-(define-module (conses packages mail)
-  #:use-module (conses packages python-xyz)
+(define-module (rde packages mail)
   #:use-module (gnu packages mail)
-  #:use-module (gnu packages gnupg)
   #:use-module (guix packages)
-  #:use-module (guix git-download)
-  #:use-module (guix build-system trivial)
-  #:use-module ((guix licenses) #:prefix license:))
+  #:use-module (guix git-download))
 
 (define-public go-gitlab.com-shackra-goimapnotify-next
   (package
@@ -17,7 +13,8 @@
        (uri (git-reference
              (url "https://gitlab.com/shackra/goimapnotify")
              (commit version)))
-       (file-name (git-file-name (package-name go-gitlab.com-shackra-goimapnotify)
-                                 version))
+       (file-name
+        (git-file-name
+         (package-name go-gitlab.com-shackra-goimapnotify) version))
        (sha256
         (base32 "0dk12x0x5zan86fdi5wi5zv545vmccs15cdrc2ica9afy189zvdn"))))))
