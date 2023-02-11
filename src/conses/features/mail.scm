@@ -251,7 +251,7 @@ but it won't appear on the right Maildir directory."
           #:key
           (mail-account-id #f))
   "Configure smtpmail, a simple mail protocol for sending mail from Emacs.
-If ACCOUNT-ID is not provided, it will use the first mail account."
+If no MAIL-ACCOUNT-ID is provided, the first mail account will be used."
   (ensure-pred maybe-symbol? mail-account-id)
 
   (define emacs-f-name 'smtpmail)
@@ -262,9 +262,11 @@ If ACCOUNT-ID is not provided, it will use the first mail account."
     (require-value 'mail-accounts config)
 
     (define mail-acc
-      (filter (lambda (acc)
-                (= (mail-account-id ac) mail-account-id))
-              (get-value 'mail-accounts config)))
+      (if mail-account-id
+          (filter (lambda (acc)
+                    (= (mail-account-id acc) mail-account-id))
+                  (get-value 'mail-accounts config))
+          (car (get-value 'mail-accounts config))))
     (define smtp-provider
       (assoc-ref %default-msmtp-provider-settings
                  (mail-account-type mail-acc)))
