@@ -66,8 +66,9 @@
           (ignore-device-verification? #f)
           (extra-config '()))
   "Configure Pantalaimon, an E2EE-aware proxy daemon for Matrix clients.
-See @uref{https://github.com/matrix-org/pantalaimon/blob/master/docs/man/pantalaimon.5.md,
-Pantalaimon's man page} for the list of available options."
+See
+@uref{https://github.com/matrix-org/pantalaimon/blob/master/docs/man/\
+pantalaimon.5.md,Pantalaimon's man page} for the list of available options."
   (ensure-pred file-like? pantalaimon)
   (ensure-pred integer? port)
   (ensure-pred boolean? ssl?)
@@ -112,7 +113,8 @@ Pantalaimon's man page} for the list of available options."
              (listen '("443 ssl http2"))
              (server-name (list (string-append "pantalaimon." domain)))
              (ssl-certificate (string-append letsencrypt-dir "/fullchain.pem"))
-             (ssl-certificate-key (string-append letsencrypt-dir "/privkey.pem"))
+             (ssl-certificate-key
+              (string-append letsencrypt-dir "/privkey.pem"))
              (locations
               (list
                (nginx-location-configuration
@@ -152,9 +154,12 @@ Pantalaimon's man page} for the list of available options."
     "Return system services related to Synapse."
     (require-value 'matrix-settings config)
     (define homeserver (get-value 'matrix-homeserver config))
-    (define server-name (string-drop homeserver (+ 1 (string-index-right homeserver #\/))))
-    (define domain (string-drop server-name (+ 1 (string-index server-name #\.))))
-    (define letsencrypt-dir (and domain (string-append "/etc/letsencrypt/live/matrix." domain)))
+    (define server-name
+      (string-drop homeserver (+ 1 (string-index-right homeserver #\/))))
+    (define domain
+      (string-drop server-name (+ 1 (string-index server-name #\.))))
+    (define letsencrypt-dir
+      (and domain (string-append "/etc/letsencrypt/live/matrix." domain)))
 
     (append
      (list
@@ -162,7 +167,8 @@ Pantalaimon's man page} for the list of available options."
                (get-value 'synapse-configuration config)))
      (if whatsapp-bridge?
          (list
-          (service mautrix-whatsapp-service-type (get-value 'mautrix-whatsapp-configuration config)))
+          (service mautrix-whatsapp-service-type
+                   (get-value 'mautrix-whatsapp-configuration config)))
          '())
      (if (get-value 'nginx config)
          (list
@@ -247,13 +253,20 @@ Pantalaimon's man page} for the list of available options."
                           :preview-key ,(kbd "M-.")
                           :state ,'consult--buffer-state
                           :items ,(lambda ()
-                                    (mapcar 'buffer-name (rde-completion--mode-buffers
-                                                          'ement-room-mode
-                                                          'ement-room-list-mode))))
-                  "Source for Ement buffers to be set in `consult-buffer-sources'.")
-                (add-to-list 'consult-buffer-sources rde-ement-buffer-source)
-                (add-to-list 'rde-completion-initial-narrow-alist '(ement-room-mode . ?e))
-                (add-to-list 'rde-completion-initial-narrow-alist '(ement-room-list-mode . ?e)))
+                                    (mapcar 'buffer-name
+                                            (rde-completion--mode-buffers
+                                             'ement-room-mode
+                                             'ement-room-list-mode))))
+                  "Source for Ement buffers to be set in \
+`consult-buffer-sources'.")
+                (with-eval-after-load 'consult
+                  (add-to-list 'consult-buffer-sources
+                               rde-ement-buffer-source))
+                (with-eval-after-load 'rde-completion
+                  (add-to-list 'rde-completion-initial-narrow-alist
+                               '(ement-room-mode . ?e))
+                  (add-to-list 'rde-completion-initial-narrow-alist
+                               '(ement-room-list-mode . ?e))))
               '())
 
         (defun rde-ement-connect (user)
@@ -269,7 +282,9 @@ Pantalaimon's man page} for the list of available options."
                                 action
                                 (mapcar 'rde-ement-user-id rde-ement-users)
                                 string pred))))
-                          rde-ement-users :key 'rde-ement-user-id :test 'string=)))
+                          rde-ement-users
+                          :key 'rde-ement-user-id
+                          :test 'string=)))
           (let ((homeserver (rde-ement-user-homeserver user))
                 (id (rde-ement-user-id user)))
             (ement-connect
@@ -278,8 +293,10 @@ Pantalaimon's man page} for the list of available options."
                         :host homeserver
                         :user (substring id 1 (string-match ":" id)))
              :uri-prefix ,(if (get-value 'pantalaimon config)
-                              (string-append "http://localhost:"
-                                             (number->string (get-value 'pantalaimon-port config)))
+                              (string-append
+                               "http://localhost:"
+                               (number->string
+                                (get-value 'pantalaimon-port config)))
                               homeserver))))
 
         (with-eval-after-load 'rde-keymaps
