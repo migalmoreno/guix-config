@@ -2,7 +2,6 @@
   #:use-module (rde features)
   #:use-module (rde features emacs)
   #:use-module (rde features predicates)
-  #:use-module (rde packages web)
   #:use-module (rde system services web)
   #:use-module (gnu services)
   #:use-module (gnu services web)
