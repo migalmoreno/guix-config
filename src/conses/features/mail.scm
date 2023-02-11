@@ -223,14 +223,18 @@ but it won't appear on the right Maildir directory."
            "blockquote"
            "border-left: 2px solid gray; padding-left: 4px;"))
 
-        (define-key org-mode-map (kbd "C-c M-o") 'org-mime-org-buffer-htmlize)
         (add-hook 'org-mime-html-hook 'rde-org-mime-darken-codeblocks)
         (add-hook 'org-mime-html-hook 'rde-org-mime-indent-quotes)
-        (let ((map message-mode-map))
-          (define-key map (kbd "C-c M-z") 'org-mime-htmlize)
-          (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode))
-        (setq org-mime-export-options
-              '(:section-numbers nil :with-author nil :with-toc nil)))
+        (with-eval-after-load 'org
+          (define-key org-mode-map (kbd "C-c M-o")
+            'org-mime-org-buffer-htmlize))
+        (with-eval-after-load 'message
+          (let ((map message-mode-map))
+            (define-key map (kbd "C-c M-z") 'org-mime-htmlize)
+            (define-key map (kbd "C-c M-o") 'org-mime-edit-mail-in-org-mode)))
+        (with-eval-after-load 'org-mime
+          (setq org-mime-export-options
+                '(:section-numbers nil :with-author nil :with-toc nil))))
       #:elisp-packages (list emacs-org-mime))))
 
   (feature
