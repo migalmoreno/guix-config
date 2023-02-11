@@ -12,22 +12,6 @@
   #:use-module (guix gexp)
   #:use-module ((guix licenses) #:prefix license:))
 
-(define-public adb-next
-  (package
-    (inherit adb)
-    (version "11.0.0_r1")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://android.googlesource.com/platform/system/core")
-             (commit (string-append "android-" version))))
-       (file-name (string-append "android-platform-system-core-"
-                                 version "-checkout"))
-       (sha256
-        (base32
-         "0a10rnn24fpkjzmfa7d6ymx0am0hqclgs7nhiaw4h7rw7k12iihb"))))))
-
 (define-public payload-dumper
   (let ((commit "60224410cbe9e937cc158d5eb376b56d8b40e12b")
         (revision "0"))
