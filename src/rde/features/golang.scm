@@ -36,12 +36,15 @@
      (rde-elisp-configuration-service
       f-name
       config
-      '((add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
-        (with-eval-after-load 'ob-core
-          (require 'ob-go)
-          (add-to-list 'org-structure-template-alist '("go" . "src go"))
-          (setq org-babel-default-header-args:go
-                '((:imports . "fmt")))))
+      `((add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+        ,@(if (get-value 'emacs-org config)
+              '((with-eval-after-load 'ob-core
+                  (require 'ob-go)
+                  (add-to-list 'org-structure-template-alist
+                               '("go" . "src go"))
+                  (setq org-babel-default-header-args:go
+                        '((:imports . "fmt")))))
+              '()))
       #:elisp-packages (list emacs-go-mode emacs-ob-go))))
 
   (feature
