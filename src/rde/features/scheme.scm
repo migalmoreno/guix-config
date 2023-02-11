@@ -130,10 +130,12 @@ Guile.")))
 (define* (feature-guix
           #:key
           (shell-authorized-directories '())
-          (extra-envs '()))
+          (configuration-dir "~/src/projects/dotfiles")
+          (extra-guix-envs '()))
   "Configure the GNU Guix system and package manager."
   (ensure-pred list? shell-authorized-directories)
-  (ensure-pred list? extra-envs)
+  (ensure-pred string? configuration-dir)
+  (ensure-pred list? extra-guix-envs)
 
   (define (get-home-services config)
     "Return home services related to GNU Guix."
@@ -146,19 +148,11 @@ Guile.")))
                 shell-authorized-directories)
                (envs
                 `((profile . ,(string-append (getenv "HOME") "/.guix-profile"))
-                  ,@extra-envs))))
+                  ,@extra-guix-envs))))
      (rde-elisp-configuration-service
       emacs-f-name
       config
-      `((defgroup rde-guix nil
-          "Emacs integration with the GNU Guix package manager."
-          :group 'rde)
-        (defcustom rde-guix-home-configuration-dir nil
-          "Directory that holds the GNU Guix home configuration."
-          :type 'directory
-          :group 'rde-guix)
-
-        (defun rde-guix-daemons-root ()
+      `((defun rde-guix-daemons-root ()
           "Invoke `daemons' as superuser to get the list of system daemons."
           (interactive)
           (let ((default-directory (format "/sudo::%s" (make-temp-file nil t))))
@@ -167,14 +161,13 @@ Guile.")))
         (defun rde-guix-compile-configuration ()
           "Compile the project located in `rde-guix-home-configuration-dir'."
           (interactive)
-          (let ((default-directory rde-guix-home-configuration-dir)
+          (let ((default-directory ,configuration-dir)
                 (compilation-read-command nil)
                 (compile-command "make home")
                 (display-buffer-alist `((,(rx "*compilation*")
                                          (display-buffer-no-window)))))
             (call-interactively 'compile)))
 
-        (setq rde-guix-home-configuration-dir ,%project-root)
         ;; (let ((map mode-specific-map))
         ;;   (define-key map "gi" 'guix-installed-user-packages)
         ;;   (define-key map "gI" 'guix-installed-user-packages)
@@ -202,5 +195,5 @@ manager from Emacs.")))
    (name 'guix)
    (values `((guix . #t)
              (shell-authorized-directories . ,shell-authorized-directories)
-             (guix-extra-envs . ,extra-envs)))
+             (guix-extra-envs . ,extra-guix-envs)))
    (home-services-getter get-home-services)))
