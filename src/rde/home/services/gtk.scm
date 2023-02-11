@@ -37,11 +37,16 @@
      (if (home-gtk3-configuration-default-cursor config)
          (list
           `(".icons/default/index.theme"
-            ,(apply mixed-text-file
-                    "index.theme"
-                    (serialize-ini-config
-                     `((#{Icon Theme}#
-                        ((Inherits . ,#~(format #f "~a" #$(home-gtk3-configuration-default-cursor config))))))))))
+            ,(apply
+              mixed-text-file
+              "index.theme"
+              (serialize-ini-config
+               `((#{Icon Theme}#
+                  (,(cons 'Inherits
+                          #~(format
+                             #f "~a"
+                             #$(home-gtk3-configuration-default-cursor
+                                config))))))))))
          '())
      (if (null? (home-gtk3-configuration-theme config))
          '()
@@ -49,7 +54,8 @@
           `(".config/gtk-3.0/gtk.css"
             ,(apply mixed-text-file
                     "gtk.css"
-                    (serialize-css-config (home-gtk3-configuration-theme config))))))
+                    (serialize-css-config
+                     (home-gtk3-configuration-theme config))))))
      (if (null? (home-gtk3-configuration-settings config))
          '()
          (list
@@ -57,7 +63,8 @@
             ,(apply mixed-text-file
                     "settings.ini"
                     (serialize-ini-config
-                     (home-gtk3-configuration-settings config)))))))))
+                     (home-gtk3-configuration-settings
+                      config)))))))))
 
 (define home-gtk3-service-type
   (service-type
