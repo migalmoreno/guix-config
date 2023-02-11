@@ -17,6 +17,8 @@
    "conses.pub"
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN (none)\n"))
 
+(define-public %default-ssh-keygrip "D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6")
+
 (define-public %default-kernel linux)
 
 (define-public %default-timezone (getenv "TIMEZONE"))
