@@ -135,12 +135,15 @@
            (setq merlin-report-warnings nil)
            (setq merlin-error-in-fringe nil)
            (setq merlin-error-check-then-move nil))
-         (with-eval-after-load 'org
-           (add-to-list 'org-structure-template-alist '("ml" . "src ocaml"))
-           (require 'ob-ocaml))
-         (with-eval-after-load 'ob-core
-           (setq org-babel-default-header-args:ocaml
-                 '((:results . "scalar"))))
+         ,@(if (get-value 'emacs-org config)
+               '((with-eval-after-load 'org
+                   (add-to-list 'org-structure-template-alist
+                                '("ml" . "src ocaml"))
+                   (require 'ob-ocaml))
+                 (with-eval-after-load 'ob-core
+                   (setq org-babel-default-header-args:ocaml
+                         '((:results . "scalar")))))
+               '())
          (with-eval-after-load 'ob-ocaml
            (setq org-babel-ocaml-command
                  ,@(if opam?
