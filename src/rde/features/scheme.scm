@@ -106,12 +106,15 @@
                      (split-string (getenv "GUILE_LOAD_PATH") ":")))
           (setq geiser-guile-binary (executable-find "guile"))
           (setq geiser-guile-load-init-file-p t))
-        (with-eval-after-load 'org
-          (add-to-list 'org-structure-template-alist '("sc" . "src scheme")))
-        (with-eval-after-load 'ob-core
-          (require 'ob-scheme)
-          (setq org-babel-default-header-args:scheme
-                '((:results . "scalar")))))
+        ,@(if (get-value 'emacs-org config)
+              '((with-eval-after-load 'org
+                  (add-to-list 'org-structure-template-alist
+                               '("sc" . "src scheme")))
+                (with-eval-after-load 'ob-core
+                  (require 'ob-scheme)
+                  (setq org-babel-default-header-args:scheme
+                        '((:results . "scalar")))))
+              '()))
       #:elisp-packages (list emacs-geiser
                              emacs-geiser-guile
                              emacs-al-scheme)
