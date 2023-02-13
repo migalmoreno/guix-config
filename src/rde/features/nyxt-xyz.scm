@@ -1,4 +1,4 @@
-(define-module (conses features nyxt-xyz)
+(define-module (rde features nyxt-xyz)
   #:use-module (conses features fontutils)
   #:use-module (conses packages emacs-xyz)
   #:use-module (rde features)
@@ -292,6 +292,7 @@
   (ensure-pred integer? autostart-delay)
 
   (define nyxt-f-name 'emacs)
+  (define emacs-f-name 'nyxt)
   (define f-name (symbol-append 'nyxt- nyxt-f-name))
 
   (define (get-home-services config)
@@ -322,7 +323,7 @@
                                nyxt/editor-mode:editor-buffer)
           ((default-modes `(nyxt/emacs-mode:emacs-mode ,@%slot-value%))))))
      (rde-elisp-configuration-service
-      nyxt-f-name
+      emacs-f-name
       config
       `(,@(if (get-value 'emacs-consult config)
               '((with-eval-after-load 'consult
@@ -332,14 +333,14 @@
               '())
 
         ,@(if (get-value 'emacs-modus-themes config)
-              '((defun rde-nyxt-load-theme (&optional theme)
+              `((defun rde-nyxt-load-theme (&optional theme)
                   "Load Nyxt theme according to current theme or THEME."
                   (interactive)
                   (when nyxt-process
                     (if (or (and theme (rde-modus-themes--dark-theme-p theme))
                             (rde-modus-themes--dark-theme-p))
-                        (nyxt-load-theme 'modus-vivendi)
-                        (nyxt-load-theme 'modus-operandi))))
+                        (nyxt-load-theme ',(get-value 'emacs-dark-theme config))
+                        (nyxt-load-theme ',(get-value 'emacs-light-theme config)))))
                 (add-hook 'rde-modus-themes-after-enable-theme-hook
                           'rde-nyxt-load-theme))
               '())
