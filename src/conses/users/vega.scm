@@ -234,7 +234,7 @@
     #:emacs-advanced-user? #t)
    (feature-gnupg
     #:gpg-primary-key "5F23F458"
-    #:ssh-keys '(("D6B4894a600BB392AB2AEDE499CBBCF3E0620B7F6"))
+    #:ssh-keys `((,%default-ssh-keygrip))
     #:pinentry-flavor 'emacs
     #:default-ttl 34560000)
    (feature-alternative-frontends
@@ -242,7 +242,6 @@
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:reddit-frontend "https://teddit.namazso.eu")
    (feature-android)
-   (feature-emacs-fdroid)
    (feature-manpages)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
