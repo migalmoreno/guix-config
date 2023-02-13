@@ -136,10 +136,6 @@
     (with-eval-after-load 'rde-completion
       (add-to-list 'rde-completion-initial-narrow-alist
                    '(cider-repl-mode . ?c)))
-    (with-eval-after-load 'rde-keymaps
-      (let ((map rde-app-map))
-        (define-key map (kbd "Si") 'text-scale-increase)
-        (define-key map (kbd "Sd") 'text-scale-decrease)))
     (with-eval-after-load 'face-remap
       (setq text-scale-mode-step 1.075))
     (with-eval-after-load 'comp
@@ -154,10 +150,6 @@
     (setq warning-minimum-level :error)
     (with-eval-after-load 'autorevert
       (setq auto-revert-remote-files nil))
-    (setq auto-save-file-name-transforms
-          `(,(cons "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
-                   (expand-file-name "emacs/auto-save-list/\\2"
-                                     (xdg-data-home)) t)))
     (setq auto-save-no-message t)
     (setq create-lockfiles nil)
     (setq delete-old-versions t)
