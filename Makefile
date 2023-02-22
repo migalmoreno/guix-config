@@ -1,6 +1,6 @@
 GUIX_PROFILE := target/profiles/guix
 GUIX := ./pre-inst-env ${GUIX_PROFILE}/bin/guix
-CHANNELS_LOCK := ${GUIX} time-machine -C channels-lock.scm --
+CHANNELS_LOCK := ${GUIX} time-machine -C conses/channels-lock.scm --
 SRC_DIR := ./src
 CONFIG := ${SRC_DIR}/conses/config.scm
 HOST := $(shell hostname)
@@ -9,15 +9,15 @@ USER := $(shell whoami)
 .PHONY: all
 all: guix pull upgrade home system iso
 
-channels-lock.scm: channels.scm
-	guix time-machine -C channels.scm -- \
-	describe -f channels > channels-lock-tmp.scm
-	mv channels-lock-tmp.scm channels-lock.scm
+conses/channels-lock.scm: conses/channels.scm
+	guix time-machine -C conses/channels.scm -- \
+	describe -f channels > conses/channels-lock-tmp.scm
+	mv conses/channels-lock-tmp.scm conses/channels-lock.scm
 
-channels-lock-local.scm: channels-local.scm
-	guix time-machine -C channels-local.scm -- \
-	describe -f channels > channels-lock-tmp.scm
-	mv channels-lock-tmp.scm channels-lock-local.scm
+conses/channels-lock-local.scm: conses/channels-local.scm
+	guix time-machine -C conses/channels-local.scm -- \
+	describe -f channels > conses/channels-lock-tmp.scm
+	mv conses/channels-lock-tmp.scm conses/channels-lock-local.scm
 
 guix: target/profiles/guix.lock
 
@@ -27,14 +27,16 @@ target:
 target/profiles:
 	mkdir -p target/profiles
 
-target/profiles/guix.lock: channels-lock.scm
+target/profiles/guix.lock: conses/channels-lock.scm
 	make target/profiles/guix
 
-target/profiles/guix: target/profiles channels-lock.scm
-	guix pull --allow-downgrades -C channels-lock.scm -p ${GUIX_PROFILE}
+target/profiles/guix: target/profiles conses/channels-lock.scm
+	guix pull --allow-downgrades -C conses/channels-lock.scm \
+	-p ${GUIX_PROFILE}
 
-target/profiles/guix-local: target/profiles channels-lock-local.scm
-	guix pull --allow-downgrades -C channels-lock-local.scm -p ${GUIX_PROFILE}
+target/profiles/guix-local: target/profiles conses/channels-lock-local.scm
+	guix pull --allow-downgrades -C conses/channels-lock-local.scm \
+	-p ${GUIX_PROFILE}
 
 target/live.iso: guix target
 	RDE_TARGET=system RDE_HOST=live $(CHANNELS_LOCK) \
