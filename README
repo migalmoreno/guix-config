@@ -3,6 +3,6 @@
 * Dotfiles
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://sr.ht/~abcdw/rde/][RDE]] configuration framework.
 
-The main goal behind this repository is to hold the configuration of my hosts, users, and remote machines.
+The main goal behind this repository is to hold the configuration of my users, hosts, and remote machines.
 
-I constantly strive to upstream most of the packages, services, and features that I write, which is why you shouldn't treat this repository as a channel. However, there may be some leftovers that don't align with some projects' principles that I need to keep around to meet my needs.
+I constantly strive to upstream most of the packages, services, and features that I write. I encourage you to do the same. Note, this repository should not to serve as an alternative Guix channel. However, there may be some leftovers that don't align with some of the upstream projects' principles that I need to temporarily keep around to meet my needs.
