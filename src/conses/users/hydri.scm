@@ -169,7 +169,7 @@
     #:header-line-as-mode-line? #f
     #:margin 0)
    (feature-emacs-tab-bar
-    #:modules-center %rde-mpv-tab-bar-modules)
+    #:modules-center %default-mpv-tab-bar-modules)
    (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme (make-theme
