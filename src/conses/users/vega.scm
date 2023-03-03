@@ -37,7 +37,11 @@
    'add-missing-shell-envs
    home-environment-variables-service-type
    '(("GPG_TTY" . "$(tty)")
-     ("LESSHISTFILE" . "-"))))
+     ("LESSHISTFILE" . "-")
+     ("npm_config_userconfig" . "$XDG_CONFIG_HOME/npm-config")
+     ("npm_config_cache" . "$XDG_CACHE_HOME/npm")
+     ("npm_config_prefix" . "$XDG_DATA_HOME/npm/bin")
+     ("PATH" . "$XDG_DATA_HOME/npm/bin:$PATH"))))
 
 (define extra-home-packages-service
   (simple-service
