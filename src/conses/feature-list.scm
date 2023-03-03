@@ -1,6 +1,5 @@
 (define-module (conses feature-list)
   #:use-module (conses features fontutils)
-  #:use-module (conses features mail)
   #:use-module (conses features shellutils)
   #:use-module (conses features version-control)
   #:use-module (conses hosts base)
@@ -18,9 +17,7 @@
   #:use-module (rde features golang)
   #:use-module (rde features irc)
   #:use-module (rde features lisp)
-  #:use-module ((rde features mail) #:select (feature-isync
-                                              feature-mail-settings
-                                              mail-account))
+  #:use-module (rde features mail)
   #:use-module (rde features matrix)
   #:use-module (rde features messaging)
   #:use-module (rde features nyxt-xyz)
@@ -413,6 +410,9 @@
      (cc ,%default-email)
      (signature ,(string-append "Best regards,\n" %default-username)))))
 
+(define (mail-directory-fn config)
+  (string-append (getenv "XDG_STATE_HOME") "/mail"))
+
 (define-public %mail-base-features
   (list
    (feature-mail-settings
@@ -423,7 +423,7 @@
    (feature-isync)
    (feature-goimapnotify
     #:goimapnotify
-    (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
+    (@ (rde packages mail) go-gitlab.com-shackra-goimapnotify-next))
    (feature-emacs-gnus
     #:topic-alist gnus-topic-alist
     #:topic-topology gnus-topic-topology
