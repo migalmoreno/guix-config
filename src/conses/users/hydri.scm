@@ -30,7 +30,7 @@
 ;;; User-specific utilities
 
 (define-public %hydri-signing-key
-  (project-file "conses/keys/hydri.pub"))
+  (project-file "src/conses/keys/hydri.pub"))
 
 (define-public %hydri-ssh-key
   (plain-file
