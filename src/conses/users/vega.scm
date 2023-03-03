@@ -246,6 +246,12 @@
           (expand-file-name "emacs/auto-save-list/.saves-"
                             (xdg-data-home)))))
 
+(define extra-elisp-packages
+  (strings->packages
+   "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
+   "emacs-json-mode" "emacs-wgrep" "emacs-rainbow-delimiters"
+   "emacs-kind-icon" "emacs-all-the-icons-completion"))
+
 (define (vega-gtk-theme config)
   (define dark-theme? (get-value 'gtk-dark-theme? config))
 
@@ -755,9 +761,7 @@
     #:emacs-server-mode? #f
     #:extra-early-init-el extra-early-init-el
     #:extra-init-el extra-init-el
-    #:additional-elisp-packages
-    (strings->packages
-     "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"))
+    #:additional-elisp-packages extra-elisp-packages)
    %ui-base-features
    (feature-gtk3
     #:dark-theme? #t
