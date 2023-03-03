@@ -1,6 +1,5 @@
 (define-module (conses hosts cygnus)
   #:use-module (conses hosts base)
-  #:use-module (conses packages matrix)
   #:use-module (conses hosts lyra)
   #:use-module (rde features base)
   #:use-module (rde features databases)
@@ -120,7 +119,6 @@
     #:homeserver (string-append "https://matrix." %default-domain)
     #:synapse-configuration
     (synapse-configuration
-     (synapse synapse-next)
      (server-name %default-domain)
      (enable-registration? #f)
      (public-base-url (string-append "https://matrix." %default-domain))
