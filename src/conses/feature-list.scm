@@ -544,7 +544,15 @@
       (cons (kbd "s-p") 'rde-xorg-take-screenshot)
       (cons (kbd "s-v") 'rde-xorg-record-screencast)
       (cons (kbd "s-l") 'rde-xorg-call-slock)
-      (cons (kbd "M-o") 'ace-window)))
+      (cons (kbd "M-o") 'ace-window))
+    #:extra-exwm-init
+    `((call-process
+       ,(file-append (@ (gnu packages xorg) xsetroot)
+                     "/bin/xsetroot")
+       nil nil nil "-cursor_name" "left_ptr")
+      (if (listp (rde-exwm--get-outputs))
+          (fontaine-set-preset 'docked)
+        (fontaine-set-preset 'headless))))
    (feature-emacs-exwm-run-on-tty
     #:emacs-exwm-tty-number 1
     #:launch-arguments '("-mm" "--debug-init")
