@@ -92,19 +92,15 @@
       ("N" . "script-message osc-visibility never")
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))))
 
-(define-public %emacs-completion-base-features
-  (list
-   (feature-emacs-all-the-icons)
-   (feature-emacs-completion)
-   (feature-emacs-vertico)
-   (feature-emacs-corfu #:corfu-doc? #t)
-   (feature-emacs-wgrep)))
-
 (define-public %emacs-base-features
   (list
    (feature-emacs-modus-themes
     #:dark? #t)
    (feature-emacs-circadian)
+   (feature-emacs-completion)
+   (feature-emacs-vertico)
+   (feature-emacs-corfu #:corfu-doc-auto #t)
+   (feature-emacs-all-the-icons)
    (feature-emacs-pdf-tools)
    (feature-emacs-tempel)
    (feature-emacs-ibuffer)
@@ -687,8 +683,8 @@ EndSection"))
      (forge-account
       (id 'sh)
       (forge 'sourcehut)
-      (username (getenv "USERNAME"))
-      (email (getenv "SOURCEHUT_EMAIL")))
+      (username %default-username)
+      (email %default-email))
      (forge-account
       (id 'gh)
       (forge 'github)
