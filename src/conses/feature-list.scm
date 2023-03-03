@@ -1,5 +1,4 @@
 (define-module (conses feature-list)
-  #:use-module (conses features emacs-xyz)
   #:use-module (conses features fontutils)
   #:use-module (conses features mail)
   #:use-module (conses features shellutils)
@@ -14,16 +13,7 @@
   #:use-module (rde features bittorrent)
   #:use-module (rde features bluetooth)
   #:use-module (rde features clojure)
-  #:use-module ((rde features emacs-xyz)
-                #:select (feature-emacs-appearance
-                          feature-emacs-circadian
-                          feature-emacs-ebdb
-                          feature-emacs-eglot
-                          feature-emacs-keycast
-                          feature-emacs-minions
-                          feature-emacs-modus-themes
-                          feature-emacs-spelling
-                          feature-emacs-time))
+  #:use-module (rde features emacs-xyz)
   #:use-module (rde features golang)
   #:use-module (rde features irc)
   #:use-module (rde features lisp)
