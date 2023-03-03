@@ -111,7 +111,7 @@
    (feature-custom-services
     #:system-services extra-system-services)
    (feature-web-settings
-    #:domain %default-domain)
+    #:primary-domain %default-domain)
    (feature-postgresql)
    (feature-nginx)
    (feature-certbot
