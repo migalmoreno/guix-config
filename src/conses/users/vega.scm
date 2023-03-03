@@ -1,6 +1,5 @@
 (define-module (conses users vega)
   #:use-module (conses feature-list)
-  #:use-module (conses features video)
   #:use-module (conses hosts base)
   #:use-module (conses utils)
   #:use-module (rde features)
@@ -16,6 +15,7 @@
   #:use-module (rde features nyxt-xyz)
   #:use-module (rde features scheme)
   #:use-module (rde features ssh)
+  #:use-module (rde features video)
   #:use-module (rde features virtualization)
   #:use-module (rde features web)
   #:use-module (rde features web-browsers)
@@ -778,7 +778,6 @@
    vega-nyxt-features
    vega-desktop-features
    %multimedia-base-features
-   %web-base-features
    %mail-base-features
    %security-base-features
    %shell-base-features
