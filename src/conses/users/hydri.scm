@@ -7,6 +7,7 @@
   #:use-module (conses features version-control)
   #:use-module (conses utils)
   #:use-module (rde packages)
+  #:use-module (rde packages web-browsers)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features bittorrent)
@@ -24,7 +25,9 @@
   #:use-module (gnu home services xdg)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages package-management)
-  #:use-module (guix gexp))
+  #:use-module (guix gexp)
+  #:use-module (guix packages)
+  #:use-module (guix utils))
 
 
 ;;; User-specific utilities
@@ -37,12 +40,21 @@
    "hydri.pub"
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
 
+(define nyxt-next-sans-gst
+  (package
+   (inherit nyxt-next)
+   (name "nyxt-next-sans-gst")
+   (propagated-inputs
+    (modify-inputs (package-propagated-inputs nyxt-next)
+      (delete "gst-libav" "gst-plugins-bad" "gst-plugins-base"
+              "gst-plugins-good" "gst-plugins-ugly")))))
+
 
 ;;; Service extensions
 
 (define extra-xdg-config-service
   (simple-service
-   'add-nyxt-entry-with-gst-plugins
+   'add-nyxt-xdg-entry-with-gst-plugins
    home-xdg-mime-applications-service-type
    (home-xdg-mime-applications-configuration
     (desktop-entries
@@ -62,9 +74,7 @@
                       (@ (gnu packages gstreamer) gst-plugins-base)
                       (@ (gnu packages gstreamer) gst-libav)
                       "--"
-                      #$(file-append (@ (rde packages web-browsers)
-                                        nyxt-next-sans-gst)
-                                     "/bin/nyxt"))
+                      #$(file-append nyxt-next-sans-gst "/bin/nyxt"))
                      "%U"))
           (terminal . #f)
           (icon . "nyxt")
