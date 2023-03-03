@@ -119,7 +119,6 @@
     (setq mode-line-misc-info
           (remove '(global-mode-string ("" global-mode-string))
                   mode-line-misc-info))
-    (setq echo-keystrokes 0)
     (setq ring-bell-function 'ignore)
     (setq visible-bell nil)
     (fset 'yes-or-no-p 'y-or-n-p)
@@ -166,10 +165,79 @@
       (setq scroll-conservatively 100)
       (setq mouse-autoselect-window nil)
       (setq what-cursor-show-names t)
-      (setq focus-follows-mouse t))))
+      (setq focus-follows-mouse t))
+    (with-eval-after-load 'window
+      (setq split-window-keep-point t))
+    (winner-mode)
+    (define-key ctl-x-map (kbd "C-b") 'ibuffer)
+    (with-eval-after-load 'ibuffer
+      (setq ibuffer-expert t))
+    (with-eval-after-load 'image-mode
+      (define-key image-mode-map "q" 'image-kill-buffer)
+      (setq image-use-external-converter t))
+    (with-eval-after-load 'js
+      (setq js-indent-level 2))
+    (with-eval-after-load 'css-mode
+      (setq css-indent-offset 2))
+    (with-eval-after-load 'mhtml-mode
+      (define-key html-mode-map (kbd "M-o") nil))
+    (defun rde-completion-crm-indicator (args)
+      "Display a discernible indicator for `completing-read-multiple'."
+      (cons (concat "[CRM] " (car args)) (cdr args)))
+
+    (advice-add 'completing-read-multiple
+                :filter-args 'rde-completion-crm-indicator)
+    (define-key goto-map (kbd "a") 'consult-org-agenda)
+    (define-key ctl-x-map "b" 'consult-buffer)
+    (define-key help-map "a" 'consult-apropos)
+    (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
+    (define-key ctl-x-4-map "b" 'consult-buffer-other-window)
+    (with-eval-after-load 'consult
+      (setq consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
+      (setq consult-narrow-key "C-=")
+      (setq consult-widen-key "C--"))
+    (define-key help-map "b" 'embark-bindings)
+    (with-eval-after-load 'embark
+      (setq embark-indicators '(embark-minimal-indicator))
+      (setq embark-prompter 'embark-keymap-prompter)
+      (setq prefix-help-command 'embark-prefix-help-command)
+      (add-to-list
+       'display-buffer-alist
+       `(,(rx bos "*Embark Collect " (or "Live" "Completions") "*")
+         nil
+         (window-parameters (mode-line-format . none)))))
+    (add-hook 'grep-mode-hook 'wgrep-mode)
+    (with-eval-after-load 'corfu
+      (setq corfu-auto-prefix 2))
+    (autoload 'corfu-history-mode "corfu-history")
+    (corfu-history-mode)
+    (with-eval-after-load 'corfu
+      (let ((map corfu-map))
+        (define-key map "\t" 'corfu-next)
+        (define-key map (kbd "<tab>") 'corfu-next)
+        (define-key map (kbd "<backtab>") 'corfu-previous)
+        (define-key map (kbd "S-TAB") 'corfu-previous)
+        (define-key map (kbd "M-p") 'corfu-doc-scroll-down)
+        (define-key map (kbd "M-n") 'corfu-doc-scroll-up)
+        (define-key map (kbd "M-d") 'corfu-doc-toggle))
+      (require 'kind-icon)
+      (setq kind-icon-default-face 'corfu-default)
+      (add-to-list 'corfu-margin-formatters 'kind-icon-margin-formatter)
+      (set-face-attribute 'corfu-default nil :inherit 'fixed-pitch))
+    (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode))
+    (with-eval-after-load 'yaml-mode
+      (define-key yaml-mode-map (kbd "RET") 'newline-and-indent))
+    (with-eval-after-load 'markdown-mode
+      (setq markdown-header-scaling t)
+      (setq markdown-header-scaling-values '(1.2 1.1 1.1 1.0 1.0 0.9))
+      (setq markdown-hide-urls t)
+      (setq markdown-hide-markup t))
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+    (add-hook 'eww-mode-hook 'eww-toggle-images)))
 
 (define extra-early-init-el
   '((require 'xdg)
+    (setq echo-keystrokes 0)
     (setq package-native-compile t)
     (setq package-user-dir
           (expand-file-name "emacs/elpa" (xdg-data-home)))
