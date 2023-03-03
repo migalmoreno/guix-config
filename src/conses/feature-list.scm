@@ -530,12 +530,12 @@ EndSection"))
      :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
      :redirect-url (quri:uri "https://www.youtube.com")
      :resource (lambda (url)
-                 (play-video url :formats nil :audio t :repeat t)))
+                 (play-emacs-mpv url :formats nil :audio t :repeat t)))
     (make-instance
      'router:web-route
      :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
      :resource (lambda (url)
-                 (play-video url :formats nil :audio t :repeat t)))
+                 (play-emacs-mpv url :formats nil :audio t :repeat t)))
     (make-instance
      'router:opener
      :trigger (match-regex "https://gfycat.com/.*"
@@ -543,7 +543,7 @@ EndSection"))
                            "https://.*/videos/watch/.*"
                            ".*cloudfront.*master.m3u8")
      :resource (lambda (url)
-                 (play-video url :formats nil)))
+                 (play-emacs-mpv url :formats nil)))
     (make-instance
      'router:opener
      :trigger (match-scheme "mailto")
@@ -552,7 +552,7 @@ EndSection"))
      'router:opener
      :trigger (match-scheme "magnet" "torrent")
      :resource (lambda (url)
-                 (eval-with-emacs `(transmission-add ,url))))
+                 (eval-in-emacs `(transmission-add ,url))))
     (make-instance
      'router:blocker
      :trigger (match-domain "lemmy.ml")
@@ -561,13 +561,13 @@ EndSection"))
      'router:blocker
      :trigger (match-regex
                ,(string-append (get-value 'reddit-frontend config) "/.*"))
-     :instances 'make-teddit-instances
+     :instances-builder router:teddit-instances-builder
      :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))
     (make-instance
      'router:blocker
      :trigger (match-regex
                ,(string-append (get-value 'tiktok-frontend config) "/.*"))
-     :instances 'make-proxitok-instances
+     :instances-builder router:proxitok-instances-builder
      :blocklist '(:path (:contains (not "/video/" "/t/"))))
     (make-instance
      'router:blocker
@@ -631,40 +631,39 @@ EndSection"))
      :fallback-url (quri:uri "https://community.penpot.app/latest")
      :base-search-url "https://community.penpot.app/search?q=~a")))
 
+(define nyxt-userstyles
+  `((make-instance
+     'nyxt/user-script-mode:user-style
+     :include '("https://github.com/*" "https://gist.github.com/*")
+     :code ,(apply string-append
+                   (serialize-css-config
+                    `((#((#{#dashboard}# .body)
+                         .js-inline-dashboard-render
+                         .js-feed-item-component
+                         .js-yearly-contributions
+                         (.js-profile-editable-area div .mb-3)
+                         .starring-container
+                         #{#js-contribution-activity}#
+                         #{#year-list-container}#
+                         #{a[href$=watchers]}#
+                         #{a[href$=stargazers]}#
+                         #{a[href$=followers]}#
+                         #{a[href$=following]}#
+                         #{a[href$=achievements]}#
+                         #{[action*=follow]}#)
+                       ((display . (none !important))))
+                      ((#{img[class*=avatar]}#)
+                       ((visibility . hidden)))))))))
+
 (define-public %nyxt-base-features
   (list
    (feature-nyxt-nx-mosaic)
-   (feature-nyxt-nx-tailor
-    #:auto? #f
-    #:dark-theme? #t)
-   (feature-nyxt-hint)
-   (feature-nyxt-emacs
-    #:autostart-delay 5)
+   (feature-nyxt-nx-tailor #:auto? #t)
+   (feature-nyxt-appearance)
+   (feature-nyxt-emacs)
    (feature-nyxt-blocker)
    (feature-nyxt-userscript
-    #:userstyles
-    '((make-instance
-       'nyxt/user-script-mode:user-style
-       :include '("https://github.com/*"
-                  "https://gist.github.com/*")
-       :code (cl-css:css
-              `((,(str:join "," '("#dashboard .body"
-                                  ".js-inline-dashboard-render"
-                                  ".js-feed-item-component"
-                                  ".js-yearly-contributions"
-                                  ".js-profile-editable-area div .mb-3"
-                                  ".starring-container"
-                                  "#js-contribution-activity"
-                                  "#year-list-container"
-                                  "a[href$=watchers]"
-                                  "a[href$=stargazers]"
-                                  "a[href$=followers]"
-                                  "a[href$=following]"
-                                  "a[href$=achievements]"
-                                  "[action*=follow]"))
-                 :display "none !important")
-                ("img[class*=avatar]"
-                 :visibility "hidden"))))))
+    #:userstyles nyxt-userstyles)
    (feature-nyxt-nx-search-engines
     #:extra-engines nx-search-engines-extra-engines)
    (feature-nyxt-nx-router
