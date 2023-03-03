@@ -1,7 +1,4 @@
 (define-module (conses feature-list)
-  #:use-module (conses features fontutils)
-  #:use-module (conses features shellutils)
-  #:use-module (conses features version-control)
   #:use-module (conses hosts base)
   #:use-module (contrib features javascript)
   #:use-module (contrib features wm)
@@ -14,6 +11,7 @@
   #:use-module (rde features bluetooth)
   #:use-module (rde features clojure)
   #:use-module (rde features emacs-xyz)
+  #:use-module (rde features fontutils)
   #:use-module (rde features golang)
   #:use-module (rde features irc)
   #:use-module (rde features lisp)
@@ -28,9 +26,11 @@
   #:use-module (rde features shells)
   #:use-module (rde features shellutils)
   #:use-module (rde features terminals)
+  #:use-module (rde features version-control)
   #:use-module (rde features video)
   #:use-module (rde features xdg)
-  #:use-module (rde packages))
+  #:use-module (rde packages)
+  #:use-module (rde serializers css))
 
 
 ;;; Helpers
