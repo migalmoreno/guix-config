@@ -174,7 +174,7 @@
     #:dark-theme? #t
     #:gtk-theme (make-theme
                  "postmarketos-oled"
-                 (@ (conses packages gnome-xyz) postmarketos-theme))
+                 (@ (gnu packages gnome-xyz) postmarketos-theme))
     #:icon-theme (make-theme
                   "Adwaita"
                   (@ (gnu packages gnome) adwaita-icon-theme))
