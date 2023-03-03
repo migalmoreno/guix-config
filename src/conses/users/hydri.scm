@@ -111,6 +111,33 @@
 
 ;;; User-specific features
 
+(define hydri-nyxt-features
+  (make-feature-list
+   (feature-nyxt
+    #:nyxt (@ (rde packages web-browsers) nyxt-next-sans-gst)
+    #:default-browser? #t
+    #:restore-session? #f
+    #:temporary-history? #t)
+   (feature-nyxt-status
+    #:format-status-buttons
+    '((:raw
+       (format-status-back-button status)
+       (format-status-reload-button status)
+       (format-status-forwards-button status)
+       (format-status-close-button status)
+       (format-status-new-buffer-button status)
+       (format-status-switch-buffer-button status)
+       (format-status-execute-button status)))
+    #:format-status
+    '((:div :id "container"
+       (:div :id "controls"
+        (:raw (format-status-buttons status)))
+       (:div :id "url"
+        (:raw
+         (format-status-load-status status)
+         (format-status-url status))))))
+   %nyxt-base-features))
+
 (define-public %user-features
   (make-feature-list
    (feature-user-info
@@ -158,34 +185,7 @@
    (feature-alternative-frontends
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend #f)
-   (feature-nyxt
-    #:nyxt (@ (rde packages web-browsers) nyxt-next-sans-gst)
-    #:default-browser? #t
-    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
-    #:restore-session? #f
-    #:temporary-history? #t)
-   (feature-nyxt-prompt)
-   (feature-nyxt-status
-    #:height 40
-    #:glyphs? #t
-    #:format-status-buttons
-    '((:raw
-       (format-status-back-button status)
-       (format-status-reload-button status)
-       (format-status-forwards-button status)
-       (format-status-close-button status)
-       (format-status-new-buffer-button status)
-       (format-status-switch-buffer-button status)
-       (format-status-execute-button status)))
-    #:format-status
-    '((:div :id "container"
-       (:div :id "controls"
-        (:raw (format-status-buttons status)))
-       (:div :id "url"
-        (:raw
-         (format-status-load-status status)
-         (format-status-url status))))))
-   %nyxt-base-features
+   hydri-nyxt-features
    %multimedia-base-features
    %emacs-base-features
    %desktop-base-features
