@@ -1,6 +1,5 @@
 (define-module (conses users vega)
   #:use-module (conses feature-list)
-  #:use-module (conses features emacs-xyz)
   #:use-module (conses features keyboard)
   #:use-module (conses features video)
   #:use-module (conses hosts base)
@@ -756,8 +755,8 @@
     #:custom-gtk-theme vega-gtk-theme
     #:gtk-theme #f
     #:extra-gtk-settings extra-gtk-settings)
-   %emacs-completion-base-features
    %emacs-base-features
+   (feature-emacs-nyxt #:autostart-delay 5)
    %emacs-desktop-base-features
    vega-nyxt-features
    vega-desktop-features
@@ -770,19 +769,6 @@
    %communication-base-features
    %programming-base-features
    %markup-base-features
-   (feature-emacs-dashboard
-    #:item-generators
-    '((recents . dashboard-insert-recents)
-      (bookmarks . dashboard-insert-bookmarks)
-      (agenda . dashboard-insert-agenda)
-      (registers . dashboard-insert-registers))
-    #:items
-    '((agenda . 7)
-      (bookmarks . 7)
-      (recents . 7))
-    #:dashboard-agenda-prefix-format "%?-12:c"
-    #:path-max-length 50)
-   (feature-emacs-polymode)
    (feature-qmk
     #:keyboard "dztech/dz65rgb/v1"
     #:keymap "custom")
