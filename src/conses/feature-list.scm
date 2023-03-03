@@ -143,9 +143,6 @@
 
 (define-public %emacs-base-features
   (list
-   (feature-emacs-modus-themes
-    #:dark? #t)
-   (feature-emacs-circadian)
    (feature-emacs-completion)
    (feature-emacs-vertico)
    (feature-emacs-corfu #:corfu-doc-auto #t)
@@ -569,9 +566,19 @@ EndSection"))
 
 (define-public %ui-base-features
   (list
-   (feature-emacs-minions)
    (feature-emacs-appearance)
-   (feature-fonts)))
+   (feature-emacs-modus-themes
+    #:dark? #t
+    #:deuteranopia? #f)
+   (feature-emacs-circadian)
+   (feature-fonts
+    #:extra-fontaine-presets
+    '((docked
+       :default-height 107
+       :variable-pitch-weight 'light)
+      (headless
+       :default-height 105
+       :variable-pitch-weight 'light)))))
 
 (define (nx-router-extra-routes config)
   `((make-instance
