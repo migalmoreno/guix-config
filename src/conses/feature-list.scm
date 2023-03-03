@@ -18,6 +18,7 @@
   #:use-module (rde features irc)
   #:use-module (rde features lisp)
   #:use-module (rde features mail)
+  #:use-module (rde features markup)
   #:use-module (rde features matrix)
   #:use-module (rde features messaging)
   #:use-module (rde features nyxt-xyz)
@@ -27,7 +28,6 @@
   #:use-module (rde features shells)
   #:use-module (rde features shellutils)
   #:use-module (rde features terminals)
-  #:use-module (rde features tex)
   #:use-module (rde features video)
   #:use-module (rde features xdg)
   #:use-module (rde packages))
@@ -187,6 +187,7 @@
 (define-public %markup-base-features
   (list
    (feature-emacs-org
+    #:org-directory "~/documents"
     #:org-priority-faces
     '((?A . (:foreground "#FF665C" :weight bold))
       (?B . (:foreground "#51AFEF"))
@@ -246,7 +247,7 @@
        :if-new (file+head "%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
    (feature-emacs-org-agenda)
-   (feature-emacs-markdown)
+   (feature-markdown)
    (feature-tex
     #:listings-options
     '(("basicstyle" "\\ttfamily")
@@ -259,7 +260,7 @@
       ("keywordstyle" "\\color{violet}")
       ("commentstyle" "\\color{gray}")
       ("label" "{Figure}"))
-    #:extra-packages
+    #:extra-tex-packages
     (strings->packages
      "texlive-wrapfig" "texlive-capt-of"
      "texlive-hyperref" "texlive-fonts-ec"
