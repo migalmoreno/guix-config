@@ -708,8 +708,8 @@ EndSection"))
    (feature-git
     #:primary-forge-account-id 'sh
     #:extra-config
-    '((sendemail
-       (cc . ,%default-email)
-       (thread . #t)))
-    #:global-ignores
+    `((sendemail
+       ((cc . ,%default-email)
+        (thread . #t))))
+    #:extra-global-ignores
     '("**/.direnv" "node_modules" "*.elc" ".log"))))
