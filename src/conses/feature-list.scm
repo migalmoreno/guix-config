@@ -316,8 +316,8 @@
     #:erc-autojoin-channels-alist
     '((Libera.Chat
        "#nyxt" "#emacs" "#org-mode" "#guix" "#nonguix" "#ocaml"
-       "#clojure" "#commonlisp" "#scheme" "#tropin")
-      (OFTC "#postmarketos" "#mobian")))
+       "#clojure" "#commonlisp" "#guile" "#tropin" "#newpipe")
+      (OFTC "#postmarketos")))
    (feature-slack-settings
     #:slack-accounts
     (list
