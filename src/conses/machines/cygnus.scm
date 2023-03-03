@@ -1,5 +1,4 @@
 (define-module (conses machines cygnus)
-  #:use-module (conses utils)
   #:use-module (conses hosts cygnus)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
