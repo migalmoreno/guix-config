@@ -1,6 +1,5 @@
 (define-module (conses users vega)
   #:use-module (conses feature-list)
-  #:use-module (conses features keyboard)
   #:use-module (conses features video)
   #:use-module (conses hosts base)
   #:use-module (conses utils)
@@ -9,6 +8,7 @@
   #:use-module (rde features base)
   #:use-module (rde features documentation)
   #:use-module (rde features emacs)
+  #:use-module (rde features keyboard)
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
   #:use-module (rde features gtk)
@@ -782,8 +782,7 @@
     #:keyboard "dztech/dz65rgb/v1"
     #:keymap "custom")
    (feature-keyboard
-    #:keyboard-layout %default-keyboard-layout
-    #:default-input-method "spanish-keyboard")
+    #:keyboard-layout %default-keyboard-layout)
    (feature-guix
     #:shell-authorized-directories guix-shell-authorized-directories)
    (feature-ssh
