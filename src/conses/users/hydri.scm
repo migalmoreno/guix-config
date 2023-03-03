@@ -95,7 +95,8 @@
   (strings->packages
    "nss-certs" "glibc-locales" "seahorse"
    "gnome-clocks" "gnome-console" "pinentry-tty"
-   "portfolio" "pavucontrol" "geary" "gnome-maps" "nheko"))
+   "portfolio" "pavucontrol" "geary" "gnome-maps"
+   "nheko" "chromium" "evince"))
 
 
 ;;; User-specific features
