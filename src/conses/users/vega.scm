@@ -671,11 +671,17 @@
 
 (define vega-nyxt-features
   (make-feature-list
-   %nyxt-base-features
-   (feature-nyxt-prompt #:mouse-support? #f)
+   (feature-nyxt
+    #:scroll-distance 150
+    #:temporary-history? #t
+    #:autostart-slynk? #f
+    #:default-browser? #t
+    #:restore-session? #t
+    #:extra-config-lisp
+    `((local-time:reread-timezone-repository)
+      (setf local-time:*default-timezone*
+            (local-time:find-timezone-by-location-name ,%default-timezone))))
    (feature-nyxt-status
-    #:height 30
-    #:glyphs? #t
     #:format-status-buttons
     '((:raw
        (format-status-back-button status)
@@ -693,7 +699,8 @@
        (:div :id "modes"
         :title (nyxt::modes-string buffer)
         (:raw
-         (format-status-modes status))))))))
+         (format-status-modes status))))))
+   %nyxt-base-features))
 
 (define vega-desktop-features
   (make-feature-list
@@ -741,14 +748,6 @@
     #:additional-elisp-packages
     (strings->packages
      "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"))
-   (feature-nyxt
-    #:scroll-distance 150
-    #:temporary-history? #t
-    #:smooth-scrolling? #t
-    #:autostart-slynk? #t
-    #:default-browser? #t
-    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
-    #:restore-session? #f)
    %ui-base-features
    (feature-gtk3
     #:dark-theme? #t
