@@ -474,9 +474,7 @@
           "#require \"str\""
           "open Core"))
    (feature-guile)
-   (feature-go)
-   (feature-emacs-yaml)
-   (feature-emacs-lang-web)))
+   (feature-go)))
 
 (define-public %emacs-desktop-base-features
   (list
