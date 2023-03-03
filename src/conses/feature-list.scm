@@ -718,14 +718,6 @@ EndSection"))
    (feature-nyxt-nx-router
     #:extra-routes nx-router-extra-routes)))
 
-(define-public %web-base-features
-  (list
-   (feature-emacs-browse-url)
-   (feature-emacs-eww)
-   (feature-emacs-webpaste
-    #:webpaste-providers
-    '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))))
-
 (define-public %security-base-features
   (list
    (feature-password-store
