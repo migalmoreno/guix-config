@@ -24,6 +24,7 @@
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services desktop)
+  #:use-module (gnu home services keyboard)
   #:use-module (gnu home services linux)
   #:use-module (gnu system keyboard)
   #:use-module (guix gexp))
@@ -718,7 +719,15 @@
                        (dawn-time "07:00")
                        (dusk-time "20:00"))))))
    (feature-networking)
-   (feature-pipewire)))
+   (feature-pipewire)
+   (service home-xmodmap-service-type
+            (home-xmodmap-configuration
+             (config
+              '((#(add mod4) . Print)
+                (clear lock)
+                (clear control)
+                (#(keycode 66) . Control_L)
+                (#(add control) . #(Control_L Control_R))))))))
 
 (define-public %user-features
   (make-feature-list
