@@ -296,7 +296,8 @@
      "nntp+gwene:gwene.com.google.groups.clojure")
     ("Common Lisp"
      "nntp+gwene:gwene.org.lisp.planet"
-     "nntp+gwene:gwene.engineer.atlas.nyxt"
+     "nntp+gwene:gwene.engineer.atlas.nyxt")
+    ("Guile"
      "nntp+gwene:gwene.org.wingolog")
     ("Technology"
      "nntp+gwene:gwene.org.fsf.news"
@@ -324,6 +325,48 @@
     ("News")
     ("Gnus")))
 
+(define gnus-topic-topology
+  '(("Gnus" visible)
+    (("Inbox" visible)
+     (("Personal" visible nil)))
+    (("Lisp" visible)
+     (("Common Lisp" visible nil))
+     (("Clojure" visible nil))
+     (("Emacs" visible nil))
+     (("Guile" visible nil))
+     (("Guix" visible nil)))
+    (("News" visible)
+     (("Technology" visible nil)))))
+
+(define gnus-group-parameters
+  '(("^nnmaildir"
+     (display . 2000)
+     (gcc-self . "nnmaildir+personal:sent"))
+    ("^nntp"
+     (display . 1000))))
+
+(define gnus-posting-styles
+  `((".*"
+     (cc ,%default-email))
+    ("^nnmaildir"
+     (signature ,(string-append
+                  "Best regards,\n" %default-fullname)))
+    ((header "cc" ".*@debbugs.gnu.org")
+     (To rde-gnus-get-article-participants)
+     (name ,%default-username)
+     (cc ,%default-email)
+     (signature ,(string-append "Best regards,\n" %default-username)))
+    ((header "to" ".*@lists.sr.ht")
+     (To rde-gnus-get-article-participants)
+     (name ,%default-username)
+     (cc ,%default-email)
+     (signature ,(string-append "Best regards,\n" %default-username)))
+    ("^nntp.+:"
+     (To rde-gnus-get-article-participants)
+     (name ,%default-username)
+     (cc ,%default-email)
+     (signature ,(string-append "Best regards,\n" %default-username)))))
+
 (define-public %mail-base-features
   (list
    (feature-mail-settings
@@ -337,46 +380,11 @@
     (@ (conses packages mail) go-gitlab.com-shackra-goimapnotify-next))
    (feature-emacs-gnus
     #:topic-alist gnus-topic-alist
-    #:topic-topology
-    '(("Gnus" visible)
-      (("Inbox" visible)
-       (("Personal" visible nil)))
-      (("Lisp" visible)
-       (("Common Lisp" visible nil))
-       (("Clojure" visible nil))
-       (("Emacs" visible nil))
-       (("Guix" visible nil)))
-      (("News" visible)
-       (("Technology" visible nil))))
+    #:topic-topology gnus-topic-topology
     #:message-archive-method '(nnmaildir "personal")
     #:message-archive-group '((".*" "sent"))
-    #:group-parameters
-    '(("^nnmaildir"
-       (display . 100)
-       (gcc-self . "nnmaildir+personal:sent"))
-      ("^nntp"
-       (display . 1000)))
-    #:posting-styles
-    `((".*"
-       (cc ,%default-email))
-      ("^nnmaildir"
-       (signature ,(string-append
-                    "Best regards,\n" %default-fullname)))
-      ((header "cc" ".*@debbugs.gnu.org")
-       (To rde-gnus-get-article-participants)
-       (name ,%default-username)
-       (cc ,%default-email)
-       (signature ,(string-append "Best regards,\n" %default-username)))
-      ((header "to" ".*@lists.sr.ht")
-       (To rde-gnus-get-article-participants)
-       (name ,%default-username)
-       (cc ,%default-email)
-       (signature ,(string-append "Best regards,\n" %default-username)))
-      ("^nntp.+:"
-       (To rde-gnus-get-article-participants)
-       (name ,%default-username)
-       (cc ,%default-email)
-       (signature ,(string-append "Best regards,\n" %default-username)))))
+    #:group-parameters gnus-group-parameters
+    #:posting-styles gnus-posting-styles)
    (feature-emacs-message
     #:message-signature (string-append "Best regards,\n" %default-username))
    (feature-emacs-org-mime)
