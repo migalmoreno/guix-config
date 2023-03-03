@@ -12,8 +12,8 @@
    (feature-base-packages
     #:system-packages
     (strings->packages
-     "make" "gnupg" "curl"
-     "emacs-no-x" "parted" "git"))
+     "make" "gnupg" "curl" "cryptsetup"
+     "emacs-no-x" "parted" "git" "dosfstools"))
    (feature-custom-services
     #:system-services
     (list
