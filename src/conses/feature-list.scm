@@ -146,17 +146,15 @@
    (feature-emacs-all-the-icons)
    (feature-emacs-pdf-tools)
    (feature-emacs-tempel)
-   (feature-emacs-ibuffer)
    (feature-emacs-graphviz)
    (feature-emacs-calendar #:week-numbers? #t)
    (feature-emacs-bookmark #:bookmarks-file "~/documents/bookmarks")
    (feature-emacs-spelling
-    #:flyspell-hooks '(org-mode-hook bibtex-mode-hook)
+    #:flyspell-hooks '(org-mode-hook message-mode-hook bibtex-mode-hook)
     #:ispell-standard-dictionary "en_US")
    (feature-emacs-info)
    (feature-emacs-which-key)
-   (feature-emacs-helpful
-    #:emacs-helpful (@ (conses packages emacs-xyz) emacs-helpful-next))
+   (feature-emacs-helpful)
    (feature-emacs-time
     #:display-time? #t
     #:display-time-24hr? #t
@@ -169,20 +167,32 @@
       ("America/New_York" "New York")
       ("Australia/Sydney" "Sydney")
       ("Asia/Tokyo" "Tokyo")))
+   (feature-emacs-dashboard
+    #:show-on-startup? #f
+    #:item-generators
+    '((recents . dashboard-insert-recents)
+      (bookmarks . dashboard-insert-bookmarks)
+      (agenda . dashboard-insert-agenda)
+      (registers . dashboard-insert-registers))
+    #:items
+    '((agenda . 7)
+      (bookmarks . 7)
+      (recents . 7))
+    #:dashboard-agenda-prefix-format "%?-12:c"
+    #:path-max-length 50)
    (feature-emacs-dired)
    (feature-emacs-calc)
    (feature-emacs-tramp)
-   (feature-emacs-rainbow-delimiters)
    (feature-emacs-re-builder)
-   (feature-emacs-image)
-   (feature-emacs-window)
-   (feature-emacs-whitespace
-    #:global-modes
-    '(not org-mode org-agenda-mode org-agenda-follow-mode
-          org-capture-mode dired-mode eshell-mode magit-status-mode
-          diary-mode magit-diff-mode text-mode pass-view-mode erc-mode))
+   (feature-emacs-ace-window)
    (feature-emacs-project)
-   (feature-emacs-keycast)))
+   (feature-emacs-keycast)
+   (feature-emacs-input-methods
+    #:default-input-method "spanish-keyboard")
+   (feature-emacs-browse-url)
+   (feature-emacs-webpaste
+    #:webpaste-providers
+    '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))))
 
 (define-public %markup-base-features
   (list
