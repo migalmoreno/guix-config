@@ -46,7 +46,8 @@
     "haunt" "ddcutil" "light" "xclip"
     "nasm" "gcc-toolchain" "autoconf"
     "v4l-utils" "binutils" "wireguard-tools"
-    "texinfo" "pass-otp")))
+    "texinfo" "pass-otp" "imagemagick" "fd"
+    "setxkbmap" "xkeyboard-config")))
 
 (define guix-shell-authorized-directories
   (map (lambda (dir)
