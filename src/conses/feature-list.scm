@@ -3,12 +3,13 @@
   #:use-module (conses features mail)
   #:use-module (conses features shellutils)
   #:use-module (conses features version-control)
-  #:use-module (conses features video)
   #:use-module (conses hosts base)
   #:use-module (contrib features javascript)
   #:use-module (contrib features wm)
   #:use-module (contrib features xorg)
   #:use-module (guix gexp)
+  #:use-module (guix git-download)
+  #:use-module (guix packages)
   #:use-module (rde features)
   #:use-module (rde features bittorrent)
   #:use-module (rde features bluetooth)
@@ -30,6 +31,7 @@
   #:use-module (rde features shellutils)
   #:use-module (rde features terminals)
   #:use-module (rde features tex)
+  #:use-module (rde features video)
   #:use-module (rde features xdg)
   #:use-module (rde packages))
 
@@ -44,6 +46,61 @@
    (type type)
    (pass-cmd (format #f "pass show mail/~a | head -1" id))))
 
+(define (mpv-run-with-emacs command)
+  (format #f (string-append
+              "run \"/bin/sh\" \"-c\" \"emacsclient -e "
+              (if (string? command)
+                  "~a\""
+                  "'~s'\""))
+          command))
+
+(define mpv-34
+  (let ((mpv (@ (gnu packages video) mpv)))
+    (package
+      (inherit mpv)
+      (version "0.34.1")
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/mpv-player/mpv")
+                      (commit (string-append "v" version))))
+                (file-name (git-file-name (package-name mpv) version))
+                (sha256
+                 (base32 "12qxwm1ww5vhjddl8yvj1xa0n1fi9z3lmzwhaiday2v59ca0qgsk")))))))
+
+(define emacs-ytdl-next
+  (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
+        (branch "add-format-selection")
+        (emacs-ytdl (@ (gnu packages emacs-xyz) emacs-ytdl)))
+    (package
+      (inherit emacs-ytdl)
+      (version (git-version "0" branch commit))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://gitlab.com/fleetime/ytdl")
+                      (commit commit)))
+                (file-name (git-file-name (package-name emacs-ytdl) version))
+                (sha256
+                 (base32 "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
+
+(define mpv-extra-config
+  `((border . no)
+    (volume . 100)
+    ,(cons 'screenshot-directory
+           (string-append (or (getenv "XDG_DATA_HOME") "~/.local/share")
+                          "/mpv/screenshots"))
+    (autofit . 800x800)
+    (osd-border-size . 2)
+    (osd-bar . yes)
+    (osd-level . 0)
+    (slang . en)
+    (ytdl-raw-options . "ignore-config=,sub-lang=en,write-auto-sub=")
+    (script-opts-add=osc-visibility . never)
+    (script-opts-add=osc-windowcontrols . no)
+    ("D" . ,(mpv-run-with-emacs '(rde-mpv-download)))
+    ("Alt+c" . ,(mpv-run-with-emacs '(rde-mpv-capture)))))
+
 
 ;;; Base features
 
@@ -51,7 +108,7 @@
   (list
    (feature-transmission)
    (feature-youtube-dl
-    #:emacs-ytdl (@ (conses packages emacs-xyz) emacs-ytdl-next)
+    #:emacs-ytdl emacs-ytdl-next
     #:music-dl-args
     '("-q" "-x" "-f" "bestaudio" "--audio-format" "mp3"
       "--add-metadata" "--compat-options" "all")
@@ -60,24 +117,16 @@
       "--add-metadata" "--compat-options" "all"))
    (feature-emacs-emms)
    (feature-mpv
-    #:mpv (@ (conses packages video) mpv-34)
-    #:emacs-mpv (@ (conses packages emacs-xyz) emacs-mpv-next)
-    #:extra-mpv-conf
-    `((border . no)
-      (volume . 100)
-      ,(cons 'screenshot-directory
-             (string-append (or (getenv "XDG_DATA_HOME") "~/.local/share")
-                            "/mpv/screenshots"))
-      (autofit . 800x800)
-      (osd-border-size . 2)
-      (osd-bar . yes)
-      (osd-level . 0)
-      (slang . en)
-      (ytdl-raw-options . "ignore-config=,sub-lang=en,write-auto-sub=")
-      (script-opts-add=osc-visibility . never)
-      (script-opts-add=osc-windowcontrols . no))
+    #:mpv mpv-34
+    #:extra-mpv-conf mpv-extra-config
     #:extra-bindings
-    `(("F" . "cycle fullscreen")
+    `(("ctrl+a" . "seek 0 absolute-percent")
+      ("ctrl+e" . "seek 100 absolute-percent")
+      ("ctrl+f" . "seek 5 relative")
+      ("ctrl+b" . "seek -5 relative")
+      ("Shift+n" . "add chapter 1")
+      ("Shift+p" . "add chapter -1")
+      ("F" . "cycle fullscreen")
       ("M" . "cycle mute")
       ("+" . "add volume 2")
       ("-" . "add volume -2")
