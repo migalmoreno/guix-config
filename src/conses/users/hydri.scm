@@ -181,7 +181,6 @@
     #:custom-gtk-theme (lambda _
                          `((.phosh-topbar-clock
                             ((margin-left . 125px))))))
-   %emacs-completion-base-features
    (feature-alternative-frontends
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend #f)
