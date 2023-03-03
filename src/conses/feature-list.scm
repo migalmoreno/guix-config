@@ -502,7 +502,7 @@
                        "emacs" :v-adjust -0.1 :height 1))
        :help "Menu"
        :action 'tab-bar-menu-bar)
-      ,@%rde-mpv-tab-bar-modules
+      ,@%default-mpv-tab-bar-modules
       (make-rde-tab-bar-module
        :id 'notifications
        :label '(:eval (rde-ednc--notify))))
