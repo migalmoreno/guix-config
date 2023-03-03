@@ -756,7 +756,7 @@
    (feature-alternative-frontends
     #:google-frontend "http://localhost:5000"
     #:youtube-frontend (string-append "https://" %tubo-host)
-    #:reddit-frontend "https://teddit.namazso.eu")
+    #:reddit-frontend "https://teddit.pussthecat.org")
    (feature-android)
    (feature-manpages)
    (feature-emacs
