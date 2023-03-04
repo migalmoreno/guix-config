@@ -65,26 +65,6 @@
         "src/projects/dojo"
         "src/projects/blog")))
 
-(define extra-gtk-settings
-  `((gtk-cursor-blink . #f)
-    (gtk-cursor-theme-size . 16)
-    (gtk-decoration-layout . "")
-    (gtk-dialogs-use-header . #f)
-    (gtk-enable-animations . #t)
-    (gtk-enable-event-sounds . #f)
-    (gtk-enable-input-feedback-sounds . #f)
-    (gtk-error-bell . #f)
-    (gtk-overlay-scrolling . #t)
-    (gtk-recent-files-enabled . #f)
-    (gtk-shell-shows-app-menu . #f)
-    (gtk-shell-shows-desktop . #f)
-    (gtk-shell-shows-menubar . #f)
-    (gtk-xft-antialias . #t)
-    (gtk-xft-dpi . 92)
-    (gtk-xft-hinting . #t)
-    (gtk-xft-hintstyle . hintfull)
-    (gtk-xft-rgba . none)))
-
 (define extra-ssh-config
   (home-ssh-configuration
    (extra-config
@@ -256,7 +236,27 @@
    "emacs-json-mode" "emacs-wgrep" "emacs-rainbow-delimiters"
    "emacs-kind-icon" "emacs-all-the-icons-completion"))
 
-(define (vega-gtk-theme config)
+(define extra-gtk-settings
+  `((gtk-cursor-blink . #f)
+    (gtk-cursor-theme-size . 16)
+    (gtk-decoration-layout . "")
+    (gtk-dialogs-use-header . #f)
+    (gtk-enable-animations . #t)
+    (gtk-enable-event-sounds . #f)
+    (gtk-enable-input-feedback-sounds . #f)
+    (gtk-error-bell . #f)
+    (gtk-overlay-scrolling . #t)
+    (gtk-recent-files-enabled . #f)
+    (gtk-shell-shows-app-menu . #f)
+    (gtk-shell-shows-desktop . #f)
+    (gtk-shell-shows-menubar . #f)
+    (gtk-xft-antialias . #t)
+    (gtk-xft-dpi . 92)
+    (gtk-xft-hinting . #t)
+    (gtk-xft-hintstyle . hintfull)
+    (gtk-xft-rgba . none)))
+
+(define (extra-gtk-css config)
   (define dark-theme? (get-value 'gtk-dark-theme? config))
 
   (let ((bg (if dark-theme? 'black 'white))
@@ -769,9 +769,9 @@
    %ui-base-features
    (feature-gtk3
     #:dark-theme? #t
-    #:custom-gtk-theme vega-gtk-theme
     #:gtk-theme #f
-    #:extra-gtk-settings extra-gtk-settings)
+    #:extra-gtk-settings extra-gtk-settings
+    #:extra-gtk-css extra-gtk-css)
    %emacs-base-features
    (feature-emacs-nyxt #:autostart-delay 5)
    %emacs-desktop-base-features

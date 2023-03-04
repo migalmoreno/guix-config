@@ -178,9 +178,9 @@
     #:icon-theme (make-theme
                   "Adwaita"
                   (@ (gnu packages gnome) adwaita-icon-theme))
-    #:custom-gtk-theme (lambda _
-                         `((.phosh-topbar-clock
-                            ((margin-left . 125px))))))
+    #:extra-gtk-css (lambda _
+                      `((.phosh-topbar-clock
+                         ((margin-left . 125px))))))
    (feature-alternative-frontends
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend #f)
