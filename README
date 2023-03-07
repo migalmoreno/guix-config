@@ -1,4 +1,4 @@
-# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; -*-
+# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; -*-
 #+OPTIONS: toc:nil num:nil
 * Dotfiles
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://sr.ht/~abcdw/rde/][RDE]] configuration framework.
