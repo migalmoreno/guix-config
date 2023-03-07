@@ -147,8 +147,11 @@
    (feature-emacs-pdf-tools)
    (feature-emacs-tempel)
    (feature-emacs-graphviz)
-   (feature-emacs-calendar #:week-numbers? #t)
-   (feature-emacs-bookmark #:bookmarks-file "~/documents/bookmarks")
+   (feature-emacs-calendar
+    #:calendar-date-style 'european
+    #:diary-file "~/documents/diary")
+   (feature-emacs-bookmark
+    #:bookmarks-file "~/documents/bookmarks")
    (feature-emacs-spelling
     #:flyspell-hooks '(org-mode-hook message-mode-hook bibtex-mode-hook)
     #:ispell-standard-dictionary "en_US")
