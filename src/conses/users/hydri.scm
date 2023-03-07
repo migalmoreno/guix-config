@@ -108,6 +108,10 @@
    "portfolio" "pavucontrol" "geary" "gnome-maps"
    "nheko" "chromium" "evince"))
 
+(define extra-gtk-css
+  `((.phosh-topbar-clock
+     ((margin-left . 125px)))))
+
 
 ;;; User-specific features
 
@@ -178,9 +182,7 @@
     #:icon-theme (make-theme
                   "Adwaita"
                   (@ (gnu packages gnome) adwaita-icon-theme))
-    #:extra-gtk-css (lambda _
-                      `((.phosh-topbar-clock
-                         ((margin-left . 125px))))))
+    #:extra-gtk-css extra-gtk-css)
    (feature-alternative-frontends
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend #f)
