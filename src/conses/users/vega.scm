@@ -54,17 +54,6 @@
     "texinfo" "pass-otp" "imagemagick" "fd"
     "setxkbmap" "xkeyboard-config")))
 
-(define guix-shell-authorized-directories
-  (map (lambda (dir)
-         (string-append (getenv "HOME") "/" dir))
-       (list
-        "src/projects/fdroid.el"
-        "src/projects/nyxt.el"
-        "src/projects/dotfiles"
-        "src/projects/tubo"
-        "src/projects/dojo"
-        "src/projects/blog")))
-
 (define extra-ssh-config
   (home-ssh-configuration
    (extra-config
@@ -863,8 +852,6 @@
     #:keymap "custom")
    (feature-keyboard
     #:keyboard-layout %default-keyboard-layout)
-   (feature-guix
-    #:shell-authorized-directories guix-shell-authorized-directories)
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))
