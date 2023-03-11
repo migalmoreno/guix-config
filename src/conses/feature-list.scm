@@ -447,7 +447,10 @@
     #:posting-styles gnus-posting-styles)
    (feature-emacs-message
     #:message-signature (string-append "Best regards,\n" %default-username))
-   (feature-emacs-org-mime)
+   (feature-emacs-org-mime
+    #:html-element-styles
+    '(("pre" . "color: #E6E1Dc; background-color: #232323; padding: 0.5em;")
+      ("blockquote" . "border-left: 2px solid gray; padding-left: 4px;")))
    (feature-emacs-smtpmail)
    (feature-emacs-debbugs)
    (feature-emacs-ebdb
