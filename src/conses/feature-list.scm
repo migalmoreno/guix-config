@@ -185,9 +185,7 @@
    (feature-emacs-input-methods
     #:default-input-method "spanish-keyboard")
    (feature-emacs-browse-url)
-   (feature-emacs-webpaste
-    #:webpaste-providers
-    '("bpa.st" "bpaste.org" "dpaste.org" "dpaste.com"))))
+   (feature-emacs-webpaste)))
 
 (define-public %markup-base-features
   (list
