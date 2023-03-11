@@ -251,7 +251,8 @@
        :if-new (file+head "%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
    (feature-emacs-org-agenda)
-   (feature-markdown)
+   (feature-markdown
+    #:headings-scaling? #t)
    (feature-tex
     #:listings-options
     '(("basicstyle" "\\ttfamily")
