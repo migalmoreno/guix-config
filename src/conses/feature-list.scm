@@ -35,22 +35,6 @@
 
 ;;; Helpers
 
-(define* (mail-acc id user type #:optional pass-cmd)
-  "Make a simple mail account."
-  (mail-account
-   (id id)
-   (fqda user)
-   (type type)
-   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
-
-(define (mpv-run-with-emacs command)
-  (format #f (string-append
-              "run \"/bin/sh\" \"-c\" \"emacsclient -e "
-              (if (string? command)
-                  "~a\""
-                  "'~s'\""))
-          command))
-
 (define mpv-34
   (let ((mpv (@ (gnu packages video) mpv)))
     (package
@@ -80,6 +64,14 @@
                 (file-name (git-file-name (package-name emacs-ytdl) version))
                 (sha256
                  (base32 "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
+
+(define (mpv-run-with-emacs cmd)
+  (format #f (string-append
+              "run \"/bin/sh\" \"-c\" \"emacsclient -e "
+              (if (string? cmd)
+                  "~a\""
+                  "'~s'\""))
+          cmd))
 
 (define mpv-extra-config
   `((border . no)
@@ -423,6 +415,14 @@
      (name ,%default-username)
      (cc ,%default-email)
      (signature ,(string-append "Best regards,\n" %default-username)))))
+
+(define* (mail-acc id user type #:optional pass-cmd)
+  "Make a simple mail account."
+  (mail-account
+   (id id)
+   (fqda user)
+   (type type)
+   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
 
 (define (mail-directory-fn config)
   (string-append (getenv "XDG_STATE_HOME") "/mail"))
