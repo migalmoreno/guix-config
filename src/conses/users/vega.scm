@@ -234,7 +234,7 @@
   (strings->packages
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
    "emacs-json-mode" "emacs-wgrep" "emacs-rainbow-delimiters"
-   "emacs-kind-icon"))
+   "emacs-kind-icon" "emacs-gif-screencast"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
