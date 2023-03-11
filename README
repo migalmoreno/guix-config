@@ -5,4 +5,4 @@ This is my personal set of configuration files built around the [[https://guix.g
 
 The main goal behind this repository is to hold the configuration of my users, hosts, and remote machines.
 
-I constantly strive to upstream most of the packages, services, and features that I write. I encourage you to do the same. With that being said, there might be some leftovers that don't align with the upstream projects' principles that I need to temporarily keep around to meet my needs.
+I constantly strive to upstream most of the packages, services, and features that I write. I encourage you to do the same so everyone in the community benefits.
