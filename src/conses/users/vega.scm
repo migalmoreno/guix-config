@@ -210,11 +210,6 @@
     (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode))
     (with-eval-after-load 'yaml-mode
       (define-key yaml-mode-map (kbd "RET") 'newline-and-indent))
-    (with-eval-after-load 'markdown-mode
-      (setq markdown-header-scaling t)
-      (setq markdown-header-scaling-values '(1.2 1.1 1.1 1.0 1.0 0.9))
-      (setq markdown-hide-urls t)
-      (setq markdown-hide-markup t))
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
     (add-hook 'eww-mode-hook 'eww-toggle-images)))
 
