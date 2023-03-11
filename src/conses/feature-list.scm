@@ -217,6 +217,7 @@
    (feature-emacs-org-roam
     #:org-roam-directory "~/documents/notes"
     #:org-roam-dailies-directory "journal/"
+    #:org-roam-todo? #t
     #:org-roam-capture-templates
     `(("d" "default" plain "%?"
        :if-new (file+head
