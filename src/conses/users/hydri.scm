@@ -103,9 +103,9 @@
 
 (define extra-home-packages
   (strings->packages
-   "nss-certs" "glibc-locales" "seahorse"
-   "gnome-clocks" "gnome-console" "pinentry-tty"
-   "portfolio" "pavucontrol" "geary" "gnome-maps"
+   "nss-certs" "glibc-locales" "seahorse" "gnome-maps"
+   "gnome-clocks" "gnome-weather" "gnome-console"
+   "pinentry-tty" "portfolio" "pavucontrol" "geary"
    "nheko" "chromium" "evince"))
 
 (define extra-gtk-css
