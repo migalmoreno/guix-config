@@ -531,7 +531,6 @@
       (make-rde-tab-bar-module
        :id 'battery
        :label 'battery-mode-line-string)))
-   (feature-xorg)
    (feature-emacs-exwm
     #:window-configurations
     '(((string= exwm-class-name "Nyxt")
@@ -569,7 +568,17 @@
 EndSection
 Section \"ServerFlags\"
   Option \"BlankTime\" \"0\"
-EndSection"))))
+EndSection"))
+   (feature-xorg
+    #:extra-xresources
+    '((Xcursor.size . 16)
+      (Xft.autohint . #t)
+      (Xft.antialias . #t)
+      (Xft.hinting . #t)
+      (Xft.hintstyle . hintfull)
+      (Xft.rgba . none)
+      (Xft.lcdfilter . lcddefault)
+      (Xft.dpi . 110)))))
 
 (define-public %desktop-base-features
   (list
