@@ -149,7 +149,7 @@
     #:ispell-standard-dictionary "en_US")
    (feature-emacs-info)
    (feature-emacs-which-key)
-   (feature-emacs-helpful)
+   (feature-emacs-help)
    (feature-emacs-time
     #:display-time? #t
     #:display-time-24hr? #t
