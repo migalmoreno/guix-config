@@ -600,7 +600,8 @@ EndSection"))
    (feature-emacs-appearance)
    (feature-emacs-modus-themes
     #:dark? #t
-    #:deuteranopia? #f)
+    #:deuteranopia? #f
+    #:headings-scaling? #t)
    (feature-emacs-circadian)
    (feature-fonts
     #:extra-fontaine-presets
