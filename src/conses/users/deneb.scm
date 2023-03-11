@@ -21,7 +21,4 @@
       (delete network-manager-service-type)))
    (feature-pantalaimon
     #:ignore-device-verification? #t
-    #:ssl? #f)
-   (feature-guix
-    #:shell-authorized-directories
-    (list "/home/deneb/src/tubo"))))
+    #:ssl? #f)))
