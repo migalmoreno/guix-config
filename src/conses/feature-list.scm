@@ -269,8 +269,8 @@
     (strings->packages
      "texlive-wrapfig" "texlive-capt-of"
      "texlive-hyperref" "texlive-fonts-ec"
-     "texlive-latex-geometry" "texlive-listings"
-     "texlive-xcolor" "texlive-ulem" "texlive-latex-preview"
+     "texlive-latex-geometry" "texlive-xcolor"
+     "texlive-ulem" "texlive-latex-preview"
      "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"
      "texlive-titling" "texlive-latex-titlesec" "texlive-enumitem"))
    (feature-emacs-citar
