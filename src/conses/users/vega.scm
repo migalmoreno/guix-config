@@ -178,7 +178,6 @@
     (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
     (define-key ctl-x-4-map "b" 'consult-buffer-other-window)
     (with-eval-after-load 'consult
-      (setq consult-find-args "fd . -H -F -t f -E .git node_modules .cache")
       (setq consult-narrow-key "C-=")
       (setq consult-widen-key "C--"))
     (define-key help-map "b" 'embark-bindings)
