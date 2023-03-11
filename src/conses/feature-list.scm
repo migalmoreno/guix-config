@@ -458,6 +458,7 @@
 
 (define-public %programming-base-features
   (list
+   (feature-emacs-guix)
    (feature-emacs-flymake)
    (feature-emacs-eglot)
    (feature-emacs-xref)
@@ -488,7 +489,7 @@
           "#require \"ppx_fields_conv\""
           "#require \"str\""
           "open Core"))
-   (feature-guile)
+   (feature-emacs-geiser)
    (feature-go)))
 
 (define-public %emacs-desktop-base-features
