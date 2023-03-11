@@ -436,8 +436,7 @@
     #:mail-directory-fn mail-directory-fn)
    (feature-isync)
    (feature-goimapnotify
-    #:goimapnotify
-    (@ (rde packages mail) go-gitlab.com-shackra-goimapnotify-next))
+    #:notify? #t)
    (feature-emacs-gnus
     #:topic-alist gnus-topic-alist
     #:topic-topology gnus-topic-topology
