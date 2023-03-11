@@ -206,6 +206,11 @@
                    `(,(rx "*help" (* any) "*")
                      (display-buffer-reuse-window
                       display-buffer-same-window)
+                     (reusable-frames . t)))
+      (add-to-list 'display-buffer-alist
+                   `(,(rx "*Geiser" (* any) "*")
+                     (display-buffer-reuse-window
+                      display-buffer-same-window)
                      (reusable-frames . t))))
     (repeat-mode 1)
 
