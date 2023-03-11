@@ -190,7 +190,6 @@
        `(,(rx bos "*Embark Collect " (or "Live" "Completions") "*")
          nil
          (window-parameters (mode-line-format . none)))))
-    (add-hook 'grep-mode-hook 'wgrep-mode)
     (with-eval-after-load 'corfu
       (setq corfu-auto-prefix 2))
     (autoload 'corfu-history-mode "corfu-history")
