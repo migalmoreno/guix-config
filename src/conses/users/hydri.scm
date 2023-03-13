@@ -168,7 +168,23 @@
     #:ssh-keys `((,%default-ssh-keygrip))
     #:pinentry-flavor 'tty
     #:default-ttl 34560000)
-   (feature-fonts)
+   (feature-fonts
+    #:font-serif
+    (font
+     (name "IBM Plex Serif")
+     (size 11)
+     (package (@ (gnu packages fonts) font-ibm-plex)))
+    #:font-sans
+    (font
+     (name "IBM Plex Sans")
+     (size 11)
+     (package (@ (gnu packages fonts) font-ibm-plex))
+     (weight 'light))
+    #:font-unicode
+    (font
+     (name "Noto Color Emoji")
+     (size 11)
+     (package (@ (gnu packages fonts) font-google-noto))))
    (feature-emacs-appearance
     #:header-line-as-mode-line? #f
     #:margin 0)
