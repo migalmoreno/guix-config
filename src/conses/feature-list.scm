@@ -605,6 +605,22 @@ EndSection"))
     #:headings-scaling? #t)
    (feature-emacs-circadian)
    (feature-fonts
+    #:font-serif
+    (font
+     (name "IBM Plex Serif")
+     (size 11)
+     (package (@ (gnu packages fonts) font-ibm-plex)))
+    #:font-sans
+    (font
+     (name "IBM Plex Sans")
+     (size 11)
+     (package (@ (gnu packages fonts) font-ibm-plex))
+     (weight 'light))
+    #:font-unicode
+    (font
+     (name "Noto Color Emoji")
+     (size 11)
+     (package (@ (gnu packages fonts) font-google-noto)))
     #:extra-fontaine-presets
     '((docked
        :default-height 107
