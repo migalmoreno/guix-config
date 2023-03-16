@@ -543,11 +543,12 @@
       ((string-match "Android Emulator" exwm-title)
        floating t))
     #:extra-exwm-bindings
-    '((cons (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
+    `((cons (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
       (cons (kbd "s-<prior>") 'pulseaudio-control-increase-sink-volume)
-      (cons (kbd "s-p") 'rde-xorg-take-screenshot)
-      (cons (kbd "s-v") 'rde-xorg-record-screencast)
-      (cons (kbd "s-l") (lambda () (call-process (executable-find "slock"))))
+      (cons (kbd "s-l") (lambda ()
+                          (call-process ,(file-append
+                                          (@ (gnu packages suckless) slock)
+                                          "/bin/slock"))))
       (cons (kbd "M-o") 'ace-window))
     #:extra-exwm-init
     `((call-process
