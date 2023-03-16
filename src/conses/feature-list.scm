@@ -39,14 +39,16 @@
     (package
       (inherit mpv)
       (version "0.34.1")
-      (source (origin
-                (method git-fetch)
-                (uri (git-reference
-                      (url "https://github.com/mpv-player/mpv")
-                      (commit (string-append "v" version))))
-                (file-name (git-file-name (package-name mpv) version))
-                (sha256
-                 (base32 "12qxwm1ww5vhjddl8yvj1xa0n1fi9z3lmzwhaiday2v59ca0qgsk")))))))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/mpv-player/mpv")
+               (commit (string-append "v" version))))
+         (file-name (git-file-name (package-name mpv) version))
+         (sha256
+          (base32
+           "12qxwm1ww5vhjddl8yvj1xa0n1fi9z3lmzwhaiday2v59ca0qgsk")))))))
 
 (define emacs-ytdl-next
   (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
@@ -55,14 +57,16 @@
     (package
       (inherit emacs-ytdl)
       (version (git-version "0" branch commit))
-      (source (origin
-                (method git-fetch)
-                (uri (git-reference
-                      (url "https://gitlab.com/fleetime/ytdl")
-                      (commit commit)))
-                (file-name (git-file-name (package-name emacs-ytdl) version))
-                (sha256
-                 (base32 "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://gitlab.com/fleetime/ytdl")
+               (commit commit)))
+         (file-name (git-file-name (package-name emacs-ytdl) version))
+         (sha256
+          (base32
+           "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
 
 (define (mpv-run-with-emacs cmd)
   (format #f (string-append
