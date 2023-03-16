@@ -214,6 +214,44 @@
                      (reusable-frames . t))))
     (repeat-mode 1)
 
+    ,@(if (and (get-value 'emacs-org) (get-value 'emacs-exwm))
+          '((eval-when-compile
+              (require 'cl-macs))
+
+            (defun nyxt-store-link ()
+              "Store the current page link via Org mode."
+              (when (and (or nyxt-process
+                             (nyxt--system-process-p))
+                         (string-match "Nyxt:"
+                                       (buffer-name (current-buffer))))
+                (org-link-store-props
+                 :type "nyxt"
+                 :link  (if (nyxt--extension-p "nx-router" "trace-url")
+                            (read
+                             (nyxt--sly-eval
+                              '(render-url (nx-router:trace-url
+                                            (url (current-buffer))))))
+                          (read (nyxt--sly-eval
+                                 '(render-url (url (current-buffer))))))
+                 :description (read (nyxt--sly-eval
+                                     '(title (current-buffer)))))))
+
+            (cl-defun nyxt-capture (template &key (roam-p nil))
+              "Store and capture the current Nyxt page link in Org TEMPLATE.
+
+If ROAM-P, store it in the corresponding Org Roam capture TEMPLATE."
+              (interactive)
+              (with-current-buffer
+                  (car (cl-remove-if-not
+                        (lambda (buffer)
+                          (string-match "Nyxt:" (buffer-name buffer)))
+                        (buffer-list)))
+                (org-store-link t t)
+                (if roam-p
+                    (org-roam-capture nil template)
+                  (org-capture nil template)))))
+          '())
+
     (eval-when-compile
       (require 'cl-lib))
     (defun rde-linux-list-lsusb-devices ()
