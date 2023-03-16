@@ -29,8 +29,7 @@
   #:use-module (rde features version-control)
   #:use-module (rde features video)
   #:use-module (rde features xdg)
-  #:use-module (rde packages)
-  #:use-module (rde serializers css))
+  #:use-module (rde packages))
 
 
 ;;; Helpers
@@ -740,25 +739,21 @@ EndSection"))
   `((make-instance
      'nyxt/user-script-mode:user-style
      :include '("https://github.com/*" "https://gist.github.com/*")
-     :code ,(apply string-append
-                   (serialize-css-config
-                    `((#((#{#dashboard}# .body)
-                         .js-inline-dashboard-render
-                         .js-feed-item-component
-                         .js-yearly-contributions
-                         (.js-profile-editable-area div .mb-3)
-                         .starring-container
-                         #{#js-contribution-activity}#
-                         #{#year-list-container}#
-                         #{a[href$=watchers]}#
-                         #{a[href$=stargazers]}#
-                         #{a[href$=followers]}#
-                         #{a[href$=following]}#
-                         #{a[href$=achievements]}#
-                         #{[action*=follow]}#)
-                       ((display . (none !important))))
-                      ((#{img[class*=avatar]}#)
-                       ((visibility . hidden)))))))))
+     :code (theme:themed-css (theme:theme *browser*)
+             `((:or |#dashboard.body|
+                    .js-inline-dashboard-render
+                    .js-feed-item-component
+                    (:and .js-profile-editable-area div .mb-3)
+                    .starring-container
+                    |#js-contributor-activity|
+                    |#year-list-container|
+                    (:and a (:$= href (:or "watchers" "stargazers"
+                                           "followers" "following"
+                                           "achievements")))
+                    (:*= action "follow"))
+               :display none !important)
+             `((:and img (:*= class "avatar"))
+               :visibility hidden)))))
 
 (define-public %nyxt-base-features
   (list
