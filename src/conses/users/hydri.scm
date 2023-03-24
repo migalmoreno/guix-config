@@ -106,7 +106,7 @@
    "nss-certs" "glibc-locales" "seahorse" "gnome-maps"
    "gnome-clocks" "gnome-weather" "gnome-console"
    "pinentry-tty" "portfolio" "pavucontrol" "geary"
-   "nheko" "chromium" "evince"))
+   "nheko" "evince"))
 
 (define extra-gtk-css
   `((.phosh-topbar-clock
