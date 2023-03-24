@@ -279,15 +279,15 @@
       (id 'srht)
       (network "chat.sr.ht")
       (bouncer? #t)
-      (nick (getenv "IRC_BOUNCER_NICK")))
+      (nick %default-username))
      (irc-account
       (id 'libera)
       (network "irc.libera.chat")
-      (nick (getenv "IRC_LIBERA_NICK")))
+      (nick "ardon"))
      (irc-account
       (id 'oftc)
       (network "irc.oftc.net")
-      (nick (getenv "IRC_OFTC_NICK")))))
+      (nick "nvsop"))))
    (feature-emacs-erc
     #:erc-auto-query 'bury
     #:erc-query-display 'buffer
