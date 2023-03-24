@@ -628,10 +628,10 @@ EndSection"))
     #:extra-fontaine-presets
     '((docked
        :default-height 107
-       :variable-pitch-weight 'light)
+       :variable-pitch-weight light)
       (headless
        :default-height 105
-       :variable-pitch-weight 'light)))))
+       :variable-pitch-weight light)))))
 
 (define (nx-router-extra-routes config)
   `((make-instance
