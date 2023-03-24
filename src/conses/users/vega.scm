@@ -872,7 +872,7 @@ If ROAM-P, store it in the corresponding Org Roam capture TEMPLATE."
     #:additional-elisp-packages extra-elisp-packages)
    %ui-base-features
    (feature-gtk3
-    #:dark-theme? #t
+    #:gtk-dark-theme? #t
     #:gtk-theme #f
     #:extra-gtk-settings extra-gtk-settings
     #:extra-gtk-css extra-gtk-css)
