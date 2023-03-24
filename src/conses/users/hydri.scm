@@ -52,9 +52,9 @@
 
 ;;; Service extensions
 
-(define extra-xdg-config-service
+(define extra-xdg-desktop-entries
   (simple-service
-   'add-nyxt-xdg-entry-with-gst-plugins
+   'add-extra-desktop-entries
    home-xdg-mime-applications-service-type
    (home-xdg-mime-applications-configuration
     (desktop-entries
@@ -155,7 +155,7 @@
    (feature-custom-services
     #:home-services
     (list
-     extra-xdg-config-service
+     extra-xdg-desktop-entries
      extra-shepherd-services-service
      extra-home-envs-service))
    (feature-emacs
