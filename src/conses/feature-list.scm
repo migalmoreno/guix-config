@@ -788,12 +788,14 @@ EndSection"))
       (id 'sh)
       (forge 'sourcehut)
       (username %default-username)
+      (full-name %default-full-name)
       (email %default-email))
      (forge-account
       (id 'gh)
       (forge 'github)
-      (username (getenv "GITHUB_USER"))
-      (email (getenv "GITHUB_EMAIL")))))
+      (username "miguelmorenov")
+      (full-name %default-full-name)
+      (email %default-email))))
    (feature-sourcehut)
    (feature-git
     #:primary-forge-account-id 'sh
