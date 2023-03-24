@@ -71,7 +71,7 @@
      (ssh-host
       (host "hydri")
       (options
-       `((host-name . ,(getenv "HYDRI_HOST"))
+       `((host-name . "192.168.1.123")
          (user . "hydri"))))))))
 
 (define extra-xdg-desktop-entries
