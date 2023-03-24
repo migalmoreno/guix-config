@@ -553,7 +553,8 @@
                           (call-process ,(file-append
                                           (@ (gnu packages suckless) slock)
                                           "/bin/slock"))))
-      (cons (kbd "M-o") 'ace-window))
+      (cons (kbd "M-o") 'ace-window)
+      (cons (kbd "s-<SPC>") 'app-launcher-run-app))
     #:extra-exwm-init
     `((call-process
        ,(file-append (@ (gnu packages xorg) xsetroot)
