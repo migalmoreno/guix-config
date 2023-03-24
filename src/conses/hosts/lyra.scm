@@ -11,11 +11,6 @@
   #:use-module (gnu services syncthing)
   #:use-module (gnu services virtualization)
   #:use-module (gnu services xorg)
-  #:use-module (gnu packages ssh)
-  #:use-module (gnu packages base)
-  #:use-module (gnu packages bash)
-  #:use-module (gnu packages linux)
-  #:use-module (gnu packages suckless)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system uuid)
@@ -26,7 +21,6 @@
   #:use-module (gnu home services)
   #:use-module (gnu home services linux)
   #:use-module (guix gexp)
-  #:use-module (nongnu packages linux)
   #:use-module (rde packages)
   #:use-module (rde features)
   #:use-module (rde features base)
@@ -124,7 +118,7 @@
              (tls-port "16555")))
    (service openssh-service-type
             (openssh-configuration
-             (openssh openssh-sans-x)
+             (openssh (@ (gnu packages ssh) openssh-sans-x))
              (password-authentication? #f)
              (permit-root-login 'prohibit-password)
              (authorized-keys
@@ -143,9 +137,9 @@
   (list
    (feature-kernel
     #:kernel %default-kernel
-    #:firmware (list linux-firmware sof-firmware)
-    #:kernel-loadable-modules (list ddcci-driver-linux
-                                    v4l2loopback-linux-module))
+    #:firmware (strings->packages "linux-firmware" "sof-firmware")
+    #:kernel-loadable-modules
+    (strings->packages "ddcci-driver-linux" "v4l2loopback-linux-module"))
    (feature-host-info
     #:host-name "lyra"
     #:timezone %default-timezone)
