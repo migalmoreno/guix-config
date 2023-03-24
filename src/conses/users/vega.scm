@@ -216,6 +216,8 @@
                    `(,(rx "*org-roam*")
                      display-buffer-same-window)))
     (repeat-mode 1)
+    (with-eval-after-load 'rde-keymaps
+      (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))
 
     (eval-when-compile
       (require 'cl-lib))
