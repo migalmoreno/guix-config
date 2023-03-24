@@ -1,4 +1,4 @@
-(define-module (conses config)
+(define-module (conses dispatch)
   #:use-module (conses hosts base)
   #:use-module (conses machines base)
   #:use-module (gnu system)
