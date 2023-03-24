@@ -126,7 +126,9 @@
    (service qemu-binfmt-service-type
             (qemu-binfmt-configuration
              (platforms (lookup-qemu-platforms "aarch64"))))
-   (screen-locker-service slock #:allow-empty-passwords? #f)
+   (service screen-locker-service-type
+            (screen-locker-configuration
+             "slock" (@ (gnu packages suckless) slock) #f))
    (service kernel-module-loader-service-type
             '("ddcci" "ddcci_backlight"))))
 
