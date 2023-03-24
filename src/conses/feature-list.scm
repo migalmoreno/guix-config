@@ -303,8 +303,8 @@
     #:slack-accounts
     (list
      (slack-account
-      (workspace (getenv "SLACK_WORKSPACE"))
-      (nick (getenv "SLACK_NICK"))
+      (workspace "clojurians")
+      (nick "vienzer")
       (cookie? #t))))
    (feature-emacs-slack)
    (feature-emacs-telega)))
