@@ -383,24 +383,15 @@
 (define gnus-posting-styles
   `((".*"
      (cc ,%default-email))
-    ("^nnmaildir"
-     (signature ,(string-append
-                  "Best regards,\n" %default-fullname)))
     ((header "cc" ".*@debbugs.gnu.org")
      (To rde-gnus-get-article-participants)
-     (name ,%default-username)
-     (cc ,%default-email)
-     (signature ,(string-append "Best regards,\n" %default-username)))
+     (cc nil))
     ((header "to" ".*@lists.sr.ht")
      (To rde-gnus-get-article-participants)
-     (name ,%default-username)
-     (cc ,%default-email)
-     (signature ,(string-append "Best regards,\n" %default-username)))
+     (cc ,%default-email))
     ("^nntp.+:"
      (To rde-gnus-get-article-participants)
-     (name ,%default-username)
-     (cc ,%default-email)
-     (signature ,(string-append "Best regards,\n" %default-username)))))
+     (cc ,%default-email))))
 
 (define* (mail-acc id user type #:optional pass-cmd)
   "Make a simple mail account."
