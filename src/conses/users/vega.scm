@@ -832,17 +832,17 @@ If ROAM-P, store it in the corresponding Org Roam capture TEMPLATE."
              (service home-redshift-service-type
                       (home-redshift-configuration
                        (dawn-time "07:00")
-                       (dusk-time "20:00"))))))
+                       (dusk-time "20:00")))
+             (service home-xmodmap-service-type
+                      (home-xmodmap-configuration
+                       (config
+                        '(("add mod4" . "Print")
+                          "clear lock"
+                          "clear control"
+                          ("keycode 66" . "Control_L")
+                          ("add control" . "Control_L Control_R"))))))))
    (feature-networking)
-   (feature-pipewire)
-   (service home-xmodmap-service-type
-            (home-xmodmap-configuration
-             (config
-              '((#(add mod4) . Print)
-                (clear lock)
-                (clear control)
-                (#(keycode 66) . Control_L)
-                (#(add control) . #(Control_L Control_R))))))))
+   (feature-pipewire)))
 
 (define-public %user-features
   (make-feature-list
