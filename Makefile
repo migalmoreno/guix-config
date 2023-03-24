@@ -1,25 +1,25 @@
 GUIX_PROFILE := target/profiles/guix
 GUIX := ./pre-inst-env ${GUIX_PROFILE}/bin/guix
-CHANNELS_LOCK := ${GUIX} time-machine -C conses/channels-lock.scm --
+CHANNELS_LOCK := ${GUIX} time-machine -C rde/channels-lock.scm --
 SRC_DIR := ./src
-CONFIG := ${SRC_DIR}/conses/config.scm
+CONFIG := ${SRC_DIR}/dotfiles/config.scm
 HOST := $(shell hostname)
 USER := $(shell whoami)
 
 .PHONY: all
 all: guix pull upgrade home system iso
 
-conses/channels-lock.scm: conses/channels.scm
-	guix time-machine -C conses/channels.scm -- \
-	describe -f channels > conses/channels-lock-tmp.scm
-	mv conses/channels-lock-tmp.scm conses/channels-lock.scm
+rde/channels-lock.scm: rde/channels.scm
+	guix time-machine -C rde/channels.scm -- \
+	describe -f channels > rde/channels-lock-tmp.scm
+	mv rde/channels-lock-tmp.scm rde/channels-lock.scm
 
-conses/channels-lock-local.scm: conses/channels-local.scm
-	guix time-machine -C conses/channels-local.scm -- \
-	describe -f channels > conses/channels-lock-tmp.scm
-	mv conses/channels-lock-tmp.scm conses/channels-lock-local.scm
+rde/channels-lock-local.scm: rde/channels-local.scm
+	guix time-machine -C rde/channels-local.scm -- \
+	describe -f channels > rde/channels-lock-tmp.scm
+	mv rde/channels-lock-tmp.scm rde/channels-lock-local.scm
 
-guix: target/profiles/guix.lock
+guix: target/profiles/guix-time-marker
 
 repl:
 	./pre-inst-env target/profiles/guix/bin/guix repl --listen=tcp:37146
@@ -33,12 +33,12 @@ target/profiles:
 target/profiles/guix.lock: conses/channels-lock.scm
 	make target/profiles/guix
 
-target/profiles/guix: target/profiles conses/channels-lock.scm
-	guix pull --allow-downgrades -C conses/channels-lock.scm \
+target/profiles/guix: target/profiles rde/channels-lock.scm
+	guix pull --allow-downgrades -C rde/channels-lock.scm \
 	-p ${GUIX_PROFILE}
 
-target/profiles/guix-local: target/profiles conses/channels-lock-local.scm
-	guix pull --allow-downgrades -C conses/channels-lock-local.scm \
+target/profiles/guix-local: target/profiles rde/channels-lock-local.scm
+	guix pull --allow-downgrades -C rde/channels-lock-local.scm \
 	-p ${GUIX_PROFILE}
 
 target/live.iso: guix target
