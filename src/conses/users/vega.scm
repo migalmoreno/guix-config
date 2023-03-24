@@ -211,7 +211,10 @@
                    `(,(rx "*Geiser" (* any) "*")
                      (display-buffer-reuse-window
                       display-buffer-same-window)
-                     (reusable-frames . t))))
+                     (reusable-frames . t)))
+      (add-to-list 'display-buffer-alist
+                   `(,(rx "*org-roam*")
+                     display-buffer-same-window)))
     (repeat-mode 1)
 
     (eval-when-compile
