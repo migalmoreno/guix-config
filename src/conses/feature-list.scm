@@ -73,9 +73,7 @@
     (slang . en)
     (ytdl-raw-options . "ignore-config=,sub-lang=en,write-auto-sub=")
     (script-opts-add=osc-visibility . never)
-    (script-opts-add=osc-windowcontrols . no)
-    ("D" . ,(mpv-run-with-emacs '(rde-mpv-download)))
-    ("Alt+c" . ,(mpv-run-with-emacs '(rde-mpv-capture)))))
+    (script-opts-add=osc-windowcontrols . no)))
 
 
 ;;; Base features
@@ -102,6 +100,8 @@
       ("Shift+n" . "add chapter 1")
       ("Shift+p" . "add chapter -1")
       ("F" . "cycle fullscreen")
+      ("D" . ,(mpv-run-with-emacs '(rde-mpv-download)))
+      ("Alt+c" . ,(mpv-run-with-emacs '(rde-mpv-capture)))
       ("M" . "cycle mute")
       ("+" . "add volume 2")
       ("-" . "add volume -2")
