@@ -420,8 +420,7 @@
     #:message-archive-group '((".*" "sent"))
     #:group-parameters gnus-group-parameters
     #:posting-styles gnus-posting-styles)
-   (feature-emacs-message
-    #:message-signature (string-append "Best regards,\n" %default-username))
+   (feature-emacs-message)
    (feature-emacs-org-mime
     #:html-element-styles
     '(("pre" . "color: #E6E1Dc; background-color: #232323; padding: 0.5em;")
