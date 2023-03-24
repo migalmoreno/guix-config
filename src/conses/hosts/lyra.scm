@@ -61,7 +61,7 @@
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBN0KzBIzlhPkr3BhcuKt9ki6iYyMS97hpAEFIrNCa9O root@lyra\n"))
 
 (define-public %lyra-signing-key
-  (project-file "conses/keys/lyra.pub"))
+  (project-file "src/conses/keys/lyra.pub"))
 
 (define lyra-mapped-devices
   (list
