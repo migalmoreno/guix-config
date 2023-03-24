@@ -375,7 +375,6 @@
 
 (define gnus-group-parameters
   '(("^nnmaildir"
-     (display . 2000)
      (gcc-self . "nnmaildir+personal:sent"))
     ("^nntp"
      (display . 1000))))
