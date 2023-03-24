@@ -866,7 +866,6 @@ If ROAM-P, store it in the corresponding Org Roam capture TEMPLATE."
    (feature-manpages)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
-    #:default-application-launcher? #t
     #:emacs-server-mode? #f
     #:extra-early-init-el extra-early-init-el
     #:extra-init-el extra-init-el
