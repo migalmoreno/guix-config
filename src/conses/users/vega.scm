@@ -74,6 +74,44 @@
        `((host-name . ,(getenv "HYDRI_HOST"))
          (user . "hydri"))))))))
 
+(define extra-xdg-desktop-entries
+  (simple-service
+   'add-extra-desktop-entries
+   home-xdg-mime-applications-service-type
+   (home-xdg-mime-applications-configuration
+    (desktop-entries
+     (list
+      (xdg-desktop-entry
+       (file "emulator")
+       (name "Emulator")
+       (type 'application)
+       (config
+        `(,(cons 'exec
+                 #~(string-join
+                    (list
+                     #$(file-append
+                        (@ (gnu packages package-management) current-guix)
+                        "/bin/guix")
+                     "time-machine" "-C"
+                     #$(project-file "rde/channels-lock.scm")
+                     "shell" "-C" "-N" "--emulate-fhs"
+                     "--share=/tmp/.X11-unix" "--share=/dev/shm"
+                     "--expose=/etc/machine-id" "--share=$HOME"
+                     "--preserve=^ANDROID" "--preserve=^DISPLAY$"
+                     "--preserve=^XAUTHORITY$" "--share=/dev/kvm"
+                     "--share=/dev/video0" "--share=/dev/dri"
+                     "-m" #$(project-file "src/dotfiles/manifests/android.scm")
+                     "--" "env"
+                     #$(string-append "LD_LIBRARY-PATH="
+                                      "/lib:/lib/nss:"
+                                      "~/.android/emulator/lib64/qt/lib:"
+                                      "~/.android/emulator/lib64")
+                     "~/.android/emulator/emulator" "-show-kernel" "-gpu"
+                     "swiftshader_indirect" "-camera-back" "webcam0"
+                     "-avd" "whatsapp_bridge")))
+          (icon . "android")
+          (comment . "Run an Android emulator")))))))))
+
 (define extra-init-el
   '((add-hook 'after-init-hook 'server-start)
     (with-eval-after-load 'password-cache
@@ -795,6 +833,7 @@
             (list
              extra-shell-envs-service
              extra-home-packages-service
+             extra-xdg-desktop-entries
              (service home-udiskie-service-type)
              (service home-redshift-service-type
                       (home-redshift-configuration
