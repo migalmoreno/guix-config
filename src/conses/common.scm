@@ -1,4 +1,4 @@
-(define-module (conses feature-list)
+(define-module (conses common)
   #:use-module (conses hosts base)
   #:use-module (contrib features javascript)
   #:use-module (contrib features wm)
@@ -22,7 +22,6 @@
   #:use-module (rde features nyxt-xyz)
   #:use-module (rde features ocaml)
   #:use-module (rde features password-utils)
-  #:use-module (rde features scheme)
   #:use-module (rde features shells)
   #:use-module (rde features shellutils)
   #:use-module (rde features terminals)
@@ -128,8 +127,6 @@
    (feature-emacs-calendar
     #:calendar-date-style 'european
     #:diary-file "~/documents/diary")
-   (feature-emacs-bookmark
-    #:bookmarks-file "~/documents/bookmarks")
    (feature-emacs-spelling
     #:flyspell-hooks '(org-mode-hook message-mode-hook bibtex-mode-hook)
     #:ispell-standard-dictionary "en_US")
@@ -326,6 +323,12 @@
      "nnmaildir+personal:sent"
      "nnmaildir+personal:spam"
      "nnmaildir+personal:trash")
+    ("Deprecated"
+     "nnmaildir+deprecated:inbox"
+     "nnmaildir+deprecated:drafts"
+     "nnmaildir+deprecated:sent"
+     "nnmaildir+deprecated:spam"
+     "nnmaildir+deprecated:trash")
     ("Clojure"
      "nntp+gwene:gwene.clojure.planet"
      "nntp+gwene:gwene.com.google.groups.clojure")
@@ -363,14 +366,14 @@
 (define gnus-topic-topology
   '(("Gnus" visible)
     (("Inbox" visible)
-     (("Personal" visible nil)))
-    (("Lisp" visible)
+     (("Personal" visible nil))
+     (("Deprecated" visible nil)))
+    (("News" visible)
      (("Common Lisp" visible nil))
      (("Clojure" visible nil))
      (("Emacs" visible nil))
      (("Guile" visible nil))
-     (("Guix" visible nil)))
-    (("News" visible)
+     (("Guix" visible nil))
      (("Technology" visible nil)))))
 
 (define gnus-group-parameters
@@ -408,6 +411,7 @@
    (feature-mail-settings
     #:mail-accounts
     (list
+     (mail-acc 'deprecated "contact@conses.eu" 'gandi)
      (mail-acc 'personal %default-email 'gandi))
     #:mail-directory-fn mail-directory-fn)
    (feature-isync)
@@ -484,7 +488,6 @@
                        "emacs" :v-adjust -0.1 :height 1))
        :help "Menu"
        :action 'tab-bar-menu-bar)
-      ,@%default-mpv-tab-bar-modules
       (make-rde-tab-bar-module
        :id 'notifications
        :label '(:eval (rde-ednc--notify))))
