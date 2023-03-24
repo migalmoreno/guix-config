@@ -30,8 +30,9 @@ target:
 target/profiles:
 	mkdir -p target/profiles
 
-target/profiles/guix.lock: conses/channels-lock.scm
+target/profiles/guix-time-marker: rde/channels-lock.scm
 	make target/profiles/guix
+	touch $@
 
 target/profiles/guix: target/profiles rde/channels-lock.scm
 	guix pull --allow-downgrades -C rde/channels-lock.scm \
