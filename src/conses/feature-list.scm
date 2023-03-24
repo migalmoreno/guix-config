@@ -472,7 +472,8 @@
   (list
    (feature-emacs-ednc
     #:notifications-icon "")
-   (feature-emacs-pulseaudio-control)
+   (feature-emacs-pulseaudio-control
+    #:display-volume? #t)
    (feature-emacs-display-wttr)
    (feature-emacs-battery)
    (feature-emacs-tab-bar
