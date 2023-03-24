@@ -43,29 +43,6 @@
                "caps:ctrl_modifier"
                "altwin:prtsc_rwin")))
 
-(define-public %default-mpv-tab-bar-modules
-  '((make-rde-tab-bar-module
-     :id 'mpv-string
-     :label 'mpv-mode-line-string)
-    (make-rde-tab-bar-module
-     :id 'mpv-prev
-     :label 'mpv-prev-button
-     :help "Previous playlist entry"
-     :action 'mpv-playlist-prev)
-    (make-rde-tab-bar-module
-     :id 'mpv-toggle
-     :label 'mpv-toggle-button
-     :help "Toggle playback"
-     :action 'mpv-pause)
-    (make-rde-tab-bar-module
-     :id 'mpv-next
-     :label 'mpv-next-button
-     :help "Next playlist entry"
-     :action 'mpv-playlist-next)
-    (make-rde-tab-bar-module
-     :id 'mpv-playing-time
-     :label 'mpv-playing-time-string)))
-
 (define-public %initial-os
   (operating-system
     (host-name "conses")
