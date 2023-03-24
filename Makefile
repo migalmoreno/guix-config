@@ -21,6 +21,9 @@ conses/channels-lock-local.scm: conses/channels-local.scm
 
 guix: target/profiles/guix.lock
 
+repl:
+	./pre-inst-env target/profiles/guix/bin/guix repl --listen=tcp:37146
+
 target:
 	mkdir target
 
