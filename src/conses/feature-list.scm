@@ -34,22 +34,6 @@
 
 ;;; Helpers
 
-(define mpv-34
-  (let ((mpv (@ (gnu packages video) mpv)))
-    (package
-      (inherit mpv)
-      (version "0.34.1")
-      (source
-       (origin
-         (method git-fetch)
-         (uri (git-reference
-               (url "https://github.com/mpv-player/mpv")
-               (commit (string-append "v" version))))
-         (file-name (git-file-name (package-name mpv) version))
-         (sha256
-          (base32
-           "12qxwm1ww5vhjddl8yvj1xa0n1fi9z3lmzwhaiday2v59ca0qgsk")))))))
-
 (define emacs-ytdl-next
   (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
         (branch "add-format-selection")
@@ -109,7 +93,6 @@
       "--add-metadata" "--compat-options" "all"))
    (feature-emacs-emms)
    (feature-mpv
-    #:mpv mpv-34
     #:extra-mpv-conf mpv-extra-config
     #:extra-bindings
     `(("ctrl+a" . "seek 0 absolute-percent")
