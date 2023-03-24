@@ -536,6 +536,7 @@
        :id 'battery
        :label 'battery-mode-line-string)))
    (feature-emacs-exwm
+    #:workspace-number 4
     #:window-configurations
     '(((string= exwm-class-name "Nyxt")
        char-mode t
