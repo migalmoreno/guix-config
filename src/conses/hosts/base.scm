@@ -10,28 +10,28 @@
   #:use-module (ice-9 pretty-print))
 
 (define-public %nonguix-signing-key
-  (project-file "conses/keys/nonguix.pub"))
+  (project-file "src/conses/keys/nonguix.pub"))
 
 (define-public %default-ssh-key
   (plain-file
-   "conses.pub"
+   "mmoreno.pub"
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN (none)\n"))
 
 (define-public %default-ssh-keygrip "D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6")
 
 (define-public %default-kernel linux)
 
-(define-public %default-timezone (getenv "TIMEZONE"))
+(define-public %default-timezone "Europe/Madrid")
 
-(define-public %default-email (getenv "MAIL_PERSONAL_EMAIL"))
+(define-public %default-email "mmoreno@mmoreno.eu")
 
-(define-public %default-fullname (getenv "MAIL_PERSONAL_FULLNAME"))
+(define-public %default-fullname "Miguel Moreno")
 
-(define-public %default-username (getenv "USERNAME"))
+(define-public %default-username "mmoreno")
 
-(define-public %default-domain (getenv "DOMAIN"))
+(define-public %default-domain "conses.eu")
 
-(define-public %tubo-host (getenv "TUBO_HOST"))
+(define-public %tubo-host (string-append "tubo." %default-domain))
 
 (define-public %default-kernel-arguments
   (list "quiet" "net.ifnames=0"))
