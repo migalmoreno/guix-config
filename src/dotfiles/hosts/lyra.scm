@@ -1,7 +1,6 @@
-(define-module (conses hosts lyra)
-  #:use-module (conses hosts base)
-  #:use-module (conses users hydri)
-  #:use-module (conses utils)
+(define-module (dotfiles hosts lyra)
+  #:use-module (dotfiles common)
+  #:use-module (dotfiles users hydri)
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services databases)
@@ -61,7 +60,7 @@
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBN0KzBIzlhPkr3BhcuKt9ki6iYyMS97hpAEFIrNCa9O root@lyra\n"))
 
 (define-public %lyra-signing-key
-  (project-file "src/conses/keys/lyra.pub"))
+  (project-file "src/dotfiles/keys/lyra.pub"))
 
 (define lyra-mapped-devices
   (list
@@ -160,7 +159,7 @@
     (bootloader-configuration
      (bootloader grub-efi-bootloader)
      (targets '("/boot/efi"))))
-   (feature-whoogle)
+   ;; (feature-whoogle)
    (feature-file-systems
     #:mapped-devices lyra-mapped-devices
     #:file-systems lyra-file-systems)

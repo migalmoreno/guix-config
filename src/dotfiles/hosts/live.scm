@@ -1,4 +1,4 @@
-(define-module (conses hosts live)
+(define-module (dotfiles hosts live)
   #:use-module (rde packages)
   #:use-module (rde features base)
   #:use-module (gnu system)

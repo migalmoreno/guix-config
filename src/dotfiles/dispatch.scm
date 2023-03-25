@@ -1,36 +1,46 @@
-(define-module (conses dispatch)
-  #:use-module (conses hosts base)
-  #:use-module (conses machines base)
-  #:use-module (gnu system)
+(define-module (dotfiles dispatch)
+  #:use-module (dotfiles common)
+  #:use-module (gnu bootloader)
+  #:use-module (gnu bootloader grub)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
+  #:use-module (gnu system)
+  #:use-module (gnu system file-systems)
   #:use-module (guix records)
-  #:use-module (rde features)
   #:use-module (ice-9 match)
-  #:use-module (nongnu packages linux)
+  #:use-module (rde features)
   #:export (dispatcher))
+
+(define %initial-os
+  (operating-system
+    (host-name "guix")
+    (locale "en_US.utf8")
+    (timezone %default-timezone)
+    (bootloader (bootloader-configuration
+                 (bootloader grub-efi-bootloader)
+                 (targets '("/boot/efi"))))
+    (kernel-arguments %default-kernel-arguments)
+    (keyboard-layout %default-keyboard-layout)
+    (file-systems %base-file-systems)
+    (issue "This is the GNU system. Welcome.\n")
+    (sudoers-file #f)))
+
+(define-public %initial-machine
+  (machine
+   (operating-system %initial-os)
+   (environment managed-host-environment-type)))
 
 (define* (dispatcher
           #:key
           (user (or (getenv "RDE_USER") (getlogin)))
           (host (or (getenv "RDE_HOST") (gethostname)))
           (target (getenv "RDE_TARGET"))
-          (users-submodule '(conses users))
-          (hosts-submodule '(conses hosts))
-          (machines-submodule '(conses machines))
+          (users-submodule '(dotfiles users))
+          (hosts-submodule '(dotfiles hosts))
+          (machines-submodule '(dotfiles machines))
           (initial-os %initial-os)
           (he-in-os? (not (nil? (getenv "RDE_HE_IN_OS"))))
           (pretty-print? #f))
-  "Dispatch a configuration based on a set of inputs."
-  (ensure-pred string? user)
-  (ensure-pred string? host)
-  (ensure-pred string? target)
-  (ensure-pred list? users-submodule)
-  (ensure-pred list? hosts-submodule)
-  (ensure-pred list? machines-submodule)
-  (ensure-pred operating-system? initial-os)
-  (ensure-pred boolean? he-in-os?)
-  (ensure-pred boolean? pretty-print?)
 
   (define* (mod-ref sub mod var-name #:optional default-value)
     (let ((var (module-variable (resolve-module `(,@sub ,(string->symbol mod))) var-name)))

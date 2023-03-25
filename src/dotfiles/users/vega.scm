@@ -1,7 +1,5 @@
-(define-module (conses users vega)
-  #:use-module (conses feature-list)
-  #:use-module (conses hosts base)
-  #:use-module (conses utils)
+(define-module (dotfiles users vega)
+  #:use-module (dotfiles common)
   #:use-module (rde features)
   #:use-module (rde features android)
   #:use-module (rde features base)
@@ -86,29 +84,29 @@
        (name "Emulator")
        (type 'application)
        (config
-        `(,(cons 'exec
-                 #~(string-join
-                    (list
-                     #$(file-append
-                        (@ (gnu packages package-management) current-guix)
-                        "/bin/guix")
-                     "time-machine" "-C"
-                     #$(project-file "rde/channels-lock.scm")
-                     "shell" "-C" "-N" "--emulate-fhs"
-                     "--share=/tmp/.X11-unix" "--share=/dev/shm"
-                     "--expose=/etc/machine-id" "--share=$HOME"
-                     "--preserve=^ANDROID" "--preserve=^DISPLAY$"
-                     "--preserve=^XAUTHORITY$" "--share=/dev/kvm"
-                     "--share=/dev/video0" "--share=/dev/dri"
-                     "-m" #$(project-file "src/dotfiles/manifests/android.scm")
-                     "--" "env"
-                     #$(string-append "LD_LIBRARY-PATH="
-                                      "/lib:/lib/nss:"
-                                      "~/.android/emulator/lib64/qt/lib:"
-                                      "~/.android/emulator/lib64")
-                     "~/.android/emulator/emulator" "-show-kernel" "-gpu"
-                     "swiftshader_indirect" "-camera-back" "webcam0"
-                     "-avd" "whatsapp_bridge")))
+        `((exec . ,#~(string-join
+                      (list
+                       #$(file-append
+                          (@ (gnu packages package-management) guix)
+                          "/bin/guix")
+                       "time-machine" "-C"
+                       #$(project-file "rde/channels-lock.scm") "--"
+                       "shell" "-C" "-N" "--emulate-fhs"
+                       "--share=/tmp/.X11-unix" "--share=/dev/shm"
+                       "--expose=/etc/machine-id" "--share=$HOME"
+                       "--preserve='^ANDROID'" "--preserve='^DISPLAY$'"
+                       "--preserve='^XAUTHORITY$'" "--share=/dev/kvm"
+                       "--share=/dev/video0" "--share=/dev/dri"
+                       "-m" #$(project-file
+                               "src/dotfiles/manifests/android.scm")
+                       "--" "env"
+                       #$(string-append "LD_LIBRARY_PATH="
+                                        "/lib:/lib/nss:"
+                                        "~/.android/emulator/lib64/qt/lib:"
+                                        "~/.android/emulator/lib64")
+                       "~/.android/emulator/emulator" "-show-kernel" "-gpu"
+                       "swiftshader_indirect" "-camera-back" "webcam0"
+                       "-avd" "whatsapp_bridge")))
           (icon . "android")
           (comment . "Run an Android emulator")))))))))
 
@@ -803,25 +801,25 @@
     `((local-time:reread-timezone-repository)
       (setf local-time:*default-timezone*
             (local-time:find-timezone-by-location-name ,%default-timezone))))
-   (feature-nyxt-status
-    #:format-status-buttons
-    '((:raw
-       (format-status-back-button status)
-       (format-status-reload-button status)
-       (format-status-forwards-button status)
-       (format-status-close-button status)))
-    #:format-status
-    '((:div :id "container"
-       (:div :id "controls"
-        (:raw (format-status-buttons status)))
-       (:div :id "url"
-        (:raw
-         (format-status-load-status status)
-         (format-status-url status)))
-       (:div :id "modes"
-        :title (nyxt::modes-string buffer)
-        (:raw
-         (format-status-modes status))))))
+   ;; (feature-nyxt-status
+   ;;  #:format-status-buttons
+   ;;  '((:raw
+   ;;     (format-status-back-button status)
+   ;;     (format-status-reload-button status)
+   ;;     (format-status-forwards-button status)
+   ;;     (format-status-close-button status)))
+   ;;  #:format-status
+   ;;  '((:div :id "container"
+   ;;     (:div :id "controls"
+   ;;      (:raw (format-status-buttons status)))
+   ;;     (:div :id "url"
+   ;;      (:raw
+   ;;       (format-status-load-status status)
+   ;;       (format-status-url status)))
+   ;;     (:div :id "modes"
+   ;;      :title (nyxt::modes-string buffer)
+   ;;      (:raw
+   ;;       (format-status-modes status))))))
    %nyxt-base-features))
 
 (define vega-desktop-features
@@ -839,14 +837,15 @@
                       (home-redshift-configuration
                        (dawn-time "07:00")
                        (dusk-time "20:00")))
-             (service home-xmodmap-service-type
-                      (home-xmodmap-configuration
-                       (config
-                        '(("add mod4" . "Print")
-                          "clear lock"
-                          "clear control"
-                          ("keycode 66" . "Control_L")
-                          ("add control" . "Control_L Control_R"))))))))
+             ;; (service home-xmodmap-service-type
+             ;;          (home-xmodmap-configuration
+             ;;           (config
+             ;;            '(("add mod4" . "Print")
+             ;;              "clear lock"
+             ;;              "clear control"
+             ;;              ("keycode 66" . "Control_L")
+             ;;              ("add control" . "Control_L Control_R")))))
+             )))
    (feature-networking)
    (feature-pipewire)))
 
@@ -864,11 +863,11 @@
     #:ssh-keys `((,%default-ssh-keygrip))
     #:pinentry-flavor 'emacs
     #:default-ttl 34560000)
-   (feature-alternative-frontends
-    #:google-frontend "http://localhost:5000"
-    #:youtube-frontend (string-append "https://" %tubo-host)
-    #:reddit-frontend "https://teddit.pussthecat.org")
-   (feature-android)
+   ;; (feature-alternative-frontends
+   ;;  #:google-frontend "http://localhost:5000"
+   ;;  #:youtube-frontend (string-append "https://" %tubo-host)
+   ;;  #:reddit-frontend "https://teddit.pussthecat.org")
+   ;; (feature-android)
    (feature-manpages)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
@@ -883,9 +882,12 @@
     #:extra-gtk-settings extra-gtk-settings
     #:extra-gtk-css extra-gtk-css)
    %emacs-base-features
-   (feature-emacs-nyxt #:autostart-delay 5)
+   ;; (feature-emacs-nyxt #:autostart-delay 5)
    %emacs-desktop-base-features
    vega-nyxt-features
+   (feature-ungoogled-chromium
+    #:ungoogled-chromium (@ (gnu packages chromium) ungoogled-chromium)
+    #:startup-flags '("--incognito"))
    vega-desktop-features
    %multimedia-base-features
    %mail-base-features
@@ -895,9 +897,9 @@
    %communication-base-features
    %programming-base-features
    %markup-base-features
-   (feature-qmk
-    #:keyboard "dztech/dz65rgb/v1"
-    #:keymap "custom")
+   ;; (feature-qmk
+   ;;  #:keyboard "dztech/dz65rgb/v1"
+   ;;  #:keymap "custom")
    (feature-keyboard
     #:keyboard-layout %default-keyboard-layout)
    (feature-ssh

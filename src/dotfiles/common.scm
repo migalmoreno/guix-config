@@ -1,5 +1,4 @@
-(define-module (conses common)
-  #:use-module (conses hosts base)
+(define-module (dotfiles common)
   #:use-module (contrib features javascript)
   #:use-module (contrib features wm)
   #:use-module (contrib features xorg)
@@ -14,6 +13,7 @@
   #:use-module (rde features fontutils)
   #:use-module (rde features golang)
   #:use-module (rde features irc)
+  #:use-module (rde features keyboard)
   #:use-module (rde features lisp)
   #:use-module (rde features mail)
   #:use-module (rde features markup)
@@ -28,28 +28,70 @@
   #:use-module (rde features version-control)
   #:use-module (rde features video)
   #:use-module (rde features xdg)
-  #:use-module (rde packages))
+  #:use-module (rde packages)
+  #:use-module (srfi srfi-1))
 
 
-;;; Helpers
+;;; Common utilities
 
-(define emacs-ytdl-next
-  (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
-        (branch "add-format-selection")
-        (emacs-ytdl (@ (gnu packages emacs-xyz) emacs-ytdl)))
-    (package
-      (inherit emacs-ytdl)
-      (version (git-version "0" branch commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri (git-reference
-               (url "https://gitlab.com/fleetime/ytdl")
-               (commit commit)))
-         (file-name (git-file-name (package-name emacs-ytdl) version))
-         (sha256
-          (base32
-           "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
+(define-public (make-feature-list . features)
+  (append-map (lambda (f)
+                (if (list? f) f (list f)))
+              features))
+
+(define-public %project-root
+  (canonicalize-path
+   (dirname
+    (find (lambda (path)
+            (every file-exists?
+                   (map (lambda (file)
+                          (string-append (dirname path) "/" file))
+                        (list "src/dotfiles"))))
+          %load-path))))
+
+(define-public (project-file subpath)
+  (local-file (string-append %project-root "/" subpath)))
+
+
+;;; Defaults
+
+(define-public %nonguix-signing-key
+  (project-file "src/dotfiles/keys/nonguix.pub"))
+
+(define-public %default-ssh-key
+  (plain-file
+   "mmoreno.pub"
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN (none)\n"))
+
+(define-public %default-ssh-keygrip
+  "D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6")
+
+(define-public %default-kernel (@ (nongnu packages linux) linux))
+
+(define-public %default-timezone "Europe/Madrid")
+
+(define-public %default-email "mmoreno@mmoreno.eu")
+
+(define-public %default-fullname "Miguel Moreno")
+
+(define-public %default-username "mmoreno")
+
+(define-public %default-domain "conses.eu")
+
+(define-public %tubo-host (string-append "tubo." %default-domain))
+
+(define-public %default-kernel-arguments
+  (list "quiet" "net.ifnames=0"))
+
+(define-public %default-keyboard-layout
+  (keyboard-layout
+   "us,es"
+   #:options '("grp:shifts_toggle"
+               "caps:ctrl_modifier"
+               "altwin:prtsc_rwin")))
+
+
+;;; Base features
 
 (define (mpv-run-with-emacs cmd)
   (format #f (string-append
@@ -74,8 +116,23 @@
     (script-opts-add=osc-visibility . never)
     (script-opts-add=osc-windowcontrols . no)))
 
-
-;;; Base features
+(define emacs-ytdl-next
+  (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
+        (branch "add-format-selection")
+        (emacs-ytdl (@ (gnu packages emacs-xyz) emacs-ytdl)))
+    (package
+      (inherit emacs-ytdl)
+      (version (git-version "0" branch commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://gitlab.com/fleetime/ytdl")
+               (commit commit)))
+         (file-name (git-file-name (package-name emacs-ytdl) version))
+         (sha256
+          (base32
+           "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
 
 (define-public %multimedia-base-features
   (list
@@ -167,7 +224,7 @@
    (feature-emacs-keycast)
    (feature-emacs-input-methods
     #:default-input-method "spanish-keyboard")
-   (feature-emacs-browse-url)
+   ;; (feature-emacs-browse-url)
    (feature-emacs-webpaste)))
 
 (define-public %markup-base-features
@@ -740,17 +797,18 @@ EndSection"))
 
 (define-public %nyxt-base-features
   (list
-   (feature-nyxt-nx-mosaic)
-   (feature-nyxt-nx-tailor #:auto? #t)
+   ;; (feature-nyxt-nx-mosaic)
+   ;; (feature-nyxt-nx-tailor #:auto? #t)
    (feature-nyxt-appearance)
-   (feature-nyxt-emacs)
-   (feature-nyxt-blocker)
-   (feature-nyxt-userscript
-    #:userstyles nyxt-userstyles)
-   (feature-nyxt-nx-search-engines
-    #:extra-engines nx-search-engines-extra-engines)
-   (feature-nyxt-nx-router
-    #:extra-routes nx-router-extra-routes)))
+   ;; (feature-nyxt-emacs)
+   ;; (feature-nyxt-blocker)
+   ;; (feature-nyxt-userscript
+   ;;  #:userstyles nyxt-userstyles)
+   ;; (feature-nyxt-nx-search-engines
+   ;;  #:extra-engines nx-search-engines-extra-engines)
+   ;; (feature-nyxt-nx-router
+   ;;  #:extra-routes nx-router-extra-routes)
+   ))
 
 (define-public %security-base-features
   (list
@@ -766,13 +824,13 @@ EndSection"))
       (id 'sh)
       (forge 'sourcehut)
       (username %default-username)
-      (full-name %default-full-name)
+      (full-name %default-fullname)
       (email %default-email))
      (forge-account
       (id 'gh)
       (forge 'github)
       (username "miguelmorenov")
-      (full-name %default-full-name)
+      (full-name %default-fullname)
       (email %default-email))))
    (feature-sourcehut)
    (feature-git

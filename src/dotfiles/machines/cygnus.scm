@@ -1,5 +1,5 @@
-(define-module (conses machines cygnus)
-  #:use-module (conses hosts cygnus)
+(define-module (dotfiles machines cygnus)
+  #:use-module (dotfiles hosts cygnus)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
   #:use-module (gnu system install))

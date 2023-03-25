@@ -1,9 +1,5 @@
-(define-module (conses users hydri)
-  #:use-module (conses feature-list)
-  #:use-module (conses hosts base)
-  #:use-module (conses utils)
-  #:use-module (rde packages)
-  #:use-module (rde packages web-browsers)
+(define-module (dotfiles users hydri)
+  #:use-module (dotfiles common)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features bittorrent)
@@ -19,12 +15,11 @@
   #:use-module (rde features xdg)
   #:use-module (rde features web)
   #:use-module (rde features web-browsers)
+  #:use-module (rde packages)
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
-  #:use-module (gnu packages emacs)
-  #:use-module (gnu packages package-management)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils))
@@ -33,7 +28,7 @@
 ;;; User-specific utilities
 
 (define-public %hydri-signing-key
-  (project-file "src/conses/keys/hydri.pub"))
+  (project-file "src/dotfiles/keys/hydri.pub"))
 
 (define-public %hydri-ssh-key
   (plain-file
@@ -42,12 +37,12 @@
 
 (define nyxt-next-sans-gst
   (package
-   (inherit nyxt-next)
-   (name "nyxt-next-sans-gst")
-   (propagated-inputs
-    (modify-inputs (package-propagated-inputs nyxt-next)
-      (delete "gst-libav" "gst-plugins-bad" "gst-plugins-base"
-              "gst-plugins-good" "gst-plugins-ugly")))))
+    (inherit (@ (rde packages web-browsers) nyxt-next))
+    (name "nyxt-next-sans-gst")
+    (propagated-inputs
+     (modify-inputs (package-propagated-inputs nyxt-next)
+       (delete "gst-libav" "gst-plugins-bad" "gst-plugins-base"
+               "gst-plugins-good" "gst-plugins-ugly")))))
 
 
 ;;; Service extensions
@@ -64,18 +59,20 @@
        (name "Nyxt")
        (type 'application)
        (config
-        `((exec . #~(string-join
-                     (list
-                      #$(file-append current-guix "/bin/guix")
-                      "shell"
-                      (@ (gnu packages gstreamer) gst-plugins-good)
-                      (@ (gnu packages gstreamer) gst-plugins-bad)
-                      (@ (gnu packages gstreamer) gst-plugins-ugly)
-                      (@ (gnu packages gstreamer) gst-plugins-base)
-                      (@ (gnu packages gstreamer) gst-libav)
-                      "--"
-                      #$(file-append nyxt-next-sans-gst "/bin/nyxt"))
-                     "%U"))
+        `((exec . ,#~(string-join
+                      (list
+                       #$(file-append
+                          (@ (gnu packages package-management) guix)
+                          "/bin/guix")
+                       "shell"
+                       (@ (gnu packages gstreamer) gst-plugins-good)
+                       (@ (gnu packages gstreamer) gst-plugins-bad)
+                       (@ (gnu packages gstreamer) gst-plugins-ugly)
+                       (@ (gnu packages gstreamer) gst-plugins-base)
+                       (@ (gnu packages gstreamer) gst-libav)
+                       "--"
+                       #$(file-append nyxt-next-sans-gst "/bin/nyxt"))
+                      "%U"))
           (terminal . #f)
           (icon . "nyxt")
           (comment . "Be productive")))))))))
@@ -159,7 +156,7 @@
      extra-shepherd-services-service
      extra-home-envs-service))
    (feature-emacs
-    #:emacs emacs-next-pgtk
+    #:emacs (@ (gnu packages emacs) emacs-next-pgtk)
     #:emacs-server-mode? #f
     #:extra-init-el
     '((add-hook 'after-init-hook 'server-start)))

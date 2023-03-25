@@ -1,5 +1,5 @@
-(define-module (conses users deneb)
-  #:use-module (conses hosts base)
+(define-module (dotfiles users deneb)
+  #:use-module (dotfiles common)
   #:use-module (gnu services)
   #:use-module (gnu services networking)
   #:use-module (rde features base)
