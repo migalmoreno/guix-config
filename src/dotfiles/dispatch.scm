@@ -1,5 +1,5 @@
 (define-module (dotfiles dispatch)
-  #:use-module (dotfiles common)
+  #:use-module (dotfiles utils)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu machine)
