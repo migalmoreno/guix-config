@@ -166,7 +166,7 @@
    (feature-emacs-keycast)
    (feature-emacs-input-methods
     #:default-input-method "spanish-keyboard")
-   ;; (feature-emacs-browse-url)
+   (feature-emacs-browse-url)
    (feature-emacs-webpaste)))
 
 (define-public %markup-base-features
