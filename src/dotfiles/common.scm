@@ -538,7 +538,9 @@
        nil nil nil "-cursor_name" "left_ptr")
       (if (listp (rde-exwm--get-outputs))
           (fontaine-set-preset 'docked)
-        (fontaine-set-preset 'headless))))
+        (fontaine-set-preset 'headless))
+      (with-eval-after-load 'pinentry-autoloads
+        (pinentry-start))))
    (feature-emacs-exwm-run-on-tty
     #:emacs-exwm-tty-number 1
     #:launch-arguments '("-mm" "--debug-init")
