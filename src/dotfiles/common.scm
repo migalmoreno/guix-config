@@ -428,7 +428,7 @@
     #:html-element-styles
     '(("pre" . "color: #E6E1Dc; background-color: #232323; padding: 0.5em;")
       ("blockquote" . "border-left: 2px solid gray; padding-left: 4px;")))
-   (feature-emacs-smtpmail)
+   (feature-msmtp)
    (feature-emacs-debbugs)
    (feature-emacs-ebdb
     #:ebdb-sources (list "~/documents/contacts")
