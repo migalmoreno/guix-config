@@ -186,6 +186,9 @@
       (setq image-use-external-converter t))
     (with-eval-after-load 'js
       (setq js-indent-level 2))
+    (with-eval-after-load 'org
+      (add-to-list 'org-structure-template-alist
+                   '("js" . "src js")))
     (with-eval-after-load 'css-mode
       (setq css-indent-offset 2))
     (with-eval-after-load 'mhtml-mode
