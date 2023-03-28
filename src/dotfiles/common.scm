@@ -724,14 +724,14 @@ EndSection"))
   `((make-instance
      'nyxt/user-script-mode:user-style
      :include '("https://github.com/*" "https://gist.github.com/*")
-     :code (theme:themed-css (theme:theme *browser*)
-             `((:or |#dashboard.body|
+     :code (theme:themed-css (theme *browser*)
+             `((:or "#dashboard.body"
                     .js-inline-dashboard-render
                     .js-feed-item-component
                     (:and .js-profile-editable-area div .mb-3)
                     .starring-container
-                    |#js-contributor-activity|
-                    |#year-list-container|
+                    "#js-contributor-activity"
+                    "#year-list-container"
                     (:and a (:$= href (:or "watchers" "stargazers"
                                            "followers" "following"
                                            "achievements")))
