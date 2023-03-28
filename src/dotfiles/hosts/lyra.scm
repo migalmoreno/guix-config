@@ -1,5 +1,6 @@
 (define-module (dotfiles hosts lyra)
   #:use-module (dotfiles common)
+  #:use-module (dotfiles utils)
   #:use-module (dotfiles users hydri)
   #:use-module (gnu services)
   #:use-module (gnu services base)
