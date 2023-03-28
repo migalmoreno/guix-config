@@ -646,23 +646,32 @@ EndSection"))
      'router:blocker
      :trigger (match-domain "lemmy.ml")
      :blocklist '(:path (:contains (not "/u/" "/post/"))))
-    (make-instance
-     'router:blocker
-     :trigger (match-regex
-               ,(string-append (get-value 'reddit-frontend config) "/.*"))
-     :instances-builder router:teddit-instances-builder
-     :blocklist '(:path (:contains (not "/comments/" "/wiki/"))))
-    (make-instance
-     'router:blocker
-     :trigger (match-regex
-               ,(string-append (get-value 'tiktok-frontend config) "/.*"))
-     :instances-builder router:proxitok-instances-builder
-     :blocklist '(:path (:contains (not "/video/" "/t/"))))
-    (make-instance
-     'router:blocker
-     :trigger (match-regex
-               ,(string-append (get-value 'instagram-frontend config) "/.*"))
-     :blocklist '(:path (:contains (not "/media/"))))))
+    ,@(if (get-value 'reddit-frontend config)
+          `((make-instance
+             'router:blocker
+             :trigger (match-regex
+                       ,(string-append
+                         (get-value 'reddit-frontend config) "/.*"))
+             :instances-builder router:teddit-instances-builder
+             :blocklist '(:path (:contains (not "/comments/" "/wiki/")))))
+          '())
+    ,@(if (get-value 'tiktok-frontend config)
+          `((make-instance
+             'router:blocker
+             :trigger (match-regex
+                       ,(string-append
+                         (get-value 'tiktok-frontend config) "/.*"))
+             :instances-builder router:proxitok-instances-builder
+             :blocklist '(:path (:contains (not "/video/" "/t/")))))
+          '())
+    ,@(if (get-value 'instagram-frontend config)
+          `((make-instance
+             'router:blocker
+             :trigger (match-regex
+                       ,(string-append
+                         (get-value 'instagram-frontend config) "/.*"))
+             :blocklist '(:path (:contains (not "/media/")))))
+          '())))
 
 (define (nx-search-engines-extra-engines _)
   `((make-instance
