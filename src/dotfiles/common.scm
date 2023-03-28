@@ -751,18 +751,17 @@ EndSection"))
 
 (define-public %nyxt-base-features
   (list
-   ;; (feature-nyxt-nx-mosaic)
-   ;; (feature-nyxt-nx-tailor #:auto? #t)
+   (feature-nyxt-nx-mosaic)
+   (feature-nyxt-nx-tailor #:auto? #t)
    (feature-nyxt-appearance)
-   ;; (feature-nyxt-emacs)
-   ;; (feature-nyxt-blocker)
-   ;; (feature-nyxt-userscript
-   ;;  #:userstyles nyxt-userstyles)
-   ;; (feature-nyxt-nx-search-engines
-   ;;  #:extra-engines nx-search-engines-extra-engines)
-   ;; (feature-nyxt-nx-router
-   ;;  #:extra-routes nx-router-extra-routes)
-   ))
+   (feature-nyxt-emacs)
+   (feature-nyxt-blocker)
+   (feature-nyxt-userscript
+    #:userstyles nyxt-userstyles)
+   (feature-nyxt-nx-search-engines
+    #:extra-engines nx-search-engines-extra-engines)
+   (feature-nyxt-nx-router
+    #:extra-routes nx-router-extra-routes)))
 
 (define-public %security-base-features
   (list
