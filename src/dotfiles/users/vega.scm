@@ -766,15 +766,14 @@
                       (home-redshift-configuration
                        (dawn-time "07:00")
                        (dusk-time "20:00")))
-             ;; (service home-xmodmap-service-type
-             ;;          (home-xmodmap-configuration
-             ;;           (config
-             ;;            '(("add mod4" . "Print")
-             ;;              "clear lock"
-             ;;              "clear control"
-             ;;              ("keycode 66" . "Control_L")
-             ;;              ("add control" . "Control_L Control_R")))))
-             )))
+             (service home-xmodmap-service-type
+                      (home-xmodmap-configuration
+                       (key-map
+                        '(("add mod4" . "Print")
+                          "clear lock"
+                          "clear control"
+                          ("keycode 66" . "Control_L")
+                          ("add control" . "Control_L Control_R"))))))))
    (feature-networking)
    (feature-pipewire)))
 
