@@ -730,25 +730,25 @@
     `((local-time:reread-timezone-repository)
       (setf local-time:*default-timezone*
             (local-time:find-timezone-by-location-name ,%default-timezone))))
-   ;; (feature-nyxt-status
-   ;;  #:format-status-buttons
-   ;;  '((:raw
-   ;;     (format-status-back-button status)
-   ;;     (format-status-reload-button status)
-   ;;     (format-status-forwards-button status)
-   ;;     (format-status-close-button status)))
-   ;;  #:format-status
-   ;;  '((:div :id "container"
-   ;;     (:div :id "controls"
-   ;;      (:raw (format-status-buttons status)))
-   ;;     (:div :id "url"
-   ;;      (:raw
-   ;;       (format-status-load-status status)
-   ;;       (format-status-url status)))
-   ;;     (:div :id "modes"
-   ;;      :title (nyxt::modes-string buffer)
-   ;;      (:raw
-   ;;       (format-status-modes status))))))
+   (feature-nyxt-status
+    #:format-status-buttons
+    '((:raw
+       (format-status-back-button status)
+       (format-status-reload-button status)
+       (format-status-forwards-button status)
+       (format-status-close-button status)))
+    #:format-status
+    '((:div :id "container"
+       (:div :id "controls"
+        (:raw (format-status-buttons status)))
+       (:div :id "url"
+        (:raw
+         (format-status-load-status status)
+         (format-status-url status)))
+       (:div :id "modes"
+        :title (nyxt::modes-string buffer)
+        (:raw
+         (format-status-modes status))))))
    %nyxt-base-features))
 
 (define vega-desktop-features
