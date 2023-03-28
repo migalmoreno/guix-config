@@ -1,5 +1,6 @@
 (define-module (dotfiles users hydri)
   #:use-module (dotfiles common)
+  #:use-module (dotfiles utils)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features bittorrent)

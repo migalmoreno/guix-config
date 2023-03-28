@@ -1,5 +1,6 @@
 (define-module (dotfiles users vega)
   #:use-module (dotfiles common)
+  #:use-module (dotfiles utils)
   #:use-module (rde features)
   #:use-module (rde features android)
   #:use-module (rde features base)
