@@ -525,10 +525,11 @@
     #:extra-exwm-bindings
     `((cons (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
       (cons (kbd "s-<prior>") 'pulseaudio-control-increase-sink-volume)
-      (cons (kbd "s-l") (lambda ()
-                          (call-process ,(file-append
-                                          (@ (gnu packages suckless) slock)
-                                          "/bin/slock"))))
+      (cons (kbd "s-l") '(lambda ()
+                           (interactive)
+                           (call-process ,(file-append
+                                           (@ (gnu packages suckless) slock)
+                                           "/bin/slock"))))
       (cons (kbd "M-o") 'ace-window)
       (cons (kbd "s-<SPC>") 'app-launcher-run-app))
     #:extra-exwm-init
