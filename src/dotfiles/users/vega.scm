@@ -723,9 +723,9 @@
    (feature-nyxt
     #:scroll-distance 150
     #:temporary-history? #t
-    #:autostart-slynk? #f
+    #:autostart-slynk? #t
     #:default-browser? #t
-    #:restore-session? #t
+    #:restore-session? #f
     #:extra-config-lisp
     `((local-time:reread-timezone-repository)
       (setf local-time:*default-timezone*
