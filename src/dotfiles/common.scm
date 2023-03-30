@@ -114,6 +114,17 @@
       ("N" . "script-message osc-visibility never")
       ("L" . "cycle-values loop-file \"inf\" \"no\"")))))
 
+(define extra-tempel-templates
+  `(text-mode
+    ,#~""
+    (cut "--8<---------------cut here---------------start------------->8---"
+         n r n
+         "--8<---------------cut here---------------end--------------->8---"
+         n)
+    (asciibox "+-" (make-string (length str) ?-) "-+" n
+              "| " (s str) " |" n
+              "+-" (make-string (length str) ?-) "-+" n)))
+
 (define-public %emacs-base-features
   (list
    (feature-emacs-completion)
@@ -121,7 +132,8 @@
    (feature-emacs-corfu #:corfu-doc-auto #t)
    (feature-emacs-all-the-icons)
    (feature-emacs-pdf-tools)
-   (feature-emacs-tempel)
+   (feature-emacs-tempel
+    #:templates extra-tempel-templates)
    (feature-emacs-graphviz)
    (feature-emacs-calendar
     #:calendar-date-style 'european
