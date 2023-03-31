@@ -59,8 +59,8 @@
     (script-opts-add=osc-windowcontrols . no)))
 
 (define emacs-ytdl-next
-  (let ((commit "5c9330594fc048f1efd64b6a4bf867af35245b62")
-        (branch "add-format-selection")
+  (let ((commit "2ea3daf2f6aa9d18b71fe3e15f05c30a56fca228")
+        (branch "feat-add-format-selection")
         (emacs-ytdl (@ (gnu packages emacs-xyz) emacs-ytdl)))
     (package
       (inherit emacs-ytdl)
@@ -69,12 +69,12 @@
        (origin
          (method git-fetch)
          (uri (git-reference
-               (url "https://gitlab.com/fleetime/ytdl")
+               (url "https://gitlab.com/miguel-moreno/ytdl")
                (commit commit)))
          (file-name (git-file-name (package-name emacs-ytdl) version))
          (sha256
           (base32
-           "1qryr9jp4p4l3ckpnbms6gy70wc721y0pmd598vm55vfk6fvbnqf")))))))
+           "0y62lkgsg19j05dpd6sp6zify8vq8xvpc8caqiy4rwi7p4ahacsf")))))))
 
 (define-public %multimedia-base-features
   (list
