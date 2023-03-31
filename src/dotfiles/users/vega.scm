@@ -282,8 +282,9 @@
 (define extra-elisp-packages
   (strings->packages
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
-   "emacs-json-mode" "emacs-wgrep" "emacs-rainbow-delimiters"
-   "emacs-kind-icon" "emacs-gif-screencast"))
+   "emacs-yaml-mode" "emacs-json-mode" "emacs-wgrep"
+   "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
+   "emacs-exwm-modeline"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
