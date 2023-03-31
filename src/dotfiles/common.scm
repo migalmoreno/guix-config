@@ -502,6 +502,9 @@
        :action 'tab-bar-menu-bar)
       (make-rde-tab-bar-module
        :id 'notifications
+       :label '(:eval (exwm-modeline-segment)))
+      (make-rde-tab-bar-module
+       :id 'notifications
        :label '(:eval (rde-ednc--notify))))
     #:modules-center
     '((make-rde-tab-bar-module
