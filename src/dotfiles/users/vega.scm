@@ -255,7 +255,19 @@
                      display-buffer-same-window)))
     (repeat-mode 1)
     (with-eval-after-load 'rde-keymaps
-      (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))))
+      (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))
+    (eval-when-compile
+     (require 'cl-lib))
+    (defun exwm-modeline-update ()
+      "Update EXWM modefine for every frame."
+      (interactive)
+      (cl-loop for frame in exwm-workspace--list
+               do (with-selected-frame frame
+                    (set-frame-parameter nil 'exwm-modeline--string
+                                         (exwm-modeline--format)))))
+    (exwm-modeline-mode)
+    (with-eval-after-load 'exwm-modeline
+      (setq exwm-modeline-randr nil))))
 
 (define extra-early-init-el
   '((require 'xdg)
