@@ -169,7 +169,8 @@
       (recents . 7))
     #:dashboard-agenda-prefix-format "%?-12:c"
     #:path-max-length 50)
-   (feature-emacs-dired)
+   (feature-emacs-dired
+    #:kill-when-opening-new-buffer? #t)
    (feature-emacs-calc)
    (feature-emacs-tramp)
    (feature-emacs-re-builder)
