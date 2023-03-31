@@ -784,7 +784,7 @@ EndSection"))
 (define-public %security-base-features
   (list
    (feature-password-store
-    #:remote-password-store-url "git@git.sr.ht:~conses/pass")))
+    #:remote-password-store-url "git@git.sr.ht:~mmoreno/pass")))
 
 (define-public %forge-base-features
   (list
