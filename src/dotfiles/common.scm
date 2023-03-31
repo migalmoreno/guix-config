@@ -87,7 +87,6 @@
     #:video-dl-args
     '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
       "--add-metadata" "--compat-options" "all"))
-   (feature-emacs-emms)
    (feature-mpv
     #:extra-mpv-conf mpv-extra-config
     #:extra-bindings
@@ -112,7 +111,8 @@
       ("b" . "cycle sub")
       ("n" . "script-message osc-visibility always")
       ("N" . "script-message osc-visibility never")
-      ("L" . "cycle-values loop-file \"inf\" \"no\"")))))
+      ("L" . "cycle-values loop-file \"inf\" \"no\"")))
+   (feature-emacs-emms)))
 
 (define extra-tempel-templates
   `(text-mode
