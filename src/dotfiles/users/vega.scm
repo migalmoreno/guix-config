@@ -47,10 +47,10 @@
    'add-extra-home-packages
    home-profile-service-type
    (strings->packages
-    "haunt" "ddcutil" "light" "xclip"
+    "ddcutil" "light" "xclip"
     "nasm" "gcc-toolchain" "autoconf"
     "v4l-utils" "binutils" "wireguard-tools"
-    "texinfo" "pass-otp" "imagemagick" "fd"
+    "texinfo" "pass-otp" "imagemagick"
     "setxkbmap" "xkeyboard-config")))
 
 (define extra-ssh-config
