@@ -585,6 +585,8 @@ EndSection"))
 (define-public %desktop-base-features
   (list
    (feature-bluetooth)
+   (feature-keyboard
+    #:keyboard-layout %default-keyboard-layout)
    (feature-xdg
     #:xdg-user-directories-configuration
     (home-xdg-user-directories-configuration
