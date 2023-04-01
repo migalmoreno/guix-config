@@ -700,6 +700,11 @@ EndSection"))
      :fallback-url "https://clojars.org")
     (make-instance
      'search-engine
+     :shortcut "fa"
+     :search-url "https://fontawesome.com/search?q=~a&m=free"
+     :fallback-url "https://fontawesome.com")
+    (make-instance
+     'search-engine
      :shortcut "et"
      :search-url "https://www.etsy.com/search?q=~a"
      :fallback-url "https://www.etsy.com")
