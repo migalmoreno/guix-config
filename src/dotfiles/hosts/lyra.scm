@@ -159,7 +159,8 @@
     #:bootloader-configuration
     (bootloader-configuration
      (bootloader grub-efi-bootloader)
-     (targets '("/boot/efi"))))
+     (targets '("/boot/efi"))
+     (timeout 3)))
    ;; (feature-whoogle)
    (feature-file-systems
     #:mapped-devices lyra-mapped-devices
