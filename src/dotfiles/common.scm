@@ -78,7 +78,8 @@
 
 (define-public %multimedia-base-features
   (list
-   (feature-transmission)
+   (feature-transmission
+    #:download-dir (format #f "~a/videos" (getenv "HOME")))
    (feature-youtube-dl
     #:emacs-ytdl emacs-ytdl-next
     #:music-dl-args
