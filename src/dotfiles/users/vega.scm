@@ -702,10 +702,6 @@
     #:autostart-slynk? #t
     #:default-browser? #t
     #:restore-session? #f
-    #:extra-config-lisp
-    `((local-time:reread-timezone-repository)
-      (setf local-time:*default-timezone*
-            (local-time:find-timezone-by-location-name ,%default-timezone))))
    (feature-nyxt-status
     #:format-status-buttons
     '((:raw
