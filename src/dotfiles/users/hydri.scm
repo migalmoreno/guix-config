@@ -83,10 +83,12 @@
 
 (define extra-home-packages
   (strings->packages
-   "nss-certs" "glibc-locales" "seahorse" "gnome-maps"
-   "gnome-clocks" "gnome-weather" "gnome-console"
-   "pinentry-tty" "portfolio" "pavucontrol" "geary"
-   "nheko" "evince"))
+   "nss-certs" "glibc-locales" "seahorse"
+   "gnome-clocks" "pinentry-tty"
+   "portfolio" "pavucontrol" "geary"
+   "lollypop" "gst-plugins-good" "gst-plugins-bad"
+   "gst-plugins-ugly" "gst-plugins-base" "gst-libav"
+   "gnome-console"))
 
 (define extra-gtk-css
   `((.phosh-topbar-clock
