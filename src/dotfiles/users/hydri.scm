@@ -58,36 +58,6 @@
 
 ;;; Service extensions
 
-(define extra-xdg-desktop-entries
-  (simple-service
-   'add-extra-desktop-entries
-   home-xdg-mime-applications-service-type
-   (home-xdg-mime-applications-configuration
-    (desktop-entries
-     (list
-      (xdg-desktop-entry
-       (file "nyxt")
-       (name "Nyxt")
-       (type 'application)
-       (config
-        `((exec . ,#~(string-join
-                      (list
-                       #$(file-append
-                          (@ (gnu packages package-management) guix)
-                          "/bin/guix")
-                       "shell"
-                       (@ (gnu packages gstreamer) gst-plugins-good)
-                       (@ (gnu packages gstreamer) gst-plugins-bad)
-                       (@ (gnu packages gstreamer) gst-plugins-ugly)
-                       (@ (gnu packages gstreamer) gst-plugins-base)
-                       (@ (gnu packages gstreamer) gst-libav)
-                       "--"
-                       #$(file-append nyxt-next-sans-gst "/bin/nyxt"))
-                      "%U"))
-          (terminal . #f)
-          (icon . "nyxt")
-          (comment . "Be productive")))))))))
-
 (define extra-shepherd-services-service
   (simple-service
    'run-syncthing-on-userspace
@@ -165,7 +135,6 @@
    (feature-custom-services
     #:home-services
     (list
-     extra-xdg-desktop-entries
      extra-shepherd-services-service
      extra-home-envs-service))
    (feature-emacs
