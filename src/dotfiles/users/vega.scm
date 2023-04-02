@@ -702,6 +702,9 @@
     #:autostart-slynk? #t
     #:default-browser? #t
     #:restore-session? #f
+    #:extra-config-lisp %base-nyxt-extra-config-lisp)
+   (feature-nyxt-nx-tailor #:auto? #t)
+   (feature-nyxt-appearance)
    (feature-nyxt-status
     #:format-status-buttons
     '((:raw
