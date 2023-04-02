@@ -126,6 +126,35 @@
               "| " (s str) " |" n
               "+-" (make-string (length str) ?-) "-+" n)))
 
+(define-public %base-extra-init-el
+  `((add-hook 'after-init-hook 'server-start)
+    (setq-default frame-title-format '("%b - Emacs"))
+    (require 'warnings)
+    (setq warning-suppress-types '((diary) (auto-save) (org-babel)))
+    (setq warning-suppress-log-types '((comp org-babel)))
+    (setq warning-minimum-level :error)
+    (setq mode-line-misc-info
+          (remove '(global-mode-string ("" global-mode-string))
+                  mode-line-misc-info))
+    (setq ring-bell-function 'ignore)
+    (setq visible-bell nil)
+    (fset 'yes-or-no-p 'y-or-n-p)
+    (transient-mark-mode)
+    (delete-selection-mode)
+    (tooltip-mode -1)
+    (with-eval-after-load 'comp
+      (setq native-comp-async-report-warnings-errors nil))
+    (global-so-long-mode)
+    (with-eval-after-load 'autorevert
+      (setq auto-revert-remote-files nil))
+    (setq auto-save-no-message t)
+    (setq create-lockfiles nil)
+    (setq delete-old-versions t)
+    (setq kept-new-versions 3)
+    (setq kept-old-versions 2)
+    (setq version-control t)
+    (setq remote-file-name-inhibit-cache nil)))
+
 (define-public %emacs-base-features
   (list
    (feature-emacs-completion)
