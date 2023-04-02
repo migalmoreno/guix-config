@@ -111,7 +111,7 @@
           (comment . "Run an Android emulator")))))))))
 
 (define extra-init-el
-  '((add-hook 'after-init-hook 'server-start)
+  `(,@%base-extra-init-el
     (with-eval-after-load 'password-cache
       (setq password-cache t)
       (setq password-cache-expiry (* 60 10)))
@@ -776,7 +776,7 @@
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
     #:emacs-server-mode? #f
-    #:extra-early-init-el extra-early-init-el
+    #:extra-early-init-el %base-extra-early-init-el
     #:extra-init-el extra-init-el
     #:additional-elisp-packages extra-elisp-packages)
    %ui-base-features
