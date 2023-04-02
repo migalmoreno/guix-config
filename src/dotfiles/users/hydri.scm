@@ -208,7 +208,6 @@
    %multimedia-base-features
    %emacs-base-features
    %desktop-base-features
-   %web-base-features
    %security-base-features
    %shell-base-features
    %forge-base-features
