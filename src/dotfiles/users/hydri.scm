@@ -10,6 +10,7 @@
   #:use-module (rde features fontutils)
   #:use-module (rde features gnupg)
   #:use-module (rde features gtk)
+  #:use-module (rde features lisp)
   #:use-module (rde features nyxt-xyz)
   #:use-module (rde features shellutils)
   #:use-module (rde features version-control)
@@ -211,6 +212,15 @@
    %security-base-features
    %shell-base-features
    %forge-base-features
-   %communication-base-features
-   %programming-base-features
-   %markup-base-features))
+   (feature-emacs-ebdb
+    #:ebdb-sources (list "~/documents/contacts")
+    #:ebdb-popup-size 0.2)
+   (feature-lisp
+    #:extra-lisp-packages
+    (strings->packages "sbcl-prove" "sbcl-cl-cffi-gtk" "sbcl-lisp-unit2")
+    #:extra-source-registry-files
+    (list
+     (plain-file
+      "10-projects.conf"
+      (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
+   %org-base-features))
