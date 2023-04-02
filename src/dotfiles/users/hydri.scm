@@ -107,7 +107,9 @@
   (simple-service
    'override-global-gtk-theme-on-wayland
    home-environment-variables-service-type
-   '(("GTK_THEME" . "postmarketos-oled"))))
+   '(("GTK_THEME" . "postmarketos-oled")
+     ("SSL_CERT_DIR" . "/etc/ssl/certs")
+     ("SSL_CERT_FILE" . "/etc/ssl/certs/ca-certificates.crt"))))
 
 (define extra-home-packages
   (strings->packages
