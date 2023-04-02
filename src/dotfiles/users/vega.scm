@@ -121,18 +121,8 @@
       (setq epg-pinentry-mode 'loopback))
     (with-eval-after-load 'password-store
       (setq password-store-time-before-clipboard-restore 60))
-    (setq-default frame-title-format '("%b - Emacs"))
     (with-eval-after-load 'frame
       (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
-    (setq mode-line-misc-info
-          (remove '(global-mode-string ("" global-mode-string))
-                  mode-line-misc-info))
-    (setq ring-bell-function 'ignore)
-    (setq visible-bell nil)
-    (fset 'yes-or-no-p 'y-or-n-p)
-    (transient-mark-mode)
-    (delete-selection-mode)
-    (tooltip-mode -1)
     (with-eval-after-load 'prog-mode
       (setq prettify-symbols-unprettify-at-point 'right-edge)
       (setq-default prettify-symbols-alist
@@ -145,25 +135,9 @@
                    '(cider-repl-mode . ?c)))
     (with-eval-after-load 'face-remap
       (setq text-scale-mode-step 1.075))
-    (with-eval-after-load 'comp
-      (setq native-comp-async-report-warnings-errors nil))
     (setq-default tab-width 2)
     (with-eval-after-load 'indent
       (setq tab-always-indent 'complete))
-    (global-so-long-mode)
-    (require 'warnings)
-    (setq warning-suppress-types '((diary) (auto-save) (org-babel)))
-    (setq warning-suppress-log-types '((comp org-babel)))
-    (setq warning-minimum-level :error)
-    (with-eval-after-load 'autorevert
-      (setq auto-revert-remote-files nil))
-    (setq auto-save-no-message t)
-    (setq create-lockfiles nil)
-    (setq delete-old-versions t)
-    (setq kept-new-versions 3)
-    (setq kept-old-versions 2)
-    (setq version-control t)
-    (setq remote-file-name-inhibit-cache nil)
     (add-hook 'before-save-hook 'delete-trailing-whitespace)
     (with-eval-after-load 'mwheel
       (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
