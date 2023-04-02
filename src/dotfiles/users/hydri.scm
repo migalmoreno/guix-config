@@ -114,7 +114,12 @@
     #:nyxt nyxt-next
     #:default-browser? #t
     #:restore-session? #f
-    #:temporary-history? #t)
+    #:temporary-history? #t
+    #:extra-config-lisp %base-nyxt-extra-config-lisp)
+   (feature-nyxt-appearance
+    #:status-buffer-height 40
+    #:status-buffer-position ':bottom
+    #:dark? #t)
    (feature-nyxt-status
     #:format-status-buttons
     '((:raw
