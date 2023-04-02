@@ -161,6 +161,15 @@
     #:ssh-keys `((,%default-ssh-keygrip))
     #:pinentry-flavor 'tty
     #:default-ttl 34560000)
+   (feature-emacs-appearance
+    #:header-line-as-mode-line? #f
+    #:margin 0)
+   (feature-emacs-modus-themes
+    #:dark? #t
+    #:deuteranopia? #f
+    #:headings-scaling? #t
+    #:extra-modus-themes-overrides
+    '((bg-mode-line-active bg-dim)))
    (feature-fonts
     #:font-serif
     (font
@@ -178,9 +187,6 @@
      (name "Noto Color Emoji")
      (size 11)
      (package (@ (gnu packages fonts) font-google-noto))))
-   (feature-emacs-appearance
-    #:header-line-as-mode-line? #f
-    #:margin 0)
    (feature-gtk3
     #:dark-theme? #t
     #:gtk-theme (make-theme
