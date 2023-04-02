@@ -19,6 +19,7 @@
   #:use-module (rde packages)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (rde home services shells)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
   #:use-module (guix gexp)
@@ -72,6 +73,16 @@
                      "-no-browser" "-no-restart")))
      (respawn? #f)
      (stop #~(make-kill-destructor))))))
+
+(define extra-bashrc-service
+  (simple-service
+   'add-bashrc
+   home-bash-service-type
+   (home-bash-extension
+    (bashrc
+     (list
+      "gpg-connect-agent updatestartuptty /bye > /dev/null"
+      "export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)")))))
 
 (define extra-home-envs-service
   (simple-service
@@ -137,6 +148,7 @@
    (feature-custom-services
     #:home-services
     (list
+     extra-bashrc-service
      extra-shepherd-services-service
      extra-home-envs-service))
    (feature-emacs
