@@ -824,8 +824,6 @@ EndSection"))
 (define-public %nyxt-base-features
   (list
    (feature-nyxt-nx-mosaic)
-   (feature-nyxt-nx-tailor #:auto? #t)
-   (feature-nyxt-appearance)
    (feature-nyxt-emacs)
    (feature-nyxt-blocker)
    (feature-nyxt-userscript
