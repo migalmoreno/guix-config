@@ -155,6 +155,16 @@
     (setq version-control t)
     (setq remote-file-name-inhibit-cache nil)))
 
+(define-public %base-extra-early-init-el
+  '((require 'xdg)
+    (setq echo-keystrokes 0)
+    (setq package-native-compile t)
+    (setq package-user-dir
+          (expand-file-name "emacs/elpa" (xdg-data-home)))
+    (setq auto-save-list-file-prefix
+          (expand-file-name "emacs/auto-save-list/.saves-"
+                            (xdg-data-home)))))
+
 (define-public %emacs-base-features
   (list
    (feature-emacs-completion)
