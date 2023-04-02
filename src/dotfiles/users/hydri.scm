@@ -193,7 +193,7 @@
      (size 11)
      (package (@ (gnu packages fonts) font-google-noto))))
    (feature-gtk3
-    #:dark-theme? #t
+    #:gtk-dark-theme? #t
     #:gtk-theme (make-theme
                  "postmarketos-oled"
                  (@ (gnu packages gnome-xyz) postmarketos-theme))
