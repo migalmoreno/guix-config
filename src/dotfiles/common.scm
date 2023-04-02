@@ -222,7 +222,7 @@
    (feature-emacs-browse-url)
    (feature-emacs-webpaste)))
 
-(define-public %markup-base-features
+(define-public %org-base-features
   (list
    (feature-emacs-org
     #:org-directory "~/documents"
@@ -285,7 +285,11 @@
        "* %?"
        :if-new (file+head "%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
-   (feature-emacs-org-agenda)
+   (feature-emacs-org-agenda)))
+
+(define-public %markup-base-features
+  (make-feature-list
+   %org-base-features
    (feature-markdown
     #:headings-scaling? #t)
    (feature-tex
