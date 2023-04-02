@@ -101,7 +101,7 @@
    "gst-plugins-ugly" "gst-plugins-base" "gst-libav"
    "gnome-console"))
 
-(define extra-gtk-css
+(define (extra-gtk-css _)
   `((.phosh-topbar-clock
      ((margin-left . 125px)))))
 
