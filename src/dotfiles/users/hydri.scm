@@ -160,8 +160,8 @@
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next-pgtk)
     #:emacs-server-mode? #f
-    #:extra-init-el
-    '((add-hook 'after-init-hook 'server-start)))
+    #:extra-init-el %base-extra-init-el
+    #:extra-early-init-el %base-extra-early-init-el)
    (feature-gnupg
     #:gpg-primary-key "5F23F458"
     #:ssh-keys `((,%default-ssh-keygrip))
