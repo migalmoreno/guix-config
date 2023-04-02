@@ -242,16 +242,6 @@
     (with-eval-after-load 'exwm-modeline
       (setq exwm-modeline-randr nil))))
 
-(define extra-early-init-el
-  '((require 'xdg)
-    (setq echo-keystrokes 0)
-    (setq package-native-compile t)
-    (setq package-user-dir
-          (expand-file-name "emacs/elpa" (xdg-data-home)))
-    (setq auto-save-list-file-prefix
-          (expand-file-name "emacs/auto-save-list/.saves-"
-                            (xdg-data-home)))))
-
 (define extra-elisp-packages
   (strings->packages
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
