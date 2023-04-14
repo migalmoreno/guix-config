@@ -741,7 +741,7 @@ EndSection"))
              :redirect-url (quri:uri ,(get-value 'github-frontend config))))
           '())))
 
-(define (nx-search-engines-extra-engines _)
+(define (nx-search-engines-extra-engines config)
   `((make-instance
      'search-engine
      :shortcut "clj"
@@ -800,7 +800,21 @@ EndSection"))
     (engines:discourse
      :shortcut "pc"
      :fallback-url (quri:uri "https://community.penpot.app/latest")
-     :base-search-url "https://community.penpot.app/search?q=~a")))
+     :base-search-url "https://community.penpot.app/search?q=~a")
+    (engines:whoogle
+     :shortcut "who"
+     :fallback-url
+     (quri:uri ,(get-value 'google-frontend config))
+     :base-search-url
+     ,(string-append (get-value 'google-frontend config)
+                     "/search?q=~a")
+     :theme :system
+     :alternatives nil
+     :lang-results :english
+     :lang-ui :english
+     :view-image t
+     :no-javascript t
+     :new-tab t)))
 
 (define nyxt-userstyles
   `((make-instance
@@ -835,6 +849,7 @@ EndSection"))
    (feature-nyxt-userscript
     #:userstyles nyxt-userstyles)
    (feature-nyxt-nx-search-engines
+    #:default-engine-shortcut "who"
     #:extra-engines nx-search-engines-extra-engines)
    (feature-nyxt-nx-router
     #:extra-routes nx-router-extra-routes)))
