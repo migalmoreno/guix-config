@@ -713,7 +713,7 @@ EndSection"))
              'router:blocker
              :trigger (match-regex
                        ,(string-append
-                         (get-value 'reddit-frontend config) "/.*"))
+                         "^" (get-value 'reddit-frontend config) "/.*"))
              :instances-builder router:teddit-instances-builder
              :blocklist '(:path (:contains (not "/comments/" "/wiki/")))))
           '())
@@ -722,7 +722,7 @@ EndSection"))
              'router:blocker
              :trigger (match-regex
                        ,(string-append
-                         (get-value 'tiktok-frontend config) "/.*"))
+                         "^" (get-value 'tiktok-frontend config) "/.*"))
              :instances-builder router:proxitok-instances-builder
              :blocklist '(:path (:contains (not "/video/" "/t/")))))
           '())
@@ -731,7 +731,7 @@ EndSection"))
              'router:blocker
              :trigger (match-regex
                        ,(string-append
-                         (get-value 'instagram-frontend config) "/.*"))
+                         "^" (get-value 'instagram-frontend config) "/.*"))
              :blocklist '(:path (:contains (not "/media/")))))
           '())))
 
