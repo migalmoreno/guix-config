@@ -733,6 +733,12 @@ EndSection"))
                        ,(string-append
                          "^" (get-value 'instagram-frontend config) "/.*"))
              :blocklist '(:path (:contains (not "/media/")))))
+          '())
+    ,@(if (get-value 'github-frontend config)
+          `((make-instance
+             'router:redirector
+             :trigger (match-domain "github.com")
+             :redirect-url (quri:uri ,(get-value 'github-frontend config))))
           '())))
 
 (define (nx-search-engines-extra-engines _)
