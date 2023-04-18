@@ -1,31 +1,21 @@
 (list (channel
         (name 'nonguix)
-        (url "https://gitlab.com/nonguix/nonguix")
-        (branch "master")
+        (url "file:///home/vega/src/guile/nonguix")
+        (branch "base-to-upstream")
         (commit
-          "29d63cbac7b1e652932595adb583fcffe59bfaee")
-        (introduction
-          (make-channel-introduction
-            "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-            (openpgp-fingerprint
-              "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+          "026b5b5c47f606161113398cda710a7c85164937"))
       (channel
         (name 'guix)
-        (url "https://git.savannah.gnu.org/git/guix")
-        (branch "master")
+        (url "file:///home/vega/src/guile/guix")
+        (branch "base-to-upstream")
         (commit
-          "b8f6ead5faac3c1b9a8fa6e060c00cf0917e884e")
-        (introduction
-          (make-channel-introduction
-            "9edb3f66fd807b096b48283debdcddccfea34bad"
-            (openpgp-fingerprint
-              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+          "5c9a6ec115f866c7f3bd30653527a88a9702342b"))
       (channel
         (name 'rde)
         (url "file:///home/vega/src/guile/rde")
-        (branch "master")
+        (branch "base-to-upstream")
         (commit
-          "a35e1ede2b0cfc0f19ee834448de5ba6d23e136a")
+          "81a9dc0055aece8d1914b7278430e256dad3fda2")
         (introduction
           (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
