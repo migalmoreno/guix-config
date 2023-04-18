@@ -1,7 +1,7 @@
 #!/bin/sh
 local_rde_path="../../guile/rde/src/"
-local_guix_path="../../guile/guix/"
-local_paths="$local_guix_path:$local_rde_path"
+local_nonguix_path="../../guile/nonguix/"
+local_paths="$local_rde_path:$local_nonguix_path"
 GUILE_LOAD_PATH="$local_paths:./src${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"
 GUILE_LOAD_COMPILED_PATH="$local_paths:./src${GUILE_LOAD_COMPILED_PATH:+:}$GUILE_LOAD_COMPILED_PATH"
 export GUILE_LOAD_COMPILED_PATH GUILE_LOAD_PATH
