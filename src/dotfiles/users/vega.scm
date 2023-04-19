@@ -8,6 +8,7 @@
   #:use-module (rde features emacs)
   #:use-module (rde features emacs-xyz)
   #:use-module (rde features fontutils)
+  #:use-module (rde features keyboard)
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
   #:use-module (rde features gtk)
@@ -805,9 +806,9 @@
    %communication-base-features
    %programming-base-features
    %markup-base-features
-   ;; (feature-qmk
-   ;;  #:keyboard "dztech/dz65rgb/v1"
-   ;;  #:keymap "custom")
+   (feature-qmk
+    #:keyboard "dztech/dz65rgb/v1"
+    #:keymap "custom")
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)))
