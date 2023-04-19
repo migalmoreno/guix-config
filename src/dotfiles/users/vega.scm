@@ -775,7 +775,7 @@
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:reddit-frontend "https://teddit.pussthecat.org"
     #:github-frontend "https://gothub.dev.projectsegfau.lt")
-   ;; (feature-android)
+   (feature-android)
    (feature-manpages)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next)
