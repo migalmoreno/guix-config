@@ -6,6 +6,7 @@
   #:use-module (rde features base)
   #:use-module (rde features documentation)
   #:use-module (rde features emacs)
+  #:use-module (rde features emacs-xyz)
   #:use-module (rde features fontutils)
   #:use-module (rde features linux)
   #:use-module (rde features gnupg)
@@ -788,7 +789,8 @@
     #:extra-gtk-settings extra-gtk-settings
     #:extra-gtk-css extra-gtk-css)
    %emacs-base-features
-   ;; (feature-emacs-nyxt #:autostart-delay 5)
+   (feature-emacs-nyxt
+    #:autostart-delay 5)
    %emacs-desktop-base-features
    vega-nyxt-features
    (feature-ungoogled-chromium
