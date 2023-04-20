@@ -29,7 +29,7 @@ rde/channels-lock-local.scm: rde/channels-local.scm
 guix: target/profiles/guix-time-marker
 
 repl:
-	./pre-inst-env target/profiles/guix/bin/guix repl --listen=tcp:37146
+	${GUIX} repl --listen=tcp:37146
 
 target:
 	mkdir target
