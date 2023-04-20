@@ -88,7 +88,7 @@
 
 ;;; Host-specific features
 
-(define-public %cygnus-features
+(define-public %host-features
   (list
    (feature-host-info
     #:host-name "cygnus"
