@@ -136,3 +136,4 @@
                     (,(string-append "@admin:" %default-domain) . admin)))))
    (feature-synapse
     #:whatsapp-bridge? #t)))
+   (feature-whoogle)
