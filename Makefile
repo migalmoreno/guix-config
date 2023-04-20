@@ -89,5 +89,5 @@ system/build/%: guix
 	RDE_TARGET=system RDE_HOST=$* RDE_USER= ${CMD} system build $(ENTRY)
 
 system/reconfigure/%: guix
-	RDE_TARGET=system RDE_HOST=$* sudo -E $(CHANNELS_LOCK) \
-	system reconfigure $(ENTRY)
+	RDE_TARGET=system RDE_HOST=$* sudo -E ${CMD} system --allow-downgrades \
+	reconfigure $(ENTRY)
