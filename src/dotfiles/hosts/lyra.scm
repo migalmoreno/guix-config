@@ -135,9 +135,12 @@
   (list
    (feature-kernel
     #:kernel %default-kernel
-    #:firmware (strings->packages "linux-firmware" "sof-firmware")
+    #:firmware (list (@ (nongnu packages linux) linux-firmware)
+                     (@ (nongnu packages linux) sof-firmware))
     #:kernel-loadable-modules
-    (strings->packages "ddcci-driver-linux" "v4l2loopback-linux-module"))
+    (strings->packages
+     ;; "ddcci-driver-linux"
+     "v4l2loopback-linux-module"))
    (feature-host-info
     #:host-name "lyra"
     #:timezone %default-timezone)
