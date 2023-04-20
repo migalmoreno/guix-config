@@ -2,6 +2,11 @@
   #:use-module (dotfiles utils)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
+  #:use-module (gnu home)
+  #:use-module (gnu home services)
+  #:use-module (gnu home services shells)
+  #:use-module (gnu home services symlink-manager)
+  #:use-module (gnu home services xdg)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
   #:use-module (gnu system)
@@ -59,7 +64,17 @@
      (features (append %host-features %user-features))))
 
   (define %he
-    (rde-config-home-environment %config))
+    (home-environment
+     (inherit (rde-config-home-environment %config))
+     (essential-services
+      (list
+       (service home-run-on-first-login-service-type)
+       (service home-activation-service-type)
+       (service home-environment-variables-service-type)
+       (service home-symlink-manager-service-type)
+       (service home-xdg-base-directories-service-type)
+       (service home-service-type)
+       (service home-profile-service-type '())))))
 
   (define %os
     (operating-system
