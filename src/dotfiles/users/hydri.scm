@@ -202,9 +202,9 @@
                   "Adwaita"
                   (@ (gnu packages gnome) adwaita-icon-theme))
     #:extra-gtk-css extra-gtk-css)
-   ;; (feature-alternative-frontends
-   ;;  #:youtube-frontend (string-append "https://" %tubo-host)
-   ;;  #:google-frontend #f)
+   (feature-alternative-frontends
+    #:youtube-frontend (string-append "https://" %tubo-host)
+    #:google-frontend #f)
    hydri-nyxt-features
    %multimedia-base-features
    %emacs-base-features
