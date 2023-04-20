@@ -48,7 +48,7 @@
 
 (define-public %default-username "mmoreno")
 
-(define-public %default-domain "conses.eu")
+(define-public %default-domain "mmoreno.eu")
 
 (define-public %tubo-host (string-append "tubo." %default-domain))
 
