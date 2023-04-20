@@ -73,6 +73,11 @@ deploy/%: guix
 
 home: home/reconfigure/${USER}
 
+home/local: CMD := ${GUIX_LOCAL}
+home/local: CHANNELS := ${LOCK}
+home/local: PROFILE := ${GUIX_PROFILE}
+home/local: home
+
 home/build/%: guix
 	RDE_TARGET=home RDE_HOST= RDE_USER=$* ${CMD} home build $(ENTRY)
 
