@@ -1,10 +1,9 @@
 (define-module (dotfiles users deneb)
-  #:use-module (dotfiles common)
+  #:use-module (dotfiles utils)
   #:use-module (gnu services)
   #:use-module (gnu services networking)
   #:use-module (rde features base)
-  #:use-module (rde features matrix)
-  #:use-module (rde features scheme))
+  #:use-module (rde features matrix))
 
 
 ;;; User-specific features
