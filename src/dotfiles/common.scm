@@ -839,7 +839,14 @@ EndSection"))
 (define-public %base-nyxt-extra-config-lisp
   `((local-time:reread-timezone-repository)
     (setf local-time:*default-timezone*
-          (local-time:find-timezone-by-location-name ,%default-timezone))))
+          (local-time:find-timezone-by-location-name ,%default-timezone))
+    (define-configuration web-buffer
+      ((default-modes
+         (append '(nyxt/reduce-tracking-mode:reduce-tracking-mode)
+                 %slot-value%))))
+    (define-configuration nyxt/reduce-tracking-mode:reduce-tracking-mode
+      ((nyxt/reduce-tracking-mode:preferred-user-agent
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")))))
 
 (define-public %nyxt-base-features
   (list
