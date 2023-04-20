@@ -1,6 +1,13 @@
 GUIX_PROFILE := target/profiles/guix
-GUIX := ./pre-inst-env ${GUIX_PROFILE}/bin/guix
-CHANNELS_LOCK := ${GUIX} time-machine -C rde/channels-lock.scm --
+GUIX_PROFILE_LOCAL := target/profiles/guix-local
+PROFILE := ${GUIX_PROFILE_LOCAL}
+LOCK := rde/channels-lock.scm
+LOCAL_LOCK := rde/channels-lock-local.scm
+CHANNELS := ${LOCAL_LOCK}
+GUIX := ./pre-inst-env ${PROFILE}/bin/guix
+GUIX_LOCAL := ../../guile/guix/pre-inst-env ./pre-inst-env guix
+GUIX_LOCK := ${GUIX} time-machine --disable-authentication -C ${CHANNELS} --
+CMD := $(GUIX_LOCK)
 SRC_DIR := ./src
 ENTRY := ${SRC_DIR}/dotfiles/dispatch.scm
 HOST := $(shell hostname)
