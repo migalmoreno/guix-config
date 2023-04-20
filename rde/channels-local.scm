@@ -1,6 +1,6 @@
 (list (channel
        (name 'rde)
-       (url "file:///home/vega/src/guile/rde")
+       (url (format #f "file://~a/src/guile/rde" (getenv "HOME")))
        (branch "base-to-upstream")
        (introduction
         (make-channel-introduction
@@ -9,9 +9,9 @@
           "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
       (channel
        (name 'guix)
-       (url "file:///home/vega/src/guile/guix")
+       (url (format #f "file://~a/src/guile/guix" (getenv "HOME")))
        (branch "base-to-upstream"))
       (channel
        (name 'nonguix)
-       (url "file:///home/vega/src/guile/nonguix")
+       (url (format #f "file://~a/src/guile/nonguix" (getenv "HOME")))
        (branch "base-to-upstream")))
