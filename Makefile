@@ -50,7 +50,7 @@ target/profiles/guix-local: target/profiles rde/channels-lock-local.scm
 	-p ${GUIX_PROFILE_LOCAL}
 
 target/live.iso: guix target
-	RDE_TARGET=system RDE_HOST=live $(CHANNELS_LOCK) \
+	RDE_TARGET=system RDE_HOST=live ${CMD} \
 	system -L . image -t iso9660 $(ENTRY) -r target/live-tmp.iso \
 	mv target/live-tmp.iso target/live.iso
 
@@ -62,34 +62,31 @@ clean: clean-target
 build/%: guix
 	RDE_TARGET=system $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )\
 	RDE_USER=$(word 3, $(subst /, ,$@)) \
-	RDE_HOST=$(word 2, $(subst /, ,$@)) $(CHANNELS_LOCK) \
+	RDE_HOST=$(word 2, $(subst /, ,$@)) ${CMD} \
 	system build $(ENTRY)
 
 deploy/%: guix
 	RDE_TARGET=deploy $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )\
 	RDE_USER=$(word 3, $(subst /, ,$@)) \
-	RDE_SYSTEM=$(word 2, $(subst /, ,$@)) $(CHANNELS_LOCK) \
+	RDE_HOST=$(word 2, $(subst /, ,$@)) ${CMD} \
 	deploy $(ENTRY)
 
 home: home/reconfigure/${USER}
 
 home/build/%: guix
-	RDE_TARGET=home RDE_HOST= RDE_USER=$* $(CHANNELS_LOCK) \
-	home build $(ENTRY)
+	RDE_TARGET=home RDE_HOST= RDE_USER=$* ${CMD} home build $(ENTRY)
 
 home/reconfigure/%: guix
-	RDE_TARGET=home RDE_USER=$* $(CHANNELS_LOCK) home --allow-downgrades \
+	RDE_TARGET=home RDE_USER=$* ${CMD} home --allow-downgrades \
 	reconfigure $(ENTRY)
 
 system: system/reconfigure/${HOST}
 
 system/init/%:
-	RDE_TARGET=system RDE_HOST=$* RDE_HE_IN_OS=true \
-	$(CHANNELS_LOCK) init $(ENTRY) /mnt
+	RDE_TARGET=system RDE_HOST=$* RDE_HE_IN_OS=true ${CMD} init $(ENTRY) /mnt
 
 system/build/%: guix
-	RDE_TARGET=system RDE_HOST=$* RDE_USER= $(CHANNELS_LOCK) \
-	system build $(ENTRY)
+	RDE_TARGET=system RDE_HOST=$* RDE_USER= ${CMD} system build $(ENTRY)
 
 system/reconfigure/%: guix
 	RDE_TARGET=system RDE_HOST=$* sudo -E $(CHANNELS_LOCK) \
