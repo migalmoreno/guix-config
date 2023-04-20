@@ -1,5 +1,5 @@
 (define-module (dotfiles hosts cygnus)
-  #:use-module (dotfiles common)
+  #:use-module (dotfiles utils)
   #:use-module (dotfiles hosts lyra)
   #:use-module (rde features base)
   #:use-module (rde features databases)
