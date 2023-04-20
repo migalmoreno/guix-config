@@ -47,6 +47,11 @@ target/live.iso: guix target
 	system -L . image -t iso9660 $(ENTRY) -r target/live-tmp.iso \
 	mv target/live-tmp.iso target/live.iso
 
+clean-target:
+	rm -rf ./target
+
+clean: clean-target
+
 build/%: guix
 	RDE_TARGET=system $(if $(word 3, $(subst /, , $@)),RDE_HE_IN_OS=true )\
 	RDE_USER=$(word 3, $(subst /, ,$@)) \
