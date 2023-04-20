@@ -244,7 +244,19 @@
                                          (exwm-modeline--format)))))
     (exwm-modeline-mode)
     (with-eval-after-load 'exwm-modeline
-      (setq exwm-modeline-randr nil))))
+      (setq exwm-modeline-randr nil))
+    (defun rde-geiser-autoconnect ()
+      "Start a Geiser REPL unless an active connection is already present."
+      (require 'geiser-guile)
+      (require 'geiser-repl)
+      (unless (geiser-repl--connection*)
+        (save-window-excursion
+         (run-guile))))
+    (add-hook 'geiser-mode-hook 'rde-geiser-autoconnect)
+    (with-eval-after-load 'geiser-repl
+      (define-key geiser-repl-mode-map (kbd "C-M-q") 'indent-sexp)
+      (setq geiser-repl-use-other-window nil)
+      (setq geiser-repl-per-project-p t))))
 
 (define extra-elisp-packages
   (strings->packages
