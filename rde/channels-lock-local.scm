@@ -9,13 +9,13 @@
         (url "file:///home/vega/src/guile/guix")
         (branch "base-to-upstream")
         (commit
-          "5c9a6ec115f866c7f3bd30653527a88a9702342b"))
+          "f60c40ffc4a725aaaa5321d5f6b3d5098a9a23ed"))
       (channel
         (name 'rde)
         (url "file:///home/vega/src/guile/rde")
         (branch "base-to-upstream")
         (commit
-          "81a9dc0055aece8d1914b7278430e256dad3fda2")
+          "86b221431cbfb08618d1cc201720f1cb4510767e")
         (introduction
           (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
