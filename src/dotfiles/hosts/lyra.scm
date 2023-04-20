@@ -169,6 +169,7 @@
     #:mapped-devices lyra-mapped-devices
     #:file-systems lyra-file-systems)
    (feature-base-packages
+    #:base-home-packages '()
     #:system-packages
     (strings->packages
      "emacs-no-x" "git" "curl"))))
