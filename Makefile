@@ -22,7 +22,7 @@ rde/channels-lock.scm: rde/channels.scm
 	mv rde/channels-lock-tmp.scm rde/channels-lock.scm
 
 rde/channels-lock-local.scm: rde/channels-local.scm
-	guix time-machine -C rde/channels-local.scm -- \
+	guix time-machine --disable-authentication -C rde/channels-local.scm -- \
 	describe -f channels > rde/channels-lock-tmp.scm
 	mv rde/channels-lock-tmp.scm rde/channels-lock-local.scm
 
@@ -46,8 +46,8 @@ target/profiles/guix: target/profiles rde/channels-lock.scm
 	-p ${GUIX_PROFILE}
 
 target/profiles/guix-local: target/profiles rde/channels-lock-local.scm
-	guix pull --allow-downgrades -C rde/channels-lock-local.scm \
-	-p ${GUIX_PROFILE}
+	guix pull --disable-authentication --allow-downgrades -C rde/channels-lock-local.scm \
+	-p ${GUIX_PROFILE_LOCAL}
 
 target/live.iso: guix target
 	RDE_TARGET=system RDE_HOST=live $(CHANNELS_LOCK) \
