@@ -26,7 +26,7 @@ rde/channels-lock-local.scm: rde/channels-local.scm
 	describe -f channels > rde/channels-lock-tmp.scm
 	mv rde/channels-lock-tmp.scm rde/channels-lock-local.scm
 
-guix: target/profiles/guix-time-marker
+guix: target/guix-time-marker
 
 repl:
 	${GUIX} repl --listen=tcp:37146
@@ -37,8 +37,8 @@ target:
 target/profiles:
 	mkdir -p target/profiles
 
-target/profiles/guix-time-marker: rde/channels-lock.scm
-	make target/profiles/guix
+target/guix-time-marker: ${CHANNELS}
+	make ${PROFILE}
 	touch $@
 
 target/profiles/guix: target/profiles rde/channels-lock.scm
