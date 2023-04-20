@@ -103,6 +103,7 @@
      (targets '("/dev/vda"))
      (terminal-outputs '(console))))
    (feature-base-packages
+    #:base-home-packages '()
     #:system-packages extra-system-packages)
    (feature-file-systems
     #:file-systems cygnus-file-systems
