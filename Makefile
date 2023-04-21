@@ -74,8 +74,8 @@ deploy/%: guix
 home: home/reconfigure/${USER}
 
 home/local: CMD := ${GUIX_LOCAL}
-home/local: CHANNELS := ${LOCK}
-home/local: PROFILE := ${GUIX_PROFILE}
+home/local: CHANNELS := ${LOCK_LOCAL}
+home/local: PROFILE := ${GUIX_PROFILE_LOCAL}
 home/local: home
 
 home/build/%: guix
