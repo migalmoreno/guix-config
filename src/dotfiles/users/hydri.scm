@@ -212,6 +212,7 @@
    %security-base-features
    %shell-base-features
    %forge-base-features
+   %org-base-features
    (feature-emacs-ebdb
     #:ebdb-sources (list "~/documents/contacts")
     #:ebdb-popup-size 0.2)
@@ -222,5 +223,4 @@
     (list
      (plain-file
       "10-projects.conf"
-      (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
-   %org-base-features))
+      (format #f "(:tree \"~a/src\")" (getenv "HOME")))))))
