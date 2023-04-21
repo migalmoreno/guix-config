@@ -78,6 +78,10 @@ home/local: CHANNELS := ${LOCK_LOCAL}
 home/local: PROFILE := ${GUIX_PROFILE_LOCAL}
 home/local: home
 
+home/external: CHANNELS := ${LOCK}
+home/external: PROFILE := ${GUIX_PROFILE}
+home/external: home
+
 home/build/%: guix
 	RDE_TARGET=home RDE_HOST= RDE_USER=$* ${CMD} home build $(ENTRY)
 
