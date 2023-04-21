@@ -58,30 +58,11 @@
     (script-opts-add=osc-visibility . never)
     (script-opts-add=osc-windowcontrols . no)))
 
-(define emacs-ytdl-next
-  (let ((commit "2ea3daf2f6aa9d18b71fe3e15f05c30a56fca228")
-        (branch "feat-add-format-selection")
-        (emacs-ytdl (@ (gnu packages emacs-xyz) emacs-ytdl)))
-    (package
-      (inherit emacs-ytdl)
-      (version (git-version "0" branch commit))
-      (source
-       (origin
-         (method git-fetch)
-         (uri (git-reference
-               (url "https://gitlab.com/miguel-moreno/ytdl")
-               (commit commit)))
-         (file-name (git-file-name (package-name emacs-ytdl) version))
-         (sha256
-          (base32
-           "0y62lkgsg19j05dpd6sp6zify8vq8xvpc8caqiy4rwi7p4ahacsf")))))))
-
 (define-public %multimedia-base-features
   (list
    (feature-transmission
     #:download-dir (format #f "~a/videos" (getenv "HOME")))
    (feature-youtube-dl
-    #:emacs-ytdl emacs-ytdl-next
     #:music-dl-args
     '("-q" "-x" "-f" "bestaudio" "--audio-format" "mp3"
       "--add-metadata" "--compat-options" "all")
