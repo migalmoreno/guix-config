@@ -256,7 +256,10 @@
     (with-eval-after-load 'geiser-repl
       (define-key geiser-repl-mode-map (kbd "C-M-q") 'indent-sexp)
       (setq geiser-repl-use-other-window nil)
-      (setq geiser-repl-per-project-p t))))
+      (setq geiser-repl-per-project-p t))
+    (setq copyright-names-regexp
+          (format "%s <%s>" user-full-name user-mail-address))
+    (add-hook 'after-save-hook (lambda () (copyright-update nil nil)))))
 
 (define extra-elisp-packages
   (strings->packages
