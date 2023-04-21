@@ -118,7 +118,8 @@
              (password-authentication? #f)
              (permit-root-login 'prohibit-password)
              (authorized-keys
-              `(("root" ,%hydri-ssh-key)))))
+              `(("root" ,%hydri-ssh-key)
+                ("vega" ,%hydri-ssh-key ,%default-ssh-key)))))
    (service qemu-binfmt-service-type
             (qemu-binfmt-configuration
              (platforms (lookup-qemu-platforms "aarch64"))))
