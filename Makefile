@@ -91,6 +91,11 @@ home/reconfigure/%: guix
 
 system: system/reconfigure/${HOST}
 
+system/local: CMD := ${GUIX_LOCAL}
+system/local: CHANNELS := ${LOCK_LOCAL}
+system/local: PROFILE := ${GUIX_PROFILE_LOCAL}
+system/local: system
+
 system/init/%:
 	RDE_TARGET=system RDE_HOST=$* RDE_HE_IN_OS=true ${CMD} init $(ENTRY) /mnt
 
