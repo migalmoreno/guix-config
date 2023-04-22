@@ -98,10 +98,9 @@
   (strings->packages
    "nss-certs" "glibc-locales" "seahorse"
    "gnome-clocks" "pinentry-tty"
-   "portfolio" "pavucontrol" "geary"
+   "portfolio" "pavucontrol"
    "lollypop" "gst-plugins-good" "gst-plugins-bad"
-   "gst-plugins-ugly" "gst-plugins-base" "gst-libav"
-   "gnome-console"))
+   "gst-plugins-ugly" "gst-plugins-base" "gst-libav"))
 
 (define (extra-gtk-css _)
   `((.phosh-topbar-clock
