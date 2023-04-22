@@ -13,6 +13,7 @@
   #:use-module (rde features lisp)
   #:use-module (rde features nyxt-xyz)
   #:use-module (rde features shellutils)
+  #:use-module (rde features terminals)
   #:use-module (rde features version-control)
   #:use-module (rde features xdg)
   #:use-module (rde features web)
@@ -213,14 +214,6 @@
    (feature-alternative-frontends
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend (string-append "https://" %whoogle-host))
-   hydri-nyxt-features
-   %multimedia-base-features
-   %emacs-base-features
-   %desktop-base-features
-   %security-base-features
-   %shell-base-features
-   %forge-base-features
-   %org-base-features
    (feature-emacs-ebdb
     #:ebdb-sources (list "~/documents/contacts")
     #:ebdb-popup-size 0.2)
@@ -231,4 +224,13 @@
     (list
      (plain-file
       "10-projects.conf"
-      (format #f "(:tree \"~a/src\")" (getenv "HOME")))))))
+      (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
+   (feature-alacritty)
+   hydri-nyxt-features
+   %multimedia-base-features
+   %emacs-base-features
+   %desktop-base-features
+   %security-base-features
+   %shell-base-features
+   %forge-base-features
+   %org-base-features))
