@@ -224,7 +224,6 @@
      (plain-file
       "10-projects.conf"
       (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
-   (feature-alacritty)
    hydri-nyxt-features
    %multimedia-base-features
    %emacs-base-features
