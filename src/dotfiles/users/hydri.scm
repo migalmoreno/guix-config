@@ -211,7 +211,7 @@
     #:extra-gtk-css extra-gtk-css)
    (feature-alternative-frontends
     #:youtube-frontend (string-append "https://" %tubo-host)
-    #:google-frontend #f)
+    #:google-frontend (string-append "https://" %whoogle-host))
    hydri-nyxt-features
    %multimedia-base-features
    %emacs-base-features
