@@ -17,10 +17,10 @@
   #:use-module (rde features xdg)
   #:use-module (rde features web)
   #:use-module (rde features web-browsers)
+  #:use-module (rde home services shells)
   #:use-module (rde packages)
   #:use-module (gnu services)
   #:use-module (gnu home services)
-  #:use-module (rde home services shells)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
   #:use-module (guix gexp)
@@ -163,7 +163,8 @@
     (list
      extra-bashrc-service
      extra-shepherd-services-service
-     extra-home-envs-service))
+     extra-home-envs-service
+     (service home-shell-profile-service-type)))
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next-pgtk)
     #:emacs-server-mode? #f
