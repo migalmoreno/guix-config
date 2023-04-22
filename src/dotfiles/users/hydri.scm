@@ -106,6 +106,13 @@
   `((.phosh-topbar-clock
      ((margin-left . 125px)))))
 
+(define nyxt-extra-config-lisp
+  `(,@%base-nyxt-extra-config-lisp
+    (define-configuration nyxt/reduce-tracking-mode:reduce-tracking-mode
+      ((nyxt/reduce-tracking-mode:preferred-user-agent
+        "Mozilla/5.0 (Linux; Android 10; Google Pixel 4 Build/QD1A.190821.014.C2; wv)
+ AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36")))))
+
 
 ;;; User-specific features
 
@@ -116,7 +123,7 @@
     #:default-browser? #t
     #:restore-session? #f
     #:temporary-history? #t
-    #:extra-config-lisp %base-nyxt-extra-config-lisp)
+    #:extra-config-lisp nyxt-extra-config-lisp)
    (feature-nyxt-appearance
     #:status-buffer-height 40
     #:status-buffer-position ':bottom
