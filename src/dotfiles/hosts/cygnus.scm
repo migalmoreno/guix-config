@@ -113,7 +113,8 @@
    (feature-web-settings
     #:primary-domain %default-domain)
    (feature-postgresql)
-   (feature-nginx)
+   (feature-nginx
+    #:primary-domain-setup? #t)
    (feature-certbot
     #:email %default-email)
    (feature-matrix-settings
