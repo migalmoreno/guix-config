@@ -782,20 +782,22 @@ EndSection"))
      :shortcut "pc"
      :fallback-url (quri:uri "https://community.penpot.app/latest")
      :base-search-url "https://community.penpot.app/search?q=~a")
-    (engines:whoogle
-     :shortcut "who"
-     :fallback-url
-     (quri:uri ,(get-value 'google-frontend config))
-     :base-search-url
-     ,(string-append (get-value 'google-frontend config)
-                     "/search?q=~a")
-     :theme :system
-     :alternatives nil
-     :lang-results :english
-     :lang-ui :english
-     :view-image t
-     :no-javascript t
-     :new-tab t)))
+    ,@(if (get-value 'google-frontend config)
+          `((engines:whoogle
+             :shortcut "who"
+             :fallback-url
+             (quri:uri ,(get-value 'google-frontend config))
+             :base-search-url
+             ,(string-append (get-value 'google-frontend config)
+                             "/search?q=~a")
+             :theme :system
+             :alternatives nil
+             :lang-results :english
+             :lang-ui :english
+             :view-image t
+             :no-javascript t
+             :new-tab t))
+          '())))
 
 (define nyxt-userstyles
   `((make-instance
