@@ -37,7 +37,8 @@
 (define-public %hydri-ssh-key
   (plain-file
    "hydri.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
+   "ssh-ed25519
+ AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
 
 (define-public sbcl-montezuma-sans-tests
   (let ((sbcl-montezuma (@ (gnu packages lisp-xyz) sbcl-montezuma)))
@@ -110,8 +111,9 @@
   `(,@%base-nyxt-extra-config-lisp
     (define-configuration nyxt/reduce-tracking-mode:reduce-tracking-mode
       ((nyxt/reduce-tracking-mode:preferred-user-agent
-        "Mozilla/5.0 (Linux; Android 10; Google Pixel 4 Build/QD1A.190821.014.C2; wv)
- AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36")))))
+        "Mozilla/5.0 (Linux; Android 10; Google Pixel 4
+ Build/QD1A.190821.014.C2; wv) AppleWebKit/537.36 (KHTML, like Gecko)
+ Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36")))))
 
 
 ;;; User-specific features
