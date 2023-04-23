@@ -37,8 +37,7 @@
 (define-public %hydri-ssh-key
   (plain-file
    "hydri.pub"
-   "ssh-ed25519
- AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
 
 (define-public sbcl-montezuma-sans-tests
   (let ((sbcl-montezuma (@ (gnu packages lisp-xyz) sbcl-montezuma)))
