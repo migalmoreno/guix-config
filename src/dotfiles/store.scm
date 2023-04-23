@@ -48,14 +48,16 @@
           (pretty-print? #f))
 
   (define* (mod-ref sub mod var-name #:optional default-value)
-    (let ((var (module-variable (resolve-module `(,@sub ,(string->symbol mod))) var-name)))
+    (let ((var (module-variable
+                (resolve-module `(,@sub ,(string->symbol mod))) var-name)))
       (if (and var (not (unspecified? var)))
           (variable-ref var)
           default-value)))
 
   (define %user-features (mod-ref users-submodule user '%user-features '()))
   (define %host-features (mod-ref hosts-submodule host '%host-features '()))
-  (define %machine (mod-ref machines-submodule host '%machine %initial-machine))
+  (define %machine
+    (mod-ref machines-submodule host '%machine %initial-machine))
 
   (define %config
     (rde-config
