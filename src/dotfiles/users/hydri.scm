@@ -226,6 +226,7 @@
       "10-projects.conf"
       (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
    hydri-nyxt-features
+   %communication-base-features
    %multimedia-base-features
    %emacs-base-features
    %desktop-base-features
