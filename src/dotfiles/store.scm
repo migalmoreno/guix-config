@@ -1,4 +1,4 @@
-(define-module (dotfiles dispatch)
+(define-module (dotfiles store)
   #:use-module (dotfiles utils)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
