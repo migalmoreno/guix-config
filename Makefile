@@ -53,8 +53,8 @@ target/profiles/guix: target/profiles rde/channels-lock.scm
 	-p ${GUIX_PROFILE}
 
 target/profiles/guix-local: target/profiles rde/channels-lock-local.scm
-	guix pull --disable-authentication --allow-downgrades -C rde/channels-lock-local.scm \
-	-p ${GUIX_PROFILE_LOCAL}
+	guix pull --disable-authentication --allow-downgrades \
+	-C rde/channels-lock-local.scm -p ${GUIX_PROFILE_LOCAL}
 
 target/live.iso: guix target
 	RDE_TARGET=system RDE_HOST=live ${CMD} \
