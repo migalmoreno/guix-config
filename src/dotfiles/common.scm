@@ -440,9 +440,6 @@
    (type type)
    (pass-cmd (format #f "pass show mail/~a | head -1" id))))
 
-(define (mail-directory-fn config)
-  (string-append (getenv "XDG_STATE_HOME") "/mail"))
-
 (define-public %mail-base-features
   (list
    (feature-mail-settings
@@ -450,7 +447,8 @@
     (list
      (mail-acc 'deprecated "contact@conses.eu" 'gandi)
      (mail-acc 'personal %default-email 'gandi))
-    #:mail-directory-fn mail-directory-fn)
+    #:mail-directory-fn
+    (const (string-append (getenv "XDG_STATE_HOME") "/mail")))
    (feature-isync)
    (feature-goimapnotify
     #:notify? #t)
