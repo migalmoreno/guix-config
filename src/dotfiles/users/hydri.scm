@@ -211,6 +211,7 @@
                   (@ (gnu packages gnome) adwaita-icon-theme))
     #:extra-gtk-css extra-gtk-css)
    (feature-alternative-frontends
+    #:reddit-frontend "https://teddit.pussthecat.org"
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:google-frontend (string-append "https://" %whoogle-host))
    (feature-emacs-ebdb
