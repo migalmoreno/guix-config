@@ -58,7 +58,8 @@
 (define-public %lyra-ssh-key
   (plain-file
    "lyra.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBN0KzBIzlhPkr3BhcuKt9ki6iYyMS97hpAEFIrNCa9O root@lyra\n"))
+   "ssh-ed25519
+ AAAAC3NzaC1lZDI1NTE5AAAAIBN0KzBIzlhPkr3BhcuKt9ki6iYyMS97hpAEFIrNCa9O\n"))
 
 (define-public %lyra-signing-key
   (project-file "src/dotfiles/keys/lyra.pub"))
@@ -95,10 +96,12 @@
     "90-backlight.rules"
     (string-append
      "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
-     "RUN+=\"/run/current-system/profile/bin/chgrp video /sys/class/backlight/%k/brightness\""
+     "RUN+=\"/run/current-system/profile/bin/chgrp "
+     "video /sys/class/backlight/%k/brightness\""
      "\n"
      "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
-     "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\""))))
+     "RUN+=\"/run/current-system/profile/bin/chmod "
+     "g+w /sys/class/backlight/%k/brightness\""))))
 
 (define lyra-custom-services
   (list
