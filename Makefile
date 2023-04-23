@@ -13,6 +13,13 @@ ENTRY := ${SRC_DIR}/dotfiles/dispatch.scm
 HOST := $(shell hostname)
 USER := $(shell whoami)
 
+%/local: CMD := ${GUIX_LOCAL}
+%/local: CHANNELS := ${LOCK_LOCAL}
+%/local: PROFILE := ${GUIX_PROFILE_LOCAL}
+
+%/external: CHANNELS := ${LOCK}
+%/external: PROFILE := ${GUIX_PROFILE}
+
 .PHONY: all
 all: guix pull upgrade home system iso
 
@@ -72,36 +79,27 @@ deploy/%: guix
 	deploy $(ENTRY)
 
 home: home/reconfigure/${USER}
-
-home/local: CMD := ${GUIX_LOCAL}
-home/local: CHANNELS := ${LOCK_LOCAL}
-home/local: PROFILE := ${GUIX_PROFILE_LOCAL}
-home/local: home
-
-home/external: CHANNELS := ${LOCK}
-home/external: PROFILE := ${GUIX_PROFILE}
-home/external: home
+home/local: home/reconfigure/${USER}/local
 
 home/build/%: guix
-	RDE_TARGET=home RDE_HOST= RDE_USER=$* ${CMD} home build $(ENTRY)
+	RDE_TARGET=home RDE_HOST= RDE_USER=$(word 1, $(subst /, ,$*)) ${CMD} \
+	home build $(ENTRY)
 
 home/reconfigure/%: guix
-	RDE_TARGET=home RDE_USER=$* ${CMD} home --allow-downgrades \
-	reconfigure $(ENTRY)
+	RDE_TARGET=home RDE_USER=$(word 1, $(subst /, ,$*)) ${CMD} \
+	home --allow-downgrades reconfigure $(ENTRY)
 
 system: system/reconfigure/${HOST}
-
-system/local: CMD := ${GUIX_LOCAL}
-system/local: CHANNELS := ${LOCK_LOCAL}
-system/local: PROFILE := ${GUIX_PROFILE_LOCAL}
-system/local: system
+system/local: system/reconfigure/${HOST}/local
 
 system/init/%:
-	RDE_TARGET=system RDE_HOST=$* RDE_HE_IN_OS=true ${CMD} init $(ENTRY) /mnt
+	RDE_TARGET=system RDE_HOST=$(word 1, $(subst /, ,$*)) \
+	RDE_HE_IN_OS=true ${CMD} init $(ENTRY) /mnt
 
 system/build/%: guix
-	RDE_TARGET=system RDE_HOST=$* RDE_USER= ${CMD} system build $(ENTRY)
+	RDE_TARGET=system RDE_HOST=$(word 1, $(subst /, ,$*)) \
+	RDE_USER= ${CMD} system build $(ENTRY)
 
 system/reconfigure/%: guix
-	RDE_TARGET=system RDE_HOST=$* sudo -E ${CMD} system --allow-downgrades \
-	reconfigure $(ENTRY)
+	RDE_TARGET=system RDE_HOST=$(word 1, $(subst /, ,$*)) \
+	sudo -E ${CMD} system --allow-downgrades reconfigure $(ENTRY)
