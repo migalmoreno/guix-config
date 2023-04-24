@@ -47,6 +47,19 @@
    (list
     (nginx-server-configuration
      (listen '("443 ssl http2"))
+     (server-name (list "conses.eu" "www.conses.eu"))
+     (ssl-certificate "/etc/letsencrypt/live/conses.eu/fullchain.pem")
+     (ssl-certificate-key "/etc/letsencrypt/live/conses.eu/privkey.pem")
+     (locations
+      (list
+       (nginx-location-configuration
+        (uri "/.well-known/matrix/server")
+        (body
+         (list "default_type application/json;"
+               "return 200 '{\"m.server\": \"matrix.conses.eu:443\"}';"
+               "add_header Access-Control-Allow-Origin *;"))))))
+    (nginx-server-configuration
+     (listen '("443 ssl http2"))
      (server-name (list %tubo-host))
      (ssl-certificate (string-append "/etc/letsencrypt/live/"
                                      %tubo-host "/fullchain.pem"))
