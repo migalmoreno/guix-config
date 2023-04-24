@@ -118,23 +118,23 @@
    (feature-certbot
     #:email %default-email)
    (feature-matrix-settings
-    #:homeserver (string-append "https://matrix." %default-domain)
+    #:homeserver "https://matrix.conses.eu")
+   (feature-whoogle)
+   (feature-synapse
+    #:whatsapp-bridge? #t
     #:synapse-configuration
     (synapse-configuration
-     (server-name %default-domain)
+     (server-name "conses.eu")
      (enable-registration? #f)
-     (public-base-url (string-append "https://matrix." %default-domain))
+     (public-base-url "https://matrix.conses.eu")
      (shared-secret (getenv "CYGNUS_SYNAPSE_SHARED_SECRET"))
      (postgresql-db? #t)
      (postgresql-db-password (getenv "CYGNUS_SYNAPSE_DB_PASSWORD")))
     #:mautrix-whatsapp-configuration
     (mautrix-whatsapp-configuration
-     (domain %default-domain)
+     (domain "conses.eu")
      (postgresql-db? #t)
      (postgresql-db-password (getenv "CYGNUS_MAUTRIX_WHATSAPP_DB_PASSWORD"))
      (encryption? #t)
-     (permissions `((,%default-domain . user)
-                    (,(string-append "@admin:" %default-domain) . admin)))))
-   (feature-synapse
-    #:whatsapp-bridge? #t)))
-   (feature-whoogle)
+     (permissions `(("conses.eu" . user)
+                    ("@admin:conses.eu" . admin)))))))
