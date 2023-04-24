@@ -299,12 +299,12 @@
 (define-public %communication-base-features
   (list
    (feature-matrix-settings
-    #:homeserver (string-append "https://pantalaimon." %default-domain)
+    #:homeserver (string-append "https://pantalaimon.conses.eu")
     #:matrix-accounts
     (list
      (matrix-account
       (id "@sloan:conses.eu")
-      (homeserver (string-append "matrix." %default-domain)))))
+      (homeserver "matrix.conses.eu"))))
    (feature-emacs-ement)
    (feature-irc-settings
     #:irc-accounts
