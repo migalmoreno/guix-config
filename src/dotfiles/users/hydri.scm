@@ -118,7 +118,7 @@
 ;;; User-specific features
 
 (define hydri-nyxt-features
-  (make-feature-list
+  (cons*
    (feature-nyxt
     #:nyxt nyxt-next
     #:default-browser? #t
@@ -150,7 +150,7 @@
    %nyxt-base-features))
 
 (define-public %user-features
-  (make-feature-list
+  (cons*
    (feature-user-info
     #:user-name "hydri"
     #:full-name %default-fullname
