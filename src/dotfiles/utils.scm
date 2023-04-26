@@ -52,8 +52,6 @@
 
 (define-public %tubo-host (string-append "tubo." %default-domain))
 
-(define-public %whoogle-host (string-append "whoogle." %default-domain))
-
 (define-public %default-kernel-arguments
   (list "quiet" "net.ifnames=0"))
 
