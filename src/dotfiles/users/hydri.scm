@@ -214,7 +214,7 @@
    (feature-alternative-frontends
     #:reddit-frontend "https://teddit.pussthecat.org"
     #:youtube-frontend (string-append "https://" %tubo-host)
-    #:google-frontend (string-append "https://" %whoogle-host))
+    #:google-frontend (string-append "https://whoogle." %default-domain))
    (feature-emacs-ebdb
     #:ebdb-sources (list "~/documents/contacts")
     #:ebdb-popup-size 0.2)
