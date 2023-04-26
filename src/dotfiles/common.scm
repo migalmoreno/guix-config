@@ -269,7 +269,7 @@
    (feature-emacs-org-agenda)))
 
 (define-public %markup-base-features
-  (make-feature-list
+  (list*
    %org-base-features
    (feature-markdown
     #:headings-scaling? #t)
