@@ -6,10 +6,10 @@
 
 ;;; Common utilities
 
-(define-public (make-feature-list . features)
+(define-public (list* . es)
   (append-map (lambda (f)
                 (if (list? f) f (list f)))
-              features))
+              es))
 
 (define-public %project-root
   (canonicalize-path
