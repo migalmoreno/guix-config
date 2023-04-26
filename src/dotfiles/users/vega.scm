@@ -721,7 +721,7 @@
 ;;; User-specific features
 
 (define vega-nyxt-features
-  (make-feature-list
+  (cons*
    (feature-nyxt
     #:scroll-distance 150
     #:temporary-history? #t
@@ -753,7 +753,7 @@
    %nyxt-base-features))
 
 (define vega-desktop-features
-  (make-feature-list
+  (list*
    %desktop-base-features
    (feature-desktop-services
     #:default-desktop-home-services
@@ -779,7 +779,7 @@
    (feature-pipewire)))
 
 (define-public %user-features
-  (make-feature-list
+  (list*
    (feature-user-info
     #:user-name "vega"
     #:full-name %default-fullname
