@@ -123,8 +123,11 @@
     cgit-service-type
     (cgit-configuration
      (project-list "/var/lib/gitolite/projects.list")
+     (section-from-path 1)
      (repository-directory "/var/lib/gitolite/repositories")
-     (root-desc (string-append %default-fullname "'s personal repositories"))
+     (repository-sort "age")
+     (case-sensitive-sort? #f)
+     (root-desc (string-append %default-fullname "'s Git repositories"))
      (enable-git-config? #t)
      (enable-index-links? #t)
      (enable-index-owner? #f)
