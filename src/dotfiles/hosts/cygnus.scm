@@ -60,6 +60,17 @@
                "add_header Access-Control-Allow-Origin *;"))))))
     (nginx-server-configuration
      (listen '("443 ssl http2"))
+     (server-name (list (string-append "files." %default-domain)))
+     (root "/srv/http/files")
+     (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
+                              %default-domain))
+     (ssl-certificate-key
+      (format #f "/etc/letsencrypt/live/~a/privkey.pem" %default-domain))
+     (raw-content '("autoindex on;"))
+     (locations
+      (list %letsencrypt-acme-challenge)))
+    (nginx-server-configuration
+     (listen '("443 ssl http2"))
      (server-name (list %tubo-host))
      (ssl-certificate (string-append "/etc/letsencrypt/live/"
                                      %tubo-host "/fullchain.pem"))
