@@ -478,10 +478,17 @@
    (feature-emacs-xref)
    (feature-emacs-smartparens
     #:paredit-bindings? #t
-    #:smartparens-hooks '(prog-mode-hook
-                          lisp-data-mode-hook
-                          minibuffer-inactive-mode-hook
-                          comint-mode-hook))
+    #:smartparens-hooks
+    '(prog-mode-hook
+      lisp-data-mode-hook
+      minibuffer-inactive-mode-hook
+      comint-mode-hook
+      cider-repl-mode-hook)
+    #:smartparens-strict-hooks
+    '(prog-mode-hook
+      lisp-data-mode-hook
+      comint-mode-hook
+      cider-repl-mode-hook))
    (feature-emacs-elisp)
    (feature-clojure)
    (feature-javascript
