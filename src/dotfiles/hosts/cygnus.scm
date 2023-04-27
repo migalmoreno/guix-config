@@ -8,15 +8,18 @@
   #:use-module (rde features web)
   #:use-module (rde system services matrix)
   #:use-module (rde packages)
+  #:use-module (gnu packages version-control)
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services certbot)
+  #:use-module (gnu services cgit)
   #:use-module (gnu services networking)
   #:use-module (gnu services rsync)
   #:use-module (gnu services ssh)
+  #:use-module (gnu services version-control)
   #:use-module (gnu services web)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
@@ -85,6 +88,70 @@
                "proxy_set_header X-Forwarded-For $remote_addr;"
                "proxy_set_header HOST $http_host;")))
        %letsencrypt-acme-challenge))))))
+
+(define cygnus-version-control-services
+  (list
+   (service fcgiwrap-service-type
+            (fcgiwrap-configuration
+             (group "git")))
+   (service gitolite-service-type
+            (gitolite-configuration
+             (admin-pubkey %default-ssh-key)
+             (rc-file
+              (gitolite-rc-file
+               (umask #o0027)
+               (git-config-keys "gitweb\\..*")))))
+   (service
+    cgit-service-type
+    (cgit-configuration
+     (project-list "/var/lib/gitolite/projects.list")
+     (repository-directory "/var/lib/gitolite/repositories")
+     (root-desc (string-append %default-fullname "'s personal repositories"))
+     (enable-git-config? #t)
+     (enable-index-links? #t)
+     (enable-index-owner? #f)
+     (enable-commit-graph? #t)
+     (enable-log-filecount? #t)
+     (enable-log-linecount? #t)
+     (readme ":README.md")
+     (remove-suffix? #t)
+     (clone-url
+      (list (format #f "https://git.~a/$CGIT_REPO_URL " %default-domain)))
+     (about-filter
+      (program-file
+       "about-formatting"
+       #~(apply execl (string-append
+                       #$cgit "/lib/cgit/filters/about-formatting.sh")
+                (command-line))))
+     (source-filter
+      (program-file
+       "cgit-syntax-highlighting"
+       #~(apply execl (string-append
+                       #$cgit "/lib/cgit/filters/syntax-highlighting.py")
+                (command-line))))
+     (nginx
+      (list
+       (nginx-server-configuration
+        (listen '("443 ssl http2"))
+        (server-name (list (string-append "git." %default-domain)))
+        (root cgit)
+        (ssl-certificate
+         (format #f "/etc/letsencrypt/live/git.~a/fullchain.pem"
+                 %default-domain))
+        (ssl-certificate-key
+         (format #f "/etc/letsencrypt/live/git.~a/privkey.pem"
+                 %default-domain))
+        (try-files (list "$uri" "@cgit"))
+        (locations
+         (list
+          (nginx-location-configuration
+           (uri "@cgit")
+           (body
+            '("fastcgi_param SCRIPT_FILENAME $document_root/lib/cgit/cgit.cgi;"
+              "fastcgi_param PATH_INFO $uri;"
+              "fastcgi_param QUERY_STRING $args;"
+              "fastcgi_param HTTP_HOST $server_name;"
+              "fastcgi_pass 127.0.0.1:9000;"))))))))))))
 
 (define extra-system-packages
   (strings->packages "git" "rsync"))
