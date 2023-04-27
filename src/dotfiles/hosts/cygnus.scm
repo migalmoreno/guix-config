@@ -72,10 +72,10 @@
     (nginx-server-configuration
      (listen '("443 ssl http2"))
      (server-name (list %tubo-host))
-     (ssl-certificate (string-append "/etc/letsencrypt/live/"
-                                     %tubo-host "/fullchain.pem"))
-     (ssl-certificate-key (string-append "/etc/letsencrypt/live/"
-                                         %tubo-host "/privkey.pem"))
+     (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
+                              %tubo-host))
+     (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
+                                  %tubo-host ))
      (locations
       (list
        (nginx-location-configuration
