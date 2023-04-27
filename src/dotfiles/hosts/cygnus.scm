@@ -89,6 +89,24 @@
                "proxy_set_header HOST $http_host;")))
        %letsencrypt-acme-challenge))))))
 
+(define extra-certbot-certificates-service
+  (simple-service
+   'add-extra-ssl-certificates
+   certbot-service-type
+   (list
+    (certificate-configuration
+     (domains (list (string-append "git." %default-domain)))
+     (deploy-hook %nginx-deploy-hook))
+    (certificate-configuration
+     (domains (list (string-append "files." %default-domain)))
+     (deploy-hook %nginx-deploy-hook))
+    (certificate-configuration
+     (domains (list %tubo-host))
+     (deploy-hook %nginx-deploy-hook))
+    (certificate-configuration
+     (domains (list "conses.eu" "www.conses.eu"))
+     (deploy-hook %nginx-deploy-hook)))))
+
 (define cygnus-version-control-services
   (list
    (service fcgiwrap-service-type
