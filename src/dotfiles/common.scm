@@ -360,12 +360,24 @@
      "nnmaildir+personal:sent"
      "nnmaildir+personal:spam"
      "nnmaildir+personal:trash")
-    ("Deprecated"
-     "nnmaildir+deprecated:inbox"
-     "nnmaildir+deprecated:drafts"
-     "nnmaildir+deprecated:sent"
-     "nnmaildir+deprecated:spam"
-     "nnmaildir+deprecated:trash")
+    ("Public"
+     "nnmaildir+public:inbox"
+     "nnmaildir+public:drafts"
+     "nnmaildir+public:sent"
+     "nnmaildir+public:spam"
+     "nnmaildir+public:trash")
+    ("Mmoreno"
+     "nnmaildir+mmoreno:inbox"
+     "nnmaildir+mmoreno:drafts"
+     "nnmaildir+mmoreno:sent"
+     "nnmaildir+mmoreno:spam"
+     "nnmaildir+mmoreno:trash")
+    ("Conses"
+     "nnmaildir+conses:inbox"
+     "nnmaildir+conses:drafts"
+     "nnmaildir+conses:sent"
+     "nnmaildir+conses:spam"
+     "nnmaildir+conses:trash")
     ("Clojure"
      "nntp+gwene:gwene.clojure.planet"
      "nntp+gwene:gwene.com.google.groups.clojure")
@@ -404,7 +416,9 @@
   '(("Gnus" visible)
     (("Inbox" visible)
      (("Personal" visible nil))
-     (("Deprecated" visible nil)))
+     (("Public" visible nil))
+     (("Mmoreno" visible nil))
+     (("Conses" visible nil)))
     (("News" visible)
      (("Common Lisp" visible nil))
      (("Clojure" visible nil))
@@ -445,8 +459,10 @@
    (feature-mail-settings
     #:mail-accounts
     (list
-     (mail-acc 'deprecated "contact@conses.eu" 'gandi)
-     (mail-acc 'personal %default-email 'gandi))
+     (mail-acc 'public "public@mianmoreno.com" 'gandi)
+     (mail-acc 'personal "me@mianmoreno.com" 'gandi)
+     (mail-acc 'mmoreno "mmoreno@mmoreno.eu" 'gandi)
+     (mail-acc 'conses "contact@conses.eu" 'gandi))
     #:mail-directory-fn
     (const (string-append (getenv "XDG_STATE_HOME") "/mail")))
    (feature-isync)
