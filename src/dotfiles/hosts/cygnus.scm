@@ -175,8 +175,10 @@
   (strings->packages "git" "rsync"))
 
 (define extra-system-services
-  (list
+  (list*
    extra-nginx-config-service
+   extra-certbot-certificates-service
+   cygnus-version-control-services
    (service rsync-service-type
             (rsync-configuration
              (modules
