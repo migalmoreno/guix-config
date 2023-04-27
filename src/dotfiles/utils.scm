@@ -32,7 +32,7 @@
 
 (define-public %default-ssh-key
   (plain-file
-   "mmoreno.pub"
+   "mianmoreno.pub"
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN\n"))
 
 (define-public %default-ssh-keygrip
@@ -42,13 +42,13 @@
 
 (define-public %default-timezone "Europe/Madrid")
 
-(define-public %default-email "mmoreno@mmoreno.eu")
+(define-public %default-email "me@mianmoreno.com")
 
 (define-public %default-fullname "Miguel Moreno")
 
-(define-public %default-username "mmoreno")
+(define-public %default-username "mianmoreno")
 
-(define-public %default-domain "mmoreno.eu")
+(define-public %default-domain "mianmoreno.com")
 
 (define-public %tubo-host (string-append "tubo." %default-domain))
 
