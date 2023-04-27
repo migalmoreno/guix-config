@@ -259,7 +259,9 @@
       (setq geiser-repl-per-project-p t))
     (setq copyright-names-regexp
           (format "%s <%s>" user-full-name user-mail-address))
-    (add-hook 'after-save-hook (lambda () (copyright-update nil nil)))))
+    (add-hook 'after-save-hook (lambda () (copyright-update nil nil)))
+    (with-eval-after-load 'cider-repl
+      (setq cider-repl-display-in-current-window t))))
 
 (define extra-elisp-packages
   (strings->packages
