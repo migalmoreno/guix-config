@@ -313,7 +313,7 @@
       (id 'srht)
       (network "chat.sr.ht")
       (bouncer? #t)
-      (nick %default-username))
+      (nick "mmoreno"))
      (irc-account
       (id 'libera)
       (network "irc.libera.chat")
