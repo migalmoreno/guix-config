@@ -166,7 +166,9 @@
                    '("js" . "src js")))
     (with-eval-after-load 'ob-core
       (require 'ob-js))
-    (require 'ox-md)
+    (with-eval-after-load 'ox
+      (require 'ox-md)
+      (require 'ox-haunt))
     (with-eval-after-load 'css-mode
       (setq css-indent-offset 2))
     (with-eval-after-load 'mhtml-mode
