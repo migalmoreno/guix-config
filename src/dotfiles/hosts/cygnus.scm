@@ -232,7 +232,28 @@
     #:primary-domain %default-domain)
    (feature-postgresql)
    (feature-nginx
-    #:primary-domain-setup? #t)
+    #:nginx-configuration
+    (nginx-configuration
+     (server-blocks
+      (list
+       (nginx-server-configuration
+        (listen '("443 ssl http2"))
+        (server-name (list %default-domain
+                           (string-append "www." %default-domain)))
+        (root (string-append "/srv/http/" %default-domain))
+        (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
+                                 %default-domain))
+        (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
+                                     %default-domain))
+        (raw-content (list "error_page 404 = /404.html;"))
+        (locations
+         (append
+          (list
+           (nginx-location-configuration
+            (uri "/404.html")
+            (body
+             (list "internal;"))))
+          (list %letsencrypt-acme-challenge))))))))
    (feature-certbot
     #:email %default-email)
    (feature-matrix-settings
