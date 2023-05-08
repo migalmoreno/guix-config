@@ -16,6 +16,7 @@
   #:use-module (gnu services base)
   #:use-module (gnu services certbot)
   #:use-module (gnu services cgit)
+  #:use-module (gnu services docker)
   #:use-module (gnu services networking)
   #:use-module (gnu services rsync)
   #:use-module (gnu services ssh)
@@ -190,6 +191,7 @@
                 (name "site")
                 (file-name (string-append "/srv/http/" %default-domain)))))))
    (service dhcp-client-service-type)
+   (service docker-service-type)
    (service openssh-service-type
             (openssh-configuration
              (openssh (@ (gnu packages ssh) openssh-sans-x))
