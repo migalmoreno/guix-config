@@ -264,7 +264,66 @@
           (format "%s <%s>" user-full-name user-mail-address))
     (add-hook 'after-save-hook (lambda () (copyright-update nil nil)))
     (with-eval-after-load 'cider-repl
-      (setq cider-repl-display-in-current-window t))))
+      (setq cider-repl-display-in-current-window t))
+    (defvar rde-screencast-process nil)
+    (defvar rde-screencast-map nil)
+    (define-prefix-command 'rde-screencast-map)
+    (with-eval-after-load 'rde-keymaps
+      (define-key rde-app-map (kbd "S") 'rde-screencast-map)
+      (let ((map rde-screencast-map))
+        (define-key map (kbd "f") 'rde-record-screencast)
+        (define-key map (kbd "r") 'rde-record-screencast-region)
+        (define-key map (kbd "s") 'rde-stop-screencast)))
+    (defun rde-record-screencast-region ()
+      "Record a portion of the screen as a screencast."
+      (interactive)
+      (require 'hexrgb)
+      (pcase-let ((`(,pos-x ,pos-y ,height ,width)
+                   (split-string
+                    (shell-command-to-string
+                     (substring
+                      (concat "slop -q -o -b 3 --format=%x,%y,%h,%w -c "
+                              (mapconcat 'number-to-string
+                                         (hexrgb-hex-to-rgb "#51afef")
+                                         ","))
+                      0 -1))
+                    ",")))
+
+        (setq rde-screencast-process
+              (start-process
+               "ffmpeg" nil (executable-find "ffmpeg")
+               "-framerate" "60" "-show_region" "1"
+               "-s" (format "%sx%s" width height)
+               "-f" "x11grab"
+               "-i" (format ":0.0+%s,%s" pos-x pos-y)
+               "-c:v" "libx264" "-qp" "0"
+               "-preset" "ultrafast" "-crf" "17"
+               (expand-file-name (format-time-string "%Y%m%d-%H%M%S.mp4")
+                                 (xdg-user-dir "VIDEOS"))))))
+    (defun rde-record-screencast ()
+      "Record a full-screen desktop screencast."
+      (interactive)
+      (notifications-notify
+       :app-name "ffmpeg"
+       :title "Started recording screen"
+       :timeout 3000)
+      (run-at-time 2 nil
+                   (lambda ()
+                     (setq rde-screencast-process
+                           (start-process
+                            "ffmpeg" nil (executable-find "ffmpeg")
+                            "-framerate" "60" "-f" "x11grab" "-i" ":0.0"
+                            "-c:v" "libx264" "-qp" "0"
+                            "-preset" "ultrafast"
+                            (expand-file-name
+                             (format-time-string "%Y%m%d-%H%M%S.mp4")
+                             (xdg-user-dir "VIDEOS")))))))
+    (defun rde-stop-screencast ()
+      (interactive)
+      (when rde-screencast-process
+        (ignore-errors
+          (interrupt-process rde-screencast-process)))
+      (setq rde-screencast-process nil))
 
 (define extra-elisp-packages
   (strings->packages
