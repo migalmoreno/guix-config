@@ -803,6 +803,14 @@ EndSection"))
      :shortcut "pc"
      :fallback-url (quri:uri "https://community.penpot.app/latest")
      :base-search-url "https://community.penpot.app/search?q=~a")
+    (engines:google
+     :shortcut "go"
+     :fallback-url (quri:uri "https://www.google.es")
+     :base-search-url "https://www.google.es/search?q=~a"
+     :safe-search nil
+     :lang-ui :english
+     :results-number 50
+     :new-window t)
     ,@(if (get-value 'google-frontend config)
           `((engines:whoogle
              :shortcut "who"
