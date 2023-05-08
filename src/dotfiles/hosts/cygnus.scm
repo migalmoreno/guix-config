@@ -66,10 +66,12 @@
      (listen '("443 ssl http2"))
      (server-name (list (string-append "files." %default-domain)))
      (root "/srv/http/files")
-     (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
-                              %default-domain))
+     (ssl-certificate
+      (format #f "/etc/letsencrypt/live/files.~a/fullchain.pem"
+              %default-domain))
      (ssl-certificate-key
-      (format #f "/etc/letsencrypt/live/~a/privkey.pem" %default-domain))
+      (format #f "/etc/letsencrypt/live/files.~a/privkey.pem"
+              %default-domain))
      (raw-content '("autoindex on;"))
      (locations
       (list %letsencrypt-acme-challenge)))
