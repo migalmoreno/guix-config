@@ -271,7 +271,7 @@
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
    "emacs-yaml-mode" "emacs-json-mode" "emacs-wgrep"
    "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
-   "emacs-exwm-modeline"))
+   "emacs-exwm-modeline" "emacs-nginx-mode" "emacs-hexrgb"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
