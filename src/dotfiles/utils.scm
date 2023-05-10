@@ -44,7 +44,7 @@
 
 (define-public %default-email "me@mianmoreno.com")
 
-(define-public %default-fullname "Miguel Moreno")
+(define-public %default-fullname "Miguel Ángel Moreno")
 
 (define-public %default-username "mianmoreno")
 
