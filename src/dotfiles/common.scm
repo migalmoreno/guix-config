@@ -762,7 +762,7 @@ EndSection"))
     (make-instance
      'search-engine
      :shortcut "to"
-     :search-url "https://torrents-csv.ml/#/search/torrent/~a/1"
+     :search-url "https://torrents-csv.ml/search/~a"
      :fallback-url "https://torrents-csv.ml")
     (make-instance
      'search-engine
