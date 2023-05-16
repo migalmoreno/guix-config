@@ -143,7 +143,7 @@
       (list (format #f "https://git.~a/$CGIT_REPO_URL " %default-domain)))
      (about-filter
       (program-file
-       "about-formatting"
+       "cgit-about-formatting"
        #~(apply execl (string-append
                        #$cgit "/lib/cgit/filters/about-formatting.sh")
                 (command-line))))
