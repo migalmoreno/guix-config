@@ -701,7 +701,7 @@ EndSection"))
     (make-instance
      'router:opener
      :trigger (match-scheme "mailto")
-     :resource "xdg-open ~a")
+     :resource "xdg-open ~s &")
     (make-instance
      'router:opener
      :trigger (match-scheme "magnet" "torrent")
