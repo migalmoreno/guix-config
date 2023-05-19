@@ -767,6 +767,16 @@ EndSection"))
      :fallback-url "https://torrents-csv.ml")
     (make-instance
      'search-engine
+     :shortcut "ra"
+     :search-url "https://rargb.to/search/?search=~a"
+     :fallback-url "https://rargb.to")
+    (make-instance
+     'search-engine
+     :shortcut "kt"
+     :search-url "https://kickasstorrents.to/usearch/~a"
+     :fallback-url "https://kickasstorrents.to")
+    (make-instance
+     'search-engine
      :shortcut "mdn"
      :search-url "https://developer.mozilla.org/en-US/search?q=~a"
      :fallback-url "https://developer.mozilla.org")
