@@ -56,7 +56,8 @@
     (slang . en)
     (ytdl-raw-options . "ignore-config=,sub-lang=en,write-auto-sub=")
     (script-opts-add=osc-visibility . never)
-    (script-opts-add=osc-windowcontrols . no)))
+    (script-opts-add=osc-windowcontrols . no)
+    (save-position-on-quit . #t)))
 
 (define-public %multimedia-base-features
   (list
