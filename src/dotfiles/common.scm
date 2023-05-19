@@ -384,8 +384,9 @@
     ("Common Lisp"
      "nntp+gwene:gwene.org.lisp.planet"
      "nntp+gwene:gwene.engineer.atlas.nyxt")
-    ("Guile"
-     "nntp+gwene:gwene.org.wingolog")
+    ("Scheme"
+     "nntp+gwene:gwene.org.wingolog"
+     "nntp+gwene:gwene.org.scheme.planet")
     ("Technology"
      "nntp+gwene:gwene.org.fsf.news"
      "nntp+gwene:gwene.rs.lobste"
@@ -422,8 +423,8 @@
     (("News" visible)
      (("Common Lisp" visible nil))
      (("Clojure" visible nil))
+     (("Scheme" visible nil))
      (("Emacs" visible nil))
-     (("Guile" visible nil))
      (("Guix" visible nil))
      (("Technology" visible nil)))))
 
