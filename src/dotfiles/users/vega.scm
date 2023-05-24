@@ -331,23 +331,22 @@
       (interactive "P")
       (if (listp (rde-exwm--get-outputs))
           (if decrease
-              (start-process-shell-command "light" nil "light -s sysfs/backlight/ddcci1 -U 5")
-              (start-process-shell-command "light" nil "light -s sysfs/backlight/ddcci1 -A 5"))
+              (start-process "light" nil "light"
+                             "-s" "sysfs/backlight/ddcci1" "-U" "5")
+              (start-process "light" nil "light"
+                             "-s" "sysfs/backlight/ddcci1" "-A" "5"))
           (if decrease
-              (start-process-shell-command "light" nil "light -U 5")
-              (start-process-shell-command "light" nil "light -A 5"))))
+              (start-process "light" nil "light" "-U" "5")
+              (start-process "light" nil "light" "-A" "5"))))
     (defun rde--get-brightness ()
       "Get display brigthness using light."
-      (let* ((display (substring (shell-command-to-string "autorandr --current") 0 -1))
-             (brightness
-              (round
-               (string-to-number
-                (substring
-                 (if (string-equal display "standalone")
-                     (shell-command-to-string "light -G")
-                   (shell-command-to-string "light -s sysfs/backlight/ddcci1 -G"))
-                 0 -1)))))
-        brightness))))
+      (round
+       (string-to-number
+        (substring
+         (if (listp (rde-exwm--get-outputs))
+             (shell-command-to-string "light -s sysfs/backlight/ddcci1 -G")
+             (shell-command-to-string "light -G"))
+         0 -1))))))
 
 (define extra-elisp-packages
   (strings->packages
