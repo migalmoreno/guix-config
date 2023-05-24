@@ -352,9 +352,9 @@
 (define extra-elisp-packages
   (strings->packages
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
-   "emacs-yaml-mode" "emacs-json-mode" "emacs-wgrep"
+   "emacs-yaml-mode" "emacs-json-mode" "emacs-nginx-mode" "emacs-pug-mode"
    "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
-   "emacs-exwm-modeline" "emacs-nginx-mode" "emacs-hexrgb"))
+   "emacs-exwm-modeline"  "emacs-hexrgb" "emacs-wgrep"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
