@@ -749,6 +749,11 @@ EndSection"))
      :fallback-url "https://clojars.org")
     (make-instance
      'search-engine
+     :shortcut "npm"
+     :search-url "https://www.npmjs.com/search?q=~a"
+     :fallback-url "https://www.npmjs.com")
+    (make-instance
+     'search-engine
      :shortcut "fa"
      :search-url "https://fontawesome.com/search?q=~a&m=free"
      :fallback-url "https://fontawesome.com")
