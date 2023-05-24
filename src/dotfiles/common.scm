@@ -192,7 +192,9 @@
     #:dashboard-agenda-prefix-format "%?-12:c"
     #:path-max-length 50)
    (feature-emacs-dired
-    #:kill-when-opening-new-buffer? #t)
+    #:kill-when-opening-new-buffer? #t
+    #:group-directories-first? #t
+    #:default-switches "")
    (feature-emacs-calc)
    (feature-emacs-tramp)
    (feature-emacs-re-builder)
