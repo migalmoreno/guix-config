@@ -920,4 +920,4 @@ EndSection"))
        ((cc . ,%default-email)
         (thread . #t))))
     #:extra-global-ignores
-    '("**/.direnv" "node_modules" ".log"))))
+    '("**/.direnv" ".log"))))
