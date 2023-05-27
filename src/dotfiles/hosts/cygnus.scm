@@ -76,6 +76,25 @@
      (locations
       (list %letsencrypt-acme-challenge)))
     (nginx-server-configuration
+     (listen '("443 ssl http2"
+               "[::]:443 ssl http2"))
+     (server-name (list (string-append "pantalaimon." %default-domain)))
+     (ssl-certificate
+      (format #f "/etc/letsencrypt/live/pantalaimon.~a/fullchain.pem"
+              %default-domain))
+     (ssl-certificate-key
+      (format #f "/etc/letsencrypt/live/pantalaimon.~a/privkey.pem"
+              %default-domain))
+     (locations
+      (list
+       (nginx-location-configuration
+        (uri "/")
+        (body
+         (list "proxy_pass http://localhost:8009;"
+               "proxy_set_header X-Forwarded-For $remote_addr;"
+               "proxy_set_header HOST $http_host;")))
+       %letsencrypt-acme-challenge)))
+    (nginx-server-configuration
      (listen '("443 ssl http2"))
      (server-name (list %tubo-host))
      (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
@@ -102,6 +121,9 @@
      (deploy-hook %nginx-deploy-hook))
     (certificate-configuration
      (domains (list (string-append "files." %default-domain)))
+     (deploy-hook %nginx-deploy-hook))
+    (certificate-configuration
+     (domains (list (string-append "pantalaimon." %default-domain)))
      (deploy-hook %nginx-deploy-hook))
     (certificate-configuration
      (domains (list %tubo-host))
