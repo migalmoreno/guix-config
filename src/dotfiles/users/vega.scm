@@ -266,7 +266,7 @@
     (with-eval-after-load 'cider-repl
       (setq cider-repl-display-in-current-window t))
     (with-eval-after-load 'ange-ftp
-      (setq ange-ftp-try-passive-mode t)))
+      (setq ange-ftp-try-passive-mode t))
     (defvar rde-screencast-process nil)
     (defvar rde-screencast-map nil)
     (define-prefix-command 'rde-screencast-map)
