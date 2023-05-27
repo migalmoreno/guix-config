@@ -307,7 +307,7 @@
     (list
      (matrix-account
       (id "@sloan:conses.eu")
-      (homeserver "matrix.conses.eu"))))
+      (server "matrix.conses.eu"))))
    (feature-emacs-ement)
    (feature-irc-settings
     #:irc-accounts
