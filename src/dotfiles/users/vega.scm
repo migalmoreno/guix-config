@@ -326,18 +326,32 @@
         (ignore-errors
           (interrupt-process rde-screencast-process)))
       (setq rde-screencast-process nil))
-    (defun rde-change-brightness (&optional decrease)
+    (defun rde-increase-brightness ()
       "Change monitor/laptop screen brightness through light and ddcutil."
-      (interactive "P")
+      (interactive)
       (if (listp (rde-exwm--get-outputs))
-          (if decrease
-              (start-process "light" nil "light"
-                             "-s" "sysfs/backlight/ddcci1" "-U" "5")
-              (start-process "light" nil "light"
-                             "-s" "sysfs/backlight/ddcci1" "-A" "5"))
-          (if decrease
-              (start-process "light" nil "light" "-U" "5")
-              (start-process "light" nil "light" "-A" "5"))))
+          (start-process "light" nil "light"
+                         "-s" "sysfs/backlight/ddcci1" "-A" "5")
+          (start-process "light" nil "light" "-A" "5")))
+    (defun rde-decrease-brightness ()
+      (interactive)
+      (if (listp (rde-exwm--get-outputs))
+          (start-process "light" nil "light"
+                         "-s" "sysfs/backlight/ddcci1" "-U" "5")
+          (start-process "light" nil "light" "-U" "5")))
+    (defvar rde-brightness-map nil
+      "Map to bind brightness-related helpers under.")
+    (define-prefix-command 'rde-brightness-map)
+    (with-eval-after-load 'rde-keymaps
+      (define-key rde-app-map (kbd "l") 'rde-brightness-map))
+    (let ((map rde-brightness-map))
+      (define-key map (kbd "i") 'rde-increase-brightness)
+      (define-key map (kbd "d") 'rde-decrease-brightness)
+      (map-keymap
+       (lambda (_key cmd)
+         (when (symbolp cmd)
+           (put cmd 'repeat-map 'rde-brightness-map)))
+       map))
     (defun rde--get-brightness ()
       "Get display brigthness using light."
       (round
