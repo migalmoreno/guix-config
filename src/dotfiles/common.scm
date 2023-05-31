@@ -194,7 +194,7 @@
    (feature-emacs-dired
     #:kill-when-opening-new-buffer? #t
     #:group-directories-first? #t
-    #:default-switches "")
+    #:extra-switches #f)
    (feature-emacs-calc)
    (feature-emacs-tramp)
    (feature-emacs-re-builder)
