@@ -840,26 +840,6 @@ EndSection"))
              :new-tab t))
           '())))
 
-(define nyxt-userstyles
-  `((make-instance
-     'nyxt/user-script-mode:user-style
-     :include '("https://github.com/*" "https://gist.github.com/*")
-     :code (theme:themed-css (theme *browser*)
-             `((:or "#dashboard.body"
-                    .js-inline-dashboard-render
-                    .js-feed-item-component
-                    (:and .js-profile-editable-area div .mb-3)
-                    .starring-container
-                    "#js-contributor-activity"
-                    "#year-list-container"
-                    (:and a (:$= href (:or "watchers" "stargazers"
-                                           "followers" "following"
-                                           "achievements")))
-                    (:*= action "follow"))
-               :display none !important)
-             `((:and img (:*= class "avatar"))
-               :visibility hidden)))))
-
 (define-public %base-nyxt-extra-config-lisp
   `((local-time:reread-timezone-repository)
     (setf local-time:*default-timezone*
@@ -874,8 +854,6 @@ EndSection"))
    (feature-nyxt-nx-mosaic)
    (feature-nyxt-emacs)
    (feature-nyxt-blocker)
-   (feature-nyxt-userscript
-    #:userstyles nyxt-userstyles)
    (feature-nyxt-nx-search-engines
     #:default-engine-shortcut "who"
     #:extra-engines nx-search-engines-extra-engines)
