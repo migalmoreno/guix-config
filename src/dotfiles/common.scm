@@ -388,7 +388,6 @@
      "nntp+gwene:gwene.org.lisp.planet"
      "nntp+gwene:gwene.engineer.atlas.nyxt")
     ("Scheme"
-     "nntp+gwene:gwene.org.wingolog"
      "nntp+gwene:gwene.org.scheme.planet")
     ("Technology"
      "nntp+gwene:gwene.org.fsf.news"
