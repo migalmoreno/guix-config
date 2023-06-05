@@ -71,7 +71,7 @@
      (ssh-host
       (host "hydri")
       (options
-       `((host-name . "192.168.1.123")
+       `((host-name . "192.168.0.29")
          (user . "hydri"))))))))
 
 (define extra-xdg-desktop-entries
