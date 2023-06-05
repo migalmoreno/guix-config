@@ -367,7 +367,8 @@
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
    "emacs-yaml-mode" "emacs-json-mode" "emacs-nginx-mode" "emacs-pug-mode"
    "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
-   "emacs-exwm-modeline"  "emacs-hexrgb" "emacs-wgrep"))
+   "emacs-exwm-modeline"  "emacs-hexrgb" "emacs-wgrep" "emacs-org-fragtog"
+   "emacs-org-download" "emacs-org-make-toc"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
