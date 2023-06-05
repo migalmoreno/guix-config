@@ -265,6 +265,8 @@
         (define-key map (kbd "M-n") 'corfu-doc-scroll-up)
         (define-key map (kbd "M-d") 'corfu-doc-toggle))
       (require 'kind-icon)
+      (setq corfu-auto-prefix 2)
+      (setq corfu-exclude-modes '(org-mode))
       (setq kind-icon-default-face 'corfu-default)
       (add-to-list 'corfu-margin-formatters 'kind-icon-margin-formatter)
       (set-face-attribute 'corfu-default nil :inherit 'fixed-pitch))
