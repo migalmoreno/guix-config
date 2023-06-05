@@ -241,6 +241,7 @@
     (advice-add 'completing-read-multiple
                 :filter-args 'rde-completion-crm-indicator)
     (define-key goto-map (kbd "a") 'consult-org-agenda)
+    (define-key goto-map (kbd "h") 'consult-org-heading)
     (define-key ctl-x-map "b" 'consult-buffer)
     (define-key help-map "a" 'consult-apropos)
     (define-key ctl-x-map (kbd "M-:") 'consult-complex-command)
