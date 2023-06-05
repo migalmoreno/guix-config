@@ -109,7 +109,9 @@
               "+-" (make-string (length str) ?-) "-+" n)))
 
 (define-public %base-extra-init-el
-  `((add-hook 'after-init-hook 'server-start)
+  `((eval-when-compile
+     (require 'cl-lib))
+    (add-hook 'after-init-hook 'server-start)
     (setq-default frame-title-format '("%b - Emacs"))
     (require 'warnings)
     (setq warning-suppress-types '((diary) (auto-save) (org-babel)))
