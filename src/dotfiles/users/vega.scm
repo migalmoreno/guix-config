@@ -150,8 +150,6 @@
       (setq mouse-autoselect-window nil)
       (setq what-cursor-show-names t)
       (setq focus-follows-mouse t))
-    (with-eval-after-load 'window
-      (setq split-window-keep-point t))
     (winner-mode)
     (define-key ctl-x-map (kbd "C-b") 'ibuffer)
     (with-eval-after-load 'ibuffer
@@ -254,14 +252,7 @@
     (with-eval-after-load 'embark
       (setq embark-indicators '(embark-minimal-indicator))
       (setq embark-prompter 'embark-keymap-prompter)
-      (setq prefix-help-command 'embark-prefix-help-command)
-      (add-to-list
-       'display-buffer-alist
-       `(,(rx bos "*Embark Collect " (or "Live" "Completions") "*")
-         nil
-         (window-parameters (mode-line-format . none)))))
-    (with-eval-after-load 'corfu
-      (setq corfu-auto-prefix 2))
+      (setq prefix-help-command 'embark-prefix-help-command))
     (autoload 'corfu-history-mode "corfu-history")
     (corfu-history-mode)
     (with-eval-after-load 'corfu
@@ -283,6 +274,12 @@
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
     (add-hook 'eww-mode-hook 'eww-toggle-images)
     (with-eval-after-load 'window
+      (setq split-window-keep-point t)
+      (add-to-list 'display-buffer-alist
+                   `(,(rx bos "*Embark Collect "
+                          (or "Live" "Completions") "*")
+                     nil
+                     (window-parameters (mode-line-format . none))))
       (add-to-list 'display-buffer-alist
                    `(,(rx "*help" (* any) "*")
                      (display-buffer-reuse-window
