@@ -161,12 +161,75 @@
       (setq image-use-external-converter t))
     (with-eval-after-load 'js
       (setq js-indent-level 2))
+    (cl-defun rde-org-do-promote (&optional (levels 1))
+      "Allow promoting the current heading LEVELS high up the tree."
+      (interactive "p")
+      (save-excursion
+        (if (org-region-active-p)
+            (org-map-region (lambda ()
+                              (dotimes (_ levels)
+                                (org-promote)))
+                            (region-beginning) (region-end))
+          (dotimes (_ levels)
+            (org-promote))))
+      (org-fix-position-after-promote))
+    (advice-add 'org-do-promote :override 'rde-org-do-promote)
+    (define-key mode-specific-map (kbd "l") 'org-store-link)
+    (add-hook 'org-mode-hook 'prettify-symbols-mode)
+    (add-hook 'org-mode-hook 'org-fragtog-mode)
+    (add-hook 'org-mode-hook 'variable-pitch-mode)
+    (org-crypt-use-before-save-magic)
     (with-eval-after-load 'org
+      (require 'org-tempo)
+      (require 'org-timer)
+      (let ((map org-mode-map))
+        (define-key map (kbd "M-n") 'org-metaright)
+        (define-key map (kbd "M-p") 'org-metaleft))
+      (setq org-startup-folded 'content)
+      (setq org-startup-with-inline-images t)
+      (setq org-startup-with-latex-preview t)
+      (setq org-extend-today-until 0)
+      (setq org-use-fast-todo-selection 'expert)
+      (setq org-log-done 'time)
+      (setq org-log-into-drawer t)
+      (setq org-special-ctrl-a/e t)
+      (setq org-insert-heading-respect-content t)
+      (setq org-auto-align-tags t)
+      (setq org-tags-exclude-from-inheritance '("todo" "crypt"))
+      (setq org-enforce-todo-dependencies t)
+      (setq org-enforce-todo-checkbox-dependencies t)
+      (setq org-archive-location "~/documents/archive.org::* From %s")
+      (setq org-fast-tag-selection-single-key 'expert)
+      (setq org-display-remote-inline-images 'cache)
+      (setq org-image-actual-width nil)
+      (setq org-pretty-entities t)
+      (setq org-pretty-entities-include-sub-superscripts nil)
+      (setq org-M-RET-may-split-line nil)
+      (setq org-highest-priority ?A)
+      (setq org-lowest-priority ?C)
+      (setq org-default-priority ?B)
+      (setq org-fontify-done-headline t)
       (add-to-list 'org-structure-template-alist
                    '("js" . "src js")))
+    (with-eval-after-load 'org-capture
+      (setq org-capture-bookmark nil))
+    (with-eval-after-load 'org-src
+      (setq org-src-tab-acts-natively t)
+      (setq org-src-window-setup 'current-window)
+      (setq org-catch-invisible-edits 'show-and-error)
+      (setq org-src-fontify-natively t))
+    (with-eval-after-load 'org-keys
+      (setq org-return-follows-link t))
+    (with-eval-after-load 'org-download
+      (setq org-download-image-dir "images")
+      (setq org-download-image-org-width 300))
     (with-eval-after-load 'ob-core
-      (require 'ob-js))
+      (require 'ob-js)
+      (setq org-confirm-babel-evaluate nil))
+    (with-eval-after-load 'ol
+      (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file))
     (with-eval-after-load 'ox
+      (setq org-export-preserve-breaks t)
       (require 'ox-md)
       (require 'ox-haunt))
     (with-eval-after-load 'css-mode
@@ -231,13 +294,15 @@
                       display-buffer-same-window)
                      (reusable-frames . t)))
       (add-to-list 'display-buffer-alist
+                   `(,(rx "*Org Links*")
+                     display-buffer-no-window
+                     (allow-no-window . t)))
+      (add-to-list 'display-buffer-alist
                    `(,(rx "*org-roam*")
                      display-buffer-same-window)))
     (repeat-mode 1)
     (with-eval-after-load 'rde-keymaps
       (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))
-    (eval-when-compile
-     (require 'cl-lib))
     (defun exwm-modeline-update ()
       "Update EXWM modefine for every frame."
       (interactive)
