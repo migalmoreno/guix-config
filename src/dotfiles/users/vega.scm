@@ -896,8 +896,7 @@
    (feature-alternative-frontends
     #:google-frontend "http://localhost:5000"
     #:youtube-frontend (string-append "https://" %tubo-host)
-    #:reddit-frontend "https://teddit.pussthecat.org"
-    #:github-frontend "https://gothub.dev.projectsegfau.lt")
+    #:reddit-frontend "https://teddit.pussthecat.org")
    (feature-android)
    (feature-manpages)
    (feature-emacs
