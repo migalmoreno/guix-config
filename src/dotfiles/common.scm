@@ -275,6 +275,7 @@
 
 (define-public %markup-base-features
   (list*
+   (feature-emacs-monocle)
    %org-base-features
    (feature-markdown
     #:headings-scaling? #t)
