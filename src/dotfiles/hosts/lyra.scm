@@ -10,6 +10,7 @@
   #:use-module (gnu services ssh)
   #:use-module (gnu services syncthing)
   #:use-module (gnu services virtualization)
+  #:use-module (gnu services web)
   #:use-module (gnu services xorg)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
@@ -110,6 +111,7 @@
             (syncthing-configuration (user "vega")))
    (service spice-vdagent-service-type)
    (service virtlog-service-type)
+   (service whoogle-service-type)
    (service libvirt-service-type
             (libvirt-configuration
              (unix-sock-group "libvirt")
@@ -167,7 +169,6 @@
      (bootloader grub-efi-bootloader)
      (targets '("/boot/efi"))
      (timeout 3)))
-   (feature-whoogle)
    (feature-file-systems
     #:mapped-devices lyra-mapped-devices
     #:file-systems lyra-file-systems)
