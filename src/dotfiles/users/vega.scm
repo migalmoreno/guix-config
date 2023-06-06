@@ -330,6 +330,15 @@
     (repeat-mode 1)
     (with-eval-after-load 'rde-keymaps
       (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))
+    (with-eval-after-load 'exwm
+      (exwm-input-set-key (kbd "s-<insert>")
+                          (lambda ()
+                            (interactive)
+                            (call-process ,maim-fullscreen)))
+      (exwm-input-set-key (kbd "S-s-<insert>")
+                          (lambda ()
+                            (interactive)
+                            (call-process ,maim-region))))
     (defun exwm-modeline-update ()
       "Update EXWM modefine for every frame."
       (interactive)
