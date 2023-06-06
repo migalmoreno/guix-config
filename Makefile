@@ -12,6 +12,7 @@ SRC_DIR := ./src
 ENTRY := ${SRC_DIR}/dotfiles/store.scm
 HOST := $(shell hostname)
 USER := $(shell whoami)
+EXTRA_OPTIONS := --substitute-urls=https://ci.guix.gnu.org
 
 %/local: CMD := ${GUIX_LOCAL}
 %/local: CHANNELS := ${LOCK_LOCAL}
