@@ -2,7 +2,6 @@
   #:use-module (dotfiles utils)
   #:use-module (contrib features javascript)
   #:use-module (contrib features wm)
-  #:use-module (contrib features xorg)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module (guix packages)
@@ -611,17 +610,7 @@
 EndSection
 Section \"ServerFlags\"
   Option \"BlankTime\" \"0\"
-EndSection"))
-   (feature-xorg
-    #:extra-xresources
-    '((Xcursor.size . 16)
-      (Xft.autohint . #t)
-      (Xft.antialias . #t)
-      (Xft.hinting . #t)
-      (Xft.hintstyle . hintfull)
-      (Xft.rgba . none)
-      (Xft.lcdfilter . lcddefault)
-      (Xft.dpi . 110)))))
+EndSection"))))
 
 (define-public %desktop-base-features
   (list
