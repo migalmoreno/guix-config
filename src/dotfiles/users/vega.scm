@@ -23,8 +23,10 @@
   #:use-module (rde packages)
   #:use-module (gnu home)
   #:use-module (gnu services)
+  #:use-module (gnu home-services xorg)
   #:use-module (gnu home services)
   #:use-module (gnu home services desktop)
+  #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
   #:use-module (gnu system keyboard)
   #:use-module (guix gexp))
@@ -941,7 +943,43 @@
                           "clear lock"
                           "clear control"
                           ("keycode 66" . "Control_L")
-                          ("add control" . "Control_L Control_R"))))))))
+                          ("add control" . "Control_L Control_R")))))
+             (service home-xresources-service-type
+                      (home-xresources-configuration
+                       (config
+                        '((Xcursor.size . 16)
+                          (Xft.autohint . #t)
+                          (Xft.antialias . #t)
+                          (Xft.hinting . #t)
+                          (Xft.hintstyle . hintfull)
+                          (Xft.rgba . none)
+                          (Xft.lcdfilter . lcddefault)
+                          (Xft.dpi . 110)))))
+             (service home-unclutter-service-type
+               (home-unclutter-configuration
+                (idle-timeout 5)))
+             (simple-service
+              'add-startup-scripts
+              home-shepherd-service-type
+              (list
+               (shepherd-service
+                (provision '(screensaver))
+                (requirement '())
+                (one-shot? #t)
+                (start #~(lambda ()
+                           (invoke #$(file-append
+                                      (@ (gnu packages xorg) xset)
+                                      "/bin/xset")
+                                   "-dpms" "s" "off"))))
+               (shepherd-service
+                (provision '(cursor))
+                (requirement '())
+                (one-shot? #t)
+                (start #~(lambda ()
+                           (invoke #$(file-append
+                                      (@ (gnu packages xorg) xsetroot)
+                                      "/bin/xsetroot")
+                                   "-cursor_name" "left_ptr")))))))))
    (feature-networking)
    (feature-pipewire)))
 
