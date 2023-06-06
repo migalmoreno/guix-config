@@ -5,7 +5,6 @@
   #:use-module (rde features databases)
   #:use-module (rde features matrix)
   #:use-module (rde features system)
-  #:use-module (rde features web)
   #:use-module (rde system services matrix)
   #:use-module (rde packages)
   #:use-module (gnu packages version-control)
@@ -259,6 +258,7 @@
                (rsync-module
                 (name "site")
                 (file-name (string-append "/srv/http/" %default-domain)))))))
+   (service whoogle-service-type)
    (service dhcp-client-service-type)
    (service docker-service-type)
    (service openssh-service-type
@@ -298,7 +298,6 @@
    (feature-postgresql)
    (feature-matrix-settings
     #:homeserver "https://matrix.conses.eu")
-   (feature-whoogle)
    (feature-synapse
     #:whatsapp-bridge? #t
     #:synapse-configuration
