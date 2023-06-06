@@ -3,7 +3,6 @@
   #:use-module (dotfiles hosts lyra)
   #:use-module (rde features base)
   #:use-module (rde features databases)
-  #:use-module (rde features matrix)
   #:use-module (rde features system)
   #:use-module (rde system services matrix)
   #:use-module (rde packages)
@@ -41,107 +40,220 @@
    (swap-space
     (target (file-system-label "swap")))))
 
-
-;;; Service extensions
+(define cygnus-nginx-services
+  (list
+   (service nginx-service-type
+            (nginx-configuration
+             (server-blocks
+              (list
+               (nginx-server-configuration
+                (listen '("443 ssl http2"))
+                (server-name
+                 (list %default-domain
+                       (string-append "www." %default-domain)))
+                (root (string-append "/srv/http/" %default-domain))
+                (ssl-certificate
+                 (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
+                         %default-domain))
+                (ssl-certificate-key
+                 (format #f "/etc/letsencrypt/live/~a/privkey.pem"
+                         %default-domain))
+                (raw-content (list "error_page 404 = /404.html;"))
+                (locations
+                 (append
+                  (list
+                   (nginx-location-configuration
+                    (uri "/404.html")
+                    (body
+                     (list "internal;"))))
+                  (list %letsencrypt-acme-challenge))))))))
+   (simple-service
+    'add-extra-nginx-configuration
+    nginx-service-type
+    (list
+     (nginx-server-configuration
+      (listen '("443 ssl http2"))
+      (server-name (list %tubo-host))
+      (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
+                               %tubo-host))
+      (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
+                                   %tubo-host ))
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "/")
+         (body
+          (list "proxy_pass http://localhost:3000;"
+                "proxy_set_header X-Forwarded-For $remote_addr;"
+                "proxy_set_header HOST $http_host;")))
+        %letsencrypt-acme-challenge)))))))
 
-(define extra-nginx-config-service
-  (simple-service
-   'add-extra-nginx-configuration
-   nginx-service-type
-   (list
-    (nginx-server-configuration
-     (listen '("443 ssl http2"))
-     (server-name (list "conses.eu" "www.conses.eu"))
-     (ssl-certificate "/etc/letsencrypt/live/conses.eu/fullchain.pem")
-     (ssl-certificate-key "/etc/letsencrypt/live/conses.eu/privkey.pem")
-     (locations
-      (list
-       (nginx-location-configuration
-        (uri "/.well-known/matrix/server")
-        (body
-         (list "default_type application/json;"
-               "return 200 '{\"m.server\": \"matrix.conses.eu:443\"}';"
-               "add_header Access-Control-Allow-Origin *;"))))))
-    (nginx-server-configuration
-     (listen '("443 ssl http2"))
-     (server-name (list (string-append "whoogle." %default-domain)))
-     (ssl-certificate
-      (format #f "/etc/letsencrypt/live/whoogle.~a/fullchain.pem"
-              %default-domain))
-     (ssl-certificate-key
-      (format #f "/etc/letsencrypt/live/whoogle.~a/privkey.pem"
-              %default-domain))
-     (locations
-      (list
-       (nginx-location-configuration
-        (uri "/")
-        (body
-         (list "proxy_pass http://localhost:5000/;"
-               "proxy_set_header X-Forwarded-For $remote_addr;"
-               "proxy_set_header HOST $http_host;")))
-       %letsencrypt-acme-challenge)))
-    (nginx-server-configuration
-     (listen '("443 ssl http2"))
-     (server-name (list (string-append "files." %default-domain)))
-     (root "/srv/http/files")
-     (ssl-certificate
-      (format #f "/etc/letsencrypt/live/files.~a/fullchain.pem"
-              %default-domain))
-     (ssl-certificate-key
-      (format #f "/etc/letsencrypt/live/files.~a/privkey.pem"
-              %default-domain))
-     (raw-content '("autoindex on;"))
-     (locations
-      (list %letsencrypt-acme-challenge)))
-    (nginx-server-configuration
-     (listen '("443 ssl http2"
-               "[::]:443 ssl http2"))
-     (server-name (list (string-append "pantalaimon." %default-domain)))
-     (ssl-certificate
-      (format #f "/etc/letsencrypt/live/pantalaimon.~a/fullchain.pem"
-              %default-domain))
-     (ssl-certificate-key
-      (format #f "/etc/letsencrypt/live/pantalaimon.~a/privkey.pem"
-              %default-domain))
-     (locations
-      (list
-       (nginx-location-configuration
-        (uri "/")
-        (body
-         (list "proxy_pass http://localhost:8009;"
-               "proxy_set_header X-Forwarded-For $remote_addr;"
-               "proxy_set_header HOST $http_host;")))
-       %letsencrypt-acme-challenge)))
-    (nginx-server-configuration
-     (listen '("443 ssl http2"))
-     (server-name (list %tubo-host))
-     (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
-                              %tubo-host))
-     (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
-                                  %tubo-host ))
-     (locations
-      (list
-       (nginx-location-configuration
-        (uri "/")
-        (body
-         (list "proxy_pass http://localhost:3000;"
-               "proxy_set_header X-Forwarded-For $remote_addr;"
-               "proxy_set_header HOST $http_host;")))
-       %letsencrypt-acme-challenge))))))
+(define cygnus-certbot-services
+  (list
+   (service certbot-service-type
+            (certbot-configuration
+             (email %default-email)
+             (webroot "/srv/http")
+             (certificates
+              (list
+               (certificate-configuration
+                (domains (list %default-domain
+                               (string-append "www." %default-domain)))
+                (deploy-hook %nginx-deploy-hook))))))
+   (simple-service
+    'add-extra-ssl-certificates
+    certbot-service-type
+    (list
+     (certificate-configuration
+      (domains (list %tubo-host))
+      (deploy-hook %nginx-deploy-hook))))))
 
-(define extra-certbot-certificates-service
-  (simple-service
-   'add-extra-ssl-certificates
-   certbot-service-type
-   (map
-    (lambda (domain)
-      (certificate-configuration
-       (domains (list domain))
-       (deploy-hook %nginx-deploy-hook)))
-    (append
-     (map (cut string-append <> "." %default-domain)
-          (list "git" "files" "pantalaimon" "whoogle"))
-     (list %tubo-host "conses.eu")))))
+(define cygnus-matrix-services
+  (list
+   (service synapse-service-type
+            (synapse-configuration
+             (server-name "conses.eu")
+             (enable-registration? #f)
+             (public-base-url "https://matrix.conses.eu")
+             (shared-secret (getenv "CYGNUS_SYNAPSE_SHARED_SECRET"))
+             (postgresql-db? #t)
+             (postgresql-db-password (getenv "CYGNUS_SYNAPSE_DB_PASSWORD"))))
+   (service mautrix-whatsapp-service-type
+            (mautrix-whatsapp-configuration
+             (domain "conses.eu")
+             (postgresql-db? #t)
+             (postgresql-db-password
+              (getenv "CYGNUS_MAUTRIX_WHATSAPP_DB_PASSWORD"))
+             (encryption? #t)
+             (permissions `(("conses.eu" . user)
+                            ("@admin:conses.eu" . admin)))))
+   (simple-service
+    'add-matrix-nginx-configuration
+    nginx-service-type
+    (list
+     (nginx-server-configuration
+      (listen '("443 ssl http2"))
+      (server-name (list "conses.eu" "www.conses.eu"))
+      (ssl-certificate "/etc/letsencrypt/live/conses.eu/fullchain.pem")
+      (ssl-certificate-key "/etc/letsencrypt/live/conses.eu/privkey.pem")
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "/.well-known/matrix/server")
+         (body
+          (list "default_type application/json;"
+                "return 200 '{\"m.server\": \"matrix.conses.eu:443\"}';"
+                "add_header Access-Control-Allow-Origin *;"))))))
+     (nginx-server-configuration
+      (listen '("443 ssl http2"
+                "[::]:443 ssl http2"
+                "8448 ssl http2 default_server"
+                "[::]:8448 ssl http2 default_server"))
+      (server-name (list "matrix.conses.eu"))
+      (ssl-certificate
+       "/etc/letsencrypt/live/matrix.conses.eu/fullchain.pem")
+      (ssl-certificate-key
+       "/etc/letsencrypt/live/matrix.conses.eu/privkey.pem")
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "~ ^(/_matrix|/_synapse/client)")
+         (body
+          (list "proxy_pass http://localhost:8008;"
+                "proxy_set_header X-Forwarded-For $remote_addr;"
+                "proxy_set_header X-Forwarded-Proto $scheme;"
+                "proxy_set_header Host $host;"
+                "client_max_body_size 50M;")))
+        %letsencrypt-acme-challenge)))
+     (nginx-server-configuration
+      (listen '("443 ssl http2"
+                "[::]:443 ssl http2"))
+      (server-name (list "pantalaimon.conses.eu"))
+      (ssl-certificate
+       "/etc/letsencrypt/live/pantalaimon.conses.eu/fullchain.pem")
+      (ssl-certificate-key
+       "/etc/letsencrypt/live/pantalaimon.conses.eu/privkey.pem")
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "/")
+         (body
+          (list "proxy_pass http://localhost:8009;"
+                "proxy_set_header X-Forwarded-For $remote_addr;"
+                "proxy_set_header HOST $http_host;")))
+        %letsencrypt-acme-challenge)))))
+   (simple-service
+    'add-matrix-ssl-certificates
+    certbot-service-type
+    (map
+     (lambda (domain)
+       (certificate-configuration
+        (domains (list domain))
+        (deploy-hook %nginx-deploy-hook)))
+     (append
+      (list "conses.eu")
+      (map (cut string-append <> ".conses.eu")
+           (list "pantalaimon" "matrix")))))))
+
+(define cygnus-whoogle-services
+  (list
+   (service whoogle-service-type)
+   (simple-service
+    'add-whoogle-nginx-configuration
+    nginx-service-type
+    (list
+     (nginx-server-configuration
+      (listen '("443 ssl http2"))
+      (server-name (list (string-append "whoogle." %default-domain)))
+      (ssl-certificate
+       (format #f "/etc/letsencrypt/live/whoogle.~a/fullchain.pem"
+               %default-domain))
+      (ssl-certificate-key
+       (format #f "/etc/letsencrypt/live/whoogle.~a/privkey.pem"
+               %default-domain))
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "/")
+         (body
+          (list "proxy_pass http://localhost:5000/;"
+                "proxy_set_header X-Forwarded-For $remote_addr;"
+                "proxy_set_header HOST $http_host;")))
+        %letsencrypt-acme-challenge)))))
+   (simple-service
+    'add-whoogle-ssl-certificate
+    certbot-service-type
+    (list
+     (certificate-configuration
+      (domains (list (string-append "whoogle." %default-domain)))
+      (deploy-hook %nginx-deploy-hook))))))
+
+(define cygnus-file-server-services
+  (list
+   (simple-service
+    'add-file-server-nginx-configuration
+    nginx-service-type
+    (list
+     (nginx-server-configuration
+      (listen '("443 ssl http2"))
+      (server-name (list (string-append "files." %default-domain)))
+      (root "/srv/http/files")
+      (ssl-certificate
+       (format #f "/etc/letsencrypt/live/files.~a/fullchain.pem"
+               %default-domain))
+      (ssl-certificate-key
+       (format #f "/etc/letsencrypt/live/files.~a/privkey.pem"
+               %default-domain))
+      (raw-content '("autoindex on;"))
+      (locations
+       (list %letsencrypt-acme-challenge)))))
+   (simple-service
+    'add-file-server-ssl-certificate
+    certbot-service-type
+    (list
+     (certificate-configuration
+      (domains (list "files." %default-domain))
+      (deploy-hook %nginx-deploy-hook))))))
 
 (define cygnus-version-control-services
   (list
@@ -204,53 +316,30 @@
           (nginx-location-configuration
            (uri "@cgit")
            (body
-            '("fastcgi_param SCRIPT_FILENAME $document_root/lib/cgit/cgit.cgi;"
-              "fastcgi_param PATH_INFO $uri;"
-              "fastcgi_param QUERY_STRING $args;"
-              "fastcgi_param HTTP_HOST $server_name;"
-              "fastcgi_pass 127.0.0.1:9000;"))))))))))))
+            (list
+             "fastcgi_param SCRIPT_FILENAME $document_root/lib/cgit/cgit.cgi;"
+             "fastcgi_param PATH_INFO $uri;"
+             "fastcgi_param QUERY_STRING $args;"
+             "fastcgi_param HTTP_HOST $server_name;"
+             "fastcgi_pass 127.0.0.1:9000;"))))))))))
+   (simple-service
+    'add-cgit-ssl-certificate
+    certbot-service-type
+    (list
+     (certificate-configuration
+      (domains (list (string-append "git." %default-domain)))
+      (deploy-hook %nginx-deploy-hook))))))
 
-(define extra-system-packages
-  (strings->packages "git" "rsync"))
-
-(define extra-system-services
+(define cygnus-extra-services
   (list*
-   (service
-    nginx-service-type
-    (nginx-configuration
-     (server-blocks
-      (list
-       (nginx-server-configuration
-        (listen '("443 ssl http2"))
-        (server-name (list %default-domain
-                           (string-append "www." %default-domain)))
-        (root (string-append "/srv/http/" %default-domain))
-        (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
-                                 %default-domain))
-        (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
-                                     %default-domain))
-        (raw-content (list "error_page 404 = /404.html;"))
-        (locations
-         (append
-          (list
-           (nginx-location-configuration
-            (uri "/404.html")
-            (body
-             (list "internal;"))))
-          (list %letsencrypt-acme-challenge))))))))
-   extra-nginx-config-service
-   (service certbot-service-type
-            (certbot-configuration
-             (email %default-email)
-             (webroot "/srv/http")
-             (certificates
-              (list
-               (certificate-configuration
-                (domains (list %default-domain
-                               (string-append "www." %default-domain)))
-                (deploy-hook %nginx-deploy-hook))))))
-   extra-certbot-certificates-service
+   cygnus-nginx-services
+   cygnus-certbot-services
+   cygnus-matrix-services
+   cygnus-whoogle-services
+   cygnus-file-server-services
    cygnus-version-control-services
+   (service dhcp-client-service-type)
+   (service docker-service-type)
    (service rsync-service-type
             (rsync-configuration
              (modules
@@ -258,9 +347,6 @@
                (rsync-module
                 (name "site")
                 (file-name (string-append "/srv/http/" %default-domain)))))))
-   (service whoogle-service-type)
-   (service dhcp-client-service-type)
-   (service docker-service-type)
    (service openssh-service-type
             (openssh-configuration
              (openssh (@ (gnu packages ssh) openssh-sans-x))
@@ -268,7 +354,6 @@
              (permit-root-login 'prohibit-password)
              (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
                                 ("deneb" ,%default-ssh-key)))))))
-
 
 
 ;;; Host-specific features
@@ -289,30 +374,10 @@
      (terminal-outputs '(console))))
    (feature-base-packages
     #:base-home-packages '()
-    #:system-packages extra-system-packages)
+    #:system-packages (strings->packages "git" "rsync"))
    (feature-file-systems
     #:file-systems cygnus-file-systems
     #:swap-devices cygnus-swap-devices)
    (feature-custom-services
-    #:system-services extra-system-services)
-   (feature-postgresql)
-   (feature-matrix-settings
-    #:homeserver "https://matrix.conses.eu")
-   (feature-synapse
-    #:whatsapp-bridge? #t
-    #:synapse-configuration
-    (synapse-configuration
-     (server-name "conses.eu")
-     (enable-registration? #f)
-     (public-base-url "https://matrix.conses.eu")
-     (shared-secret (getenv "CYGNUS_SYNAPSE_SHARED_SECRET"))
-     (postgresql-db? #t)
-     (postgresql-db-password (getenv "CYGNUS_SYNAPSE_DB_PASSWORD")))
-    #:mautrix-whatsapp-configuration
-    (mautrix-whatsapp-configuration
-     (domain "conses.eu")
-     (postgresql-db? #t)
-     (postgresql-db-password (getenv "CYGNUS_MAUTRIX_WHATSAPP_DB_PASSWORD"))
-     (encryption? #t)
-     (permissions `(("conses.eu" . user)
-                    ("@admin:conses.eu" . admin)))))))
+    #:system-services cygnus-extra-services)
+   (feature-postgresql)))
