@@ -18,6 +18,8 @@
     #:default-desktop-system-services
     (modify-services (@@ (rde features base) %rde-desktop-system-services)
       (delete network-manager-service-type)))
+   (feature-matrix-settings
+    #:homeserver "https://matrix.conses.eu")
    (feature-pantalaimon
     #:ignore-device-verification? #t
     #:ssl? #f)))
