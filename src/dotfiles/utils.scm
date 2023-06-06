@@ -1,5 +1,6 @@
 (define-module (dotfiles utils)
   #:use-module (gnu system keyboard)
+  #:use-module (gnu services web)
   #:use-module (guix gexp)
   #:use-module (srfi srfi-1))
 
@@ -26,6 +27,17 @@
 
 
 ;;; Defaults
+
+(define-public %nginx-deploy-hook
+  (program-file
+   "nginx-deploy-hook"
+   #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
+       (kill pid SIGHUP))))
+
+(define-public %letsencrypt-acme-challenge
+  (nginx-location-configuration
+   (uri "/.well-known")
+   (body '("root /srv/http;"))))
 
 (define-public %nonguix-signing-key
   (project-file "src/dotfiles/keys/nonguix.pub"))
