@@ -372,12 +372,6 @@
      "nnmaildir+public:sent"
      "nnmaildir+public:spam"
      "nnmaildir+public:trash")
-    ("Mmoreno"
-     "nnmaildir+mmoreno:inbox"
-     "nnmaildir+mmoreno:drafts"
-     "nnmaildir+mmoreno:sent"
-     "nnmaildir+mmoreno:spam"
-     "nnmaildir+mmoreno:trash")
     ("Conses"
      "nnmaildir+conses:inbox"
      "nnmaildir+conses:drafts"
@@ -423,7 +417,6 @@
     (("Inbox" visible)
      (("Personal" visible nil))
      (("Public" visible nil))
-     (("Mmoreno" visible nil))
      (("Conses" visible nil)))
     (("News" visible)
      (("Common Lisp" visible nil))
@@ -467,7 +460,6 @@
     (list
      (mail-acc 'public "public@mianmoreno.com" 'gandi)
      (mail-acc 'personal "me@mianmoreno.com" 'gandi)
-     (mail-acc 'mmoreno "mmoreno@mmoreno.eu" 'gandi)
      (mail-acc 'conses "contact@conses.eu" 'gandi))
     #:mail-directory-fn
     (const (string-append (getenv "XDG_STATE_HOME") "/mail")))
