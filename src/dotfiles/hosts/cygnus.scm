@@ -24,7 +24,8 @@
   #:use-module (gnu services web)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
-  #:use-module (guix gexp))
+  #:use-module (guix gexp)
+  #:use-module (srfi srfi-26))
 
 
 ;;; Host-specific utilities
@@ -62,6 +63,24 @@
          (list "default_type application/json;"
                "return 200 '{\"m.server\": \"matrix.conses.eu:443\"}';"
                "add_header Access-Control-Allow-Origin *;"))))))
+    (nginx-server-configuration
+     (listen '("443 ssl http2"))
+     (server-name (list (string-append "whoogle." %default-domain)))
+     (ssl-certificate
+      (format #f "/etc/letsencrypt/live/whoogle.~a/fullchain.pem"
+              %default-domain))
+     (ssl-certificate-key
+      (format #f "/etc/letsencrypt/live/whoogle.~a/privkey.pem"
+              %default-domain))
+     (locations
+      (list
+       (nginx-location-configuration
+        (uri "/")
+        (body
+         (list "proxy_pass http://localhost:5000/;"
+               "proxy_set_header X-Forwarded-For $remote_addr;"
+               "proxy_set_header HOST $http_host;")))
+       %letsencrypt-acme-challenge)))
     (nginx-server-configuration
      (listen '("443 ssl http2"))
      (server-name (list (string-append "files." %default-domain)))
@@ -115,22 +134,15 @@
   (simple-service
    'add-extra-ssl-certificates
    certbot-service-type
-   (list
-    (certificate-configuration
-     (domains (list (string-append "git." %default-domain)))
-     (deploy-hook %nginx-deploy-hook))
-    (certificate-configuration
-     (domains (list (string-append "files." %default-domain)))
-     (deploy-hook %nginx-deploy-hook))
-    (certificate-configuration
-     (domains (list (string-append "pantalaimon." %default-domain)))
-     (deploy-hook %nginx-deploy-hook))
-    (certificate-configuration
-     (domains (list %tubo-host))
-     (deploy-hook %nginx-deploy-hook))
-    (certificate-configuration
-     (domains (list "conses.eu" "www.conses.eu"))
-     (deploy-hook %nginx-deploy-hook)))))
+   (map
+    (lambda (domain)
+      (certificate-configuration
+       (domains (list domain))
+       (deploy-hook %nginx-deploy-hook)))
+    (append
+     (map (cut string-append <> "." %default-domain)
+          (list "git" "files" "pantalaimon" "whoogle"))
+     (list %tubo-host "conses.eu")))))
 
 (define cygnus-version-control-services
   (list
@@ -204,7 +216,40 @@
 
 (define extra-system-services
   (list*
+   (service
+    nginx-service-type
+    (nginx-configuration
+     (server-blocks
+      (list
+       (nginx-server-configuration
+        (listen '("443 ssl http2"))
+        (server-name (list %default-domain
+                           (string-append "www." %default-domain)))
+        (root (string-append "/srv/http/" %default-domain))
+        (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
+                                 %default-domain))
+        (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
+                                     %default-domain))
+        (raw-content (list "error_page 404 = /404.html;"))
+        (locations
+         (append
+          (list
+           (nginx-location-configuration
+            (uri "/404.html")
+            (body
+             (list "internal;"))))
+          (list %letsencrypt-acme-challenge))))))))
    extra-nginx-config-service
+   (service certbot-service-type
+            (certbot-configuration
+             (email %default-email)
+             (webroot "/srv/http")
+             (certificates
+              (list
+               (certificate-configuration
+                (domains (list %default-domain
+                               (string-append "www." %default-domain)))
+                (deploy-hook %nginx-deploy-hook))))))
    extra-certbot-certificates-service
    cygnus-version-control-services
    (service rsync-service-type
@@ -250,34 +295,7 @@
     #:swap-devices cygnus-swap-devices)
    (feature-custom-services
     #:system-services extra-system-services)
-   (feature-web-settings
-    #:primary-domain %default-domain)
    (feature-postgresql)
-   (feature-nginx
-    #:nginx-configuration
-    (nginx-configuration
-     (server-blocks
-      (list
-       (nginx-server-configuration
-        (listen '("443 ssl http2"))
-        (server-name (list %default-domain
-                           (string-append "www." %default-domain)))
-        (root (string-append "/srv/http/" %default-domain))
-        (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
-                                 %default-domain))
-        (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
-                                     %default-domain))
-        (raw-content (list "error_page 404 = /404.html;"))
-        (locations
-         (append
-          (list
-           (nginx-location-configuration
-            (uri "/404.html")
-            (body
-             (list "internal;"))))
-          (list %letsencrypt-acme-challenge))))))))
-   (feature-certbot
-    #:email %default-email)
    (feature-matrix-settings
     #:homeserver "https://matrix.conses.eu")
    (feature-whoogle)
