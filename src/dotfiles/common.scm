@@ -128,6 +128,7 @@
     (with-eval-after-load 'comp
       (setq native-comp-async-report-warnings-errors nil))
     (global-so-long-mode)
+    (column-number-mode 0)
     (with-eval-after-load 'autorevert
       (setq auto-revert-remote-files nil))
     (setq auto-save-no-message t)
