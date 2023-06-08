@@ -49,12 +49,14 @@
   (simple-service
    'add-extra-home-packages
    home-profile-service-type
-   (strings->packages
-    "ddcutil" "light" "xclip"
-    "nasm" "gcc-toolchain" "autoconf"
-    "v4l-utils" "binutils" "wireguard-tools"
-    "texinfo" "pass-otp" "imagemagick"
-    "setxkbmap" "xkeyboard-config" "ffmpeg" "slop")))
+   (append
+    (strings->packages
+     "ddcutil" "light" "xclip"
+     "nasm" "gcc-toolchain" "autoconf"
+     "v4l-utils" "binutils" "wireguard-tools"
+     "texinfo" "pass-otp" "imagemagick"
+     "setxkbmap" "xkeyboard-config" "ffmpeg" "slop")
+    (list (@ (nongnu packages steam-client) steam)))))
 
 (define extra-ssh-config
   (home-ssh-configuration
