@@ -793,6 +793,10 @@ EndSection"))))
      :shortcut "pc"
      :fallback-url (quri:uri "https://community.penpot.app/latest")
      :base-search-url "https://community.penpot.app/search?q=~a")
+    (engines:lemmy
+     :shortcut "le"
+     :fallback-url (quri:uri "https://beehaw.org")
+     :base-search-url "https://beehaw.org/search/q/~a")
     (engines:google
      :shortcut "go"
      :fallback-url (quri:uri "https://www.google.es")
