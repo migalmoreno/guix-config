@@ -40,6 +40,9 @@
    (swap-space
     (target (file-system-label "swap")))))
 
+(define cygnus-extra-packages
+  (strings->packages "git" "rsync" "docker-compose"))
+
 (define cygnus-nginx-services
   (list
    (service nginx-service-type
@@ -374,7 +377,7 @@
      (terminal-outputs '(console))))
    (feature-base-packages
     #:base-home-packages '()
-    #:system-packages (strings->packages "git" "rsync"))
+    #:system-packages cygnus-extra-packages)
    (feature-file-systems
     #:file-systems cygnus-file-systems
     #:swap-devices cygnus-swap-devices)
