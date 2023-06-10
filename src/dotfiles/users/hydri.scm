@@ -154,7 +154,7 @@
          (format-status-url status))))))
    %nyxt-base-features))
 
-(define-public %user-features
+(define-public %hydri-features
   (list*
    (feature-user-info
     #:user-name "hydri"
