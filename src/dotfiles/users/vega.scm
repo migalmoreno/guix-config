@@ -1019,7 +1019,7 @@
    (feature-networking)
    (feature-pipewire)))
 
-(define-public %user-features
+(define-public %vega-features
   (list*
    (feature-user-info
     #:user-name "vega"
