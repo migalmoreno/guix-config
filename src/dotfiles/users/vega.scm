@@ -238,6 +238,9 @@
       (setq org-fontify-done-headline t)
       (add-to-list 'org-structure-template-alist
                    '("js" . "src js")))
+    (with-eval-after-load 'org-list
+      (setq org-list-demote-modify-bullet
+            '(("+" . "-") ("-" . "+") ("*" . "+"))))
     (with-eval-after-load 'org-capture
       (setq org-capture-bookmark nil))
     (with-eval-after-load 'org-src
