@@ -83,6 +83,31 @@
    "lollypop" "gst-plugins-good" "gst-plugins-bad"
    "gst-plugins-ugly" "gst-plugins-base" "gst-libav"))
 
+(define hydri-offload-service
+  (simple-service
+   'add-guix-machines
+   activation-service-type
+   (with-imported-modules '((guix build utils))
+     #~(begin
+         (use-modules (guix build utils))
+         (let ((machines-file "/etc/guix/machines.scm"))
+           (if (file-exists? machines-file)
+               (if (and (symbolic-link? machines-file)
+                        (store-file-name? (readlink machines-file)))
+                   (delete-file machines-file)
+                   (rename-file machines-file "/etc/guix/machines.scm.bak"))
+               (mkdir-p "/etc/guix"))
+           (symlink #$(project-file "src/dotfiles/machines/lyra.scm")
+                    machines-file))))))
+
+(define hydri-extra-services
+  (list
+   hydri-offload-service
+   extra-bashrc-service
+   extra-shepherd-services-service
+   extra-home-envs-service
+   (service home-shell-profile-service-type)))
+
 (define (extra-gtk-css _)
   `((.phosh-topbar-clock
      ((margin-left . 125px)))))
@@ -140,12 +165,7 @@
    (feature-base-packages
     #:home-packages extra-home-packages)
    (feature-custom-services
-    #:home-services
-    (list
-     extra-bashrc-service
-     extra-shepherd-services-service
-     extra-home-envs-service
-     (service home-shell-profile-service-type)))
+    #:home-services hydri-extra-services)
    (feature-emacs
     #:emacs (@ (gnu packages emacs) emacs-next-pgtk)
     #:emacs-server-mode? #f
