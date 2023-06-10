@@ -136,9 +136,9 @@
             '("ddcci" "ddcci_backlight"))))
 
 
-;;; System-specific features
+;;; Host-specific features
 
-(define-public %host-features
+(define-public %lyra-features
   (list
    (feature-kernel
     #:kernel %default-kernel
