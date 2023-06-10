@@ -726,64 +726,57 @@ EndSection"))))
           '())))
 
 (define (nx-search-engines-extra-engines config)
-  `((make-instance
-     'search-engine
-     :shortcut "clj"
-     :search-url "https://clojars.org/search?q=~a"
-     :fallback-url "https://clojars.org")
-    (make-instance
-     'search-engine
-     :shortcut "npm"
-     :search-url "https://www.npmjs.com/search?q=~a"
-     :fallback-url "https://www.npmjs.com")
-    (make-instance
-     'search-engine
-     :shortcut "fa"
-     :search-url "https://fontawesome.com/search?q=~a&m=free"
-     :fallback-url "https://fontawesome.com")
-    (make-instance
-     'search-engine
-     :shortcut "et"
-     :search-url "https://www.etsy.com/search?q=~a"
-     :fallback-url "https://www.etsy.com")
-    (make-instance
-     'search-engine
-     :shortcut "to"
-     :search-url "https://torrents-csv.ml/search/~a"
-     :fallback-url "https://torrents-csv.ml")
-    (make-instance
-     'search-engine
-     :shortcut "ra"
-     :search-url "https://rargb.to/search/?search=~a"
-     :fallback-url "https://rargb.to")
-    (make-instance
-     'search-engine
-     :shortcut "kt"
-     :search-url "https://kickasstorrents.to/usearch/~a"
-     :fallback-url "https://kickasstorrents.to")
-    (make-instance
-     'search-engine
-     :shortcut "mdn"
-     :search-url "https://developer.mozilla.org/en-US/search?q=~a"
-     :fallback-url "https://developer.mozilla.org")
-    (make-instance
-     'search-engine
-     :shortcut "sc"
-     :search-url
-     ,(string-append "https://" %tubo-host "/search?q=~a&serviceId=1")
-     :fallback-url ,(string-append "https://" %tubo-host))
-    (make-instance
-     'search-engine
-     :shortcut "yt"
-     :search-url
-     ,(string-append "https://" %tubo-host "/search?q=~a&serviceId=0")
-     :fallback-url ,(string-append "https://" %tubo-host))
-    (make-instance
-     'search-engine
-     :shortcut "pt"
-     :search-url
-     ,(string-append "https://" %tubo-host "/search?q=~a&serviceId=3")
-     :fallback-url ,(string-append "https://" %tubo-host))
+  `((make-instance 'search-engine
+                   :shortcut "clj"
+                   :search-url "https://clojars.org/search?q=~a"
+                   :fallback-url "https://clojars.org")
+    (make-instance 'search-engine
+                   :shortcut "npm"
+                   :search-url "https://www.npmjs.com/search?q=~a"
+                   :fallback-url "https://www.npmjs.com")
+    (make-instance 'search-engine
+                   :shortcut "fa"
+                   :search-url "https://fontawesome.com/search?q=~a&m=free"
+                   :fallback-url "https://fontawesome.com")
+    (make-instance 'search-engine
+                   :shortcut "et"
+                   :search-url "https://www.etsy.com/search?q=~a"
+                   :fallback-url "https://www.etsy.com")
+    (make-instance 'search-engine
+                   :shortcut "to"
+                   :search-url "https://torrents-csv.ml/search/~a"
+                   :fallback-url "https://torrents-csv.ml")
+    (make-instance 'search-engine
+                   :shortcut "ra"
+                   :search-url "https://rargb.to/search/?search=~a"
+                   :fallback-url "https://rargb.to")
+    (make-instance 'search-engine
+                   :shortcut "kt"
+                   :search-url "https://kickasstorrents.to/usearch/~a"
+                   :fallback-url "https://kickasstorrents.to")
+    (make-instance 'search-engine
+                   :shortcut "mdn"
+                   :search-url
+                   "https://developer.mozilla.org/en-US/search?q=~a"
+                   :fallback-url "https://developer.mozilla.org")
+    (make-instance 'search-engine
+                   :shortcut "sc"
+                   :search-url
+                   ,(format #f "https://~a/search?q=~~a&serviceId=1"
+                            %tubo-host)
+                   :fallback-url ,(string-append "https://" %tubo-host))
+    (make-instance 'search-engine
+                   :shortcut "yt"
+                   :search-url
+                   ,(format #f "https://~a/search?q=~~a&serviceId=0"
+                            %tubo-host)
+                   :fallback-url ,(string-append "https://" %tubo-host))
+    (make-instance 'search-engine
+                   :shortcut "pt"
+                   :search-url
+                   ,(format #f "https://~a/search?q=~~a&serviceId=3"
+                            %tubo-host)
+                   :fallback-url ,(string-append "https://" %tubo-host))
     (engines:discourse
      :shortcut "cv"
      :fallback-url (quri:uri "https://clojureverse.org")
