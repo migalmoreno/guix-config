@@ -25,9 +25,6 @@
   #:use-module (guix gexp)
   #:use-module (srfi srfi-26))
 
-
-;;; Host-specific utilities
-
 (define cygnus-file-systems
   (list
    (file-system
@@ -358,10 +355,7 @@
              (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
                                 ("deneb" ,%default-ssh-key)))))))
 
-
-;;; Host-specific features
-
-(define-public %host-features
+(define-public %cygnus-features
   (list
    (feature-host-info
     #:host-name "cygnus"
