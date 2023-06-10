@@ -163,6 +163,7 @@
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-base-packages
+    #:base-home-packages '()
     #:home-packages extra-home-packages)
    (feature-custom-services
     #:home-services hydri-extra-services)
