@@ -39,25 +39,6 @@
    "hydri.pub"
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ08QYeHnqdrWzd8JnASbXJKeDqS5Kmfsd3RUeWP+YyS\n"))
 
-(define-public sbcl-montezuma-sans-tests
-  (let ((sbcl-montezuma (@ (gnu packages lisp-xyz) sbcl-montezuma)))
-    (package
-      (inherit sbcl-montezuma)
-      (arguments
-       (append
-        (package-arguments sbcl-montezuma)
-        (list #:tests? #f))))))
-
-(define nyxt-next
-  (let ((nyxt-next (@ (rde packages web-browsers) nyxt-next)))
-    (package
-      (inherit nyxt-next)
-      (name "nyxt-next")
-      (inputs
-       (modify-inputs (package-inputs nyxt-next)
-         (delete "sbcl-montezuma")
-         (append sbcl-montezuma-sans-tests))))))
-
 
 ;;; Service extensions
 
@@ -120,7 +101,6 @@
 (define hydri-nyxt-features
   (list*
    (feature-nyxt
-    #:nyxt nyxt-next
     #:default-browser? #t
     #:restore-session? #f
     #:temporary-history? #t
