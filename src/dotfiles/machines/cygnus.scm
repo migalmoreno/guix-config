@@ -4,7 +4,7 @@
   #:use-module (gnu machine ssh)
   #:use-module (gnu system install))
 
-(define-public %machine
+(define-public %cygnus-machine
   (machine
    (operating-system installation-os)
    (environment managed-host-environment-type)
