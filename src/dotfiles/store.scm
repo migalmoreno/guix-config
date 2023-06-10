@@ -14,6 +14,7 @@
   #:use-module (guix records)
   #:use-module (ice-9 match)
   #:use-module (rde features)
+  #:use-module (srfi srfi-1)
   #:export (dispatcher))
 
 (define %initial-os
@@ -35,29 +36,82 @@
    (operating-system %initial-os)
    (environment managed-host-environment-type)))
 
+(define-record-type* <config> config make-config
+  config?
+  this-config
+  (host config-host (default #f))
+  (users config-users (default '()))
+  (machine config-machine (default %initial-machine)))
+
+(define-record-type* <user> user make-user
+  user?
+  this-user
+  (name user-name)
+  (features user-features))
+
+(define-record-type* <host> host make-host
+  host?
+  this-host
+  (name host-name)
+  (features host-features))
+
+(define %configs
+  (list
+   (config
+    (host (host (name "cygnus")
+                (features (@ (dotfiles hosts cygnus) %cygnus-features))))
+    (users (list (user
+                  (name "deneb")
+                  (features (@ (dotfiles users deneb) %deneb-features)))))
+    (machine (@ (dotfiles machines cygnus) %cygnus-machine)))
+   (config
+    (host (host (name "lyra")
+                (features (@ (dotfiles hosts lyra) %lyra-features))))
+    (users (list (user
+                  (name "vega")
+                  (features (@ (dotfiles users vega) %vega-features))))))
+   (config
+    (host (host (name "live")
+                (features (@ (dotfiles hosts live) %live-features)))))
+   (config
+    (users (list (user
+                  (name "hydri")
+                  (features (@ (dotfiles users hydri) %hydri-features))))))))
+
 (define* (dispatcher
           #:key
           (user (or (getenv "RDE_USER") (getlogin)))
           (host (or (getenv "RDE_HOST") (gethostname)))
           (target (getenv "RDE_TARGET"))
-          (users-submodule '(dotfiles users))
-          (hosts-submodule '(dotfiles hosts))
-          (machines-submodule '(dotfiles machines))
           (initial-os %initial-os)
           (he-in-os? (not (nil? (getenv "RDE_HE_IN_OS"))))
           (pretty-print? #f))
 
-  (define* (mod-ref sub mod var-name #:optional default-value)
-    (let ((var (module-variable
-                (resolve-module `(,@sub ,(string->symbol mod))) var-name)))
-      (if (and var (not (unspecified? var)))
-          (variable-ref var)
-          default-value)))
-
-  (define %user-features (mod-ref users-submodule user '%user-features '()))
-  (define %host-features (mod-ref hosts-submodule host '%host-features '()))
+  (define %host
+    (and=>
+     (find (lambda (config)
+             (equal? (and=> (config-host config) host-name) host))
+           (filter (lambda (config)
+                     (not (null? (config-host config))))
+                   %configs))
+     config-host))
   (define %machine
-    (mod-ref machines-submodule host '%machine %initial-machine))
+    (and=>
+     (find (lambda (config)
+             (and %host (equal? (config-host config) %host)))
+           %configs)
+     config-machine))
+  (define %user-features
+    (or (and=>
+         (find (lambda (user_)
+                 (and user (equal? (user-name user_) user)))
+               (append-map config-users
+                           (filter (lambda (config)
+                                     (not (null? (config-users config))))
+                                   %configs)))
+         user-features)
+        '()))
+  (define %host-features (or (and=> %host host-features) '()))
 
   (define %config
     (rde-config
@@ -90,7 +144,7 @@
   (define %machines
     (list
      (machine
-      (inherit %machine)
+      (inherit (or %machine %initial-machine))
       (operating-system %os))))
 
   (when pretty-print?
