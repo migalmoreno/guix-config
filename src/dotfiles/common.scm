@@ -665,64 +665,54 @@ EndSection"))))
        :default-height 105
        :variable-pitch-weight light)))))
 
-(define (nx-router-extra-routes config)
-  `((make-instance
-     'router:web-route
-     :trigger (match-regex ".*/watch\\?.*v=.*" ".*/playlist\\?list=.*")
-     :redirect-url (quri:uri "https://www.youtube.com")
-     :resource (lambda (url)
-                 (play-emacs-mpv url :formats nil :audio t :repeat t)))
-    (make-instance
-     'router:web-route
-     :trigger (match-regex "^https://(m.)?soundcloud.com/.*/.*")
-     :resource (lambda (url)
-                 (play-emacs-mpv url :formats nil :audio t :repeat t)))
-    (make-instance
-     'router:opener
-     :trigger (match-regex "https://gfycat.com/.*"
-                           "https://streamable.com/.*"
-                           "https://.*/videos/watch/.*"
-                           ".*cloudfront.*master.m3u8")
-     :resource (lambda (url)
-                 (play-emacs-mpv url :formats nil)))
-    (make-instance
-     'router:opener
-     :trigger (match-scheme "mailto")
-     :resource "xdg-open ~s &")
-    (make-instance
-     'router:opener
-     :trigger (match-scheme "magnet" "torrent")
-     :resource (lambda (url)
-                 (eval-in-emacs `(transmission-add ,url))))
-    (make-instance
-     'router:blocker
-     :trigger (match-domain "lemmy.ml")
-     :blocklist '(:path (:contains (not "/u/" "/post/"))))
+(define (nx-router-extra-routers config)
+  `((make-instance 'router:opener
+                   :name 'youtube-videos
+                   :route (match-regex
+                           ".*/watch\\?.*v=.*"
+                           ".*/playlist\\?list=.*")
+                   :resource
+                   (lambda (url)
+                     (play-emacs-mpv url :formats nil :audio t :repeat t)))
+    (make-instance 'router:redirector
+                   :name 'youtube-videos
+                   :redirect-url (quri:uri "https://www.youtube.com"))
+    (make-instance 'router:opener
+                   :route (match-regex "^https://(m.)?soundcloud.com/.*/.*")
+                   :resource (lambda (url)
+                               (play-emacs-mpv
+                                url :formats nil :audio t :repeat t)))
+    (make-instance 'router:opener
+                   :route (match-regex "https://gfycat.com/.*"
+                                       "https://streamable.com/.*"
+                                       "https://.*/videos/watch/.*"
+                                       ".*cloudfront.*master.m3u8")
+                   :resource (lambda (url)
+                               (play-emacs-mpv url :formats nil)))
+    (make-instance 'router:opener
+                   :route (match-scheme "mailto")
+                   :resource "xdg-open ~s &")
+    (make-instance 'router:opener
+                   :route (match-scheme "magnet" "torrent")
+                   :resource (lambda (url)
+                               (eval-in-emacs `(transmission-add ,url))))
     ,@(if (get-value 'reddit-frontend config)
-          `((make-instance
-             'router:blocker
-             :trigger (match-regex
-                       ,(string-append
-                         "^" (get-value 'reddit-frontend config) "/.*"))
-             :instances-builder router:teddit-instances-builder
-             :blocklist '(:path (:contains (not "/comments/" "/wiki/")))))
+          `((make-instance 'router:blocker
+                           :name 'reddit
+                           :blocklist
+                           '(:path (:contains (not "/comments/" "/wiki/")))))
           '())
     ,@(if (get-value 'tiktok-frontend config)
-          `((make-instance
-             'router:blocker
-             :trigger (match-regex
-                       ,(string-append
-                         "^" (get-value 'tiktok-frontend config) "/.*"))
-             :instances-builder router:proxitok-instances-builder
-             :blocklist '(:path (:contains (not "/video/" "/t/")))))
+          `((make-instance 'router:blocker
+                           :name 'tiktok
+                           :blocklist
+                           '(:path (:contains (not "/video/" "/t/")))))
           '())
     ,@(if (get-value 'instagram-frontend config)
-          `((make-instance
-             'router:blocker
-             :trigger (match-regex
-                       ,(string-append
-                         "^" (get-value 'instagram-frontend config) "/.*"))
-             :blocklist '(:path (:contains (not "/media/")))))
+          `((make-instance 'router:blocker
+                           :name 'instagram
+                           :blocklist
+                           '(:path (:contains (not "/media/")))))
           '())))
 
 (define (nx-search-engines-extra-engines config)
@@ -840,7 +830,7 @@ EndSection"))))
     #:default-engine-shortcut "who"
     #:extra-engines nx-search-engines-extra-engines)
    (feature-nyxt-nx-router
-    #:extra-routes nx-router-extra-routes)))
+    #:extra-routers nx-router-extra-routers)))
 
 (define-public %security-base-features
   (list
