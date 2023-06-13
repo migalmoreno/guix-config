@@ -195,8 +195,7 @@
     #:path-max-length 50)
    (feature-emacs-dired
     #:kill-when-opening-new-buffer? #t
-    #:group-directories-first? #t
-    #:extra-switches #f)
+    #:group-directories-first? #t)
    (feature-emacs-calc)
    (feature-emacs-tramp)
    (feature-emacs-re-builder)
