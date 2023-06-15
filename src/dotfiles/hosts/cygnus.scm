@@ -252,7 +252,7 @@
     certbot-service-type
     (list
      (certificate-configuration
-      (domains (list "files." %default-domain))
+      (domains (list (string-append "files." %default-domain)))
       (deploy-hook %nginx-deploy-hook))))))
 
 (define cygnus-version-control-services
