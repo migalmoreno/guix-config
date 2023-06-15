@@ -135,7 +135,7 @@
                                     "/bin/xclip"))
                (format #f "~a/pictures/~a.jpg"
                        (getenv "HOME")
-                       (date->string (current-date) "~y~m~d-~k~H~M~S"))))))))))
+                       (date->string (current-date) "~Y~m~d-~H~M~S"))))))))))
 (define maim-fullscreen (maim-script))
 (define maim-region (maim-script #:region? #t))
 (define maim-fullscreen-clipboard (maim-script #:clipboard? #t))
