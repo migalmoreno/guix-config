@@ -56,7 +56,8 @@
      "nasm" "gcc-toolchain" "autoconf"
      "v4l-utils" "binutils" "wireguard-tools"
      "texinfo" "pass-otp" "imagemagick"
-     "setxkbmap" "xkeyboard-config" "ffmpeg" "slop")
+     "setxkbmap" "xkeyboard-config" "ffmpeg" "slop"
+     "docker-cli" "docker-compose")
     (list (@ (nongnu packages steam-client) steam)))))
 
 (define extra-ssh-config
