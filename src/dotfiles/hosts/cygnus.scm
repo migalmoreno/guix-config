@@ -3,6 +3,7 @@
   #:use-module (dotfiles hosts lyra)
   #:use-module (rde features base)
   #:use-module (rde features databases)
+  #:use-module (rde features docker)
   #:use-module (rde features system)
   #:use-module (rde system services matrix)
   #:use-module (rde packages)
@@ -339,7 +340,6 @@
    cygnus-file-server-services
    cygnus-version-control-services
    (service dhcp-client-service-type)
-   (service docker-service-type)
    (service rsync-service-type
             (rsync-configuration
              (modules
@@ -377,4 +377,5 @@
     #:swap-devices cygnus-swap-devices)
    (feature-custom-services
     #:system-services cygnus-extra-services)
+   (feature-docker)
    (feature-postgresql)))
