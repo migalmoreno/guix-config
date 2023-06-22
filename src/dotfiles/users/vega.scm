@@ -4,6 +4,7 @@
   #:use-module (rde features)
   #:use-module (rde features android)
   #:use-module (rde features base)
+  #:use-module (rde features docker)
   #:use-module (rde features documentation)
   #:use-module (rde features emacs)
   #:use-module (rde features emacs-xyz)
@@ -1076,4 +1077,5 @@
     #:keymap "custom")
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
-   (feature-qemu)))
+   (feature-qemu)
+   (feature-docker)))
