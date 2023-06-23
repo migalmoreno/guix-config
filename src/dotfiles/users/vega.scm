@@ -1073,9 +1073,6 @@
    %communication-base-features
    %programming-base-features
    %markup-base-features
-   (feature-qmk
-    #:keyboard "dztech/dz65rgb/v1"
-    #:keymap "custom")
    (feature-ssh
     #:ssh-configuration extra-ssh-config)
    (feature-qemu)
