@@ -187,6 +187,7 @@
     #:extra-modus-themes-overrides
     '((bg-mode-line-active bg-dim)))
    (feature-fonts
+    #:use-serif-for-variable-pitch? #f
     #:font-serif
     (font
      (name "IBM Plex Serif")
