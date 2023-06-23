@@ -940,6 +940,7 @@
     #:restore-session? #f
     #:extra-config-lisp nyxt-extra-config-lisp)
    (feature-nyxt-nx-tailor #:auto? #t)
+   (feature-nyxt-nx-tailor-extra-styles)
    (feature-nyxt-appearance)
    (feature-nyxt-status
     #:format-status-buttons
