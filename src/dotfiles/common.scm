@@ -2,6 +2,7 @@
   #:use-module (dotfiles utils)
   #:use-module (contrib features javascript)
   #:use-module (contrib features wm)
+  #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module (guix packages)
@@ -28,6 +29,7 @@
   #:use-module (rde features version-control)
   #:use-module (rde features video)
   #:use-module (rde features xdg)
+  #:use-module (rde home services web-browsers)
   #:use-module (rde packages)
   #:use-module (srfi srfi-1))
 
@@ -820,6 +822,168 @@ EndSection"))))
       ((default-modes
          (append '(nyxt/reduce-tracking-mode:reduce-tracking-mode)
                  %slot-value%))))))
+
+(define-public (feature-nyxt-nx-tailor-extra-styles)
+  (define (get-home-services config)
+    (define font-sans (and=> (get-value 'font-sans config) font-name))
+    (list
+     (simple-service
+      'rde-nx-tailor-extension
+      (get-value 'nyxt-rde-nx-tailor-service-type config)
+      (home-nyxt-lisp-extension
+       (config
+        `((define-configuration status-buffer
+            ((style
+              (tailor:with-style 'status-buffer
+                `("#container"
+                  :height "100%"
+                  :width "100%"
+                  :background ,theme:primary
+                  :font-family ,theme:font-family
+                  :align-items "center"
+                  :padding "0 5px"
+                  :box-sizing "border-box")
+                `("#controls"
+                  :background "inherit"
+                  :box-sizing "border-box")
+                `("#controls button"
+                  :color ,theme:on-background
+                  :padding "3px")
+                `(".arrow-right, .arrow-left"
+                  :clip-path "none"
+                  :margin-right 0)
+                `("#url"
+                  :background "inherit"
+                  :color ,theme:on-background
+                  :font-weight "bold"
+                  :padding "5px"
+                  :display "flex"
+                  :align-items "center"
+                  :box-sizing "border-box"
+                  :flex-grow "6"
+                  :flex-shrink "3")
+                `("#url button"
+                  :white-space "nowrap"
+                  :text-overflow "ellipsis"
+                  :overflow "hidden")
+                `("#modes"
+                  :background "inherit"
+                  :padding-left "5px"
+                  :flex-grow "1")
+                `(:media "(max-width: 768px)"
+                         ("#container"
+                          :padding "0 1px")
+                         ("#url"
+                          :flex-basis "5em"
+                          :flex-grow "2"
+                          :flex-shrink "2"
+                          :height "80%"
+                          :border "1px solid #505050"
+                          :border-radius "3px"
+                          :overflow hidden)
+                         ("#controls"
+                          :width "fit-content"
+                          :flex-basis "auto"
+                          :padding "10% 5px")
+                         ("#controls button"
+                          :height "80%"
+                          :width "30px"
+                          :padding 0
+                          :border-color "#505050"
+                          :border-width "1px")
+                         ("#controls button:not(:first-of-type):not(:last-of-type)"
+                          :border-width "1px 1px 1px 0px"
+                          :border-style "solid"
+                          :border-color "#505050"
+                          :border-radius 0)
+                         ("#controls button:first-of-type"
+                          :border-width "1px"
+                          :border-style "solid"
+                          :border-radius "3px 0px 0px 3px")
+                         ("#controls button:last-of-type"
+                          :border-width "1px 1px 1px 0px"
+                          :border-style "solid"
+                          :border-radius "0px 3px 3px 0px"))))))
+
+          (define-configuration window
+            ((message-buffer-style
+              (tailor:with-style 'window
+                `(body
+                  :color ,theme:on-background
+                  :background ,theme:background
+                  :font-family ,theme:font-family
+                  :overflow-x "hidden")))))
+
+          (define-configuration web-buffer
+            ((style
+              (tailor:with-style 'web-buffer
+                `(:let ((font-sans ,,font-sans))
+                   ("*, body, div, section, input"
+                    :font-family ,theme:font-family
+                    :background-color ,theme:background
+                    :color ,theme:on-background)
+                   ("h1,h2,h3,h4,h5,h6"
+                    :color ,theme:on-secondary
+                    :font-family #(font-sans))
+                   ("p, td , dt, button, .button, a, a:link"
+                    :font-family #(font-sans)
+                    :color ,theme:on-background)
+                   ("button, .button"
+                    :padding "10px")
+                   (pre
+                    :font-family ,theme:font-family
+                    :color ,theme:on-background
+                    :background ,theme:background)
+                   (code
+                    :font-family ,theme:font-family
+                    :color ,theme:on-background
+                    :background ,(if (theme:dark-p theme:theme)
+                                     theme:secondary
+                                     theme:primary))
+                   (:media "(max-width: 768px)"
+                           (body
+                            :font-size "12px")))))))
+
+          (define-configuration prompt-buffer
+            ((style
+              (tailor:with-style 'prompt-buffer
+                `(* :font-family ,theme:font-family)
+                `("#prompt-area"
+                  :background ,theme:background
+                  :color ,theme:on-secondary)
+                `("#prompt"
+                  :padding-left "15px")
+                `("#prompt-modes"
+                  :padding-right "10px")
+                `("#input"
+                  :background ,theme:background)
+                `(".source"
+                  :margin 0)
+                `(".source-name"
+                  :background ,theme:background
+                  :color ,theme:on-primary
+                  :font-style "italic"
+                  :padding "5px 15px")
+                `(".source-content"
+                  :border-collapse "collapse"
+                  :margin-left 0)
+                `(".source-content td"
+                  :padding "5px 15px"
+                  :text-overflow "ellipsis")
+                `(".source-content th"
+                  :padding "5px 15px"
+                  :background ,theme:background
+                  :font-weight "bold")
+                `("#selection"
+                  :background ,(str:concat theme:primary "E6")
+                  :color ,theme:on-background)
+                `(.marked
+                  :background ,theme:accent
+                  :color ,theme:on-accent)))))))))))
+
+  (feature
+   (name 'nx-tailor-extra-styles)
+   (home-services-getter get-home-services)))
 
 (define-public %nyxt-base-features
   (list
