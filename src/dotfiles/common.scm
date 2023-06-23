@@ -640,6 +640,7 @@ EndSection"))))
     '((bg-mode-line-active bg-dim)))
    (feature-emacs-circadian)
    (feature-fonts
+    #:use-serif-for-variable-pitch? #f
     #:font-serif
     (font
      (name "IBM Plex Serif")
