@@ -1211,8 +1211,6 @@ EndSection"))))
 
 (define-public %nyxt-base-features
   (list
-   (feature-nyxt-nx-mosaic)
-   (feature-nyxt-emacs)
    (feature-nyxt-blocker)
    (feature-nyxt-nx-search-engines
     #:default-engine-shortcut "who"
