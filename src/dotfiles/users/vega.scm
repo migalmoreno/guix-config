@@ -927,6 +927,10 @@
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
  (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")))
 
+    (define-command open-with-chromium ()
+      (eval-in-emacs
+       `(browse-url-chromium ,(render-url (url (current-buffer))))))
+
     (defmethod format-status-buttons :around ((status status-buffer))
       (spinneret:with-html-string
         (:raw
