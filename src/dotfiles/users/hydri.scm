@@ -118,7 +118,31 @@
       ((nyxt/reduce-tracking-mode:preferred-user-agent
         "Mozilla/5.0 (Linux; Android 10; Google Pixel 4
  Build/QD1A.190821.014.C2; wv) AppleWebKit/537.36 (KHTML, like Gecko)
- Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36")))))
+ Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36")))
+
+    (defmethod format-status-buttons :around ((status status-buffer))
+      (spinneret:with-html-string
+        (:raw
+         (status-button
+          status "Backward" 'nyxt/history-mode:history-backwards "⊲")
+         (status-button status "Reload" 'nyxt:reload-current-buffer "↺")
+         (status-button
+          status "Forward" 'nyxt/history-mode:history-backwards "⊳")
+         (status-button status "Close" 'nyxt:delete-current-buffer "🞫")
+         (status-button status "New" 'nyxt:set-url-new-buffer "🞣")
+         (status-button status "Switch" 'nyxt:switch-buffer "◱")
+         (status-button status "Execute" 'nyxt:execute-command "≡"))))
+
+    (defmethod format-status :around ((status status-buffer))
+      (let ((buffer (current-buffer (window status))))
+        (spinneret:with-html-string
+          (:div :id "container"
+                (:div :id "controls"
+                      (:raw (format-status-buttons status)))
+                (:div :id "url"
+                      (:raw
+                       (format-status-load-status status)
+                       (format-status-url status)))))))))
 
 
 ;;; User-specific features
@@ -134,24 +158,6 @@
     #:status-buffer-height 40
     #:status-buffer-position ':bottom
     #:dark? #t)
-   (feature-nyxt-status
-    #:format-status-buttons
-    '((:raw
-       (format-status-back-button status)
-       (format-status-reload-button status)
-       (format-status-forwards-button status)
-       (format-status-close-button status)
-       (format-status-new-buffer-button status)
-       (format-status-switch-buffer-button status)
-       (format-status-execute-button status)))
-    #:format-status
-    '((:div :id "container"
-       (:div :id "controls"
-        (:raw (format-status-buttons status)))
-       (:div :id "url"
-        (:raw
-         (format-status-load-status status)
-         (format-status-url status))))))
    %nyxt-base-features))
 
 (define-public %hydri-features
