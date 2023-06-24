@@ -150,6 +150,7 @@
 (define hydri-nyxt-features
   (list*
    (feature-nyxt
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:default-browser? #t
     #:restore-session? #f
     #:temporary-history? #t
