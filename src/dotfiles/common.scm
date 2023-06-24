@@ -667,7 +667,7 @@ EndSection"))))
        :default-height 105
        :variable-pitch-weight light)))))
 
-(define (nx-router-extra-routers config)
+(define (nx-router-routers config)
   `((make-instance 'router:opener
                    :name 'youtube-videos
                    :route (match-regex
@@ -698,23 +698,131 @@ EndSection"))))
                    :route (match-scheme "magnet" "torrent")
                    :resource (lambda (url)
                                (eval-in-emacs `(transmission-add ,url))))
+    ,@(if (get-value 'google-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'google
+                           :route
+                           (match-regex ".*google.com/search.*")
+                           :original-url
+                           (quri:uri "https://www.google.com")
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'google-frontend config))
+                           :instances-builder
+                           router:whoogle-instances-builder))
+          '())
+    ,@(if (get-value 'youtube-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'youtube
+                           :route
+                           (match-domain "youtube.com" "youtu.be")
+                           :original-url "www.youtube.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'youtube-frontend config))
+                           :instances-builder
+                           router:invidious-instances-builder))
+          '())
+    ,@(if (get-value 'quora-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'quora
+                           :route (match-domain "quora.com")
+                           :original-url "www.quora.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'quora-frontend config))))
+          '())
+    ,@(if (get-value 'imgur-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'imgur
+                           :route (match-domain "imgur.com")
+                           :original-url "imgur.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'imgur-frontend config))))
+          '())
+    ,@(if (get-value 'medium-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'medium
+                           :route (match-domain "medium.com")
+                           :original-url "www.medium.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'medium-frontend config))
+                           :instances-builder
+                           router:scribe-instances-builder))
+          '())
+    ,@(if (get-value 'twitter-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'twitter
+                           :route (match-domain "twitter.com")
+                           :original-url "www.twitter.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'twitter-frontend config))))
+          '())
     ,@(if (get-value 'reddit-frontend config)
-          `((make-instance 'router:blocker
+          `((make-instance 'router:redirector
+                           :name 'reddit
+                           :route (match-domain "reddit.com")
+                           :original-url "www.reddit.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'reddit-frontend config))
+                           :instances-builder
+                           router:teddit-instances-builder)
+            (make-instance 'router:blocker
                            :name 'reddit
                            :blocklist
                            '(:path (:contains (not "/comments/" "/wiki/")))))
           '())
     ,@(if (get-value 'tiktok-frontend config)
-          `((make-instance 'router:blocker
+          `((make-instance 'router:redirector
+                           :name 'tiktok
+                           :route (match-domain "tiktok.com")
+                           :original-url "www.tiktok.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'tiktok-frontend config))
+                           :redirect-rule
+                           `(("/@placeholder/video/" .
+                              (not "/" "/@" "/t")))
+                           :instances-builder
+                           router:proxitok-instances-builder)
+            (make-instance 'router:blocker
                            :name 'tiktok
                            :blocklist
                            '(:path (:contains (not "/video/" "/t/")))))
           '())
     ,@(if (get-value 'instagram-frontend config)
-          `((make-instance 'router:blocker
+          `((make-instance 'router:redirector
+                           :name 'instagram
+                           :route
+                           (match-regex "https://(www.)?insta.*")
+                           :original-url "www.instagram.com"
+                           :redirect-url
+                           (quri:uri
+                            ,(get-value 'instagram-frontend config))
+                           :redirect-rule
+                           '(("/profile/"
+                              . (not "/" "/p/" "/tv/" "/reels/"))
+                             ("/media/" . "/p/")))
+            (make-instance 'router:blocker
                            :name 'instagram
                            :blocklist
                            '(:path (:contains (not "/media/")))))
+          '())
+    ,@(if (get-value 'fandom-frontend config)
+          `((make-instance 'router:redirector
+                           :name 'fandom
+                           :route (match-domain "fandom.com")
+                           :redirect-url
+                           ,(format #f "~a/\\1/wiki/\\2"
+                                    (get-value 'fandom-frontend config))
+                           :redirect-rule
+                           ".*://(\\w+)\\.fandom.com/wiki/(.*)"
+                           :instances-builder
+                           router:breezewiki-instances-builder))
           '())))
 
 (define (nx-search-engines-extra-engines config)
@@ -996,7 +1104,7 @@ EndSection"))))
     #:default-engine-shortcut "who"
     #:extra-engines nx-search-engines-extra-engines)
    (feature-nyxt-nx-router
-    #:extra-routers nx-router-extra-routers)))
+    #:routers nx-router-routers)))
 
 (define-public %security-base-features
   (list
