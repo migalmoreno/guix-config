@@ -925,7 +925,32 @@
     (define-configuration nyxt/reduce-tracking-mode:reduce-tracking-mode
       ((nyxt/reduce-tracking-mode:preferred-user-agent
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
- (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")))))
+ (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")))
+
+    (defmethod format-status-buttons :around ((status status-buffer))
+      (spinneret:with-html-string
+        (:raw
+         (status-button
+          status "Backward" 'nyxt/history-mode:history-backwards "⊲")
+         (status-button status "Reload" 'nyxt:reload-current-buffer "↺")
+         (status-button
+          status "Forward" 'nyxt/history-mode:history-backwards "⊳")
+         (status-button status "Close" 'nyxt:delete-current-buffer "🞫"))))
+
+    (defmethod format-status :around ((status status-buffer))
+      (let ((buffer (current-buffer (window status))))
+        (spinneret:with-html-string
+          (:div :id "container"
+                (:div :id "controls"
+                      (:raw (format-status-buttons status)))
+                (:div :id "url"
+                      (:raw
+                       (format-status-load-status status)
+                       (format-status-url status)))
+                (:div :id "modes"
+                      :title (nyxt::modes-string buffer)
+                      (:raw
+                       (format-status-modes status)))))))))
 
 
 ;;; User-specific features
@@ -942,25 +967,6 @@
    (feature-nyxt-nx-tailor #:auto? #t)
    (feature-nyxt-nx-tailor-extra-styles)
    (feature-nyxt-appearance)
-   (feature-nyxt-status
-    #:format-status-buttons
-    '((:raw
-       (format-status-back-button status)
-       (format-status-reload-button status)
-       (format-status-forwards-button status)
-       (format-status-close-button status)))
-    #:format-status
-    '((:div :id "container"
-       (:div :id "controls"
-        (:raw (format-status-buttons status)))
-       (:div :id "url"
-        (:raw
-         (format-status-load-status status)
-         (format-status-url status)))
-       (:div :id "modes"
-        :title (nyxt::modes-string buffer)
-        (:raw
-         (format-status-modes status))))))
    %nyxt-base-features))
 
 (define vega-desktop-features
