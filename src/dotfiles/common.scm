@@ -815,7 +815,9 @@ EndSection"))))
           '())))
 
 (define-public %base-nyxt-extra-config-lisp
-  `((local-time:reread-timezone-repository)
+  `((in-package :nyxt-user)
+    (nyxt:use-nyxt-package-nicknames)
+    (local-time:reread-timezone-repository)
     (setf local-time:*default-timezone*
           (local-time:find-timezone-by-location-name ,%default-timezone))
     (define-configuration web-buffer
