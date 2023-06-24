@@ -925,6 +925,7 @@ EndSection"))))
 (define-public %base-nyxt-extra-config-lisp
   `((in-package :nyxt-user)
     (nyxt:use-nyxt-package-nicknames)
+    (asdf:load-system :nx-mosaic)
     (local-time:reread-timezone-repository)
     (setf local-time:*default-timezone*
           (local-time:find-timezone-by-location-name ,%default-timezone))
