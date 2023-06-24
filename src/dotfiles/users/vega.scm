@@ -958,6 +958,7 @@
 (define vega-nyxt-features
   (cons*
    (feature-nyxt
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:scroll-distance 150
     #:temporary-history? #t
     #:autostart-slynk? #t
