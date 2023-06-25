@@ -922,8 +922,8 @@
 
 (define nyxt-extra-config-lisp
   `(,@%base-nyxt-extra-config-lisp
-    (define-configuration nyxt/reduce-tracking-mode:reduce-tracking-mode
-      ((nyxt/reduce-tracking-mode:preferred-user-agent
+    (define-configuration nyxt/mode/reduce-tracking:reduce-tracking-mode
+      ((nyxt/mode/reduce-tracking:preferred-user-agent
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
  (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")))
 
@@ -935,10 +935,10 @@
       (spinneret:with-html-string
         (:raw
          (status-button
-          status "Backward" 'nyxt/history-mode:history-backwards "⊲")
+          status "Backward" 'nyxt/mode/history:history-backwards "⊲")
          (status-button status "Reload" 'nyxt:reload-current-buffer "↺")
          (status-button
-          status "Forward" 'nyxt/history-mode:history-backwards "⊳")
+          status "Forward" 'nyxt/mode/history:history-backwards "⊳")
          (status-button status "Close" 'nyxt:delete-current-buffer "🞫"))))
 
     (defmethod format-status :around ((status status-buffer))
