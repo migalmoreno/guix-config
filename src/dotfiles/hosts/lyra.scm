@@ -128,10 +128,10 @@
             (qemu-binfmt-configuration
              (platforms (lookup-qemu-platforms "aarch64"))))
    (service screen-locker-service-type
-                  (screen-locker-configuration
-                   "slock" (file-append
-                            (@ (gnu packages suckless)
-                               slock) "/bin/slock") #f))
+            (screen-locker-configuration
+             (name "slock")
+             (program
+              (file-append (@ (gnu packages suckless) slock) "/bin/slock"))))
    (service kernel-module-loader-service-type
             '("ddcci" "ddcci_backlight"))))
 
