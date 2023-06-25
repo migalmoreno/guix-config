@@ -57,7 +57,9 @@
      "v4l-utils" "binutils" "wireguard-tools"
      "texinfo" "pass-otp" "imagemagick"
      "setxkbmap" "xkeyboard-config" "ffmpeg" "slop"
-     "docker-cli" "docker-compose")
+     "docker-cli" "docker-compose" "gst-plugins-good"
+     "gst-plugins-bad" "gst-plugins-ugly" "gst-plugins-base"
+     "gst-libav")
     (list (@ (nongnu packages steam-client) steam)))))
 
 (define extra-ssh-config
