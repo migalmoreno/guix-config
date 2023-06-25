@@ -1044,7 +1044,8 @@
     #:user-name "vega"
     #:full-name %default-fullname
     #:email %default-email
-    #:user-groups '("wheel" "netdev" "audio" "video" "libvirt" "spice")
+    #:user-groups
+    '("wheel" "netdev" "audio" "video" "libvirt" "spice" "docker")
     #:rde-advanced-user? #t
     #:emacs-advanced-user? #t)
    (feature-gnupg
