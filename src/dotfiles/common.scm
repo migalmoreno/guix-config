@@ -1039,13 +1039,13 @@ EndSection"))))
 
     (define-configuration web-buffer
       ((default-modes
-         (append '(nyxt/reduce-tracking-mode:reduce-tracking-mode)
+         (append '(nyxt/mode/reduce-tracking:reduce-tracking-mode)
                  %slot-value%))))
 
     (define-configuration (web-buffer
                            prompt-buffer
-                           nyxt/editor-mode:editor-buffer)
-      ((default-modes `(nyxt/emacs-mode:emacs-mode ,@%slot-value%))))))
+                           nyxt/mode/editor:editor-buffer)
+      ((default-modes `(nyxt/mode/emacs:emacs-mode ,@%slot-value%))))))
 
 (define-public (feature-nyxt-nx-tailor-extra-styles)
   (define (get-home-services config)
