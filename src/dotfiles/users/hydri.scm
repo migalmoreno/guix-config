@@ -114,8 +114,8 @@
 
 (define nyxt-extra-config-lisp
   `(,@%base-nyxt-extra-config-lisp
-    (define-configuration nyxt/reduce-tracking-mode:reduce-tracking-mode
-      ((nyxt/reduce-tracking-mode:preferred-user-agent
+    (define-configuration nyxt/mode/reduce-tracking:reduce-tracking-mode
+      ((nyxt/mode/reduce-tracking:preferred-user-agent
         "Mozilla/5.0 (Linux; Android 10; Google Pixel 4
  Build/QD1A.190821.014.C2; wv) AppleWebKit/537.36 (KHTML, like Gecko)
  Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36")))
@@ -124,10 +124,10 @@
       (spinneret:with-html-string
         (:raw
          (status-button
-          status "Backward" 'nyxt/history-mode:history-backwards "⊲")
+          status "Backward" 'nyxt/mode/history:history-backwards "⊲")
          (status-button status "Reload" 'nyxt:reload-current-buffer "↺")
          (status-button
-          status "Forward" 'nyxt/history-mode:history-backwards "⊳")
+          status "Forward" 'nyxt/mode/history:history-backwards "⊳")
          (status-button status "Close" 'nyxt:delete-current-buffer "🞫")
          (status-button status "New" 'nyxt:set-url-new-buffer "🞣")
          (status-button status "Switch" 'nyxt:switch-buffer "◱")
