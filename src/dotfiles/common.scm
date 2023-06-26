@@ -84,17 +84,18 @@
     (script-opts-add=osc-windowcontrols . no)
     (save-position-on-quit . #t)))
 
+(define base-ytdl-args '("-q" "--add-metadata" "--compat-options" "all"))
+
 (define-public %multimedia-base-features
   (list
    (feature-transmission
     #:download-dir (format #f "~a/videos" (getenv "HOME")))
    (feature-youtube-dl
     #:music-dl-args
-    '("-q" "-x" "-f" "bestaudio" "--audio-format" "mp3"
-      "--add-metadata" "--compat-options" "all")
+    `("-x" "-f" "bestaudio" "--audio-format" "mp3" ,@base-ytdl-args)
     #:video-dl-args
-    '("-q" "-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-      "--add-metadata" "--compat-options" "all"))
+    `("-f" "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+      ,@base-ytdl-args))
    (feature-mpv
     #:extra-mpv-conf mpv-extra-config
     #:extra-bindings mpv-extra-bindings)
