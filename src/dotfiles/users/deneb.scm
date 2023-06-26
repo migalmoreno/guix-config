@@ -11,10 +11,7 @@
     #:user-name "deneb"
     #:full-name %default-fullname
     #:email %default-email)
-   (feature-desktop-services
-    #:default-desktop-system-services
-    (modify-services (@@ (rde features base) %rde-desktop-system-services)
-      (delete network-manager-service-type)))
+   (feature-desktop-services)
    (feature-matrix-settings
     #:homeserver "https://matrix.conses.eu")
    (feature-pantalaimon
