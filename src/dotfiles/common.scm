@@ -505,13 +505,16 @@
       (format #f "(:tree \"~a/src\")" (getenv "HOME")))))
    (feature-ocaml
     #:extra-init-ml
-    (list "#directory \"_build\""
-          "#use \"topfind\""
-          "#thread"
-          "#require \"core.top\""
-          "#require \"ppx_fields_conv\""
-          "#require \"str\""
-          "open Core"))
+    (list
+     (format #f "#directory \"~a/.guix-home/profile/lib/ocaml/site-lib/\""
+             (getenv "HOME"))
+     "#directory \"_build\""
+     "#use \"topfind\""
+     "#thread"
+     "#require \"core.top\""
+     "#require \"ppx_fields_conv\""
+     "#require \"str\""
+     "open Core"))
    (feature-emacs-geiser)
    (feature-go)))
 
