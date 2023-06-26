@@ -370,18 +370,6 @@
      "nnmaildir+personal:sent"
      "nnmaildir+personal:spam"
      "nnmaildir+personal:trash")
-    ("Public"
-     "nnmaildir+public:inbox"
-     "nnmaildir+public:drafts"
-     "nnmaildir+public:sent"
-     "nnmaildir+public:spam"
-     "nnmaildir+public:trash")
-    ("Conses"
-     "nnmaildir+conses:inbox"
-     "nnmaildir+conses:drafts"
-     "nnmaildir+conses:sent"
-     "nnmaildir+conses:spam"
-     "nnmaildir+conses:trash")
     ("Clojure"
      "nntp+gwene:gwene.clojure.planet"
      "nntp+gwene:gwene.com.google.groups.clojure")
@@ -419,9 +407,7 @@
 (define gnus-topic-topology
   '(("Gnus" visible)
     (("Inbox" visible)
-     (("Personal" visible nil))
-     (("Public" visible nil))
-     (("Conses" visible nil)))
+     (("Personal" visible nil)))
     (("News" visible)
      (("Common Lisp" visible nil))
      (("Clojure" visible nil))
@@ -462,9 +448,7 @@
    (feature-mail-settings
     #:mail-accounts
     (list
-     (mail-acc 'public "public@mianmoreno.com" 'gandi)
-     (mail-acc 'personal "me@mianmoreno.com" 'gandi)
-     (mail-acc 'conses "contact@conses.eu" 'gandi))
+     (mail-acc 'personal %default-email 'gandi))
     #:mail-directory-fn
     (const (string-append (getenv "XDG_STATE_HOME") "/mail")))
    (feature-isync)
