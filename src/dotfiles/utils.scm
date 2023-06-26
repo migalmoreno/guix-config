@@ -42,11 +42,6 @@
 (define-public %nonguix-signing-key
   (project-file "src/dotfiles/keys/nonguix.pub"))
 
-(define-public %default-ssh-key
-  (plain-file
-   "mianmoreno.pub"
-   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN\n"))
-
 (define-public %default-ssh-keygrip
   "D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6")
 
@@ -54,15 +49,20 @@
 
 (define-public %default-timezone "Europe/Madrid")
 
-(define-public %default-email "me@mianmoreno.com")
-
 (define-public %default-fullname "Miguel Ángel Moreno")
 
-(define-public %default-username "mianmoreno")
+(define-public %default-username "migalmoreno")
 
-(define-public %default-domain "mianmoreno.com")
+(define-public %default-domain "migalmoreno.com")
+
+(define-public %default-email "mail@migalmoreno.com")
 
 (define-public %tubo-host (string-append "tubo." %default-domain))
+
+(define-public %default-ssh-key
+  (plain-file
+   (format #f "~a.pub" %default-username)
+   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgHrggw/+ZcncBvWeRmSf/PfaiGVmU2xnuh9C3mfbLN\n"))
 
 (define-public %default-kernel-arguments
   (list "quiet" "net.ifnames=0"))
