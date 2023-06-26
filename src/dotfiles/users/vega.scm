@@ -983,6 +983,7 @@
     #:default-desktop-home-services
     (append (@@ (rde features base) %rde-desktop-home-services)
             (list
+             extra-mpv-settings-service
              extra-shell-envs-service
              extra-home-packages-service
              extra-xdg-desktop-entries
