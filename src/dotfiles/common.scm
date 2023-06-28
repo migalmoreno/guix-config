@@ -1226,10 +1226,11 @@ EndSection"))))
   (list
    (feature-emacs-git)
    (feature-git
-    #:primary-forge-account-id 'sh
     #:extra-config
     `((sendemail
        ((cc . ,%default-email)
-        (thread . #t))))
-    #:extra-global-ignores
-    '("**/.direnv" ".log"))))
+        (thread . #t)))
+      (github
+       ((user . ,%default-username)))
+      (gitlab
+       ((user . ,%default-username)))))))
