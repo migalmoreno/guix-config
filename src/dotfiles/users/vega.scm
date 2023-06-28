@@ -59,7 +59,7 @@
      "setxkbmap" "xkeyboard-config" "ffmpeg" "slop"
      "docker-cli" "docker-compose" "gst-plugins-good"
      "gst-plugins-bad" "gst-plugins-ugly" "gst-plugins-base"
-     "gst-libav")
+     "gst-libav" "b4")
     (list (@ (nongnu packages steam-client) steam)))))
 
 (define extra-ssh-config
