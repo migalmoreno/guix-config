@@ -1224,28 +1224,6 @@ EndSection"))))
 
 (define-public %forge-base-features
   (list
-   (feature-forge-settings
-    #:forge-accounts
-    (list
-     (forge-account
-      (id 'sh)
-      (forge 'sourcehut)
-      (username "mmoreno")
-      (full-name %default-fullname)
-      (email %default-email))
-     (forge-account
-      (id 'gh)
-      (forge 'github)
-      (username %default-username)
-      (full-name %default-fullname)
-      (email %default-email))
-     (forge-account
-      (id 'gl)
-      (forge 'gitlab)
-      (username %default-username)
-      (full-name %default-fullname)
-      (email %default-email))))
-   (feature-sourcehut)
    (feature-git
     #:primary-forge-account-id 'sh
     #:extra-config
