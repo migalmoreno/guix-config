@@ -1224,6 +1224,7 @@ EndSection"))))
 
 (define-public %forge-base-features
   (list
+   (feature-emacs-git)
    (feature-git
     #:primary-forge-account-id 'sh
     #:extra-config
