@@ -478,7 +478,8 @@
    "emacs-yaml-mode" "emacs-json-mode" "emacs-nginx-mode" "emacs-pug-mode"
    "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
    "emacs-exwm-modeline"  "emacs-hexrgb" "emacs-wgrep" "emacs-org-fragtog"
-   "emacs-org-download" "emacs-org-make-toc"))
+   "emacs-org-download" "emacs-org-make-toc" "emacs-forge" "emacs-git-email"
+   "emacs-piem"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
