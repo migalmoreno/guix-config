@@ -470,7 +470,47 @@
          (if (listp (rde-exwm--get-outputs))
              (shell-command-to-string "light -s sysfs/backlight/ddcci1 -G")
              (shell-command-to-string "light -G"))
-         0 -1))))))
+         0 -1))))
+    (defun rde-git-email--get-current-project ()
+      "Return the path of the current project.
+Falls back to `default-directory'."
+      (let ((dir (or (and (bound-and-true-p projectile-known-projects)
+                          (projectile-project-root))
+                     (and (bound-and-true-p project-list-file)
+                          (if (and (listp (cdr (project-current)))
+                                   (> (length (project-current)) 2))
+                              (car (last (project-current)))
+                            (cdr (project-current))))
+                     (vc-root-dir)
+                     default-directory)))
+        dir))
+    (advice-add 'git-email--get-current-project
+                :override 'rde-git-email--get-current-project)
+    (define-key ctl-x-map "g" 'magit)
+    (add-hook 'magit-mode-hook 'toggle-truncate-lines)
+    (with-eval-after-load 'project
+      (define-key project-prefix-map "m" 'magit-project-status)
+      (add-to-list 'project-switch-commands
+                   '(magit-project-status "Show Magit Status")))
+    (with-eval-after-load 'magit
+      (define-key magit-mode-map "q" 'magit-kill-this-buffer)
+      (setq magit-display-buffer-function
+            'magit-display-buffer-same-window-except-diff-v1)
+      (setq magit-pull-or-fetch t)
+      (require 'forge)
+      (setq forge-owned-accounts '((,%default-username)
+                                   (,%default-username))))
+    (with-eval-after-load 'vc
+      (define-key vc-prefix-map "W" 'git-email-format-patch)
+      (setq vc-follow-symlinks t)
+      (setq vc-ignore-dir-regexp
+            (format "%s\\|%s"
+                    vc-ignore-dir-regexp tramp-file-name-regexp)))
+    (with-eval-after-load 'ediff
+      (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+    (with-eval-after-load 'git-email
+      (require 'git-email-magit)
+      (git-email-gnus-mode 1))))
 
 (define extra-elisp-packages
   (strings->packages
