@@ -116,7 +116,7 @@
                                         "~/.android/emulator/lib64")
                        "~/.android/emulator/emulator" "-show-kernel" "-gpu"
                        "swiftshader_indirect" "-camera-back" "webcam0"
-                       "-avd" "whatsapp_bridge")))
+                       "-avd" "whatsapp_bridge" "-no-snapshot")))
           (icon . "android")
           (comment . "Run an Android emulator")))))))))
 
