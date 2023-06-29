@@ -63,28 +63,28 @@
              (save-position-on-quit . #t)))))
 
 (define mpv-extra-bindings
-  `((global (("ctrl+a" . "seek 0 absolute-percent")
-             ("ctrl+e" . "seek 100 absolute-percent")
-             ("ctrl+f" . "seek 5 relative")
-             ("ctrl+b" . "seek -5 relative")
-             ("Shift+n" . "add chapter 1")
-             ("Shift+p" . "add chapter -1")
-             ("F" . "cycle fullscreen")
-             ("D" . ,(mpv-run-with-emacs '(rde-mpv-download)))
-             ("Alt+c" . ,(mpv-run-with-emacs '(rde-mpv-capture)))
-             ("M" . "cycle mute")
-             ("+" . "add volume 2")
-             ("-" . "add volume -2")
-             (":" . "script-binding console/enable")
-             ("s" . "screenshot video")
-             ("Q" . "quit-watch-later")
-             ("O" . "no-osd cycle-values osd-level 3 0")
-             ("o" . "osd-bar show-progress")
-             ("v" . "cycle sub-visibility")
-             ("b" . "cycle sub")
-             ("n" . "script-message osc-visibility always")
-             ("N" . "script-message osc-visibility never")
-             ("L" . "cycle-values loop-file \"inf\" \"no\"")))))
+  `("ctrl+a seek 0 absolute-percent"
+    "ctrl+e seek 100 absolute-percent"
+    "ctrl+f seek 5 relative"
+    "ctrl+b seek -5 relative"
+    "Shift+n add chapter 1"
+    "Shift+p add chapter -1"
+    "F cycle fullscreen"
+    (format #f "D ~a" ,(mpv-run-with-emacs '(rde-mpv-download)))
+    (format #f "Alt+c ~a" ,(mpv-run-with-emacs '(rde-mpv-capture)))
+    "M cycle mute"
+    "+ add volume 2"
+    "- add volume -2"
+    ": script-binding console/enable"
+    "s screenshot video"
+    "Q quit-watch-later"
+    "O no-osd cycle-values osd-level 3 0"
+    "o osd-bar show-progress"
+    "v cycle sub-visibility"
+    "b cycle sub"
+    "n script-message osc-visibility always"
+    "N script-message osc-visibility never"
+    "L cycle-values loop-file \"inf\" \"no\""))
 
 (define-public extra-mpv-settings-service
   (simple-service
