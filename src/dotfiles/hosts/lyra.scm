@@ -6,6 +6,7 @@
   #:use-module (gnu services base)
   #:use-module (gnu services databases)
   #:use-module (gnu services linux)
+  #:use-module (gnu services nix)
   #:use-module (gnu services spice)
   #:use-module (gnu services ssh)
   #:use-module (gnu services syncthing)
@@ -111,6 +112,7 @@
             (syncthing-configuration (user "vega")))
    (service spice-vdagent-service-type)
    (service virtlog-service-type)
+   (service nix-service-type)
    (service whoogle-service-type)
    (service libvirt-service-type
             (libvirt-configuration
