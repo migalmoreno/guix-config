@@ -1097,7 +1097,7 @@ Falls back to `default-directory'."
     #:pinentry-flavor 'emacs
     #:default-ttl 34560000)
    (feature-alternative-frontends
-    #:google-frontend (string-append "https://whoogle." %default-domain)
+    #:google-frontend "http://localhost:5000"
     #:youtube-frontend (string-append "https://" %tubo-host)
     #:reddit-frontend "https://teddit.pussthecat.org")
    (feature-android)
