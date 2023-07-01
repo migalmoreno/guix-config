@@ -1,8 +1,6 @@
-# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; -*-
+# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; after-save-hook: org-md-export-to-markdown; -*-
 #+OPTIONS: toc:nil num:nil
-* Dotfiles
+* Guix configuration
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://sr.ht/~abcdw/rde/][RDE]] configuration framework.
 
-The main goal behind this repository is to hold the configuration of my users, hosts, and remote machines.
-
-I constantly strive to upstream most of the packages, services, and features that I write. I encourage you to do the same so everyone in the community benefits.
+The main goal behind this repository is to hold the configuration of my users, hosts, and remote machines. You shouldn't view this as a [[https://guix.gnu.org/manual/en/html_node/Channels.html][Guix channel]], and in fact, you won't find much custom functionality because I prefer to work directly on top of upstream community channels.
