@@ -520,7 +520,7 @@ Falls back to `default-directory'."
    "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
    "emacs-exwm-modeline"  "emacs-hexrgb" "emacs-wgrep" "emacs-org-fragtog"
    "emacs-org-download" "emacs-org-make-toc" "emacs-forge" "emacs-git-email"
-   "emacs-piem"))
+   "emacs-piem" "emacs-nix-mode"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
