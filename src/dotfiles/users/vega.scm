@@ -1029,7 +1029,9 @@ Falls back to `default-directory'."
              extra-shell-envs-service
              extra-home-packages-service
              extra-xdg-desktop-entries
-             (service home-udiskie-service-type)
+             (service home-udiskie-service-type
+                      (home-udiskie-configuration
+                       '((notify . #f))))
              (service home-redshift-service-type
                       (home-redshift-configuration
                        (dawn-time "07:00")
