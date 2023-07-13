@@ -12,7 +12,6 @@
   #:use-module (gnu services syncthing)
   #:use-module (gnu services virtualization)
   #:use-module (gnu services web)
-  #:use-module (gnu services xorg)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu system uuid)
@@ -129,11 +128,6 @@
    (service qemu-binfmt-service-type
             (qemu-binfmt-configuration
              (platforms (lookup-qemu-platforms "aarch64"))))
-   (service screen-locker-service-type
-            (screen-locker-configuration
-             (name "slock")
-             (program
-              (file-append (@ (gnu packages suckless) slock) "/bin/slock"))))
    (service kernel-module-loader-service-type
             '("ddcci" "ddcci_backlight"))))
 
