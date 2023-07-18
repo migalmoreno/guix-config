@@ -120,18 +120,7 @@
      (integrate-he-in-os? he-in-os?)
      (features (append %host-features %user-features))))
 
-  (define %he
-    (home-environment
-     (inherit (rde-config-home-environment %config))
-     (essential-services
-      (list
-       (service home-run-on-first-login-service-type)
-       (service home-activation-service-type)
-       (service home-environment-variables-service-type)
-       (service home-symlink-manager-service-type)
-       (service home-xdg-base-directories-service-type)
-       (service home-service-type)
-       (service home-profile-service-type '())))))
+  (define %he (rde-config-home-environment %config))
 
   (define %os
     (operating-system
