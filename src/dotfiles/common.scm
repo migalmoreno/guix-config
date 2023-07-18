@@ -28,7 +28,9 @@
   #:use-module (rde features terminals)
   #:use-module (rde features version-control)
   #:use-module (rde features video)
+  #:use-module (rde features wm)
   #:use-module (rde features xdg)
+  #:use-module (rde features xdisorg)
   #:use-module (rde home services video)
   #:use-module (rde home services web-browsers)
   #:use-module (rde packages)
@@ -525,6 +527,17 @@
      "open Core"))
    (feature-emacs-geiser)
    (feature-go)))
+
+(define-public %wayland-base-features
+  (list
+   (feature-swaylock)
+   (feature-swayidle)
+   (feature-kanshi
+    #:extra-config
+    `((profile headless ((output eDP-1 enable)))
+      (profile docked ((output eDP-1 disable)
+                       (output DP-3 enable)))))
+   (feature-rofi)))
 
 (define-public %emacs-desktop-base-features
   (list
