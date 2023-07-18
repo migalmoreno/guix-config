@@ -85,7 +85,8 @@
           (target (getenv "RDE_TARGET"))
           (initial-os %initial-os)
           (he-in-os? (not (nil? (getenv "RDE_HE_IN_OS"))))
-          (pretty-print? #f))
+          (pretty-print? #f)
+          (configs %configs))
 
   (define %host
     (and=>
@@ -93,13 +94,13 @@
              (equal? (and=> (config-host config) host-name) host))
            (filter (lambda (config)
                      (not (null? (config-host config))))
-                   %configs))
+                   configs))
      config-host))
   (define %machine
     (and=>
      (find (lambda (config)
              (and %host (equal? (config-host config) %host)))
-           %configs)
+           configs)
      config-machine))
   (define %user-features
     (or (and=>
@@ -108,7 +109,7 @@
                (append-map config-users
                            (filter (lambda (config)
                                      (not (null? (config-users config))))
-                                   %configs)))
+                                   configs)))
          user-features)
         '()))
   (define %host-features (or (and=> %host host-features) '()))
