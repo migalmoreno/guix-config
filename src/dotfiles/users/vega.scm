@@ -1030,10 +1030,9 @@ Falls back to `default-directory'."
    (feature-android)
    (feature-manpages)
    (feature-emacs
-    #:emacs (@ (gnu packages emacs) emacs-next)
-    #:emacs-server-mode? #f
     #:extra-early-init-el %base-extra-early-init-el
     #:extra-init-el extra-init-el
+    #:default-application-launcher? #f
     #:additional-elisp-packages extra-elisp-packages)
    %ui-base-features
    (feature-gtk3
