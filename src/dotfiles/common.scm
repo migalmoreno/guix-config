@@ -15,11 +15,13 @@
   #:use-module (rde features golang)
   #:use-module (rde features irc)
   #:use-module (rde features keyboard)
+  #:use-module (rde features linux)
   #:use-module (rde features lisp)
   #:use-module (rde features mail)
   #:use-module (rde features markup)
   #:use-module (rde features matrix)
   #:use-module (rde features messaging)
+  #:use-module (rde features networking)
   #:use-module (rde features nyxt-xyz)
   #:use-module (rde features ocaml)
   #:use-module (rde features password-utils)
@@ -527,8 +529,11 @@
    (feature-emacs-geiser)
    (feature-go)))
 
-(define-public %wayland-base-features
+(define-public %desktop-base-features
   (list
+   (feature-networking)
+   (feature-pipewire)
+   (feature-emacs-pulseaudio-control)
    (feature-swaylock)
    (feature-swayidle)
    (feature-kanshi
@@ -536,96 +541,7 @@
     `((profile headless ((output eDP-1 enable)))
       (profile docked ((output eDP-1 disable)
                        (output DP-3 enable)))))
-   (feature-rofi)))
-
-(define-public %emacs-desktop-base-features
-  (list
-   (feature-emacs-ednc
-    #:notifications-icon "")
-   (feature-emacs-pulseaudio-control
-    #:display-volume? #t)
-   (feature-emacs-display-wttr)
-   (feature-emacs-battery)
-   (feature-emacs-tab-bar
-    #:modules-left
-    `((make-rde-tab-bar-module
-       :id 'menu-bar
-       :label (format " %s "
-                      (all-the-icons-fileicon
-                       "emacs" :v-adjust -0.1 :height 1))
-       :help "Menu"
-       :action 'tab-bar-menu-bar)
-      (make-rde-tab-bar-module
-       :id 'notifications
-       :label '(:eval (exwm-modeline-segment)))
-      (make-rde-tab-bar-module
-       :id 'notifications
-       :label '(:eval (rde-ednc--notify))))
-    #:modules-center
-    '((make-rde-tab-bar-module
-       :id 'time
-       :label 'display-time-string))
-    #:modules-right
-    '((make-rde-tab-bar-module
-       :id 'org-timer
-       :label 'org-timer-mode-line-string)
-      (make-rde-tab-bar-module
-       :id 'appointments
-       :label 'appt-mode-string)
-      (make-rde-tab-bar-module
-       :id 'weather
-       :label 'display-wttr-string)
-      (make-rde-tab-bar-module
-       :id 'volume-sink
-       :label 'pulseaudio-control-display-volume-string)
-      (make-rde-tab-bar-module
-       :id 'battery
-       :label 'battery-mode-line-string)))
-   (feature-emacs-exwm
-    #:workspace-number 4
-    #:window-configurations
-    '(((string= exwm-class-name "Nyxt")
-       char-mode t
-       workspace 1
-       simulation-keys nil
-       (exwm-layout-hide-mode-line))
-      ((string= exwm-instance-name "emacs")
-       char-mode t)
-      ((string-match "Android Emulator" exwm-title)
-       floating t))
-    #:extra-exwm-bindings
-    `((cons (kbd "s-<next>") 'pulseaudio-control-decrease-sink-volume)
-      (cons (kbd "s-<prior>") 'pulseaudio-control-increase-sink-volume)
-      (cons (kbd "s-l") '(lambda ()
-                           (interactive)
-                           (call-process "slock")))
-      (cons (kbd "M-o") 'ace-window)
-      (cons (kbd "s-<SPC>") 'app-launcher-run-app))
-    #:extra-exwm-init
-    `((call-process
-       ,(file-append (@ (gnu packages xorg) xsetroot)
-                     "/bin/xsetroot")
-       nil nil nil "-cursor_name" "left_ptr")
-      (if (listp (rde-exwm--get-outputs))
-          (fontaine-set-preset 'docked)
-        (fontaine-set-preset 'headless))
-      (with-eval-after-load 'pinentry-autoloads
-        (pinentry-start))))
-   (feature-emacs-exwm-run-on-tty
-    #:emacs-exwm-tty-number 1
-    #:launch-arguments '("-mm" "--debug-init")
-    #:extra-xorg-config
-    (list
-     "Section \"Monitor\"
-  Identifier \"DP-3\"
-  Option \"DPMS\" \"false\"
-EndSection
-Section \"ServerFlags\"
-  Option \"BlankTime\" \"0\"
-EndSection"))))
-
-(define-public %desktop-base-features
-  (list
+   (feature-rofi)
    (feature-bluetooth)
    (feature-keyboard
     #:keyboard-layout %default-keyboard-layout)
