@@ -398,10 +398,9 @@ Falls back to `default-directory'."
   (strings->packages
    "emacs-tempel-collection" "emacs-ox-haunt" "emacs-pinentry"
    "emacs-yaml-mode" "emacs-json-mode" "emacs-nginx-mode" "emacs-pug-mode"
-   "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-gif-screencast"
-   "emacs-exwm-modeline"  "emacs-hexrgb" "emacs-wgrep" "emacs-org-fragtog"
-   "emacs-org-download" "emacs-org-make-toc" "emacs-forge" "emacs-git-email"
-   "emacs-piem" "emacs-nix-mode"))
+   "emacs-rainbow-delimiters" "emacs-kind-icon" "emacs-wgrep"
+   "emacs-org-fragtog" "emacs-org-download" "emacs-org-make-toc" "emacs-forge"
+   "emacs-git-email" "emacs-piem" "emacs-nix-mode"))
 
 (define extra-gtk-settings
   `((gtk-cursor-blink . #f)
