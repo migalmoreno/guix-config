@@ -35,9 +35,9 @@
 
 ;;; Service extensions
 
-(define extra-shell-envs-service
+(define extra-environment-variables-service
   (simple-service
-   'add-missing-shell-envs
+   'add-extra-environment-variables
    home-environment-variables-service-type
    '(("GPG_TTY" . "$(tty)")
      ("LESSHISTFILE" . "-")
