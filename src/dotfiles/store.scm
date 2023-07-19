@@ -72,11 +72,7 @@
                   (features (@ (dotfiles users vega) %vega-features))))))
    (config
     (host (host (name "live")
-                (features (@ (dotfiles hosts live) %live-features)))))
-   (config
-    (users (list (user
-                  (name "hydri")
-                  (features (@ (dotfiles users hydri) %hydri-features))))))))
+                (features (@ (dotfiles hosts live) %live-features)))))))
 
 (define* (dispatcher
           #:key
