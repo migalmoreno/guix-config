@@ -1,7 +1,6 @@
 (define-module (dotfiles hosts lyra)
   #:use-module (dotfiles common)
   #:use-module (dotfiles utils)
-  #:use-module (dotfiles users hydri)
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services databases)
@@ -123,8 +122,7 @@
              (password-authentication? #f)
              (permit-root-login 'prohibit-password)
              (authorized-keys
-              `(("root" ,%hydri-ssh-key)
-                ("vega" ,%hydri-ssh-key ,%default-ssh-key)))))
+              `(("vega" ,%default-ssh-key)))))
    (service qemu-binfmt-service-type
             (qemu-binfmt-configuration
              (platforms (lookup-qemu-platforms "aarch64"))))
@@ -158,7 +156,7 @@
     #:guix-substitute-urls
     (list "https://substitutes.nonguix.org")
     #:guix-authorized-keys
-    (list %nonguix-signing-key %hydri-signing-key))
+    (list %nonguix-signing-key))
    (feature-bootloader
     #:bootloader-configuration
     (bootloader-configuration
