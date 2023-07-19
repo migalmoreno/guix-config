@@ -67,12 +67,7 @@
       (host "deneb")
       (options
        `((host-name . ,(getenv "CYGNUS_HOST"))
-         (user . "deneb"))))
-     (ssh-host
-      (host "hydri")
-      (options
-       `((host-name . "192.168.0.29")
-         (user . "hydri"))))))))
+         (user . "deneb"))))))))
 
 (define extra-xdg-desktop-entries
   (simple-service
