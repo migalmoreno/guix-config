@@ -821,8 +821,8 @@
      :base-search-url "https://community.penpot.app/search?q=~a")
     (engines:lemmy
      :shortcut "le"
-     :fallback-url (quri:uri "https://beehaw.org")
-     :base-search-url "https://beehaw.org/search/q/~a")
+     :fallback-url (quri:uri "https://lemm.ee")
+     :base-search-url "https://lemm.ee/search/q/~a")
     (engines:google
      :shortcut "go"
      :fallback-url (quri:uri "https://www.google.es")
