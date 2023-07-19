@@ -1023,9 +1023,10 @@ Falls back to `default-directory'."
     #:pinentry-flavor 'emacs
     #:default-ttl 34560000)
    (feature-alternative-frontends
+    #:instagram-frontend #f
     #:google-frontend "http://localhost:5000"
     #:youtube-frontend (string-append "https://" %tubo-host)
-    #:reddit-frontend "https://teddit.pussthecat.org")
+    #:reddit-frontend "https://lr.artemislena.eu")
    (feature-android)
    (feature-manpages)
    (feature-emacs
