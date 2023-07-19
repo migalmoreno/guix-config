@@ -50,16 +50,9 @@
    home-profile-service-type
    (append
     (strings->packages
-     "ddcutil" "light" "xclip"
-     "nasm" "gcc-toolchain" "autoconf"
-     "v4l-utils" "binutils" "wireguard-tools"
-     "texinfo" "pass-otp" "imagemagick"
-     "setxkbmap" "xkeyboard-config" "ffmpeg" "slop"
-     "docker-cli" "docker-compose" "gst-plugins-good"
-     "gst-plugins-bad" "gst-plugins-ugly" "gst-plugins-base"
-     "gst-libav" "b4")
-    (list (@ (nongnu packages steam-client) steam)
-          (@ (nongnu packages mozilla) firefox)))))
+     "ddcutil" "light" "v4l-utils" "binutils" "wireguard-tools" "texinfo"
+     "pass-otp" "imagemagick" "ffmpeg" "docker-cli" "docker-compose" "b4")
+    (list (@ (nongnu packages mozilla) firefox)))))
 
 (define extra-ssh-config
   (home-ssh-configuration
