@@ -848,7 +848,7 @@
              :new-tab t))
           '())))
 
-(define-public %base-nyxt-extra-config-lisp
+(define-public %base-extra-nyxt-config-lisp
   `((in-package :nyxt-user)
     (nyxt:use-nyxt-package-nicknames)
     (asdf:load-system :nx-mosaic)
