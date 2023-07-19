@@ -119,30 +119,6 @@
           (icon . "android")
           (comment . "Run an Android emulator")))))))))
 
-(define* (maim-script #:key region? clipboard?)
-  (program-file
-   (string-append "maim" (if region? "-region" ""))
-   #~(begin
-       (use-modules (srfi srfi-19))
-       (system
-        (string-join
-         (append
-          (list
-           #$(file-append (@ (gnu packages xdisorg) maim) "/bin/maim")
-           "--hidecursor"
-           #$@(if region? (list "-s") '()))
-          (list
-           (if #$clipboard?
-               (format #f "| ~a -selection clipboard -t image/png"
-                       (file-append (@ (gnu packages xdisorg) xclip)
-                                    "/bin/xclip"))
-               (format #f "~a/pictures/~a.jpg"
-                       (getenv "HOME")
-                       (date->string (current-date) "~Y~m~d-~H~M~S"))))))))))
-(define maim-fullscreen (maim-script))
-(define maim-region (maim-script #:region? #t))
-(define maim-fullscreen-clipboard (maim-script #:clipboard? #t))
-(define maim-region-clipboard (maim-script #:region? #t #:clipboard? #t))
 
 (define extra-init-el
   `(,@%base-extra-init-el
