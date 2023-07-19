@@ -49,7 +49,7 @@
                   "'~s'\""))
           cmd))
 
-(define mpv-extra-config
+(define extra-mpv-config
   `((global ((border . no)
              (volume . 100)
              ,(cons 'screenshot-directory
@@ -66,7 +66,7 @@
              (script-opts-add=osc-windowcontrols . no)
              (save-position-on-quit . #t)))))
 
-(define mpv-extra-bindings
+(define extra-mpv-bindings
   `("ctrl+a seek 0 absolute-percent"
     "ctrl+e seek 100 absolute-percent"
     "ctrl+f seek 5 relative"
@@ -95,8 +95,8 @@
    'add-mpv-extra-settings
    home-mpv-service-type
    (home-mpv-extension
-    (mpv-conf mpv-extra-config)
-    (input-conf mpv-extra-bindings))))
+    (mpv-conf extra-mpv-config)
+    (input-conf extra-mpv-bindings))))
 
 (define base-ytdl-args '("-q" "--add-metadata" "--compat-options" "all"))
 
@@ -751,7 +751,7 @@
                            router:breezewiki-instances-builder))
           '())))
 
-(define (nx-search-engines-extra-engines config)
+(define (extra-nx-search-engines config)
   `((make-instance 'search-engine
                    :shortcut "clj"
                    :search-url "https://clojars.org/search?q=~a"
@@ -1140,7 +1140,7 @@
    (feature-nyxt-blocker)
    (feature-nyxt-nx-search-engines
     #:default-engine-shortcut "who"
-    #:extra-engines nx-search-engines-extra-engines)
+    #:extra-engines extra-nx-search-engines)
    (feature-nyxt-nx-router
     #:routers nx-router-routers)))
 
