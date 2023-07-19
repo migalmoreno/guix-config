@@ -112,9 +112,37 @@
           (icon . "android")
           (comment . "Run an Android emulator")))))))))
 
+(define wayland-clipboard-fix
+  `((setq wl-copy-process nil)
+    (setq wl-copy-binary
+          ,(file-append (@ (gnu packages xdisorg) wl-clipboard)
+                        "/bin/wl-copy"))
+    (setq wl-paste-binary
+          ,(file-append (@ (gnu packages xdisorg) wl-clipboard)
+                        "/bin/wl-paste"))
+    (setq tr-binary
+          ,(file-append (@ (gnu packages base) coreutils-minimal) "/bin/tr"))
+    (setq wl-paste-command
+          (format "%s -n | %s -d \r" wl-paste-binary tr-binary))
+
+    (defun wl-copy (text)
+      (setq wl-copy-process (make-process :name "wl-copy"
+                                          :buffer nil
+                                          :command `(,wl-copy-binary "-n")
+                                          :connection-type 'pipe))
+      (process-send-string wl-copy-process text)
+      (process-send-eof wl-copy-process))
+
+    (defun wl-paste ()
+      (unless (and wl-copy-process (process-live-p wl-copy-process))
+        (shell-command-to-string wl-paste-command)))
+
+    (setq interprogram-cut-function 'wl-copy)
+    (setq interprogram-paste-function 'wl-paste)))
 
 (define extra-init-el
   `(,@%base-extra-init-el
+    ,@wayland-clipboard-fix
     (with-eval-after-load 'password-cache
       (setq password-cache t)
       (setq password-cache-expiry (* 60 10)))
