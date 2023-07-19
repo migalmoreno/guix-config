@@ -844,8 +844,8 @@ Falls back to `default-directory'."
       ((.dialog-vbox button)
        ((border-radius . 0))))))
 
-(define nyxt-extra-config-lisp
-  `(,@%base-nyxt-extra-config-lisp
+(define extra-nyxt-config-lisp
+  `(,@%base-extra-nyxt-config-lisp
     (define-configuration nyxt/mode/reduce-tracking:reduce-tracking-mode
       ((nyxt/mode/reduce-tracking:preferred-user-agent
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
@@ -882,21 +882,6 @@ Falls back to `default-directory'."
 
 
 ;;; User-specific features
-
-(define vega-nyxt-features
-  (cons*
-   (feature-nyxt
-    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
-    #:scroll-distance 150
-    #:temporary-history? #t
-    #:autostart-slynk? #t
-    #:default-browser? #t
-    #:restore-session? #f
-    #:extra-config-lisp nyxt-extra-config-lisp)
-   (feature-nyxt-nx-tailor #:auto? #t)
-   (feature-nyxt-nx-tailor-extra-styles)
-   (feature-nyxt-appearance)
-   %nyxt-base-features))
 
 (define extra-desktop-home-services
   (append
@@ -1059,7 +1044,18 @@ Falls back to `default-directory'."
    (feature-emacs-nyxt
     #:autostart-delay 5)
    %emacs-desktop-base-features
-   vega-nyxt-features
+   (feature-nyxt
+    #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
+    #:scroll-distance 150
+    #:temporary-history? #t
+    #:autostart-slynk? #t
+    #:default-browser? #t
+    #:restore-session? #f
+    #:extra-config-lisp extra-nyxt-config-lisp)
+   (feature-nyxt-nx-tailor #:auto? #t)
+   (feature-nyxt-nx-tailor-extra-styles)
+   (feature-nyxt-appearance)
+   %nyxt-base-features
    (feature-ungoogled-chromium
     #:ungoogled-chromium (@ (gnu packages chromium) ungoogled-chromium)
     #:startup-flags '("--incognito"))
