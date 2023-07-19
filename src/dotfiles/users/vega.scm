@@ -1043,7 +1043,6 @@ Falls back to `default-directory'."
    %emacs-base-features
    (feature-emacs-nyxt
     #:autostart-delay 5)
-   %emacs-desktop-base-features
    (feature-nyxt
     #:default-new-buffer-url "nyxt:nx-mosaic:mosaic"
     #:scroll-distance 150
