@@ -269,7 +269,6 @@
     (defun rde-completion-crm-indicator (args)
       "Display a discernible indicator for `completing-read-multiple'."
       (cons (concat "[CRM] " (car args)) (cdr args)))
-
     (advice-add 'completing-read-multiple
                 :filter-args 'rde-completion-crm-indicator)
     (define-key goto-map (kbd "a") 'consult-org-agenda)
@@ -335,25 +334,6 @@
     (repeat-mode 1)
     (with-eval-after-load 'rde-keymaps
       (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))
-    (with-eval-after-load 'exwm
-      (exwm-input-set-key (kbd "s-<insert>")
-                          (lambda ()
-                            (interactive)
-                            (call-process ,maim-fullscreen)))
-      (exwm-input-set-key (kbd "S-s-<insert>")
-                          (lambda ()
-                            (interactive)
-                            (call-process ,maim-region))))
-    (defun exwm-modeline-update ()
-      "Update EXWM modefine for every frame."
-      (interactive)
-      (cl-loop for frame in exwm-workspace--list
-               do (with-selected-frame frame
-                    (set-frame-parameter nil 'exwm-modeline--string
-                                         (exwm-modeline--format)))))
-    (exwm-modeline-mode)
-    (with-eval-after-load 'exwm-modeline
-      (setq exwm-modeline-randr nil))
     (defun rde-geiser-autoconnect ()
       "Start a Geiser REPL unless an active connection is already present."
       (require 'geiser-guile)
@@ -373,100 +353,6 @@
       (setq cider-repl-display-in-current-window t))
     (with-eval-after-load 'ange-ftp
       (setq ange-ftp-try-passive-mode t))
-    (defvar rde-screencast-process nil)
-    (defvar rde-screencast-map nil)
-    (define-prefix-command 'rde-screencast-map)
-    (with-eval-after-load 'rde-keymaps
-      (define-key rde-app-map (kbd "S") 'rde-screencast-map)
-      (let ((map rde-screencast-map))
-        (define-key map (kbd "f") 'rde-record-screencast)
-        (define-key map (kbd "r") 'rde-record-screencast-region)
-        (define-key map (kbd "s") 'rde-stop-screencast)))
-    (defun rde-record-screencast-region ()
-      "Record a portion of the screen as a screencast."
-      (interactive)
-      (require 'hexrgb)
-      (pcase-let ((`(,pos-x ,pos-y ,height ,width)
-                   (split-string
-                    (shell-command-to-string
-                     (substring
-                      (concat "slop -q -o -b 3 --format=%x,%y,%h,%w -c "
-                              (mapconcat 'number-to-string
-                                         (hexrgb-hex-to-rgb "#51afef")
-                                         ","))
-                      0 -1))
-                    ",")))
-
-        (setq rde-screencast-process
-              (start-process
-               "ffmpeg" nil (executable-find "ffmpeg")
-               "-framerate" "60" "-show_region" "1"
-               "-s" (format "%sx%s" width height)
-               "-f" "x11grab"
-               "-i" (format ":0.0+%s,%s" pos-x pos-y)
-               "-c:v" "libx264" "-qp" "0"
-               "-preset" "ultrafast" "-crf" "17"
-               (expand-file-name (format-time-string "%Y%m%d-%H%M%S.mp4")
-                                 (xdg-user-dir "VIDEOS"))))))
-    (defun rde-record-screencast ()
-      "Record a full-screen desktop screencast."
-      (interactive)
-      (notifications-notify
-       :app-name "ffmpeg"
-       :title "Started recording screen"
-       :timeout 3000)
-      (run-at-time 2 nil
-                   (lambda ()
-                     (setq rde-screencast-process
-                           (start-process
-                            "ffmpeg" nil (executable-find "ffmpeg")
-                            "-framerate" "60" "-f" "x11grab" "-i" ":0.0"
-                            "-c:v" "libx264" "-qp" "0"
-                            "-preset" "ultrafast"
-                            (expand-file-name
-                             (format-time-string "%Y%m%d-%H%M%S.mp4")
-                             (xdg-user-dir "VIDEOS")))))))
-    (defun rde-stop-screencast ()
-      (interactive)
-      (when rde-screencast-process
-        (ignore-errors
-          (interrupt-process rde-screencast-process)))
-      (setq rde-screencast-process nil))
-    (defun rde-increase-brightness ()
-      "Change monitor/laptop screen brightness through light and ddcutil."
-      (interactive)
-      (if (listp (rde-exwm--get-outputs))
-          (start-process "light" nil "light"
-                         "-s" "sysfs/backlight/ddcci1" "-A" "5")
-          (start-process "light" nil "light" "-A" "5")))
-    (defun rde-decrease-brightness ()
-      (interactive)
-      (if (listp (rde-exwm--get-outputs))
-          (start-process "light" nil "light"
-                         "-s" "sysfs/backlight/ddcci1" "-U" "5")
-          (start-process "light" nil "light" "-U" "5")))
-    (defvar rde-brightness-map nil
-      "Map to bind brightness-related helpers under.")
-    (define-prefix-command 'rde-brightness-map)
-    (with-eval-after-load 'rde-keymaps
-      (define-key rde-app-map (kbd "l") 'rde-brightness-map))
-    (let ((map rde-brightness-map))
-      (define-key map (kbd "i") 'rde-increase-brightness)
-      (define-key map (kbd "d") 'rde-decrease-brightness)
-      (map-keymap
-       (lambda (_key cmd)
-         (when (symbolp cmd)
-           (put cmd 'repeat-map 'rde-brightness-map)))
-       map))
-    (defun rde--get-brightness ()
-      "Get display brigthness using light."
-      (round
-       (string-to-number
-        (substring
-         (if (listp (rde-exwm--get-outputs))
-             (shell-command-to-string "light -s sysfs/backlight/ddcci1 -G")
-             (shell-command-to-string "light -G"))
-         0 -1))))
     (defun rde-git-email--get-current-project ()
       "Return the path of the current project.
 Falls back to `default-directory'."
