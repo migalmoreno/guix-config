@@ -957,7 +957,9 @@ Falls back to `default-directory'."
                                          (height . 1200)
                                          (layout . default)))
                     (set-rules '((id . "nyxt")
-                                 (tags . 2)))
+                                 (tags . 2))
+                               '((title . "Android Emulator")
+                                 (floating? . #t)))
                     (add-hook! dwl:hook-startup dwl:start-repl-server)
                     (add-hook!
                      dwl:hook-startup
