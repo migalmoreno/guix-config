@@ -533,7 +533,15 @@
    (feature-networking)
    (feature-pipewire)
    (feature-emacs-pulseaudio-control)
-   (feature-swaylock)
+   (feature-swaylock
+    #:swaylock (@ (gnu packages wm) swaylock-effects)
+    #:extra-config
+    '((screenshots)
+      (clock)
+      (indicator)
+      (effect-blur . 7x5)
+      (effect-vignette . "0.5:0.5")
+      (hide-keyboard-layout)))
    (feature-swayidle)
    (feature-kanshi
     #:extra-config
