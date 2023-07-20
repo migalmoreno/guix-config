@@ -880,7 +880,7 @@ Falls back to `default-directory'."
 
 ;;; User-specific features
 
-(define extra-desktop-home-services
+(define extra-home-desktop-services
   (let* ((shepherd-configuration (home-shepherd-configuration
                                   (auto-start? #t)
                                   (daemonize? #f)))
@@ -1082,7 +1082,7 @@ Falls back to `default-directory'."
     #:startup-flags '("--incognito"))
    %desktop-base-features
    (feature-desktop-services
-    #:default-desktop-home-services extra-desktop-home-services)
+    #:default-desktop-home-services extra-home-desktop-services)
    %multimedia-base-features
    %mail-base-features
    %security-base-features
