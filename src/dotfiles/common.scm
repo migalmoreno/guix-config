@@ -1,7 +1,6 @@
 (define-module (dotfiles common)
   #:use-module (dotfiles utils)
   #:use-module (contrib features javascript)
-  #:use-module (contrib features wm)
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
