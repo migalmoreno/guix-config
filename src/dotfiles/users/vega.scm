@@ -147,6 +147,7 @@
       (setq pass-show-keybindings nil))
     (with-eval-after-load 'epg-config
       (setq epg-pinentry-mode 'loopback))
+    (add-hook 'after-init-hook 'pinentry-start)
     (with-eval-after-load 'password-store
       (setq password-store-time-before-clipboard-restore 60))
     (with-eval-after-load 'frame
