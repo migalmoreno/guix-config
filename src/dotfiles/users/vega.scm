@@ -98,7 +98,7 @@
                        "--share=/dev/video0" "--share=/dev/dri"
                        "-m" #$(project-file
                                "src/dotfiles/manifests/android.scm")
-                       "--" "env"
+                       "--" "env" "DISPLAY=:0"
                        #$(string-append "LD_LIBRARY_PATH="
                                         "/lib:/lib/nss:"
                                         "~/.android/emulator/lib64/qt/lib:"
