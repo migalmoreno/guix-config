@@ -923,12 +923,16 @@ Falls back to `default-directory'."
                     (define pamixer
                       ,(file-append (@ (gnu packages pulseaudio) pamixer)
                                     "/bin/pamixer"))
-                    (set-keys "s-d"
-                              '(dwl:spawn
-                                ,(file-append
-                                  (@ (gnu packages xdisorg) rofi-wayland)
-                                  "/bin/rofi")
-                                "-show" "drun")
+                    (set-keys "s-d" '(dwl:spawn
+                                      ,(file-append
+                                        (@ (gnu packages xdisorg)
+                                           rofi-wayland)
+                                        "/bin/rofi")
+                                      "-show" "drun")
+                              "s-x" '(dwl:shcmd
+                                      ,(file-append
+                                        (@ (gnu packages wm) swaylock-effects)
+                                        "/bin/swaylock"))
                               "s-j" '(dwl:focus-stack 1)
                               "s-k" '(dwl:focus-stack -1)
                               "s-l" '(dwl:change-master-factor 0.05)
