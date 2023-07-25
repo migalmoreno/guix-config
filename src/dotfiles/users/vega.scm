@@ -885,7 +885,9 @@ Falls back to `default-directory'."
                                   (auto-start? #t)
                                   (daemonize? #f)))
          (shepherd (home-shepherd-configuration-shepherd
-                    shepherd-configuration)))
+                    shepherd-configuration))
+         (pamixer (file-append (@ (gnu packages pulseaudio) pamixer)
+                               "/bin/pamixer")))
     (append
      (@@ (rde features base) %rde-desktop-home-services)
      (list
@@ -920,9 +922,6 @@ Falls back to `default-directory'."
                           gaps-ih 12
                           gaps-iv 12)
                     (dwl:set-tag-keys "s" "s-S")
-                    (define pamixer
-                      ,(file-append (@ (gnu packages pulseaudio) pamixer)
-                                    "/bin/pamixer"))
                     (set-keys "s-d" '(dwl:spawn
                                       ,(file-append
                                         (@ (gnu packages xdisorg)
@@ -943,9 +942,9 @@ Falls back to `default-directory'."
                               "s-<mouse-left>" 'dwl:move
                               "s-<mouse-right>" 'dwl:resize
                               "s-<mouse-middle>" 'dwl:toggle-floating
-                              "s-<prior>" '(dwl:shcmd pamixer "--unmute"
+                              "s-<prior>" '(dwl:shcmd ,pamixer "--unmute"
                                                       "--increase" "5")
-                              "s-<next>" '(dwl:shcmd pamixer "--unmute"
+                              "s-<next>" '(dwl:shcmd ,pamixer "--unmute"
                                                      "--decrease" "5"))
                     (set-layouts 'default "[]=" 'dwl:tile
                                  'monocle "|M|" 'dwl:monocle)
