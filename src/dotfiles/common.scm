@@ -604,8 +604,8 @@
   `((make-instance 'router:opener
                    :name 'youtube-videos
                    :route (match-regex
-                           ".*/watch\\?.*v=.*"
-                           ".*/playlist\\?list=.*")
+                           "^https://.*/watch\\?.*v=.*"
+                           "^https://.*/playlist\\?list=.*")
                    :resource
                    (lambda (url)
                      (play-emacs-mpv url :formats nil :audio t :repeat t)))
