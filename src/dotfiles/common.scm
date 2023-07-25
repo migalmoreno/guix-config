@@ -703,11 +703,7 @@
                            (quri:uri
                             ,(get-value 'reddit-frontend config))
                            :instances-builder
-                           router:teddit-instances-builder)
-            (make-instance 'router:blocker
-                           :name 'reddit
-                           :blocklist
-                           '(:path (:contains (not "/comments/" "/wiki/")))))
+                           router:teddit-instances-builder))
           '())
     ,@(if (get-value 'tiktok-frontend config)
           `((make-instance 'router:redirector
