@@ -992,7 +992,11 @@ Falls back to `default-directory'."
                   (padding-top 0)
                   (padding-bottom 20)
                   (border-px 0)
-                  (modules '((ice-9 match)))
+                  (modules '((ice-9 match)
+                             (ice-9 popen)
+                             (ice-9 regex)
+                             (ice-9 rdelim)
+                             (ice-9 textual-ports)))
                   (block-spacing 0)
                   (height 28)
                   (delimiter-right " ")
@@ -1029,16 +1033,46 @@ Falls back to `default-directory'."
                    (list
                     (dtao-block
                      (events? #t)
-                     (render `(let ((title (dtao:title)))
-                                (if (> (string-length title) 80)
-                                    (string-append (substring title 0 80) "...")
-                                    title))))))
+                     (render
+                      `(let ((title (dtao:title)))
+                         (if (> (string-length title) 80)
+                             (string-append (substring title 0 80) "...")
+                             title))))))
                   (right-blocks
                    (list
                     (dtao-block
+                     (interval 60)
+                     (render
+                      `(let* ((port (open-input-pipe
+                                     ,(file-append
+                                       (@ (gnu packages linux) acpi)
+                                       "/bin/acpi")))
+                              (str (get-string-all port)))
+                         (close-port port)
+                         (string-append
+                          "^p(8)BAT: "
+                          (match:substring
+                           (string-match ".*, ([0-9]+%)" str) 1)
+                          "^p(8)"))))
+                    (dtao-block
                      (interval 1)
-                     (render `(strftime "%A, %d %b (w.%V) %T"
-                                        (localtime (current-time)))))))))))))))
+                     (render
+                      `(let* ((port (open-input-pipe
+                                     (string-append
+                                      ,pamixer " --get-volume-human")))
+                              (str (read-line port)))
+                         (close-pipe port)
+                         (when str
+                           (string-append "^p(8)VOL: " str "^p(8)"))))
+                     (click
+                      `(match button
+                         (0 (system
+                             (string-append ,pamixer " --toggle-mute"))))))
+                    (dtao-block
+                     (interval 1)
+                     (render
+                      `(strftime "%A, %d %b (w.%V) %T"
+                                 (localtime (current-time)))))))))))))))
 
 (define-public %vega-features
   (list*
