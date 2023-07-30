@@ -568,7 +568,6 @@
   (list
    (feature-emacs-appearance)
    (feature-emacs-modus-themes
-    #:dark? #t
     #:deuteranopia? #f
     #:headings-scaling? #t
     #:extra-modus-themes-overrides
