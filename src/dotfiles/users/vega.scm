@@ -1102,7 +1102,7 @@ Falls back to `default-directory'."
     #:additional-elisp-packages extra-elisp-packages)
    %ui-base-features
    (feature-gtk3
-    #:gtk-dark-theme? #t
+    #:gtk-dark-theme? #f
     #:gtk-theme #f
     #:extra-gtk-settings extra-gtk-settings
     #:extra-gtk-css extra-gtk-css)
