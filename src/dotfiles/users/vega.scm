@@ -964,23 +964,22 @@ Falls back to `default-directory'."
                                  (tags . 2))
                                '((title . "Android Emulator")
                                  (floating? . #t)))
-                    (add-hook! dwl:hook-startup dwl:start-repl-server)
                     (add-hook!
                      dwl:hook-startup
                      (lambda ()
-                       (dwl:spawn
-                        ,(program-file
-                          "launch-shepherd"
-                          #~(let* ((state-dir (or (getenv "XDG_STATE_HOME")
-                                                  (format #f "~a/.local/state"
-                                                          (getenv "HOME"))))
-                                   (log-dir (string-append state-dir "/log")))
-                              ((@ (guix build utils) mkdir-p) log-dir)
-                              (system*
-                               #$(file-append shepherd "/bin/shepherd")
-                               "--logfile"
-                               (string-append log-dir
-                                              "/shepherd.log"))))))))))))
+                       (dwl:start-repl-server)
+                       (dwl:shcmd
+                        ,(file-append
+                          (@ (gnu packages wm) swaybg)
+                          "/bin/swaybg")
+                        "-i" ,%wallpaper "-m" "stretch")
+                       (dwl:shcmd
+                        ,(file-append shepherd "/bin/shepherd")
+                        "--logfile"
+                        (format #f "~a/log/shepherd.log"
+                                (or (getenv "XDG_STATE_HOME")
+                                    (format #f "~a/.local/state"
+                                            (getenv "HOME"))))))))))))
       (service home-dtao-guile-service-type
                (home-dtao-guile-configuration
                 (config
