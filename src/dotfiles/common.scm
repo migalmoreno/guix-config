@@ -1,7 +1,10 @@
 (define-module (dotfiles common)
   #:use-module (dotfiles utils)
   #:use-module (contrib features javascript)
+  #:use-module (farg source)
+  #:use-module (farg theme)
   #:use-module (gnu services)
+  #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module (guix packages)
@@ -36,6 +39,46 @@
   #:use-module (rde home services web-browsers)
   #:use-module (rde packages)
   #:use-module (srfi srfi-1))
+
+
+;;; Themes
+
+(define-public %wallpaper
+  (origin
+    (method url-fetch)
+    (uri
+     "https://w.wallhaven.cc/full/28/wallhaven-28vjgm.jpg")
+    (sha256
+     (base32
+      "14b5h86jjimdzfw9krbc90abcd9kgvfhavqqq7xzxjxjbakrkzdl"))))
+
+(define-public %dark-theme
+  (farg-source
+   (theme
+    (farg-theme
+     (fg "#FFFFFF")
+     (bg "#000000")
+     (bg-alt "#212121")
+     (accent-0 "#00BCFF")
+     (accent-1 "#212121")
+     (accent-2 "#F0F0F0")
+     (alpha 0.8)
+     (light? #f)
+     (other '((red . "#ff5f59")))))))
+
+(define-public %light-theme
+  (farg-source
+   (theme
+    (farg-theme
+     (fg "#000000")
+     (bg "#FFFFFF")
+     (bg-alt "#212121")
+     (accent-0 "#9fc6ff")
+     (accent-1 "#212121")
+     (accent-2 "#F0F0F0")
+     (alpha 0.8)
+     (light? #t)
+     (other '((red . "#a60000")))))))
 
 
 ;;; Base features
