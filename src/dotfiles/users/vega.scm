@@ -4,6 +4,8 @@
   #:use-module (dtao-guile home-service)
   #:use-module (dwl-guile home-service)
   #:use-module (dwl-guile patches)
+  #:use-module (farg provider)
+  #:use-module (farg colors)
   #:use-module (rde features)
   #:use-module (rde features android)
   #:use-module (rde features base)
@@ -880,7 +882,7 @@ Falls back to `default-directory'."
 
 ;;; User-specific features
 
-(define extra-home-desktop-services
+(define (extra-home-desktop-services _ palette)
   (let* ((shepherd-configuration (home-shepherd-configuration
                                   (auto-start? #t)
                                   (daemonize? #f)))
@@ -911,9 +913,9 @@ Falls back to `default-directory'."
                  (list
                   `((setq inhibit-defaults? #t
                           border-px 2
-                          border-color "#ffffff"
-                          focus-color "#00bcff"
-                          root-color "#505050"
+                          border-color ,(palette 'bg)
+                          focus-color ,(farg:offset (palette 'accent-0) 10)
+                          root-color ,(palette 'bg-alt)
                           tags (map number->string (iota 5 1))
                           smart-gaps? #t
                           smart-borders? #t
@@ -985,8 +987,8 @@ Falls back to `default-directory'."
                 (config
                  (dtao-config
                   (font "Iosevka:style=Regular:size=13")
-                  (background-color "F0F0F0FF")
-                  (foreground-color "000000FF")
+                  (background-color (palette 'accent-2))
+                  (foreground-color (palette 'fg))
                   (padding-left 0)
                   (padding-top 0)
                   (padding-bottom 20)
@@ -1013,14 +1015,17 @@ Falls back to `default-directory'."
                           (render
                            `(cond
                              ((dtao:selected-tag? ,index)
-                              ,(string-append
-                                "^bg(#ffcc00)^fg(#191919)" str "^bg()^fg()"))
+                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
+                                       (palette 'accent-0) (palette 'fg)
+                                       str))
                              ((dtao:urgent-tag? ,index)
-                              ,(string-append
-                                "^bg(#ff0000)^fg(#ffffff)" str "^bg()^fg()"))
+                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
+                                       (palette 'red) (palette 'accent-0)
+                                       str))
                              ((dtao:active-tag? ,index)
-                              ,(string-append
-                                "^bg(#323232)^fg(#ffffff)" str "^bg()^fg()"))
+                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
+                                       (palette 'bg-alt) (palette 'accent-0)
+                                       str))
                              (else ,str))))))
                      (iota 5 1))
                     (list
@@ -1052,7 +1057,7 @@ Falls back to `default-directory'."
                           "^p(8)BAT: "
                           (match:substring
                            (string-match ".*, ([0-9]+%)" str) 1)
-                          "^p(8)"))))
+                          "^p(4)"))))
                     (dtao-block
                      (interval 1)
                      (render
@@ -1062,7 +1067,7 @@ Falls back to `default-directory'."
                               (str (read-line port)))
                          (close-pipe port)
                          (when str
-                           (string-append "^p(8)VOL: " str "^p(8)"))))
+                           (string-append "^p(4)VOL: " str "^p(8)"))))
                      (click
                       `(match button
                          (0 (system
@@ -1126,7 +1131,8 @@ Falls back to `default-directory'."
     #:startup-flags '("--incognito"))
    %desktop-base-features
    (feature-desktop-services
-    #:default-desktop-home-services extra-home-desktop-services)
+    #:default-desktop-home-services
+    (farg:theme-provider %light-theme extra-home-desktop-services))
    %multimedia-base-features
    %mail-base-features
    %security-base-features
