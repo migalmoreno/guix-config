@@ -572,7 +572,6 @@
     #:headings-scaling? #t
     #:extra-modus-themes-overrides
     '((bg-mode-line-active bg-dim)))
-   (feature-emacs-circadian)
    (feature-fonts
     #:use-serif-for-variable-pitch? #f
     #:font-serif
