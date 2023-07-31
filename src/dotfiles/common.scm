@@ -632,14 +632,7 @@
     (font
      (name "Noto Color Emoji")
      (size 11)
-     (package (@ (gnu packages fonts) font-google-noto)))
-    #:extra-fontaine-presets
-    '((docked
-       :default-height 107
-       :variable-pitch-weight light)
-      (headless
-       :default-height 105
-       :variable-pitch-weight light)))))
+     (package (@ (gnu packages fonts) font-google-noto))))))
 
 (define (nx-router-routers config)
   `((make-instance 'router:opener
