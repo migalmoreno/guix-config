@@ -591,7 +591,6 @@
     `((profile headless ((output eDP-1 enable)))
       (profile docked ((output eDP-1 disable)
                        (output DP-3 enable)))))
-   (feature-rofi)
    (feature-bluetooth)
    (feature-keyboard
     #:keyboard-layout %default-keyboard-layout)
