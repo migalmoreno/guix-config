@@ -142,6 +142,7 @@
 (define extra-init-el
   `(,@%base-extra-init-el
     ,@wayland-clipboard-fix
+    (add-hook 'after-init-hook 'server-start)
     (with-eval-after-load 'password-cache
       (setq password-cache t)
       (setq password-cache-expiry (* 60 10)))
@@ -1131,7 +1132,8 @@ Falls back to `default-directory'."
     #:extra-early-init-el %base-extra-early-init-el
     #:extra-init-el extra-init-el
     #:default-application-launcher? #f
-    #:additional-elisp-packages extra-elisp-packages)
+    #:additional-elisp-packages extra-elisp-packages
+    #:emacs-server-mode? #f)
    %ui-base-features
    (feature-gtk3
     #:gtk-dark-theme? #f
