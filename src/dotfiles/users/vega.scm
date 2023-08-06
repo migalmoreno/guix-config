@@ -939,7 +939,17 @@ Falls back to `default-directory'."
                               "s-l" '(dwl:change-master-factor 0.05)
                               "s-h" '(dwl:change-master-factor -0.05)
                               "s-q" 'dwl:kill-client
+                              "S-s-<escape>" 'dwl:quit
+                              "<XF86PowerOff>" 'dwl:quit
                               "s-f" 'dwl:toggle-fullscreen
+                              "s-t" '(dwl:cycle-layout 1)
+                              "s-<page-up>" '(dwl:change-masters 1)
+                              "s-<page-down>" '(dwl:change-masters -1)
+                              "s-<space>" 'dwl:zoom
+                              "s-S-0" '(dwl:view 0)
+                              "s-\\" 'dwl:toggle-gaps
+                              "s-[" '(dwl:change-gaps -6)
+                              "s-]" '(dwl:change-gaps 6)
                               "s-S-<space>" 'dwl:toggle-floating
                               "s-<mouse-left>" 'dwl:move
                               "s-<mouse-right>" 'dwl:resize
