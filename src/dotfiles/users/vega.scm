@@ -931,6 +931,7 @@ Falls back to `default-directory'."
                           tags (map number->string (iota 5 1))
                           smart-gaps? #t
                           smart-borders? #t
+                          default-alpha 0.8
                           gaps-oh 12
                           gaps-ov 12
                           gaps-ih 12
