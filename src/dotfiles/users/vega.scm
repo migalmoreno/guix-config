@@ -882,6 +882,17 @@ Falls back to `default-directory'."
 
 ;;; User-specific features
 
+(define (bemenu-options palette)
+  (define (%palette v) (format #f "~s" (palette v)))
+  (list
+   "-i" "-H" "28" "--fn" "\"Iosevka 11\"" "--hp" "10" "--cw" "1" "--ch" "20"
+   "--tf" (%palette 'accent-0) "--tb" (%palette 'bg-alt)
+   "--ff" (%palette 'fg) "--fb" (%palette 'accent-2)
+   "--nf" (%palette 'fg) "--nb" (%palette 'accent-2)
+   "--hf" (%palette 'fg) "--hb" (%palette 'accent-0)
+   "--cf" (%palette 'fg) "--cb" (%palette 'accent-2)
+   "--af" (%palette 'fg) "--ab" (%palette 'accent-2)))
+
 (define (extra-home-desktop-services _ palette)
   (let* ((shepherd-configuration (home-shepherd-configuration
                                   (auto-start? #t)
@@ -924,12 +935,18 @@ Falls back to `default-directory'."
                           gaps-ih 12
                           gaps-iv 12)
                     (dwl:set-tag-keys "s" "s-S")
-                    (set-keys "s-d" '(dwl:spawn
+                    (set-keys "s-d" '(dwl:shcmd
                                       ,(file-append
                                         (@ (gnu packages xdisorg)
-                                           rofi-wayland)
-                                        "/bin/rofi")
-                                      "-show" "drun")
+                                           j4-dmenu-desktop)
+                                        "/bin/j4-dmenu-desktop")
+                                      (format #f "--dmenu='~a ~a'"
+                                              ,(file-append
+                                                (@ (gnu packages xdisorg)
+                                                   bemenu)
+                                                "/bin/bemenu")
+                                              ,(string-join
+                                                (bemenu-options palette))))
                               "s-x" '(dwl:shcmd
                                       ,(file-append
                                         (@ (gnu packages wm) swaylock-effects)
