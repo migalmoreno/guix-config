@@ -293,7 +293,7 @@
       ("chore" . ?c)))
    (feature-emacs-org-recur)
    (feature-emacs-org-roam
-    #:org-roam-directory "~/documents/notes"
+    #:org-roam-directory "~/notes"
     #:org-roam-dailies-directory "journal/"
     #:org-roam-todo? #t
     #:org-roam-capture-templates
