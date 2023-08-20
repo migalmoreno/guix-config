@@ -392,7 +392,14 @@ Falls back to `default-directory'."
       (setq ediff-window-setup-function 'ediff-setup-windows-plain))
     (with-eval-after-load 'git-email
       (require 'git-email-magit)
-      (git-email-gnus-mode 1))))
+      (git-email-gnus-mode 1))
+    (with-eval-after-load 'piem
+      (setq piem-inboxes
+            '(("rde-devel"
+               :url "https://lists.sr.ht/~abcdw/rde-devel"
+               :address "~abcdw/rde-devel@lists.sr.ht"
+               :coderepo "~/src/guile/rde/")))
+      (piem-gnus-mode 1))))
 
 (define extra-elisp-packages
   (strings->packages
