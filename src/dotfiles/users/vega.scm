@@ -155,12 +155,7 @@
     (with-eval-after-load 'frame
       (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
     (with-eval-after-load 'prog-mode
-      (setq prettify-symbols-unprettify-at-point 'right-edge)
-      (setq-default prettify-symbols-alist
-                    '((":LOGBOOK:" . "")
-                      (":PROPERTIES:" . "")
-                      ("# -*-" . "")
-                      ("-*-" . ""))))
+      (setq prettify-symbols-unprettify-at-point 'right-edge))
     (with-eval-after-load 'rde-completion
       (add-to-list 'rde-completion-initial-narrow-alist
                    '(cider-repl-mode . ?c)))
