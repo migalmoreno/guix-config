@@ -1154,9 +1154,6 @@ Falls back to `default-directory'."
     #:default-browser? #t
     #:restore-session? #f
     #:extra-config-lisp extra-nyxt-config-lisp)
-   (feature-nyxt-nx-tailor #:auto? #f)
-   (feature-nyxt-nx-tailor-extra-styles)
-   (feature-nyxt-appearance)
    %nyxt-base-features
    (feature-ungoogled-chromium
     #:startup-flags '("--incognito"))
