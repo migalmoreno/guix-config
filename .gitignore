@@ -1,4 +1,3 @@
 *.elc
 target
 tmp*
-channels-lock-local.scm
