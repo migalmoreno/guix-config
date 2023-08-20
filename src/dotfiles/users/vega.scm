@@ -1164,7 +1164,6 @@ Falls back to `default-directory'."
    (feature-nyxt-appearance)
    %nyxt-base-features
    (feature-ungoogled-chromium
-    #:ungoogled-chromium (@ (gnu packages chromium) ungoogled-chromium)
     #:startup-flags '("--incognito"))
    %desktop-base-features
    (feature-desktop-services
