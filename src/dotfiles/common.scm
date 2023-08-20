@@ -634,7 +634,7 @@
      (size 11)
      (package (@ (gnu packages fonts) font-google-noto))))))
 
-(define (nx-router-routers config)
+(define (extra-nx-router-routers config)
   `(,@(if (get-value 'google-frontend config)
           `((make-instance 'router:redirector
                            :name 'google
@@ -967,87 +967,79 @@
                            nyxt/mode/editor:editor-buffer)
       ((default-modes `(nyxt/mode/emacs:emacs-mode ,@%slot-value%))))))
 
-(define-public (feature-nyxt-nx-tailor-extra-styles)
-  (define (get-home-services config)
-    (define font-sans (and=> (get-value 'font-sans config) font-name))
-    (list
-     (simple-service
-      'rde-nx-tailor-extension
-      (get-value 'nyxt-rde-nx-tailor-service-type config)
-      (home-nyxt-lisp-extension
-       (config
-        `((define-configuration status-buffer
-            ((style
-              (tailor:with-style 'status-buffer
-                `("#container"
-                  :height "100%"
-                  :width "100%"
-                  :background ,theme:primary
-                  :font-family ,theme:font-family
-                  :align-items "center"
-                  :padding "0 5px"
-                  :box-sizing "border-box")
-                `("#controls"
-                  :background "inherit"
-                  :box-sizing "border-box")
-                `("#controls button"
-                  :color ,theme:on-background
-                  :padding "3px")
-                `(".arrow-right, .arrow-left"
-                  :clip-path "none"
-                  :margin-right 0)
-                `("#url"
-                  :background "inherit"
-                  :color ,theme:on-background
-                  :font-weight "bold"
-                  :padding "5px"
-                  :display "flex"
-                  :align-items "center"
-                  :box-sizing "border-box"
-                  :flex-grow "6"
-                  :flex-shrink "3")
-                `("#url button"
-                  :white-space "nowrap"
-                  :text-overflow "ellipsis"
-                  :overflow "hidden")
-                `("#modes"
-                  :background "inherit"
-                  :padding-left "5px"
-                  :flex-grow "1")
-                `(:media "(max-width: 768px)"
-                         ("#container"
-                          :padding "0 1px")
-                         ("#url"
-                          :flex-basis "5em"
-                          :flex-grow "2"
-                          :flex-shrink "2"
-                          :height "80%"
-                          :border "1px solid #505050"
-                          :border-radius "3px"
-                          :overflow hidden)
-                         ("#controls"
-                          :width "fit-content"
-                          :flex-basis "auto"
-                          :padding "10% 5px")
-                         ("#controls button"
-                          :height "80%"
-                          :width "30px"
-                          :padding 0
-                          :border-color "#505050"
-                          :border-width "1px")
-                         ("#controls button:not(:first-of-type):not(:last-of-type)"
-                          :border-width "1px 1px 1px 0px"
-                          :border-style "solid"
-                          :border-color "#505050"
-                          :border-radius 0)
-                         ("#controls button:first-of-type"
-                          :border-width "1px"
-                          :border-style "solid"
-                          :border-radius "3px 0px 0px 3px")
-                         ("#controls button:last-of-type"
-                          :border-width "1px 1px 1px 0px"
-                          :border-style "solid"
-                          :border-radius "0px 3px 3px 0px"))))))
+(define-public (extra-nx-tailor-styles config)
+  `((define-configuration status-buffer
+      ((style
+        (tailor:with-style 'status-buffer
+          `("#container"
+            :height "100%"
+            :width "100%"
+            :background ,theme:primary
+            :font-family ,theme:font-family
+            :align-items "center"
+            :padding "0 5px"
+            :box-sizing "border-box")
+          `("#controls"
+            :background "inherit"
+            :box-sizing "border-box")
+          `("#controls button"
+            :color ,theme:on-background
+            :padding "3px")
+          `(".arrow-right, .arrow-left"
+            :clip-path "none"
+            :margin-right 0)
+          `("#url"
+            :background "inherit"
+            :color ,theme:on-background
+            :font-weight "bold"
+            :padding "5px"
+            :display "flex"
+            :align-items "center"
+            :box-sizing "border-box"
+            :flex-grow "6"
+            :flex-shrink "3")
+          `("#url button"
+            :white-space "nowrap"
+            :text-overflow "ellipsis"
+            :overflow "hidden")
+          `("#modes"
+            :background "inherit"
+            :padding-left "5px"
+            :flex-grow "1")
+          `(:media "(max-width: 360px)"
+                   ("#container"
+                    :padding "0 1px")
+                   ("#url"
+                    :flex-basis "5em"
+                    :flex-grow "2"
+                    :flex-shrink "2"
+                    :height "80%"
+                    :border "1px solid #505050"
+                    :border-radius "3px"
+                    :overflow hidden)
+                   ("#controls"
+                    :width "fit-content"
+                    :flex-basis "auto"
+                    :padding "10% 5px")
+                   ("#controls button"
+                    :height "80%"
+                    :width "30px"
+                    :padding 0
+                    :border-color "#505050"
+                    :border-width "1px")
+                   ("#controls button:not(:first-of-type):not(:last-of-type)"
+                    :border-width "1px 1px 1px 0px"
+                    :border-style "solid"
+                    :border-color "#505050"
+                    :border-radius 0)
+                   ("#controls button:first-of-type"
+                    :border-width "1px"
+                    :border-style "solid"
+                    :border-radius "3px 0px 0px 3px")
+                   ("#controls button:last-of-type"
+                    :border-width "1px 1px 1px 0px"
+                    :border-style "solid"
+                    :border-radius "0px 3px 3px 0px"))))))
 
           (define-configuration window
             ((message-buffer-style
@@ -1061,16 +1053,16 @@
           (define-configuration web-buffer
             ((style
               (tailor:with-style 'web-buffer
-                `(:let ((font-sans ,,font-sans))
+                `(:let ((sans ,,(font-name (get-value 'font-sans config))))
                    ("*, body, div, section, input"
                     :font-family ,theme:font-family
                     :background-color ,theme:background
                     :color ,theme:on-background)
                    ("h1,h2,h3,h4,h5,h6"
                     :color ,theme:on-secondary
-                    :font-family #(font-sans))
+                    :font-family #(sans))
                    ("p, td , dt, button, .button, a, a:link"
-                    :font-family #(font-sans)
+                    :font-family #(sans)
                     :color ,theme:on-background)
                    ("button, .button"
                     :padding "10px")
@@ -1123,11 +1115,7 @@
                   :color ,theme:on-background)
                 `(.marked
                   :background ,theme:accent
-                  :color ,theme:on-accent)))))))))))
-
-  (feature
-   (name 'nx-tailor-extra-styles)
-   (home-services-getter get-home-services)))
+                  :color ,theme:on-accent)))))))
 
 (define-public %nyxt-base-features
   (list
@@ -1136,7 +1124,19 @@
     #:default-engine-shortcut "who"
     #:extra-engines extra-nx-search-engines)
    (feature-nyxt-nx-router
-    #:routers nx-router-routers)))
+    #:routers extra-nx-router-routers)
+   (feature-nyxt-nx-tailor #:auto? #f)
+   (feature
+    (name 'nyxt-nx-tailor-extra-styles)
+    (home-services-getter
+     (lambda (config)
+       (list
+        (simple-service
+         'rde-nx-tailor-extension
+         (get-value 'nyxt-rde-nx-tailor-service-type config)
+         (home-nyxt-lisp-extension
+          (config (extra-nx-tailor-styles config))))))))
+   (feature-nyxt-appearance)))
 
 (define-public %security-base-features
   (list
