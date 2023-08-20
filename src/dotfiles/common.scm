@@ -838,14 +838,7 @@
              (quri:uri ,(get-value 'google-frontend config))
              :base-search-url
              ,(string-append (get-value 'google-frontend config)
-                             "/search?q=~a")
-             :theme :system
-             :alternatives nil
-             :lang-results :english
-             :lang-ui :english
-             :view-image t
-             :no-javascript t
-             :new-tab t))
+                             "/search?q=~a")))
           '())))
 
 (define-public %base-extra-nyxt-config-lisp
