@@ -111,7 +111,12 @@
    (service spice-vdagent-service-type)
    (service virtlog-service-type)
    (service nix-service-type)
-   (service whoogle-service-type)
+   (service whoogle-service-type
+            (whoogle-configuration
+             (environment-variables
+              (list
+               "WHOOGLE_CONFIG_ALTS=1" "WHOOGLE_MINIMAL=1"
+               "WHOOGLE_CONFIG_NEW_TAB=1""WHOOGLE_RESULTS_PER_PAGE=50"))))
    (service libvirt-service-type
             (libvirt-configuration
              (unix-sock-group "libvirt")
