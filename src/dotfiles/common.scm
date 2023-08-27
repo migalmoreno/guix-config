@@ -823,11 +823,10 @@
 (define-public %base-extra-nyxt-config-lisp
   `((in-package :nyxt-user)
     (nyxt:use-nyxt-package-nicknames)
-    (asdf:load-system :nx-mosaic)
     (local-time:reread-timezone-repository)
     (setf local-time:*default-timezone*
           (local-time:find-timezone-by-location-name ,%default-timezone))
-
+    (asdf:load-system :nx-mosaic)
     (defun status-button (buffer title action label)
       (spinneret:with-html-string
         (:button :type "button" :class "button" :title title
