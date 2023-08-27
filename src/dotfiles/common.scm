@@ -1098,7 +1098,7 @@
   (list
    (feature-nyxt-blocker)
    (feature-nyxt-nx-search-engines
-    #:default-engine-shortcut "who"
+    #:default-engine-shortcut "go"
     #:extra-engines extra-nx-search-engines)
    (feature-nyxt-nx-router
     #:routers extra-nx-router-routers)
