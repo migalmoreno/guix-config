@@ -109,7 +109,7 @@
           (icon . "android")
           (comment . "Run an Android emulator")))))))))
 
-(define wayland-clipboard-fix
+(define emacs-wayland-clipboard-fix
   `((setq wl-copy-process nil)
     (setq wl-copy-binary
           ,(file-append (@ (gnu packages xdisorg) wl-clipboard)
@@ -139,7 +139,7 @@
 
 (define extra-init-el
   `(,@%base-extra-init-el
-    ,@wayland-clipboard-fix
+    ,@emacs-wayland-clipboard-fix
     (add-hook 'after-init-hook 'server-start)
     (with-eval-after-load 'password-cache
       (setq password-cache t)
