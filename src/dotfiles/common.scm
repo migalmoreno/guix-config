@@ -958,10 +958,14 @@
             :box-sizing "border-box")
           `("#controls"
             :background "inherit"
+            :height "100%"
             :box-sizing "border-box")
           `("#controls button"
             :color ,theme:on-background
             :padding "3px")
+          `("#controls button:hover"
+            :background none
+            :color ,theme:on-background)
           `(".arrow-right, .arrow-left"
             :clip-path "none"
             :margin-right 0)
@@ -1070,6 +1074,8 @@
                   :padding-right "10px")
                 `("#input"
                   :background ,theme:background)
+                `("#input:focus"
+                  :box-shadow none)
                 `(".source"
                   :margin 0)
                 `(".source-name"
@@ -1087,6 +1093,11 @@
                   :padding "5px 15px"
                   :background ,theme:background
                   :font-weight "bold")
+                `(".arrow-right, .arrow-left"
+                  :clip-path "none"
+                  :margin-right 0)
+                `((:or "#prompt-modes" "#close-button")
+                  :display "none")
                 `("#selection"
                   :background ,(str:concat theme:primary "E6")
                   :color ,theme:on-background)
