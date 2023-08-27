@@ -291,39 +291,20 @@
    (feature-emacs-org-recur)
    (feature-emacs-org-roam
     #:org-roam-directory "~/notes"
-    #:org-roam-dailies-directory "journal/"
     #:org-roam-todo? #t
     #:org-roam-capture-templates
-    `(("d" "default" plain "%?"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                "#+title: ${title}\n#+filetags: :${Topic}:\n")
+    `(("w" "work" plain "%?"
+       :if-new (file+head "work/pages/%<%Y%m%d%H%M%S>-${slug}.org"
+                          "#+title: ${title}\n#+filetags: :${Topic}:\n")
        :unnarrowed t)
-      ("r" "reference" plain "%?"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:ROAM_REFS: ${ref}\n:END:\n"
-                  "#+title: ${title}\n#+filetags: :${Topic}:"))
-       :unnarrowed t)
-      ("m" "recipe" plain "* Ingredients\n- %?\n* Directions"
-       :if-new (file+head
-                "%<%Y%m%d%H%M%S>-${title}.org"
-                "#+title: ${title}\n#+filetags: :cooking:\n")
-       :unnarrowed t)
-      ("b" "book" plain
-       "* Chapters\n%?"
-       :if-new (file+head
-                "%<%Y%M%d%H%M%S>-${slug}.org"
-                ,(string-append
-                  ":PROPERTIES:\n:AUTHOR: ${Author}\n:DATE: ${Date}\n"
-                  ":PUBLISHER: ${Publisher}\n:EDITION: ${Edition}\n:END:\n"
-                  "#+title: ${title}\n#+filetags: :${Topic}:"))
+      ("p" "personal" plain "%?"
+       :if-new (file+head "personal/%<%Y%m%d%H%M%S>-${slug}.org"
+                          "#+title: ${title}\n#+filetags: :${Topic}:\n")
        :unnarrowed t))
     #:org-roam-dailies-capture-templates
     '(("d" "default" entry
        "* %?"
-       :if-new (file+head "%<%Y-%m-%d>.org"
+       :if-new (file+head "work/journals/%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-d>\n"))))
    (feature-emacs-org-agenda)))
 
