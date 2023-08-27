@@ -284,12 +284,9 @@
     '((:startgroup)
       (:endgroup)
       ("work" . ?w)
-      ("emacs" . ?e)
       ("project" . ?p)
-      ("linux" . ?l)
       ("education" . ?d)
       ("finance" . ?f)
-      ("guix" . ?g)
       ("chore" . ?c)))
    (feature-emacs-org-recur)
    (feature-emacs-org-roam
