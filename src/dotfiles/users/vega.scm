@@ -894,6 +894,24 @@ Falls back to `default-directory'."
    "--cf" (%palette 'fg) "--cb" (%palette 'accent-2)
    "--af" (%palette 'fg) "--ab" (%palette 'accent-2)))
 
+(define* (grim-script #:key select? clipboard?)
+  `(begin
+     (use-modules (srfi srfi-19))
+     (dwl:shcmd
+      ,(file-append (@ (gnu packages image) grim) "/bin/grim")
+      ,@(if select?
+            `("-g" "\"$("
+              ,(file-append (@ (gnu packages image) slurp) "/bin/slurp")
+              ")\"")
+            '())
+      ,@(if clipboard?
+            `("-" "|" ,(file-append (@ (gnu packages xdisorg) wl-clipboard)
+                                    "/bin/wl-copy"))
+            '("-t" "jpeg"
+              (format #f "~a/pictures/~a.jpg"
+                      (getenv "HOME")
+                      (date->string (current-date) "~Y~m~d-~H~M~S")))))))
+
 (define (extra-home-desktop-services _ palette)
   (let* ((shepherd-configuration (home-shepherd-configuration
                                   (auto-start? #t)
@@ -976,7 +994,9 @@ Falls back to `default-directory'."
                               "s-<prior>" '(dwl:shcmd ,pamixer "--unmute"
                                                       "--increase" "5")
                               "s-<next>" '(dwl:shcmd ,pamixer "--unmute"
-                                                     "--decrease" "5"))
+                                                     "--decrease" "5")
+                              "s-<insert>" ',(grim-script #:select? #t)
+                              "s-<delete>" ',(grim-script))
                     (set-layouts 'default "[]=" 'dwl:tile
                                  'monocle "|M|" 'dwl:monocle)
                     (set-monitor-rules '((name . "eDP-1")
