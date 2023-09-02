@@ -1,9 +1,9 @@
 (list (channel
         (name 'farg)
-        (url "https://github.com/engstrand-config/farg")
-        (branch "main")
+        (url "file:///home/vega/src/guile/farg")
+        (branch "feature-add-file-like-wallpapers")
         (commit
-          "2ac3d59773730882b6f77fc9723e292a7ebdfa05"))
+          "618c7ca339009313082a8eddb703495e0f2a3e88"))
       (channel
         (name 'home-service-dtao-guile)
         (url "https://github.com/engstrand-config/home-service-dtao-guile")
