@@ -64,7 +64,8 @@
      (accent-2 "#F0F0F0")
      (alpha 0.8)
      (light? #f)
-     (other '((red . "#ff5f59")))))))
+     (other '((red . "#ff5f59")))
+     (wallpaper %wallpaper)))))
 
 (define-public %light-theme
   (farg-source
@@ -78,7 +79,8 @@
      (accent-2 "#F0F0F0")
      (alpha 0.8)
      (light? #t)
-     (other '((red . "#a60000")))))))
+     (other '((red . "#a60000")))
+     (wallpaper %wallpaper)))))
 
 
 ;;; Base features
