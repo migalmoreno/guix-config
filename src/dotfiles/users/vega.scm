@@ -1023,7 +1023,7 @@ Falls back to `default-directory'."
                         ,(file-append
                           (@ (gnu packages wm) swaybg)
                           "/bin/swaybg")
-                        "-i" ,%wallpaper "-m" "stretch")
+                        "-i" ,(palette 'wallpaper) "-m" "stretch")
                        (dwl:shcmd
                         ,(file-append shepherd "/bin/shepherd")
                         "--logfile"
