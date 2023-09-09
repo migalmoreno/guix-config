@@ -895,7 +895,8 @@ Falls back to `default-directory'."
   (define (%palette v) (format #f "~s" (palette v)))
   (list
    "-i" "-H" "28" "--fn" "\"Iosevka 11\"" "--hp" "10" "--cw" "1" "--ch" "20"
-   "--tf" (%palette 'accent-0) "--tb" (%palette 'bg-alt)
+   "--tf" (%palette 'fg)
+   "--tb" (format #f "~s" (farg:offset (palette 'bg) '20))
    "--ff" (%palette 'fg) "--fb" (%palette 'accent-2)
    "--nf" (%palette 'fg) "--nb" (%palette 'accent-2)
    "--hf" (%palette 'fg) "--hb" (%palette 'accent-0)
@@ -957,7 +958,6 @@ Falls back to `default-directory'."
                           tags (map number->string (iota 5 1))
                           smart-gaps? #t
                           smart-borders? #t
-                          default-alpha 0.8
                           gaps-oh 12
                           gaps-ov 12
                           gaps-ih 12
@@ -1081,15 +1081,16 @@ Falls back to `default-directory'."
                                        str))
                              ((dtao:active-tag? ,index)
                               ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
-                                       (palette 'bg-alt) (palette 'accent-0)
-                                       str))
+                                       (farg:offset (palette 'bg) 20)
+                                       (palette 'fg) str))
                              (else ,str))))))
                      (iota 5 1))
                     (list
                      (dtao-block
                       (events? #t)
                       (click `(dtao:next-layout))
-                      (render `(string-append "^p(4)" (dtao:get-layout)))))))
+                      (render
+                       `(format #f "^p(8)~a^p(8)" (dtao:get-layout)))))))
                   (center-blocks
                    (list
                     (dtao-block
