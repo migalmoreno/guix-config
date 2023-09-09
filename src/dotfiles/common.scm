@@ -556,6 +556,7 @@
    (feature-networking)
    (feature-pipewire)
    (feature-emacs-pulseaudio-control)
+   (feature-emacs-power-menu)
    (feature-emacs-ednc)
    (feature-swaylock
     #:swaylock (@ (gnu packages wm) swaylock-effects)
