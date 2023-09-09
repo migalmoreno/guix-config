@@ -960,7 +960,6 @@
             :box-sizing "border-box")
           `("#controls"
             :background "inherit"
-            :height "100%"
             :box-sizing "border-box")
           `("#controls button"
             :color ,theme:on-background
