@@ -829,13 +829,6 @@
     (setf local-time:*default-timezone*
           (local-time:find-timezone-by-location-name ,%default-timezone))
     (asdf:load-system :nx-mosaic)
-    (defun status-button (buffer title action label)
-      (spinneret:with-html-string
-        (:button :type "button" :class "button" :title title
-                 :onclick (ps:ps (nyxt/ps:lisp-eval
-                                  (:title title :buffer buffer)
-                                  (funcall action)))
-                 label)))
 
     (defun eval-in-emacs (&rest s-exps)
       "Evaluate S-EXPS with `emacsclient'."
