@@ -857,13 +857,21 @@ Falls back to `default-directory'."
 
     (defmethod format-status-buttons :around ((status status-buffer))
       (spinneret:with-html-string
-        (:raw
-         (status-button
-          status "Backward" 'nyxt/mode/history:history-backwards "⊲")
-         (status-button status "Reload" 'nyxt:reload-current-buffer "↺")
-         (status-button
-          status "Forward" 'nyxt/mode/history:history-backwards "⊳")
-         (status-button status "Close" 'nyxt:delete-current-buffer "🞫"))))
+        (:nbutton
+          :buffer status
+          :text (:raw (glyph-left status))
+          :title "Backwards"
+          '(nyxt/mode/history:history-backwards))
+        (:nbutton
+          :buffer status
+          :text (:raw (glyph-reload status))
+          :title "Reload"
+          '(nyxt:reload-current-buffer))
+        (:nbutton
+          :buffer status
+          :text (:raw (glyph-right status))
+          :title "Forwards"
+          '(nyxt/mode/history:history-backwards))))
 
     (defmethod format-status :around ((status status-buffer))
       (let ((buffer (current-buffer (window status))))
