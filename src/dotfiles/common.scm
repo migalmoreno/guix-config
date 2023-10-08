@@ -171,7 +171,11 @@
 (define-public %base-extra-init-el
   `((eval-when-compile
      (require 'cl-lib))
-    (setq-default frame-title-format '("%b - Emacs"))
+    (setq frame-title-format
+          '(multiple-frames
+            "%b"
+            ("" "%b - GNU Emacs at " system-name
+             " [" (:eval (frame-parameter (selected-frame) 'window-id)) "]")))
     (require 'warnings)
     (setq warning-suppress-types '((diary) (auto-save) (org-babel)))
     (setq warning-suppress-log-types '((comp org-babel)))
