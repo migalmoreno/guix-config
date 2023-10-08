@@ -4,9 +4,9 @@
 
 This is my personal set of configuration files built around the [GNU Guix](https://guix.gnu.org/) package manager and the [RDE](https://github.com/abcdw/rde) configuration framework.  
 
-![img](https://files.migalmoreno.com/guix_config.jpg)  
+![img](https://files.migalmoreno.com/guix_config_setup.jpg)  
 
-The main goal behind this repository is to hold the configuration of my users, hosts, and remote machines. For the most part, I stick to the [RDE principles](https://github.com/abcdw/rde#principles) to choose my tooling, although I've contributed and maintain additional functionality for other programs.  
+The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the [RDE principles](https://github.com/abcdw/rde#principles) to choose my tooling and I try to contribute and maintain related programs.  
 
 -   **OS/Package Manager:** GNU Guix
 -   **Window Manager:** dwl-guile
@@ -16,13 +16,13 @@ The main goal behind this repository is to hold the configuration of my users, h
 -   **Text Editor:** GNU Emacs
 -   **Video Player:** mpv
 
-To build and instantiate my configurations, invoke one of the following commands:  
+To build and activate my configurations, invoke one of the following commands:  
 
-    # To instantiate the current user's home
+    # To activate the current user's home
     make home
     # For a specific user
     make home/reconfigure/$USER
-    # To instantiate the current hostname's config
+    # To activate the current hostname's config
     make system
     # For a specific host
     make system/reconfigure/$HOST
