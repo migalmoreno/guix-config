@@ -164,8 +164,6 @@
       (setq epg-pinentry-mode 'loopback))
     (with-eval-after-load 'password-store
       (setq password-store-time-before-clipboard-restore 60))
-    (with-eval-after-load 'frame
-      (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
     (with-eval-after-load 'prog-mode
       (setq prettify-symbols-unprettify-at-point 'right-edge))
     (with-eval-after-load 'rde-completion
@@ -406,7 +404,9 @@ Falls back to `default-directory'."
                :url "https://lists.sr.ht/~abcdw/rde-devel"
                :address "~abcdw/rde-devel@lists.sr.ht"
                :coderepo "~/src/guile/rde/")))
-      (piem-gnus-mode 1))))
+      (piem-gnus-mode 1))
+    (with-eval-after-load 'rde-power-menu
+      (define-key global-map (kbd "s-m") 'rde-power-menu))))
 
 (define extra-elisp-packages
   (strings->packages
