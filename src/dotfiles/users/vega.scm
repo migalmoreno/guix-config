@@ -35,16 +35,30 @@
 
 ;;; Service extensions
 
-(define extra-environment-variables-service
+(define (bemenu-options palette)
+  (define (%palette v) (format #f "~s" (palette v)))
+  (list
+   ;; "--ignorecase" "--hp" "10" "--cw" "1" "--ch" "20"
+   "-H" "28" "--fn" "\"Iosevka 11\""
+   "--tf" (%palette 'fg)
+   "--tb" (format #f "~s" (farg:offset (palette 'bg) '20))
+   "--ff" (%palette 'fg) "--fb" (%palette 'accent-2)
+   "--nf" (%palette 'fg) "--nb" (%palette 'accent-2)
+   ;; "--af" (%palette 'fg) "--ab" (%palette 'accent-2)
+   ;; "--cf" (%palette 'fg) "--cb" (%palette 'accent-2)
+   "--hf" (%palette 'fg) "--hb" (%palette 'accent-0)))
+
+(define (extra-home-environment-variables-service palette)
   (simple-service
-   'add-extra-environment-variables
+   'add-extra-home-environment-variables
    home-environment-variables-service-type
-   '(("GPG_TTY" . "$(tty)")
+   `(("GPG_TTY" . "$(tty)")
      ("LESSHISTFILE" . "-")
      ("npm_config_userconfig" . "$XDG_CONFIG_HOME/npm-config")
      ("npm_config_cache" . "$XDG_CACHE_HOME/npm")
      ("npm_config_prefix" . "$XDG_DATA_HOME/npm/bin")
-     ("PATH" . "$XDG_DATA_HOME/npm/bin:$PATH"))))
+     ("PATH" . "$XDG_DATA_HOME/npm/bin:$PATH")
+     ("BEMENU_OPTS" . ,(string-join (bemenu-options palette))))))
 
 (define extra-home-packages-service
   (simple-service
@@ -891,18 +905,6 @@ Falls back to `default-directory'."
 
 ;;; User-specific features
 
-(define (bemenu-options palette)
-  (define (%palette v) (format #f "~s" (palette v)))
-  (list
-   "-i" "-H" "28" "--fn" "\"Iosevka 11\"" "--hp" "10" "--cw" "1" "--ch" "20"
-   "--tf" (%palette 'fg)
-   "--tb" (format #f "~s" (farg:offset (palette 'bg) '20))
-   "--ff" (%palette 'fg) "--fb" (%palette 'accent-2)
-   "--nf" (%palette 'fg) "--nb" (%palette 'accent-2)
-   "--hf" (%palette 'fg) "--hb" (%palette 'accent-0)
-   "--cf" (%palette 'fg) "--cb" (%palette 'accent-2)
-   "--af" (%palette 'fg) "--ab" (%palette 'accent-2)))
-
 (define* (grim-script #:key select? clipboard?)
   `(begin
      (use-modules (srfi srfi-19))
@@ -1149,7 +1151,7 @@ Falls back to `default-directory'."
    (feature-gnupg
     #:gpg-primary-key "5F23F458"
     #:ssh-keys `((,%default-ssh-keygrip))
-    #:pinentry-flavor 'emacs
+    #:pinentry-flavor 'bemenu
     #:default-ttl 34560000)
    (feature-alternative-frontends
     #:instagram-frontend #f
