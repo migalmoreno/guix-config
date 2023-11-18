@@ -298,6 +298,7 @@
    (feature-emacs-org-roam
     #:org-roam-directory "~/notes"
     #:org-roam-todo? #t
+    #:org-roam-dailies-directory "./"
     #:org-roam-capture-templates
     `(("w" "work" plain "%?"
        :if-new (file+head "work/pages/%<%Y%m%d%H%M%S>-${slug}.org"
@@ -308,10 +309,14 @@
                           "#+title: ${title}\n#+filetags: :${Topic}:\n")
        :unnarrowed t))
     #:org-roam-dailies-capture-templates
-    '(("d" "default" entry
+    '(("w" "work" entry
        "* %?"
        :if-new (file+head "work/journals/%<%Y-%m-%d>.org"
-                          "#+title: %<%Y-%m-d>\n"))))
+                          "#+title: %<%Y-%m-%d>\n"))
+      ("p" "personal" entry
+       "* %?"
+       :if-new (file+head "personal/journals/%<%Y-%m-%d>.org"
+                          "#+title: %<%Y-%m-%d>\n"))))
    (feature-emacs-org-agenda)))
 
 (define-public %markup-base-features
