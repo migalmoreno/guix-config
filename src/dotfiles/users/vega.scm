@@ -885,7 +885,7 @@ Falls back to `default-directory'."
           :buffer status
           :text (:raw (glyph-right status))
           :title "Forwards"
-          '(nyxt/mode/history:history-backwards))))
+          '(nyxt/mode/history:history-forwards))))
 
     (defmethod format-status :around ((status status-buffer))
       (let ((buffer (current-buffer (window status))))
