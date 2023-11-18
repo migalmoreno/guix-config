@@ -23,6 +23,7 @@
   #:use-module (rde features web)
   #:use-module (rde features web-browsers)
   #:use-module (rde home services desktop)
+  #:use-module (rde home services shells)
   #:use-module (rde packages)
   #:use-module (gnu home)
   #:use-module (gnu services)
@@ -923,220 +924,267 @@ Falls back to `default-directory'."
                       (getenv "HOME")
                       (date->string (current-date) "~Y~m~d-~H~M~S")))))))
 
-(define (extra-home-desktop-services _ palette)
-  (let* ((shepherd-configuration (home-shepherd-configuration
-                                  (auto-start? #t)
+(define (extra-home-wm-services palette)
+  (let* ((dwl-guile-package (patch-dwl-guile-package
+                             dwl-guile
+                             #:patches (list %patch-xwayland
+                                             %patch-focusmonpointer
+                                             %patch-monitor-config)))
+         (dtao-guile-package (@ (dtao-guile packages) dtao-guile))
+         (pamixer (file-append (@ (gnu packages pulseaudio) pamixer)
+                               "/bin/pamixer"))
+         (shepherd-configuration (home-shepherd-configuration
+                                  (auto-start? #f)
                                   (daemonize? #f)))
          (shepherd (home-shepherd-configuration-shepherd
-                    shepherd-configuration))
-         (pamixer (file-append (@ (gnu packages pulseaudio) pamixer)
-                               "/bin/pamixer")))
-    (append
-     (@@ (rde features base) %rde-desktop-home-services)
-     (list
-      extra-mpv-settings-service
-      extra-environment-variables-service
-      extra-home-packages-service
-      extra-xdg-desktop-entries-service
-      (service home-udiskie-service-type
-               (home-udiskie-configuration
-                (config '((notify . #f)))))
-      (service home-shepherd-service-type shepherd-configuration)
-      (service home-dwl-guile-service-type
-               (home-dwl-guile-configuration
-                (package
-                  (patch-dwl-guile-package
-                   dwl-guile
-                   #:patches (list %patch-xwayland
-                                   %patch-focusmonpointer
-                                   %patch-monitor-config)))
-                (config
-                 (list
-                  `((setq inhibit-defaults? #t
-                          border-px 2
-                          border-color ,(palette 'bg)
-                          focus-color ,(farg:offset (palette 'accent-0) 10)
-                          root-color ,(palette 'bg-alt)
-                          tags (map number->string (iota 5 1))
-                          smart-gaps? #t
-                          smart-borders? #t
-                          gaps-oh 12
-                          gaps-ov 12
-                          gaps-ih 12
-                          gaps-iv 12)
-                    (dwl:set-tag-keys "s" "s-S")
-                    (set-keys "s-d" '(dwl:shcmd
-                                      ,(file-append
-                                        (@ (gnu packages xdisorg)
-                                           j4-dmenu-desktop)
-                                        "/bin/j4-dmenu-desktop")
-                                      (format #f "--dmenu='~a ~a'"
-                                              ,(file-append
-                                                (@ (gnu packages xdisorg)
-                                                   bemenu)
-                                                "/bin/bemenu")
-                                              ,(string-join
-                                                (bemenu-options palette))))
-                              "s-x" '(dwl:shcmd
-                                      ,(file-append
-                                        (@ (gnu packages wm) swaylock-effects)
-                                        "/bin/swaylock"))
-                              "s-j" '(dwl:focus-stack 1)
-                              "s-k" '(dwl:focus-stack -1)
-                              "s-l" '(dwl:change-master-factor 0.05)
-                              "s-h" '(dwl:change-master-factor -0.05)
-                              "s-q" 'dwl:kill-client
-                              "S-s-<escape>" 'dwl:quit
-                              "<XF86PowerOff>" 'dwl:quit
-                              "s-f" 'dwl:toggle-fullscreen
-                              "s-t" '(dwl:cycle-layout 1)
-                              "s-<page-up>" '(dwl:change-masters 1)
-                              "s-<page-down>" '(dwl:change-masters -1)
-                              "s-<space>" 'dwl:zoom
-                              "s-S-0" '(dwl:view 0)
-                              "s-\\" 'dwl:toggle-gaps
-                              "s-[" '(dwl:change-gaps -6)
-                              "s-]" '(dwl:change-gaps 6)
-                              "s-S-<space>" 'dwl:toggle-floating
-                              "s-<mouse-left>" 'dwl:move
-                              "s-<mouse-right>" 'dwl:resize
-                              "s-<mouse-middle>" 'dwl:toggle-floating
-                              "s-<prior>" '(dwl:shcmd ,pamixer "--unmute"
-                                                      "--increase" "5")
-                              "s-<next>" '(dwl:shcmd ,pamixer "--unmute"
-                                                     "--decrease" "5")
-                              "s-<insert>" ',(grim-script #:select? #t)
-                              "s-<delete>" ',(grim-script))
-                    (set-layouts 'default "[]=" 'dwl:tile
-                                 'monocle "|M|" 'dwl:monocle)
-                    (set-monitor-rules '((name . "eDP-1")
-                                         (masters . 1)
-                                         (master-factor . 0.55)
-                                         (width . 1920)
-                                         (height . 1200)
-                                         (layout . default))
-                                       '((name . "DP-3")
-                                         (masters . 1)
-                                         (master-factor . 0.55)
-                                         (width . 1920)
-                                         (height . 1080)
-                                         (layout . default)))
-                    (set-rules '((id . "nyxt")
-                                 (tags . 2))
-                               '((title . "Android Emulator")
-                                 (floating? . #t)))
-                    (add-hook!
-                     dwl:hook-startup
-                     (lambda ()
-                       (dwl:start-repl-server)
-                       (dwl:shcmd
-                        ,(file-append
-                          (@ (gnu packages wm) swaybg)
-                          "/bin/swaybg")
-                        "-i" ,(palette 'wallpaper) "-m" "stretch")
-                       (dwl:shcmd
-                        ,(file-append shepherd "/bin/shepherd")
-                        "--logfile"
-                        (format #f "~a/log/shepherd.log"
-                                (or (getenv "XDG_STATE_HOME")
-                                    (format #f "~a/.local/state"
-                                            (getenv "HOME"))))))))))))
-      (service home-dtao-guile-service-type
-               (home-dtao-guile-configuration
-                (config
-                 (dtao-config
-                  (font "Iosevka:style=Regular:size=13")
-                  (background-color (palette 'accent-2))
-                  (foreground-color (palette 'fg))
-                  (padding-left 0)
-                  (padding-top 0)
-                  (padding-bottom 20)
-                  (border-px 0)
-                  (modules '((ice-9 match)
-                             (ice-9 popen)
-                             (ice-9 regex)
-                             (ice-9 rdelim)
-                             (ice-9 textual-ports)))
-                  (block-spacing 0)
-                  (height 28)
-                  (delimiter-right " ")
-                  (left-blocks
-                   (append
-                    (map
-                     (lambda (tag)
-                       (let ((str (string-append
-                                   "^p(8)" (number->string tag) "^p(8)"))
-                             (index (- tag 1)))
-                         (dtao-block
-                          (events? #t)
-                          (click `(match button
-                                    (0 (dtao:view ,index))))
-                          (render
-                           `(cond
-                             ((dtao:selected-tag? ,index)
-                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
-                                       (palette 'accent-0) (palette 'fg)
-                                       str))
-                             ((dtao:urgent-tag? ,index)
-                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
-                                       (palette 'red) (palette 'accent-0)
-                                       str))
-                             ((dtao:active-tag? ,index)
-                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
-                                       (farg:offset (palette 'bg) 20)
-                                       (palette 'fg) str))
-                             (else ,str))))))
-                     (iota 5 1))
-                    (list
-                     (dtao-block
-                      (events? #t)
-                      (click `(dtao:next-layout))
-                      (render
-                       `(format #f "^p(8)~a^p(8)" (dtao:get-layout)))))))
-                  (center-blocks
+                    shepherd-configuration)))
+    (list
+     (service home-shepherd-service-type shepherd-configuration)
+     (service home-dwl-guile-service-type
+              (home-dwl-guile-configuration
+               (package dwl-guile-package)
+               (auto-start? #f)
+               (config
+                (list
+                 `((setq inhibit-defaults? #t
+                         border-px 2
+                         border-color ,(palette 'bg)
+                         focus-color ,(farg:offset (palette 'accent-0) 10)
+                         root-color ,(palette 'bg-alt)
+                         tags (map number->string (iota 5 1))
+                         smart-gaps? #t
+                         smart-borders? #t
+                         gaps-oh 12
+                         gaps-ov 12
+                         gaps-ih 12
+                         gaps-iv 12)
+                   (dwl:set-tag-keys "s" "s-S")
+                   (set-keys "s-d" '(dwl:shcmd
+                                     ,(file-append
+                                       (@ (gnu packages xdisorg)
+                                          j4-dmenu-desktop)
+                                       "/bin/j4-dmenu-desktop")
+                                     (format #f "--dmenu='~a'"
+                                             ,(file-append
+                                               (@ (gnu packages xdisorg)
+                                                  bemenu)
+                                               "/bin/bemenu")))
+                             "s-x" '(dwl:shcmd
+                                     ,(file-append
+                                       (@ (gnu packages wm) swaylock-effects)
+                                       "/bin/swaylock"))
+                             "s-j" '(dwl:focus-stack 1)
+                             "s-k" '(dwl:focus-stack -1)
+                             "s-l" '(dwl:change-master-factor 0.05)
+                             "s-h" '(dwl:change-master-factor -0.05)
+                             "s-q" 'dwl:kill-client
+                             "S-s-<escape>" 'dwl:quit
+                             "<XF86PowerOff>" 'dwl:quit
+                             "s-f" 'dwl:toggle-fullscreen
+                             "s-c" '(dwl:cycle-layout 1)
+                             "s-<page-up>" '(dwl:change-masters 1)
+                             "s-<page-down>" '(dwl:change-masters -1)
+                             "s-<space>" 'dwl:zoom
+                             "s-S-0" '(dwl:view 0)
+                             "s-\\" 'dwl:toggle-gaps
+                             "s-[" '(dwl:change-gaps -6)
+                             "s-]" '(dwl:change-gaps 6)
+                             "s-S-<space>" 'dwl:toggle-floating
+                             "s-<mouse-left>" 'dwl:move
+                             "s-<mouse-right>" 'dwl:resize
+                             "s-<mouse-middle>" 'dwl:toggle-floating
+                             "s-<prior>" '(dwl:shcmd ,pamixer "--unmute"
+                                                     "--increase" "5")
+                             "s-<next>" '(dwl:shcmd ,pamixer "--unmute"
+                                                    "--decrease" "5")
+                             "s-<insert>" ',(grim-script #:select? #t)
+                             "s-<delete>" ',(grim-script))
+                   (set-layouts 'default "[]=" 'dwl:tile
+                                'monocle "|M|" 'dwl:monocle)
+                   (set-monitor-rules '((name . "eDP-1")
+                                        (masters . 1)
+                                        (master-factor . 0.55)
+                                        (width . 1920)
+                                        (height . 1200)
+                                        (layout . default))
+                                      '((name . "DP-3")
+                                        (masters . 1)
+                                        (master-factor . 0.55)
+                                        (width . 1920)
+                                        (height . 1080)
+                                        (layout . default)))
+                   (set-rules '((id . "nyxt")
+                                (tags . 2))
+                              '((title . "Android Emulator")
+                                (floating? . #t)))
+                   (add-hook!
+                    dwl:hook-startup
+                    (lambda ()
+                      (dwl:start-repl-server)
+                      (dwl:shcmd
+                       ,(file-append
+                         (@ (gnu packages wm) swaybg)
+                         "/bin/swaybg")
+                       "-i" ,(palette 'wallpaper) "-m" "stretch")
+                      (dwl:shcmd
+                       ,(file-append shepherd "/bin/shepherd")
+                       "--logfile"
+                       (format #f "~a/log/shepherd.log"
+                               (or (getenv "XDG_STATE_HOME")
+                                   (format #f "~a/.local/state"
+                                           (getenv "HOME"))))))))))))
+     (simple-service
+      'add-rde-dtao-guile-service
+      home-shepherd-service-type
+      (list
+       (shepherd-service
+        (documentation "Run dtao-guile in RDE.")
+        (provision '(rde-dtao-guile))
+        (respawn? #t)
+        (start
+         #~(make-forkexec-constructor
+            (list
+             #$(file-append dtao-guile-package "/bin/dtao-guile")
+             "-c" #$(string-append (getenv "HOME")
+                                   "/.config/dtao-guile/config.scm"))
+            #:user (getenv "USER")
+            #:log-file
+            #$(format #f "~a/log/dtao-guile.log"
+                      (or (getenv "XDG_STATE_HOME")
+                          (format #f "~a/.local/state" (getenv "HOME"))))))
+        (stop #~(make-kill-destructor)))))
+     (simple-service
+      'restart-wm-services-on-change
+      home-run-on-change-service-type
+      `(("files/.config/dwl-guile/config.scm"
+         ,#~(system* #$(file-append dwl-guile-package "/bin/dwl-guile")
+                     "-e" "\"(dwl:reload-config)\""))
+        ("files/.config/dtao-guile/config.scm"
+         ,#~(system* #$(file-append shepherd "/bin/herd") "restart"
+                     "rde-dtao-guile"))))
+     (simple-service
+      'run-dwl-guile-on-login-tty
+      home-shell-profile-service-type
+      (list
+       #~(format #f " [ $(tty) = /dev/tty1 ] && exec ~a"
+                 #$(program-file
+                    "dwl-guile-start"
+                    #~(system*
+                       #$(file-append dwl-guile-package "/bin/dwl-guile")
+                       "-c"
+                       (string-append (getenv "HOME")
+                                      "/.config/dwl-guile/config.scm"))))))
+     (service home-dtao-guile-service-type
+              (home-dtao-guile-configuration
+               (package dtao-guile-package)
+               (auto-start? #f)
+               (config
+                (dtao-config
+                 (font "Iosevka:style=Regular:size=13")
+                 (background-color (palette 'accent-2))
+                 (foreground-color (palette 'fg))
+                 (padding-left 0)
+                 (padding-top 0)
+                 (padding-bottom 20)
+                 (border-px 0)
+                 (modules '((ice-9 match)
+                            (ice-9 popen)
+                            (ice-9 regex)
+                            (ice-9 rdelim)
+                            (ice-9 textual-ports)))
+                 (block-spacing 0)
+                 (height 28)
+                 (delimiter-right " ")
+                 (left-blocks
+                  (append
+                   (map
+                    (lambda (tag)
+                      (let ((str (string-append
+                                  "^p(8)" (number->string tag) "^p(8)"))
+                            (index (- tag 1)))
+                        (dtao-block
+                         (events? #t)
+                         (click `(match button
+                                   (0 (dtao:view ,index))))
+                         (render
+                          `(cond
+                            ((dtao:selected-tag? ,index)
+                             ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
+                                      (palette 'accent-0) (palette 'fg)
+                                      str))
+                            ((dtao:urgent-tag? ,index)
+                             ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
+                                      (palette 'red) (palette 'accent-0)
+                                      str))
+                            ((dtao:active-tag? ,index)
+                             ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
+                                      (farg:offset (palette 'bg) 20)
+                                      (palette 'fg) str))
+                            (else ,str))))))
+                    (iota 5 1))
                    (list
                     (dtao-block
                      (events? #t)
+                     (click `(dtao:next-layout))
                      (render
-                      `(let ((title (dtao:title)))
-                         (if (> (string-length title) 80)
-                             (string-append (substring title 0 80) "...")
-                             title))))))
-                  (right-blocks
-                   (list
-                    (dtao-block
-                     (interval 60)
-                     (render
-                      `(let* ((port (open-input-pipe
-                                     ,(file-append
-                                       (@ (gnu packages linux) acpi)
-                                       "/bin/acpi")))
-                              (str (get-string-all port)))
-                         (close-port port)
-                         (string-append
-                          "^p(8)BAT: "
-                          (match:substring
-                           (string-match ".*, ([0-9]+%)" str) 1)
-                          "^p(4)"))))
-                    (dtao-block
-                     (interval 1)
-                     (render
-                      `(let* ((port (open-input-pipe
-                                     (string-append
-                                      ,pamixer " --get-volume-human")))
-                              (str (read-line port)))
-                         (close-pipe port)
-                         (when str
-                           (string-append "^p(4)VOL: " str "^p(8)"))))
-                     (click
-                      `(match button
-                         (0 (system
-                             (string-append ,pamixer " --toggle-mute"))))))
-                    (dtao-block
-                     (interval 1)
-                     (render
-                      `(strftime "%A, %d %b (w.%V) %T"
-                                 (localtime (current-time)))))))))))))))
+                      `(format #f "^p(8)~a^p(8)" (dtao:get-layout)))))))
+                 (center-blocks
+                  (list
+                   (dtao-block
+                    (events? #t)
+                    (render
+                     `(let ((title (dtao:title)))
+                        (if (> (string-length title) 80)
+                            (string-append (substring title 0 80) "...")
+                            title))))))
+                 (right-blocks
+                  (list
+                   (dtao-block
+                    (interval 60)
+                    (render
+                     `(let* ((port (open-input-pipe
+                                    ,(file-append
+                                      (@ (gnu packages linux) acpi)
+                                      "/bin/acpi")))
+                             (str (get-string-all port)))
+                        (close-port port)
+                        (string-append
+                         "^p(8)BAT: "
+                         (match:substring
+                          (string-match ".*, ([0-9]+%)" str) 1)
+                         "^p(4)"))))
+                   (dtao-block
+                    (interval 1)
+                    (render
+                     `(let* ((port (open-input-pipe
+                                    (string-append
+                                     ,pamixer " --get-volume-human")))
+                             (str (read-line port)))
+                        (close-pipe port)
+                        (unless (eof-object? str)
+                          (string-append "^p(4)VOL: " str "^p(8)"))))
+                    (click
+                     `(match button
+                        (0 (system
+                            (string-append ,pamixer " --toggle-mute"))))))
+                   (dtao-block
+                    (interval 1)
+                    (render
+                     `(strftime "%A, %d %b (w.%V) %T"
+                                (localtime (current-time))))))))))))))
+
+(define (extra-home-desktop-services _ palette)
+  (append
+   (@@ (rde features base) %rde-desktop-home-services)
+   (extra-home-wm-services palette)
+   (list
+    extra-mpv-settings-service
+    extra-home-packages-service
+    extra-xdg-desktop-entries-service
+    (extra-home-environment-variables-service palette)
+    (service home-udiskie-service-type
+             (home-udiskie-configuration
+              (config '((notify . #f))))))))
 
 (define-public %vega-features
   (list*
