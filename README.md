@@ -6,7 +6,7 @@ This is my personal set of configuration files built around the [GNU Guix](https
 
 ![img](https://files.migalmoreno.com/guix_config_setup.jpg)  
 
-The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the [RDE principles](https://github.com/abcdw/rde#principles) to choose my tooling and I try to contribute and maintain related programs.  
+The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the [RDE principles](https://github.com/abcdw/rde#principles) to choose my tooling and I try to contribute to and maintain related programs.  
 
 -   **OS/Package Manager:** GNU Guix
 -   **Window Manager:** dwl-guile
