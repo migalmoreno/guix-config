@@ -57,8 +57,8 @@
      ("LESSHISTFILE" . "-")
      ("npm_config_userconfig" . "$XDG_CONFIG_HOME/npm-config")
      ("npm_config_cache" . "$XDG_CACHE_HOME/npm")
-     ("npm_config_prefix" . "$XDG_DATA_HOME/npm/bin")
-     ("PATH" . "$XDG_DATA_HOME/npm/bin:$PATH")
+     ("npm_config_prefix" . "$XDG_DATA_HOME/npm")
+     ("PATH" . "$XDG_DATA_HOME/npm/bin:$HOME/.nix-profile/bin:$PATH")
      ("BEMENU_OPTS" . ,(string-join (bemenu-options palette))))))
 
 (define extra-home-packages-service
@@ -1184,7 +1184,11 @@ Falls back to `default-directory'."
     (extra-home-environment-variables-service palette)
     (service home-udiskie-service-type
              (home-udiskie-configuration
-              (config '((notify . #f))))))))
+              (config '((notify . #f)))))
+    (simple-service
+     'source-home-manager-vars
+     home-shell-profile-service-type
+     (list "source ~/.nix-profile/etc/profile.d/hm-session-vars.sh")))))
 
 (define-public %vega-features
   (list*
