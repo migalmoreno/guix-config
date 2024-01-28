@@ -14,6 +14,7 @@
   #:use-module (rde features clojure)
   #:use-module (rde features emacs-xyz)
   #:use-module (rde features fontutils)
+  #:use-module (rde features guile)
   #:use-module (rde features golang)
   #:use-module (rde features irc)
   #:use-module (rde features keyboard)
@@ -534,6 +535,7 @@
       comint-mode-hook
       cider-repl-mode-hook))
    (feature-emacs-elisp)
+   (feature-guile)
    (feature-clojure)
    (feature-javascript
     #:node (@ (gnu packages node) node-lts))
