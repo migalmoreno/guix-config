@@ -370,11 +370,11 @@
      (irc-account
       (id 'libera)
       (network "irc.libera.chat")
-      (nick "ardon"))
+      (nick "migalmoreno"))
      (irc-account
       (id 'oftc)
       (network "irc.oftc.net")
-      (nick "nvsop"))))
+      (nick "migalmoreno"))))
    (feature-emacs-erc
     #:erc-auto-query 'bury
     #:erc-query-display 'buffer
