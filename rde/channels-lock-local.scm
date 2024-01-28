@@ -31,7 +31,7 @@
         (url "https://gitlab.com/nonguix/nonguix")
         (branch "master")
         (commit
-          "639c25bb691129607b4aa5bd87ad13f9c3d2667c")
+          "a1f460497a901b982825b4f00921c63d862686c0")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -42,13 +42,13 @@
         (url "file:///home/vega/src/guile/guix")
         (branch "base-to-upstream")
         (commit
-          "6f7733495c6bd31752082bec1ad92e88b0cc9e07"))
+          "34c1096d31f88767c2e9d2f5b674ce075ebc89b7"))
       (channel
         (name 'rde)
         (url "file:///home/vega/src/guile/rde")
         (branch "base-to-upstream")
         (commit
-          "197ee50f8481f4e38fdf833284bf5d06771481e8")
+          "e3000f8a97ed1453eb756fc49fd28d0ef013e3f7")
         (introduction
           (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
