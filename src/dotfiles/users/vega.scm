@@ -1041,7 +1041,7 @@ Falls back to `default-directory'."
       'run-dwl-guile-on-login-tty
       home-shell-profile-service-type
       (list
-       #~(format #f " [ $(tty) = /dev/tty1 ] && exec ~a"
+       #~(format #f "[ $(tty) = /dev/tty1 ] && exec ~a"
                  #$(program-file
                     "dwl-guile-start"
                     #~(system*
