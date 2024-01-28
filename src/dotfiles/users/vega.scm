@@ -1212,7 +1212,7 @@ Falls back to `default-directory'."
     #:extra-config-lisp extra-nyxt-config-lisp)
    %nyxt-base-features
    (feature-ungoogled-chromium
-    #:startup-flags '("--incognito"))
+    #:desktop-startup-flags '("--incognito" "--enable-incognito-themes"))
    %desktop-base-features
    (feature-desktop-services
     #:default-desktop-home-services
