@@ -873,7 +873,10 @@ Falls back to `default-directory'."
                 (:div :id "modes"
                       :title (nyxt::modes-string buffer)
                       (:raw
-                       (format-status-modes status)))))))))
+                       (format-status-modes status)))))))
+
+    (define-configuration prompt-buffer
+      ((mouse-support-p nil)))))
 
 
 ;;; User-specific features
