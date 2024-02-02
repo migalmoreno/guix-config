@@ -478,20 +478,16 @@
      (To rde-gnus-get-article-participants)
      (cc ,%default-email))))
 
-(define* (mail-acc id user type #:optional pass-cmd)
-  "Make a simple mail account."
-  (mail-account
-   (id id)
-   (fqda user)
-   (type type)
-   (pass-cmd (format #f "pass show mail/~a | head -1" id))))
-
 (define-public %mail-base-features
   (list
    (feature-mail-settings
     #:mail-accounts
     (list
-     (mail-acc 'personal %default-email 'gandi))
+     (mail-account
+      (id 'personal)
+      (type 'gandi)
+      (fqda %default-email)
+      (pass-cmd "pass show mail/personal")))
     #:mail-directory-fn
     (const (string-append (getenv "XDG_STATE_HOME") "/mail")))
    (feature-isync)
