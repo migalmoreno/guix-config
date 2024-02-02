@@ -149,7 +149,7 @@
   (list
    (feature-transmission
     #:download-dir (format #f "~a/videos" (getenv "HOME")))
-   (feature-youtube-dl
+   (feature-yt-dlp
     #:music-dl-args
     `("-x" "-f" "bestaudio" "--audio-format" "mp3" ,@base-ytdl-args)
     #:video-dl-args
@@ -346,7 +346,7 @@
      "texlive-ulem" "texlive-latex-preview"
      "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"
      "texlive-titling" "texlive-latex-titlesec" "texlive-enumitem"))
-   (feature-emacs-citar
+   (feature-emacs-citation
     #:global-bibliography (list "~/documents/references.bib"))))
 
 (define-public %communication-base-features
@@ -517,7 +517,6 @@
 
 (define-public %programming-base-features
   (list
-   (feature-emacs-guix)
    (feature-emacs-flymake)
    (feature-emacs-eglot)
    (feature-emacs-xref)
@@ -559,7 +558,6 @@
      "#require \"ppx_fields_conv\""
      "#require \"str\""
      "open Core"))
-   (feature-emacs-geiser)
    (feature-go)))
 
 (define-public %desktop-base-features
