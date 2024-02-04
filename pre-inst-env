@@ -1,9 +1,11 @@
 #!/bin/sh
-local_rde_path="../../guile/rde/src/"
-local_nonguix_path="../../guile/nonguix/"
-local_paths="$local_rde_path:$local_nonguix_path"
-GUILE_LOAD_PATH="$local_paths:./src${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"
-GUILE_LOAD_COMPILED_PATH="$local_paths:./src${GUILE_LOAD_COMPILED_PATH:+:}$GUILE_LOAD_COMPILED_PATH"
+base_dir="$HOME/src/guile/"
+dirs=("rde/src" "nonguix" "farg")
+for dir in ${dirs[@]}; do
+  local_paths+="${base_dir}${dir}:"
+done
+GUILE_LOAD_PATH="src:$local_paths${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"
+GUILE_LOAD_COMPILED_PATH="src:$local_paths${GUILE_LOAD_COMPILED_PATH:+:}$GUILE_LOAD_COMPILED_PATH"
 export GUILE_LOAD_COMPILED_PATH GUILE_LOAD_PATH
 
 exec "$@"
