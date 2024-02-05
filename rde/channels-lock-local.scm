@@ -20,7 +20,7 @@
         (url "https://github.com/engstrand-config/home-service-dwl-guile")
         (branch "main")
         (commit
-          "179ce7f0cb8db17987e876422d86b6d4e3717025")
+          "09045a658a17a914d1bda4d23c04d99c40a1d63b")
         (introduction
           (make-channel-introduction
             "314453a87634d67e914cfdf51d357638902dd9fe"
@@ -28,10 +28,10 @@
               "C9BE B8A0 4458 FDDF 1268  1B39 029D 8EB7 7E18 D68C"))))
       (channel
         (name 'nonguix)
-        (url "https://gitlab.com/nonguix/nonguix")
-        (branch "master")
+        (url "file:///home/vega/src/guile/nonguix")
+        (branch "base-to-upstream")
         (commit
-          "a1f460497a901b982825b4f00921c63d862686c0")
+          "2703640c447ad87c52aa63f31a27acf3dea8306a")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -42,13 +42,13 @@
         (url "file:///home/vega/src/guile/guix")
         (branch "base-to-upstream")
         (commit
-          "34c1096d31f88767c2e9d2f5b674ce075ebc89b7"))
+          "16feb71ace7ab5e577823afa2d11a0e58b66c8d0"))
       (channel
         (name 'rde)
         (url "file:///home/vega/src/guile/rde")
         (branch "base-to-upstream")
         (commit
-          "e3000f8a97ed1453eb756fc49fd28d0ef013e3f7")
+          "7b6a5006c1668a25ced464903a16a7c709a036c1")
         (introduction
           (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
