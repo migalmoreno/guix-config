@@ -1,5 +1,5 @@
-(define-module (dotfiles hosts live)
-  #:use-module (dotfiles utils)
+(define-module (migalmoreno hosts live)
+  #:use-module (migalmoreno utils)
   #:use-module (rde features system)
   #:use-module (rde features base)
   #:use-module (rde system services admin)
