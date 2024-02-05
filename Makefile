@@ -9,7 +9,7 @@ GUIX_LOCAL := ../../guile/guix/pre-inst-env ./pre-inst-env guix
 GUIX_LOCK := ${GUIX} time-machine --disable-authentication -C ${CHANNELS} --
 CMD := $(GUIX_LOCK)
 SRC_DIR := ./src
-ENTRY := ${SRC_DIR}/dotfiles/store.scm
+ENTRY := ${SRC_DIR}/migalmoreno/dispatcher.scm
 HOST := $(shell hostname)
 USER := $(shell whoami)
 EXTRA_OPTIONS := --substitute-urls=https://ci.guix.gnu.org
