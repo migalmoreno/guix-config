@@ -1,5 +1,5 @@
-(define-module (dotfiles common)
-  #:use-module (dotfiles utils)
+(define-module (migalmoreno common)
+  #:use-module (migalmoreno utils)
   #:use-module (contrib features javascript)
   #:use-module (farg source)
   #:use-module (farg theme)

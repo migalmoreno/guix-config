@@ -1,6 +1,6 @@
-(define-module (dotfiles users vega)
-  #:use-module (dotfiles common)
-  #:use-module (dotfiles utils)
+(define-module (migalmoreno users vega)
+  #:use-module (migalmoreno common)
+  #:use-module (migalmoreno utils)
   #:use-module (dtao-guile home-service)
   #:use-module (dwl-guile home-service)
   #:use-module (dwl-guile patches)
@@ -39,14 +39,14 @@
 (define (bemenu-options palette)
   (define (%palette v) (format #f "~s" (palette v)))
   (list
-   ;; "--ignorecase" "--hp" "10" "--cw" "1" "--ch" "20"
-   "-H" "28" "--fn" "\"Iosevka 11\""
+   "-H" "28" "--fn" "\"Iosevka 11\"" "--ignorecase"
+   ;; "--hp" "10" "--cw" "1" "--ch" "20"
    "--tf" (%palette 'fg)
    "--tb" (format #f "~s" (farg:offset (palette 'bg) '20))
    "--ff" (%palette 'fg) "--fb" (%palette 'accent-2)
    "--nf" (%palette 'fg) "--nb" (%palette 'accent-2)
-   ;; "--af" (%palette 'fg) "--ab" (%palette 'accent-2)
-   ;; "--cf" (%palette 'fg) "--cb" (%palette 'accent-2)
+   "--af" (%palette 'fg) "--ab" (%palette 'accent-2)
+   "--cf" (%palette 'fg) "--cb" (%palette 'accent-2)
    "--hf" (%palette 'fg) "--hb" (%palette 'accent-0)))
 
 (define (extra-home-environment-variables-service palette)
@@ -72,7 +72,8 @@
      "ddcutil" "light" "v4l-utils" "binutils" "wireguard-tools" "texinfo"
      "pass-otp" "imagemagick" "ffmpeg" "docker-cli" "docker-compose" "b4"
      "gst-plugins-good" "gst-plugins-bad" "gst-plugins-ugly"
-     "gst-plugins-base" "gst-libav" "wl-clipboard"))))
+     "gst-plugins-base" "gst-libav" "wl-clipboard" "emacs-arei" "guile-next"
+     "guile-ares-rs"))))
 
 (define extra-ssh-config
   (home-ssh-configuration
@@ -115,7 +116,7 @@
                        "--preserve='^XAUTHORITY$'" "--share=/dev/kvm"
                        "--share=/dev/video0" "--share=/dev/dri"
                        "-m" #$(project-file
-                               "src/dotfiles/manifests/android.scm")
+                               "src/migalmoreno/manifests/android.scm")
                        "--" "env" "DISPLAY=:0"
                        #$(string-append "LD_LIBRARY_PATH="
                                         "/lib:/lib/nss:"

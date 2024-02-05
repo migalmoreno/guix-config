@@ -1,4 +1,4 @@
-(define-module (dotfiles machines lyra)
+(define-module (migalmoreno machines lyra)
   #:use-module (guix scripts offload))
 
 (list

@@ -1,6 +1,6 @@
-(define-module (dotfiles hosts lyra)
-  #:use-module (dotfiles common)
-  #:use-module (dotfiles utils)
+(define-module (migalmoreno hosts lyra)
+  #:use-module (migalmoreno common)
+  #:use-module (migalmoreno utils)
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services databases)
@@ -61,7 +61,7 @@
    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBN0KzBIzlhPkr3BhcuKt9ki6iYyMS97hpAEFIrNCa9O root@lyra\n"))
 
 (define-public %lyra-signing-key
-  (project-file "src/dotfiles/keys/lyra.pub"))
+  (project-file "src/migalmoreno/keys/lyra.pub"))
 
 (define lyra-mapped-devices
   (list

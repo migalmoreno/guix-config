@@ -1,4 +1,4 @@
-(define-module (dotfiles utils)
+(define-module (migalmoreno utils)
   #:use-module (gnu system keyboard)
   #:use-module (gnu services web)
   #:use-module (guix gexp)
@@ -19,7 +19,7 @@
             (every file-exists?
                    (map (lambda (file)
                           (string-append (dirname path) "/" file))
-                        (list "src/dotfiles"))))
+                        (list "src/migalmoreno"))))
           %load-path))))
 
 (define-public (project-file subpath)
@@ -40,7 +40,7 @@
    (body '("root /srv/http;"))))
 
 (define-public %nonguix-signing-key
-  (project-file "src/dotfiles/keys/nonguix.pub"))
+  (project-file "src/migalmoreno/keys/nonguix.pub"))
 
 (define-public %default-ssh-keygrip
   "D6B4894600BB392AB2AEDE499CBBCF3E0620B7F6")

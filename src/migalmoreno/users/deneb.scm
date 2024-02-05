@@ -1,5 +1,5 @@
-(define-module (dotfiles users deneb)
-  #:use-module (dotfiles utils)
+(define-module (migalmoreno users deneb)
+  #:use-module (migalmoreno utils)
   #:use-module (gnu services)
   #:use-module (gnu services networking)
   #:use-module (rde features base)

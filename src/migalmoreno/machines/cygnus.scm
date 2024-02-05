@@ -1,5 +1,5 @@
-(define-module (dotfiles machines cygnus)
-  #:use-module (dotfiles hosts cygnus)
+(define-module (migalmoreno machines cygnus)
+  #:use-module (migalmoreno hosts cygnus)
   #:use-module (gnu machine)
   #:use-module (gnu machine ssh)
   #:use-module (gnu system install))
