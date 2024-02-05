@@ -37,7 +37,8 @@ rde/channels-lock-local.scm: rde/channels-local.scm
 guix: target/guix-time-marker
 
 repl:
-	${GUIX} repl --listen=tcp:37146
+	${GUIX} shell guile-next guix guile-ares-rs -- guile \
+	-c "((@ (nrepl server) run-nrepl-server) #:port 7888)"
 
 target:
 	mkdir target
