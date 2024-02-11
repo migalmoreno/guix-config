@@ -748,23 +748,23 @@
                    :search-url "https://www.npmjs.com/search?q=~a"
                    :fallback-url "https://www.npmjs.com")
     (make-instance 'search-engine
-                   :shortcut "fa"
+                   :shortcut "font"
                    :search-url "https://fontawesome.com/search?q=~a&m=free"
                    :fallback-url "https://fontawesome.com")
     (make-instance 'search-engine
-                   :shortcut "et"
+                   :shortcut "etsy"
                    :search-url "https://www.etsy.com/search?q=~a"
                    :fallback-url "https://www.etsy.com")
     (make-instance 'search-engine
-                   :shortcut "to"
-                   :search-url "https://torrents-csv.ml/search/~a"
-                   :fallback-url "https://torrents-csv.ml")
+                   :shortcut "tor"
+                   :search-url "https://torrents-csv.com/search/~a"
+                   :fallback-url "https://torrents-csv.com")
     (make-instance 'search-engine
                    :shortcut "ra"
                    :search-url "https://rargb.to/search/?search=~a"
                    :fallback-url "https://rargb.to")
     (make-instance 'search-engine
-                   :shortcut "kt"
+                   :shortcut "kick"
                    :search-url "https://kickasstorrents.to/usearch/~a"
                    :fallback-url "https://kickasstorrents.to")
     (make-instance 'search-engine
@@ -790,22 +790,6 @@
                    ,(format #f "https://~a/search?q=~~a&serviceId=3"
                             %tubo-host)
                    :fallback-url ,(string-append "https://" %tubo-host))
-    (engines:discourse
-     :shortcut "cv"
-     :fallback-url (quri:uri "https://clojureverse.org")
-     :base-search-url "https://clojureverse.org/search?q=~a")
-    (engines:discourse
-     :shortcut "oc"
-     :fallback-url (quri:uri "https://discuss.ocaml.org")
-     :base-search-url "https://discuss.ocaml.org/search?q=~a")
-    (engines:discourse
-     :shortcut "or"
-     :fallback-url (quri:uri "https://org-roam.discourse.group")
-     :base-search-url "https://org-roam.discourse.group/search?q=~a")
-    (engines:discourse
-     :shortcut "pc"
-     :fallback-url (quri:uri "https://community.penpot.app/latest")
-     :base-search-url "https://community.penpot.app/search?q=~a")
     (engines:lemmy
      :shortcut "le"
      :fallback-url (quri:uri "https://lemm.ee")
