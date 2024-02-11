@@ -16,7 +16,8 @@
   #:use-module (gnu packages video)
   #:use-module (gnu packages virtualization)
   #:use-module (gnu packages xml)
-  #:use-module (gnu packages xorg))
+  #:use-module (gnu packages xorg)
+  #:use-module (guix profiles))
 
 (packages->manifest
  (list bash
