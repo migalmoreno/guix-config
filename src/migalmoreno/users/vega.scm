@@ -302,11 +302,6 @@
                       display-buffer-same-window)
                      (reusable-frames . t)))
       (add-to-list 'display-buffer-alist
-                   `(,(rx "*Geiser" (* any) "*")
-                     (display-buffer-reuse-window
-                      display-buffer-same-window)
-                     (reusable-frames . t)))
-      (add-to-list 'display-buffer-alist
                    `(,(rx "*Org Links*")
                      display-buffer-no-window
                      (allow-no-window . t)))
@@ -316,21 +311,9 @@
     (repeat-mode 1)
     (with-eval-after-load 'rde-keymaps
       (define-key rde-toggle-map "f" 'display-fill-column-indicator-mode))
-    (defun rde-geiser-autoconnect ()
-      "Start a Geiser REPL unless an active connection is already present."
-      (require 'geiser-guile)
-      (require 'geiser-repl)
-      (unless (geiser-repl--connection*)
-        (save-window-excursion
-         (run-guile))))
-    (add-hook 'geiser-mode-hook 'rde-geiser-autoconnect)
-    (with-eval-after-load 'geiser-repl
-      (define-key geiser-repl-mode-map (kbd "C-M-q") 'indent-sexp)
-      (setq geiser-repl-use-other-window nil)
-      (setq geiser-repl-per-project-p t))
     (setq copyright-names-regexp
           (format "%s <%s>" user-full-name user-mail-address))
-    (add-hook 'after-save-hook (lambda () (copyright-update nil nil)))
+    (add-hook 'after-save-hook 'copyright-update)
     (with-eval-after-load 'cider-repl
       (setq cider-repl-display-in-current-window t))
     (with-eval-after-load 'ange-ftp
