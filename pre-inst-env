@@ -1,6 +1,6 @@
 #!/bin/sh
 base_dir="$HOME/src/guile/"
-dirs=("rde/src" "nonguix" "farg")
+dirs=("rde/src" "nonguix" "farg" "home-service-dtao-guile" "home-service-dwl-guile")
 for dir in ${dirs[@]}; do
   local_paths+="${base_dir}${dir}:"
 done
