@@ -3,31 +3,6 @@
 
 ((nil . ((fill-column . 78)
          (sentence-end-double-space . t)
-         (eval . (let
-                     ((root-dir-unexpanded
-                       (locate-dominating-file default-directory ".dir-locals.el")))
-                   (when root-dir-unexpanded
-                     (require 'cl-lib)
-                     (cl-flet ((add-to-geiser-guile-load-path (path)
-                                 (cl-pushnew path geiser-guile-load-path
-                                             :test #'string-equal)))
-                       (let*
-                           ((root-dir
-                             (expand-file-name root-dir-unexpanded))
-                            (root-dir*
-                             (directory-file-name root-dir)))
-                         (unless
-                             (boundp 'geiser-guile-load-path)
-                           (defvar geiser-guile-load-path 'nil))
-                         (make-local-variable 'geiser-guile-load-path)
-                         (add-to-geiser-guile-load-path
-                          (expand-file-name "src" root-dir*))
-                         (add-to-geiser-guile-load-path
-                          "~/src/guile/rde/src/")
-                         (add-to-geiser-guile-load-path
-                          "~/src/guile/guix/")
-                         (add-to-geiser-guile-load-path
-                          "~/src/guile/nonguix/"))))))
          (eval . (setq-local compile-command "make home"))))
  (Texinfo-mode . ((fill-column . 72)
                   (indent-tabs-mode . nil)))
