@@ -757,7 +757,7 @@
                    :fallback-url "https://www.etsy.com")
     (make-instance 'search-engine
                    :shortcut "tor"
-                   :search-url "https://torrents-csv.com/search/~a"
+                   :search-url "https://torrents-csv.com/search?q=~a"
                    :fallback-url "https://torrents-csv.com")
     (make-instance 'search-engine
                    :shortcut "ra"
