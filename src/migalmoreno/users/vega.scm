@@ -66,15 +66,12 @@
   (simple-service
    'add-extra-home-packages
    home-profile-service-type
-   (append
-    (list
-     (@ (nongnu packages chrome) google-chrome-stable))
-    (strings->packages
-     "ddcutil" "light" "v4l-utils" "binutils" "wireguard-tools" "texinfo"
-     "pass-otp" "imagemagick" "ffmpeg" "docker-cli" "docker-compose" "b4"
-     "gst-plugins-good" "gst-plugins-bad" "gst-plugins-ugly"
-     "gst-plugins-base" "gst-libav" "wl-clipboard" "emacs-arei" "guile-next"
-     "guile-ares-rs"))))
+   (strings->packages
+    "ddcutil" "light" "v4l-utils" "binutils" "wireguard-tools" "texinfo"
+    "pass-otp" "imagemagick" "ffmpeg" "docker-cli" "docker-compose" "b4"
+    "gst-plugins-good" "gst-plugins-bad" "gst-plugins-ugly"
+    "gst-plugins-base" "gst-libav" "wl-clipboard" "emacs-arei" "guile-next"
+    "guile-ares-rs")))
 
 (define extra-ssh-config
   (home-ssh-configuration
