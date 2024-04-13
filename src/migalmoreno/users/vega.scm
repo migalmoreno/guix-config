@@ -31,7 +31,8 @@
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
   #:use-module (gnu system keyboard)
-  #:use-module (guix gexp))
+  #:use-module (guix gexp)
+  #:use-module (sxml simple))
 
 
 ;;; Service extensions
@@ -841,7 +842,24 @@ Falls back to `default-directory'."
           :buffer status
           :text (:raw (glyph-right status))
           :title "Forwards"
-          '(nyxt/mode/history:history-forwards))))
+          '(nyxt/mode/history:history-forwards))
+        (:nbutton
+          :buffer status
+          :text (:raw ,(call-with-output-string
+                        (lambda (port)
+                          (sxml->xml
+                           '(svg (@ (xmlns "http://www.w3.org/2000/svg")
+                                    (width "5")
+                                    (height "5")
+                                    (viewBox "0 0 5 5")
+                                    (overflow "visible")
+                                    (stroke "currentColor")
+                                    (stroke-width "1.2"))
+                                 (line (@ (x2 "5") (y2 "5")))
+                                 (line (@ (x1 "5") (y2 "5"))))
+                           port))))
+          :title "Close"
+          '(nyxt:delete-current-buffer))))
 
     (defmethod format-status :around ((status status-buffer))
       (let ((buffer (current-buffer (window status))))
