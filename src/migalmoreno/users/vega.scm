@@ -1182,7 +1182,7 @@ Falls back to `default-directory'."
     #:instagram-frontend #f
     #:google-frontend "http://localhost:5000"
     #:youtube-frontend (string-append "https://" %tubo-host)
-    #:reddit-frontend "https://old.reddit.com")
+    #:reddit-frontend "https://redlib.freedit.eu")
    (feature-android)
    (feature-manpages)
    (feature-emacs
