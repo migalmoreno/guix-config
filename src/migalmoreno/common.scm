@@ -721,77 +721,20 @@
                    :resource "xdg-open ~a")))
 
 (define (extra-nx-search-engines config)
-  `((make-instance 'search-engine
-                   :shortcut "clj"
-                   :search-url "https://clojars.org/search?q=~a"
-                   :fallback-url "https://clojars.org")
-    (make-instance 'search-engine
-                   :shortcut "npm"
-                   :search-url "https://www.npmjs.com/search?q=~a"
-                   :fallback-url "https://www.npmjs.com")
-    (make-instance 'search-engine
-                   :shortcut "font"
-                   :search-url "https://fontawesome.com/search?q=~a&m=free"
-                   :fallback-url "https://fontawesome.com")
-    (make-instance 'search-engine
-                   :shortcut "etsy"
-                   :search-url "https://www.etsy.com/search?q=~a"
-                   :fallback-url "https://www.etsy.com")
-    (make-instance 'search-engine
-                   :shortcut "tor"
-                   :search-url "https://torrents-csv.com/search?q=~a"
-                   :fallback-url "https://torrents-csv.com")
-    (make-instance 'search-engine
-                   :shortcut "ra"
-                   :search-url "https://rargb.to/search/?search=~a"
-                   :fallback-url "https://rargb.to")
-    (make-instance 'search-engine
-                   :shortcut "kick"
-                   :search-url "https://kickasstorrents.to/usearch/~a"
-                   :fallback-url "https://kickasstorrents.to")
-    (make-instance 'search-engine
-                   :shortcut "mdn"
-                   :search-url
-                   "https://developer.mozilla.org/en-US/search?q=~a"
-                   :fallback-url "https://developer.mozilla.org")
-    (make-instance 'search-engine
-                   :shortcut "sc"
-                   :search-url
-                   ,(format #f "https://~a/search?q=~~a&serviceId=1"
-                            %tubo-host)
-                   :fallback-url ,(string-append "https://" %tubo-host))
-    (make-instance 'search-engine
-                   :shortcut "yt"
-                   :search-url
-                   ,(format #f "https://~a/search?q=~~a&serviceId=0"
-                            %tubo-host)
-                   :fallback-url ,(string-append "https://" %tubo-host))
-    (make-instance 'search-engine
-                   :shortcut "pt"
-                   :search-url
-                   ,(format #f "https://~a/search?q=~~a&serviceId=3"
-                            %tubo-host)
-                   :fallback-url ,(string-append "https://" %tubo-host))
-    (engines:lemmy
-     :shortcut "le"
-     :fallback-url (quri:uri "https://lemm.ee")
-     :base-search-url "https://lemm.ee/search/q/~a")
+  `((make-search-engine "toys" "https://toys.whereis.みんな/?search=~a")
+    (make-search-engine "yt" "https://www.youtube.com/search?q=~a")
+    (make-search-engine "sc" "https://soundcloud.com/search?q=~a")
     (engines:google
-     :shortcut "go"
-     :fallback-url (quri:uri "https://www.google.es")
-     :base-search-url "https://www.google.es/search?q=~a"
      :safe-search nil
      :lang-ui :english
      :results-number 50
      :new-window t)
     ,@(if (get-value 'google-frontend config)
           `((engines:whoogle
-             :shortcut "who"
-             :fallback-url
-             (quri:uri ,(get-value 'google-frontend config))
-             :base-search-url
-             ,(string-append (get-value 'google-frontend config)
-                             "/search?q=~a")))
+             :base-search-url ,(format #f "~a/search?q=~~a"
+                                       (get-value 'google-frontend config))
+             :new-tab t
+             :lang-ui :english))
           '())))
 
 (define-public %base-extra-nyxt-config-lisp
