@@ -1013,7 +1013,7 @@
   (list
    (feature-nyxt-blocker)
    (feature-nyxt-nx-search-engines
-    #:default-engine-shortcut "go"
+    #:default-engine-shortcut "whoogle"
     #:extra-engines extra-nx-search-engines)
    (feature-nyxt-nx-router
     #:routers extra-nx-router-routers)
