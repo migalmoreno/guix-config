@@ -844,11 +844,6 @@
                ,(namestring path)
                nil)))))
 
-    (define-configuration web-buffer
-      ((default-modes
-         (append '(nyxt/mode/reduce-tracking:reduce-tracking-mode)
-                 %slot-value%))))
-
     (define-configuration (web-buffer
                            prompt-buffer
                            nyxt/mode/editor:editor-buffer)
