@@ -853,161 +853,92 @@
   `((define-configuration status-buffer
       ((style
         (tailor:with-style 'status-buffer
+          `(body
+            :font-family ,theme:monospace-font-family)
           `("#container"
-            :height "100%"
-            :width "100%"
-            :background ,theme:primary
-            :font-family ,theme:font-family
-            :align-items "center"
-            :padding "0 5px"
-            :box-sizing "border-box")
+            :background ,theme:on-primary)
           `("#controls"
-            :background "inherit"
-            :box-sizing "border-box")
+            :color ,theme:on-background
+            :background inherit)
           `("#controls button"
-            :color ,theme:on-background
             :padding "3px")
-          `("#controls button:hover"
-            :background none
-            :color ,theme:on-background)
-          `(".arrow-right, .arrow-left"
-            :clip-path "none"
-            :margin-right 0)
           `("#url"
-            :background "inherit"
+            :background inherit
             :color ,theme:on-background
-            :font-weight "bold"
-            :padding "5px"
-            :display "flex"
-            :align-items "center"
-            :box-sizing "border-box"
-            :flex-grow "6"
-            :flex-shrink "3")
+            :font-weight bold
+            :font-size "55vh"
+            :padding "0 5px"
+            :display flex
+            :align-items center
+            :box-sizing border-box
+            :flex-grow 6
+            :flex-shrink 3)
           `("#url button"
-            :white-space "nowrap"
-            :text-overflow "ellipsis"
-            :overflow "hidden")
+            :white-space nowrap
+            :text-overflow ellipsis
+            :overflow hidden)
           `("#modes"
-            :background "inherit"
-            :padding-left "5px"
-            :flex-grow "1")
-          `(:media "(max-width: 360px)"
-                   ("#container"
-                    :padding "0 1px")
-                   ("#url"
-                    :flex-basis "5em"
-                    :flex-grow "2"
-                    :flex-shrink "2"
-                    :height "80%"
-                    :border "1px solid #505050"
-                    :border-radius "3px"
-                    :overflow hidden)
-                   ("#controls"
-                    :width "fit-content"
-                    :flex-basis "auto"
-                    :padding "10% 5px")
-                   ("#controls button"
-                    :height "80%"
-                    :width "30px"
-                    :padding 0
-                    :border-color "#505050"
-                    :border-width "1px")
-                   ("#controls button:not(:first-of-type):not(:last-of-type)"
-                    :border-width "1px 1px 1px 0px"
-                    :border-style "solid"
-                    :border-color "#505050"
-                    :border-radius 0)
-                   ("#controls button:first-of-type"
-                    :border-width "1px"
-                    :border-style "solid"
-                    :border-radius "3px 0px 0px 3px")
-                   ("#controls button:last-of-type"
-                    :border-width "1px 1px 1px 0px"
-                    :border-style "solid"
-                    :border-radius "0px 3px 3px 0px"))))))
-
-          (define-configuration window
-            ((message-buffer-style
-              (tailor:with-style 'window
-                `(body
-                  :color ,theme:on-background
-                  :background ,theme:background
-                  :font-family ,theme:font-family
-                  :overflow-x "hidden")))))
-
-          (define-configuration web-buffer
-            ((style
-              (tailor:with-style 'web-buffer
-                `(:let ((sans ,,(font-name (get-value 'font-sans config))))
-                   ("*, body, div, section, input"
-                    :font-family ,theme:font-family
-                    :background-color ,theme:background
-                    :color ,theme:on-background)
-                   ("h1,h2,h3,h4,h5,h6"
-                    :color ,theme:on-secondary
-                    :font-family #(sans))
-                   ("p, td , dt, button, .button, a, a:link"
-                    :font-family #(sans)
-                    :color ,theme:on-background)
-                   ("button, .button"
-                    :padding "10px")
-                   (pre
-                    :font-family ,theme:font-family
-                    :color ,theme:on-background
-                    :background ,theme:background)
-                   (code
-                    :font-family ,theme:font-family
-                    :color ,theme:on-background
-                    :background ,(if (theme:dark-p theme:theme)
-                                     theme:secondary
-                                     theme:primary))
-                   (:media "(max-width: 768px)"
-                           (body
-                            :font-size "12px")))))))
+            :background inherit
+            :color ,theme:on-background
+            :font-size "55vh"
+            :flex-grow 1)
+          `((:or .arrow-right .arrow-left)
+            :clip-path none
+            :margin-right 0)
+          `((:and (:or .button .tab "#url") :hover)
+            :background none
+            :color ,theme:on-background)))))
 
           (define-configuration prompt-buffer
             ((style
               (tailor:with-style 'prompt-buffer
-                `(* :font-family ,theme:font-family)
-                `("#prompt-area"
-                  :background ,theme:background
-                  :color ,theme:on-secondary)
-                `("#prompt"
-                  :padding-left "15px")
-                `("#prompt-modes"
-                  :padding-right "10px")
+                `(body
+                  :font-family ,theme:monospace-font-family
+                  :color ,theme:on-background
+                  :border none)
                 `("#input"
-                  :background ,theme:background)
+                  :padding-left "0 !important")
                 `("#input:focus"
                   :box-shadow none)
-                `(".source"
-                  :margin 0)
-                `(".source-name"
+                `("#prompt-area"
                   :background ,theme:background
-                  :color ,theme:on-primary
-                  :font-style "italic"
-                  :padding "5px 15px")
-                `(".source-content"
-                  :border-collapse "collapse"
-                  :margin-left 0)
-                `(".source-content td"
-                  :padding "5px 15px"
-                  :text-overflow "ellipsis")
-                `(".source-content th"
-                  :padding "5px 15px"
-                  :background ,theme:background
-                  :font-weight "bold")
-                `(".arrow-right, .arrow-left"
-                  :clip-path "none"
+                  :border none)
+                `("#prompt"
+                  :padding-left "10px")
+                `("#suggestions"
                   :margin-right 0)
-                `((:or "#prompt-modes" "#close-button")
-                  :display "none")
                 `("#selection"
-                  :background ,(str:concat theme:primary "E6")
+                  :background ,(cl-colors2:print-hex theme:on-primary
+                                                     :alpha 0.5)
                   :color ,theme:on-background)
-                `(.marked
-                  :background ,theme:accent
-                  :color ,theme:on-accent)))))))
+                `(.source
+                  :margin-left 0)
+                `(.source-name
+                  :padding-left "10px"
+                  :background ,theme:background)
+                `(.source-content
+                  :border-collapse collapse
+                  :padding-left 0
+                  :margin-left 0
+                  (th
+                   :padding "5px 10px"
+                   :color ,theme:on-background
+                   :background ,theme:background
+                   :font-weight bold)
+                  (td
+                   :padding "5px 10px"
+                   :text-overflow ellipsis))
+                `((:or "#prompt" "#prompt-extra")
+                  :color ,(if (theme:dark-p theme:theme)
+                              theme:on-secondary
+                              theme:secondary)
+                  :background none)
+                `((:or .arrow-right .arrow-left)
+                  :clip-path none
+                  :margin-right 0)
+                `((:or "#prompt-modes" "#close-button" "#previous-source"
+                   "#next-source" "#toggle-attributes")
+                  :display none)))))))
 
 (define-public %nyxt-base-features
   (list
