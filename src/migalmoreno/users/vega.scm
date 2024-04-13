@@ -1198,8 +1198,6 @@ Falls back to `default-directory'."
     #:restore-session? #f
     #:extra-config-lisp extra-nyxt-config-lisp)
    %nyxt-base-features
-   (feature-ungoogled-chromium
-    #:desktop-startup-flags '("--incognito" "--enable-incognito-themes"))
    %desktop-base-features
    (feature-desktop-services
     #:default-desktop-home-services
