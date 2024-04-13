@@ -635,21 +635,34 @@
           `((make-instance 'router:redirector
                            :route (match-domain "youtube.com")
                            :redirect
-                           ',(map
-                              (lambda (e)
-                                (cons (string-append
-                                       (get-value 'youtube-frontend config)
-                                       (car e))
-                                      (cdr e)))
-                              '(("/stream?url=\\&" . (".*/watch\\?v.*" ".*/shorts/.*"))
-                                ("/playlist?list=\\&" . ".*/playlist/.*")
-                                ("/channel?url=\\&" . ".*/channel/.*"))))
-            (make-instance 'router:redirector
-                           :route "^https://soundcloud.com/.*/.*"
+                           (list
+                            (list
+                             ,(format #f "~a/stream?url=\\&"
+                                      (get-value 'youtube-frontend config))
+                             ".*/watch\\?v.*"
+                             ".*/shorts/.*")
+                            (cons
+                             ,(format #f "~a/playlist?list=\\&"
+                                      (get-value 'youtube-frontend config))
+                             ".*/playlist/.*")
+                            (cons
+                             ,(format #f "~a/channel?url=\\&"
+                                      (get-value 'youtube-frontend config))
+                             ".*/channel/.*")
+                            (cons
+                             ,(format #f "~a/search?q=\\1&serviceId=0"
+                                      (get-value 'youtube-frontend config))
+                             ".*/search\\?q=(.*)"))))
+          '())
+    ,@(if (get-value 'soundcloud-frontend config)
+          `((make-instance 'router:redirector
+                           :route (match-domain "soundcloud.com")
                            :redirect
-                           (quri:uri
-                            ,(format #f "~a/stream?url=\\&"
-                                     (get-value 'youtube-frontend config)))))
+                           (list
+                            (cons
+                             ,(format #f "~a/stream?url=\\&"
+                                      (get-value 'soundcloud-frontend config))
+                             ".*/.*/.*"))))
           '())
     ,@(if (get-value 'quora-frontend config)
           `((make-instance 'router:redirector
@@ -690,53 +703,22 @@
                            :instances-builder
                            router:teddit-instances-builder))
           '())
-    ,@(if (get-value 'tiktok-frontend config)
-          `((make-instance 'router:redirector
-                           :name 'tiktok
-                           :route (match-domain "tiktok.com")
-                           :reverse "www.tiktok.com"
-                           :redirect
-                           ',(map (lambda (e)
-                                    (cons (string-append
-                                           (get-value 'tiktok-frontend config)
-                                           (car e))
-                                          (cdr e)))
-                                  '(("/@placeholder/video/" . (not ".*/@.*" ".*/t/.*"))
-                                    ("/\\1" . ".*://[^/]*/(.*)$")))
-                           :instances-builder
-                           router:proxitok-instances-builder)
-            (make-instance 'router:blocker
-                           :name 'tiktok
-                           :blocklist '(or (not ".*/video/.*") (not ".*/t/.*"))))
-          '())
-    ,@(if (get-value 'instagram-frontend config)
-          `((make-instance 'router:redirector
-                           :name 'instagram
-                           :route (match-regex "https://(www.)?insta.*")
-                           :reverse "www.instagram.com"
-                           :redirect
-                           ',(map (lambda (e)
-                                    (cons (string-append
-                                           (get-value 'instagram-frontend config)
-                                           (car e))
-                                          (cdr e)))
-                                  '(("/profile/" . (not ".*/p/.*" ".*/tv/.*" ".*/reels/.*"))
-                                    ("/media/\\1" . ".*/p/(.*)")
-                                    ("/\\1" . ".*://[^/]*/(.*)$"))))
-            (make-instance 'router:blocker
-                           :name 'instagram
-                           :blocklist '(not ".*/media/.*")))
-          '())
     ,@(if (get-value 'fandom-frontend config)
           `((make-instance 'router:redirector
                            :route (match-domain "fandom.com")
                            :redirect
-                           '((,(format #f "~a/\\1/wiki/\\2"
-                                       (get-value 'fandom-frontend config))
-                              . ".*://(\\w+)\\.fandom.com/wiki/(.*)"))
+                           (list
+                            (cons
+                             ,(format #f "~a/\\1/wiki/\\2"
+                                      (get-value 'fandom-frontend config))
+                             ".*://(\\w+)\\.fandom.com/wiki/(.*)"))
                            :instances-builder
                            router:breezewiki-instances-builder))
-          '())))
+          '())
+
+    (make-instance 'router:opener
+                   :route (match-scheme "magnet" "mailto")
+                   :resource "xdg-open ~a")))
 
 (define (extra-nx-search-engines config)
   `((make-instance 'search-engine
