@@ -7,10 +7,6 @@
 
 ;;; Common utilities
 
-(define-public (list* . es)
-  (append-map (lambda (f)
-                (if (list? f) f (list f)))
-              es))
 
 (define-public %project-root
   (canonicalize-path

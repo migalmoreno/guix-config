@@ -332,28 +332,29 @@
       (deploy-hook %nginx-deploy-hook))))))
 
 (define cygnus-extra-services
-  (list*
+  (append
+   (list
+    (service dhcp-client-service-type)
+    (service rsync-service-type
+             (rsync-configuration
+              (modules
+               (list
+                (rsync-module
+                 (name "site")
+                 (file-name (string-append "/srv/http/" %default-domain)))))))
+    (service openssh-service-type
+             (openssh-configuration
+              (openssh (@ (gnu packages ssh) openssh-sans-x))
+              (password-authentication? #f)
+              (permit-root-login 'prohibit-password)
+              (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
+                                 ("deneb" ,%default-ssh-key))))))
    cygnus-nginx-services
    cygnus-certbot-services
    cygnus-matrix-services
    cygnus-whoogle-services
    cygnus-file-server-services
-   cygnus-version-control-services
-   (service dhcp-client-service-type)
-   (service rsync-service-type
-            (rsync-configuration
-             (modules
-              (list
-               (rsync-module
-                (name "site")
-                (file-name (string-append "/srv/http/" %default-domain)))))))
-   (service openssh-service-type
-            (openssh-configuration
-             (openssh (@ (gnu packages ssh) openssh-sans-x))
-             (password-authentication? #f)
-             (permit-root-login 'prohibit-password)
-             (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
-                                ("deneb" ,%default-ssh-key)))))))
+   cygnus-version-control-services))
 
 (define-public %cygnus-features
   (list
