@@ -1,12 +1,25 @@
 (define-module (migalmoreno utils)
-  #:use-module (gnu system keyboard)
+  #:use-module (gnu services)
   #:use-module (gnu services web)
+  #:use-module (gnu system keyboard)
   #:use-module (guix gexp)
-  #:use-module (srfi srfi-1))
+  #:use-module (rde features)
+  #:use-module (srfi srfi-1)
+  #:export (feature-home-extension))
 
 
 ;;; Common utilities
 
+(define* (feature-home-extension #:key name service extension)
+  (feature
+   (name name)
+   (home-services-getter
+    (lambda (config)
+      (list
+       (simple-service
+        name
+        (get-value service config)
+        (extension config)))))))
 
 (define-public %project-root
   (canonicalize-path
