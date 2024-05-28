@@ -1,4 +1,5 @@
 (define-module (migalmoreno configs)
+  #:use-module (migalmoreno themes)
   #:use-module (migalmoreno utils)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
@@ -7,6 +8,7 @@
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
   #:use-module (guix records)
+  #:use-module (farg provider)
   #:export (config
             config-host
             config-users
@@ -70,7 +72,10 @@
                 (features (@ (migalmoreno hosts lyra) %lyra-features))))
     (users (list (user
                   (name "vega")
-                  (features (@ (migalmoreno users vega) %vega-features))))))
+                  (features
+                   (farg:theme-provider
+                    dark-theme
+                    (@ (migalmoreno users vega) features)))))))
    (config
     (host (host (name "live")
                 (features (@ (migalmoreno hosts live) %live-features)))))))
