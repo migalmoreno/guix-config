@@ -1,10 +1,10 @@
 (define-module (migalmoreno hosts live)
   #:use-module (migalmoreno utils)
-  #:use-module (rde features system)
   #:use-module (rde features base)
+  #:use-module (rde features system)
+  #:use-module (rde packages)
   #:use-module (rde system services admin)
   #:use-module (rde system services guix)
-  #:use-module (rde packages)
   #:use-module (gnu services)
   #:use-module (gnu system)
   #:use-module (gnu system install))
@@ -17,7 +17,7 @@
     (list "%wheel ALL=(ALL) NOPASSWD: ALL"))
    (service cow-store-service-type)))
 
-(define-public %live-features
+(define-public features
   (list
    (feature-host-info
     #:host-name "live"

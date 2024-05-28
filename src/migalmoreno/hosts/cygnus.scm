@@ -356,7 +356,7 @@
    cygnus-file-server-services
    cygnus-version-control-services))
 
-(define-public %cygnus-features
+(define-public features
   (list
    (feature-host-info
     #:host-name "cygnus"

@@ -1,5 +1,4 @@
 (define-module (migalmoreno hosts lyra)
-  #:use-module (migalmoreno common)
   #:use-module (migalmoreno utils)
   #:use-module (gnu services)
   #:use-module (gnu services base)
@@ -137,7 +136,7 @@
 
 ;;; Host-specific features
 
-(define-public %lyra-features
+(define-public features
   (list
    (feature-kernel
     #:kernel %default-kernel

@@ -62,14 +62,14 @@
   (list
    (config
     (host (host (name "cygnus")
-                (features (@ (migalmoreno hosts cygnus) %cygnus-features))))
+                (features (@ (migalmoreno hosts cygnus) features))))
     (users (list (user
                   (name "deneb")
-                  (features (@ (migalmoreno users deneb) %deneb-features)))))
-    (machine (@ (migalmoreno machines cygnus) %cygnus-machine)))
+                  (features (@ (migalmoreno users deneb) features)))))
+    (machine (@ (migalmoreno machines cygnus) machines)))
    (config
     (host (host (name "lyra")
-                (features (@ (migalmoreno hosts lyra) %lyra-features))))
+                (features (@ (migalmoreno hosts lyra) features))))
     (users (list (user
                   (name "vega")
                   (features
@@ -78,4 +78,4 @@
                     (@ (migalmoreno users vega) features)))))))
    (config
     (host (host (name "live")
-                (features (@ (migalmoreno hosts live) %live-features)))))))
+                (features (@ (migalmoreno hosts live) features)))))))

@@ -5,7 +5,7 @@
   #:use-module (rde features base)
   #:use-module (rde features matrix))
 
-(define-public %deneb-features
+(define-public features
   (list
    (feature-user-info
     #:user-name "deneb"
