@@ -359,7 +359,7 @@
       `(:background-color ,(palette 'bg)
         :background-color- ,(palette 'bg-alt)
         :on-background-color ,(palette 'fg)
-        :primary-color ,(palette 'accent-0)
+        :primary-color ,(palette (if (palette 'light?) 'accent-3 'accent-0))
         :on-primary-color ,(palette 'accent-1)
         :secondary-color ,(palette 'accent-2)
         :on-secondary-color ,(palette 'accent-3)
