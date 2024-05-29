@@ -3,7 +3,7 @@
 * Guix configuration
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://github.com/abcdw/rde][RDE]] configuration framework.
 
-[[https://files.migalmoreno.com/guix_config.jpg]]
+| https://files.migalmoreno.com/guix_config_light.jpg | https://files.migalmoreno.com/guix_config_dark.jpg |
 
 The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the [[https://github.com/abcdw/rde#principles][RDE principles]] to choose my tooling and I try to contribute to and maintain related programs.
 

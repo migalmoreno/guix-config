@@ -4,7 +4,21 @@
 
 This is my personal set of configuration files built around the [GNU Guix](https://guix.gnu.org/) package manager and the [RDE](https://github.com/abcdw/rde) configuration framework.  
 
-![img](https://files.migalmoreno.com/guix_config.jpg)  
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="https://files.migalmoreno.com/guix_config_light.jpg" alt="guix_config_light.jpg" /></td>
+<td class="org-left"><img src="https://files.migalmoreno.com/guix_config_dark.jpg" alt="guix_config_dark.jpg" /></td>
+</tr>
+</tbody>
+</table>
 
 The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the [RDE principles](https://github.com/abcdw/rde#principles) to choose my tooling and I try to contribute to and maintain related programs.  
 
