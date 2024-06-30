@@ -139,6 +139,9 @@
       (setq consult-narrow-key "C-=")
       (setq consult-widen-key "C--"))
     (define-key help-map "b" 'embark-bindings)
+    (define-key global-map (kbd "C-.") 'embark-act)
+    (define-key global-map (kbd "C->") 'embark-become)
+    (define-key minibuffer-local-map (kbd "M-g") 'embark-become)
     (with-eval-after-load 'embark
       (setq embark-indicators '(embark-minimal-indicator))
       (setq embark-prompter 'embark-keymap-prompter)
