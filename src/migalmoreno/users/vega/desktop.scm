@@ -50,8 +50,7 @@
      ("LESSHISTFILE" . "-")
      ("npm_config_userconfig" . "$XDG_CONFIG_HOME/npm-config")
      ("npm_config_cache" . "$XDG_CACHE_HOME/npm")
-     ("npm_config_prefix" . "$XDG_DATA_HOME/npm")
-     ("PATH" . "$XDG_DATA_HOME/npm/bin:$HOME/.nix-profile/bin:$PATH"))))
+     ("npm_config_prefix" . "$XDG_DATA_HOME/npm"))))
 
 (define extra-xdg-desktop-entries-service
   (simple-service
@@ -385,11 +384,7 @@
     extra-home-environment-variables-service
     (service home-udiskie-service-type
              (home-udiskie-configuration
-              (config '((notify . #f)))))
-    (simple-service
-     'source-home-manager-vars
-     home-shell-profile-service-type
-     (list "source ~/.nix-profile/etc/profile.d/hm-session-vars.sh")))))
+              (config '((notify . #f))))))))
 
 (define-public (desktop-features source palette)
   (append
