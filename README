@@ -1,11 +1,11 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; after-save-hook: org-md-export-to-markdown; -*-
 #+OPTIONS: toc:nil num:nil
 * Guix configuration
-This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://github.com/abcdw/rde][RDE]] configuration framework.
+This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://git.sr.ht/~abcdw/rde][RDE]] configuration framework.
 
 | https://files.migalmoreno.com/guix_config_light.jpg | https://files.migalmoreno.com/guix_config_dark.jpg |
 
-The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the [[https://github.com/abcdw/rde#principles][RDE principles]] to choose my tooling and I try to contribute to and maintain related programs.
+The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the RDE principles to choose my tooling and I try to contribute to and maintain related programs.
 
 - OS/Package Manager :: GNU Guix
 - Window Manager :: dwl-guile
@@ -30,4 +30,4 @@ make system/reconfigure/$HOST
 make deploy/$HOST/$USER
 #+end_src
 
-To alleviate maintenance burden, I prefer working on top of Guix community [[https://guix.gnu.org/manual/en/html_node/Channels.html][channels]] to implement new features, which I define through lock files under the [[file:rde/][rde/]] directory. If you wish to reproduce one of my setups, please make sure to consult the pinned commits on these files.
+To alleviate maintenance burden, I prefer working on top of Guix community [[https://guix.gnu.org/manual/en/html_node/Channels.html][channels]] to implement new features, which I define through lock files under the =./rde/= directory. If you wish to reproduce one of my setups, please make sure to consult the pinned commits on these files.
