@@ -112,5 +112,6 @@
      #:frontends `((google . "http://localhost:5000")
                    (youtube . ,(string-append "https://" %tubo-host))
                    (soundcloud . ,(string-append "https://" %tubo-host))
-                   (reddit . "https://redlib.freedit.eu"))))
+                   (reddit . "https://redlib.freedit.eu")
+                   (medium . "https://scribe.rip"))))
    (presets:nyxt-features source palette)))
