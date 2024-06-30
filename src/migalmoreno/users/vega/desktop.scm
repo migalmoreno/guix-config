@@ -403,7 +403,6 @@
     (feature-desktop-services
      #:default-desktop-home-services
      (extra-home-desktop-services source palette)))
-   '()
    (presets:ui-features source palette)
    (gtk-features source palette)
    (presets:desktop-features source palette)))
