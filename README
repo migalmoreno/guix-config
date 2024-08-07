@@ -1,19 +1,7 @@
-# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; after-save-hook: org-md-export-to-markdown; -*-
+# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; -*-
 #+OPTIONS: toc:nil num:nil
-* Guix configuration
+* Guix Configuration
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://git.sr.ht/~abcdw/rde][RDE]] configuration framework.
-
-| https://files.migalmoreno.com/guix_config_light.jpg | https://files.migalmoreno.com/guix_config_dark.jpg |
-
-The main goal behind this repository is to hold the configurations of my users, hosts, and remote machines in a single dispatch entry point. For the most part, I stick to the RDE principles to choose my tooling and I try to contribute to and maintain related programs.
-
-- OS/Package Manager :: GNU Guix
-- Window Manager :: dwl-guile
-- Status Bar :: dtao-guile
-- Menu Prompt :: bemenu + j4-dmenu-desktop
-- Browser :: Nyxt
-- Text Editor :: GNU Emacs
-- Video Player :: mpv
 
 To build and activate my configurations, invoke one of the following commands:
 
