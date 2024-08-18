@@ -41,7 +41,7 @@
 (define cygnus-extra-packages
   (strings->packages "git" "rsync" "docker-compose"))
 
-(define cygnus-nginx-services
+(define cygnus-blog-services
   (list
    (service nginx-service-type
             (nginx-configuration
@@ -69,44 +69,12 @@
                      (list "internal;"))))
                   (list %letsencrypt-acme-challenge))))))))
    (simple-service
-    'add-extra-nginx-configuration
-    nginx-service-type
-    (list
-     (nginx-server-configuration
-      (listen '("443 ssl http2"))
-      (server-name (list %tubo-host))
-      (ssl-certificate (format #f "/etc/letsencrypt/live/~a/fullchain.pem"
-                               %tubo-host))
-      (ssl-certificate-key (format #f "/etc/letsencrypt/live/~a/privkey.pem"
-                                   %tubo-host ))
-      (locations
-       (list
-        (nginx-location-configuration
-         (uri "/")
-         (body
-          (list "proxy_pass http://localhost:3000;"
-                "proxy_set_header X-Forwarded-For $remote_addr;"
-                "proxy_set_header HOST $http_host;")))
-        %letsencrypt-acme-challenge)))))))
-
-(define cygnus-certbot-services
-  (list
-   (service certbot-service-type
-            (certbot-configuration
-             (email %default-email)
-             (webroot "/srv/http")
-             (certificates
-              (list
-               (certificate-configuration
-                (domains (list %default-domain
-                               (string-append "www." %default-domain)))
-                (deploy-hook %nginx-deploy-hook))))))
-   (simple-service
-    'add-extra-ssl-certificates
+    'add-blog-ssl-certificate
     certbot-service-type
     (list
      (certificate-configuration
-      (domains (list %tubo-host))
+      (domains (list %default-domain
+                     (string-append "www." %default-domain)))
       (deploy-hook %nginx-deploy-hook))))))
 
 (define cygnus-matrix-services
@@ -322,10 +290,13 @@
               (password-authentication? #f)
               (permit-root-login 'prohibit-password)
               (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
-                                 ("deneb" ,%default-ssh-key))))))
-   cygnus-nginx-services
-   cygnus-certbot-services
    cygnus-matrix-services
+                                 ("deneb" ,%default-ssh-key)))))
+    (service certbot-service-type
+            (certbot-configuration
+             (email %default-email)
+             (webroot "/srv/http"))))
+   cygnus-blog-services
    cygnus-whoogle-services
    cygnus-version-control-services))
 
