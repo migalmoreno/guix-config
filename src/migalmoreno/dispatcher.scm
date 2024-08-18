@@ -1,21 +1,22 @@
 (define-module (migalmoreno dispatcher)
-  #:use-module (migalmoreno configs)
+  #:use-module (migalmoreno config)
   #:use-module (gnu home)
   #:use-module (gnu machine)
   #:use-module (gnu system)
   #:use-module (ice-9 match)
   #:use-module (rde features)
-  #:use-module (srfi srfi-1))
+  #:use-module (srfi srfi-1)
+  #:export (dispatcher))
 
 (define* (dispatcher
+          configs
           #:key
           (user (or (getenv "RDE_USER") (getlogin)))
           (host (or (getenv "RDE_HOST") (gethostname)))
           (target (getenv "RDE_TARGET"))
           (initial-os %initial-os)
           (he-in-os? (not (nil? (getenv "RDE_HE_IN_OS"))))
-          (pretty-print? #f)
-          (configs %configs))
+          (pretty-print? #f))
   (define %host
     (and=>
      (find (lambda (config)
@@ -73,5 +74,3 @@
     ("system" %os)
     ("deploy" %machines)
     (_ %he)))
-
-(dispatcher)

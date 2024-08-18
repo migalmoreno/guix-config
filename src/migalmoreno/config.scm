@@ -1,5 +1,4 @@
-(define-module (migalmoreno configs)
-  #:use-module (migalmoreno themes)
+(define-module (migalmoreno config)
   #:use-module (migalmoreno utils)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
@@ -8,7 +7,6 @@
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
   #:use-module (guix records)
-  #:use-module (farg provider)
   #:export (config
             config-host
             config-users
@@ -57,25 +55,3 @@
   this-host
   (name host-name)
   (features host-features))
-
-(define-public %configs
-  (list
-   (config
-    (host (host (name "cygnus")
-                (features (@ (migalmoreno hosts cygnus) features))))
-    (users (list (user
-                  (name "deneb")
-                  (features (@ (migalmoreno users deneb) features)))))
-    (machine (@ (migalmoreno machines cygnus) machines)))
-   (config
-    (host (host (name "lyra")
-                (features (@ (migalmoreno hosts lyra) features))))
-    (users (list (user
-                  (name "vega")
-                  (features
-                   (farg:theme-provider
-                    dark-theme
-                    (@ (migalmoreno users vega) features)))))))
-   (config
-    (host (host (name "live")
-                (features (@ (migalmoreno hosts live) features)))))))
