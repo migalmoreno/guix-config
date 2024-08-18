@@ -3,18 +3,33 @@
 * Guix Configuration
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://git.sr.ht/~abcdw/rde][RDE]] configuration framework.
 
-To build and activate my configurations, invoke one of the following commands:
+To activate the current user's home configuration:
 
 #+begin_src sh
-# To activate the current user's home
 make home
-# For a specific user
+#+end_src
+
+To activate a specific user's home configuration:
+
+#+begin_src sh
 make home/reconfigure/$USER
-# To activate the current hostname's config
+#+end_src
+
+To activate the current host's system configuration:
+
+#+begin_src sh
 make system
-# For a specific host
+#+end_src
+
+To activate a specific host's system configuration:
+
+#+begin_src sh
 make system/reconfigure/$HOST
-# To deploy an entire configuration for a remote machine
+#+end_src
+
+To deploy an entire system configuration and home configuration to a remote machine:
+
+#+begin_src sh
 make deploy/$HOST/$USER
 #+end_src
 
