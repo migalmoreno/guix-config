@@ -3,6 +3,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services base)
   #:use-module (gnu services databases)
+  #:use-module (gnu services dbus)
   #:use-module (gnu services linux)
   #:use-module (gnu services nix)
   #:use-module (gnu services spice)
@@ -17,6 +18,7 @@
   #:use-module (gnu system accounts)
   #:use-module (gnu system file-systems)
   #:use-module (gnu system mapped-devices)
+  #:use-module (gnu system setuid)
   #:use-module (guix gexp)
   #:use-module (rde packages)
   #:use-module (rde features)
@@ -107,7 +109,20 @@
    extra-etc-files-service
    (service syncthing-service-type
             (syncthing-configuration (user "vega")))
+   (service libvirt-service-type
+            (libvirt-configuration
+             (unix-sock-group "libvirt")
+             (tls-port "16555")))
    (service spice-vdagent-service-type)
+   (simple-service 'add-spice-polkit
+                   polkit-service-type
+                   (list (@ (gnu packages spice) spice-gtk)))
+   (simple-service 'mount-setuid-helpers
+                   setuid-program-service-type
+                   (map file-like->setuid-program
+                        (list (file-append
+                               (@ (gnu packages spice) spice-gtk)
+                               "/libexec/spice-client-glib-usb-acl-helper"))))
    (service virtlog-service-type)
    (service nix-service-type
             (nix-configuration
@@ -123,10 +138,6 @@
                "WHOOGLE_MINIMAL=1"
                "WHOOGLE_CONFIG_NEW_TAB=1"
                "WHOOGLE_RESULTS_PER_PAGE=50"))))
-   (service libvirt-service-type
-            (libvirt-configuration
-             (unix-sock-group "libvirt")
-             (tls-port "16555")))
    (service openssh-service-type
             (openssh-configuration
              (openssh (@ (gnu packages ssh) openssh-sans-x))
