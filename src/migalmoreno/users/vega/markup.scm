@@ -3,7 +3,7 @@
   #:use-module (rde features markup)
   #:use-module (rde packages))
 
-(define org-features
+(define-public features
   (list
    (feature-emacs-org
     #:org-directory "~/documents"
@@ -33,7 +33,7 @@
     #:org-roam-dailies-directory "./"
     #:org-roam-capture-templates
     `(("w" "work" plain "%?"
-       :if-new (file+head "work/pages/%<%Y%m%d%H%M%S>-${slug}.org"
+       :if-new (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
                           "#+title: ${title}\n#+filetags: :${Topic}:\n")
        :unnarrowed t)
       ("p" "personal" plain "%?"
@@ -43,40 +43,27 @@
     #:org-roam-dailies-capture-templates
     '(("w" "work" entry
        "* %?"
-       :if-new (file+head "work/journals/%<%Y-%m-%d>.org"
+       :if-new (file+head "work/daily/%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-%d>\n"))
       ("p" "personal" entry
        "* %?"
-       :if-new (file+head "personal/journals/%<%Y-%m-%d>.org"
+       :if-new (file+head "personal/daily/%<%Y-%m-%d>.org"
                           "#+title: %<%Y-%m-%d>\n"))))
-   (feature-emacs-org-agenda)))
-
-(define-public markup-features
-  (append
-   org-features
-   (list
-    (feature-emacs-monocle)
-    (feature-markdown
-     #:headings-scaling? #t)
-    (feature-tex
-     #:listings-options
-     '(("basicstyle" "\\ttfamily")
-       ("stringstyle" "\\color{blue}\\ttfamily")
-       ("numbers" "left")
-       ("numberstyle" "\\tiny")
-       ("breaklines" "true")
-       ("showstringspaces" "false")
-       ("showtabs" "false")
-       ("keywordstyle" "\\color{violet}")
-       ("commentstyle" "\\color{gray}")
-       ("label" "{Figure}"))
-     #:extra-tex-packages
-     (strings->packages
-      "texlive-wrapfig" "texlive-capt-of"
-      "texlive-hyperref" "texlive-fonts-ec"
-      "texlive-latex-geometry" "texlive-xcolor"
-      "texlive-ulem" "texlive-latex-preview"
-      "texlive-amsfonts" "texlive-grfext" "texlive-latex-natbib"
-      "texlive-titling" "texlive-latex-titlesec" "texlive-enumitem"))
-    (feature-emacs-citation
-     #:global-bibliography (list "~/documents/references.bib")))))
+   (feature-emacs-org-agenda)
+   (feature-emacs-monocle)
+   (feature-markdown
+    #:headings-scaling? #t)
+   (feature-tex
+    #:listings-options
+    '(("basicstyle" "\\ttfamily")
+      ("stringstyle" "\\color{blue}\\ttfamily")
+      ("numbers" "left")
+      ("numberstyle" "\\tiny")
+      ("breaklines" "true")
+      ("showstringspaces" "false")
+      ("showtabs" "false")
+      ("keywordstyle" "\\color{violet}")
+      ("commentstyle" "\\color{gray}")
+      ("label" "{Figure}")))
+   (feature-emacs-citation
+    #:global-bibliography (list "~/documents/references.bib"))))

@@ -444,7 +444,7 @@
       ((.dialog-vbox button)
        ((border-radius . 0))))))
 
-(define-public (gtk-features _ palette)
+(define-public (features _ palette)
   (list
    (feature-gtk3
     #:gtk-dark-theme? (not (palette 'light?))

@@ -64,7 +64,7 @@
 
 (define base-ytdl-args '("-q" "--add-metadata" "--compat-options" "all"))
 
-(define-public multimedia-features
+(define-public features
   (list
    (feature-transmission
     #:download-dir (format #f "~a/videos" (getenv "HOME")))

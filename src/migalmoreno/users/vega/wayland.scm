@@ -1,7 +1,5 @@
-(define-module (migalmoreno users vega desktop)
-  #:use-module (migalmoreno users vega gtk)
-  #:use-module (migalmoreno users vega multimedia)
-  #:use-module ((migalmoreno presets desktop) #:prefix presets:)
+(define-module (migalmoreno users vega wayland)
+  #:use-module ((migalmoreno users vega multimedia) #:prefix multimedia:)
   #:use-module (migalmoreno utils)
   #:use-module (dtao-guile home-service)
   #:use-module (dwl-guile home-service)
@@ -13,7 +11,14 @@
   #:use-module (gnu home services xdg)
   #:use-module (guix gexp)
   #:use-module (rde features base)
+  #:use-module (rde features bluetooth)
   #:use-module (rde features gnupg)
+  #:use-module (rde features keyboard)
+  #:use-module (rde features networking)
+  #:use-module (rde features linux)
+  #:use-module (rde features wm)
+  #:use-module (rde features xdg)
+  #:use-module (rde features xdisorg)
   #:use-module (rde home services desktop)
   #:use-module (rde home services shells)
   #:use-module (rde packages))
@@ -199,9 +204,11 @@
                                         (width . 1920)
                                         (height . 1080)
                                         (layout . default))
-                                      '((name . "DP-3")
+                                      '((name . "HDMI-A-1")
                                         (masters . 1)
                                         (master-factor . 0.55)
+                                        (x . 1920)
+                                        (y . 0)
                                         (width . 1920)
                                         (height . 1080)
                                         (layout . default)))
@@ -310,7 +317,10 @@
                           `(cond
                             ((dtao:selected-tag? ,index)
                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
-                                      (palette 'accent-0) (palette 'fg)
+                                      (palette 'accent-0)
+                                      (if (palette 'light?)
+                                          (palette 'fg)
+                                          (palette 'bg-alt))
                                       str))
                             ((dtao:urgent-tag? ,index)
                              ,(format #f "^bg(~a)^fg(~a)~a^fg()^bg()"
@@ -378,7 +388,7 @@
    (@@ (rde features base) %rde-desktop-home-services)
    (extra-home-wm-services source palette)
    (list
-    extra-mpv-settings-service
+    multimedia:extra-mpv-settings-service
     extra-home-packages-service
     extra-xdg-desktop-entries-service
     extra-home-environment-variables-service
@@ -386,7 +396,7 @@
              (home-udiskie-configuration
               (config '((notify . #f))))))))
 
-(define-public (desktop-features source palette)
+(define-public (features source palette)
   (append
    (list
     (feature-gnupg
@@ -402,7 +412,41 @@
      #:default-ttl 34560000)
     (feature-desktop-services
      #:default-desktop-home-services
-     (extra-home-desktop-services source palette)))
-   (presets:ui-features source palette)
-   (gtk-features source palette)
-   (presets:desktop-features source palette)))
+     (extra-home-desktop-services source palette))
+    (feature-networking)
+    (feature-pipewire)
+    (feature-swaylock
+     #:swaylock (@ (gnu packages wm) swaylock-effects)
+     #:extra-config
+     `((screenshots)
+       (clock)
+       (indicator)
+       (effect-blur . 7x5)
+       (effect-vignette . "0.5:0.5")
+       (hide-keyboard-layout)
+       ,(cons 'indicator-color (substring (palette 'accent-0) 1))
+       ,(cons 'inside-color (substring (palette 'fg) 1))
+       ,(cons 'ring-color (substring (palette 'accent-0) 1))))
+    (feature-swayidle)
+    (feature-kanshi
+     #:extra-config
+     `((profile headless ((output eDP-1 enable)))
+       (profile single ((output eDP-1 disable)
+                        (output HDMI-A-1 enable)))
+       (profile multi ((output eDP-1 disable)
+                       (output DP-2 mode 1920x1080 position -1920,0)
+                       (output HDMI-A-1 mode 1920x1080 position 0,0)))))
+    (feature-bluetooth)
+    (feature-keyboard
+     #:keyboard-layout %default-keyboard-layout)
+    (feature-xdg
+     #:xdg-user-directories-configuration
+     (home-xdg-user-directories-configuration
+      (desktop "$HOME")
+      (documents "$HOME/documents")
+      (download "$HOME/downloads")
+      (music "$HOME/music")
+      (pictures "$HOME/pictures")
+      (publicshare "$HOME")
+      (videos "$HOME/videos")
+      (templates "$HOME"))))))

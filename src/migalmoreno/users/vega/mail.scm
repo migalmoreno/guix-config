@@ -47,7 +47,7 @@
      (To rde-gnus-get-article-participants)
      (cc ,%default-email))))
 
-(define-public mail-features
+(define-public features
   (list
    (feature-mail-settings
     #:mail-accounts

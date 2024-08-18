@@ -4,7 +4,7 @@
   #:use-module (rde features matrix)
   #:use-module (rde features messaging))
 
-(define-public messaging-features
+(define-public features
   (list
    (feature-matrix-settings
     #:homeserver "https://pantalaimon.conses.eu"
