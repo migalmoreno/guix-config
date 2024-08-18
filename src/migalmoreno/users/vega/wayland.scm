@@ -447,6 +447,6 @@
       (download "$HOME/downloads")
       (music "$HOME/music")
       (pictures "$HOME/pictures")
-      (publicshare "$HOME")
+      (publicshare "$HOME/public")
       (videos "$HOME/videos")
       (templates "$HOME"))))))
