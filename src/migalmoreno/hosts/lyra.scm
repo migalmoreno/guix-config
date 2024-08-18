@@ -109,12 +109,19 @@
             (syncthing-configuration (user "vega")))
    (service spice-vdagent-service-type)
    (service virtlog-service-type)
-   (service nix-service-type)
+   (service nix-service-type
+            (nix-configuration
+             (extra-config
+              (list
+               "experimental-features = nix-command flakes\n"
+               "warn-dirty = false\n"
+               "extra-platforms = aarch64-linux i686-linux\n"))))
    (service whoogle-service-type
             (whoogle-configuration
              (environment-variables
               (list
-               "WHOOGLE_MINIMAL=1" "WHOOGLE_CONFIG_NEW_TAB=1"
+               "WHOOGLE_MINIMAL=1"
+               "WHOOGLE_CONFIG_NEW_TAB=1"
                "WHOOGLE_RESULTS_PER_PAGE=50"))))
    (service libvirt-service-type
             (libvirt-configuration
