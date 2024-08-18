@@ -187,7 +187,10 @@
          (body
           (list "proxy_pass http://localhost:5000/;"
                 "proxy_set_header X-Forwarded-For $remote_addr;"
-                "proxy_set_header HOST $http_host;")))
+                "proxy_set_header X-Forwarded-Proto $scheme;"
+                "proxy_set_header X-NginX-Proxy true;"
+                "proxy_set_header X-Real-IP $remote_addr;"
+                "proxy_set_header Host $http_host;")))
         %letsencrypt-acme-challenge)))))
    (simple-service
     'add-whoogle-ssl-certificate
