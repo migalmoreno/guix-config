@@ -397,56 +397,55 @@
               (config '((notify . #f))))))))
 
 (define-public (features source palette)
-  (append
-   (list
-    (feature-gnupg
-     #:gpg-primary-key "5F23F458"
-     #:ssh-keys `((,%default-ssh-keygrip))
-     #:pinentry-flavor
-     (program-file
-      "pinentry-bemenu-wrapper"
-      #~(system* #$(file-append
-                    (@ (gnu packages gnupg) pinentry-bemenu)
-                    "/bin/pinentry-bemenu")
-                 #$@(bemenu-options palette)))
-     #:default-ttl 34560000)
-    (feature-desktop-services
-     #:default-desktop-home-services
-     (extra-home-desktop-services source palette))
-    (feature-networking)
-    (feature-pipewire)
-    (feature-swaylock
-     #:swaylock (@ (gnu packages wm) swaylock-effects)
-     #:extra-config
-     `((screenshots)
-       (clock)
-       (indicator)
-       (effect-blur . 7x5)
-       (effect-vignette . "0.5:0.5")
-       (hide-keyboard-layout)
-       ,(cons 'indicator-color (substring (palette 'accent-0) 1))
-       ,(cons 'inside-color (substring (palette 'fg) 1))
-       ,(cons 'ring-color (substring (palette 'accent-0) 1))))
-    (feature-swayidle)
-    (feature-kanshi
-     #:extra-config
-     `((profile headless ((output eDP-1 enable)))
-       (profile single ((output eDP-1 disable)
-                        (output HDMI-A-1 enable)))
-       (profile multi ((output eDP-1 disable)
-                       (output DP-2 mode 1920x1080 position -1920,0)
-                       (output HDMI-A-1 mode 1920x1080 position 0,0)))))
-    (feature-bluetooth)
-    (feature-keyboard
-     #:keyboard-layout %default-keyboard-layout)
-    (feature-xdg
-     #:xdg-user-directories-configuration
-     (home-xdg-user-directories-configuration
-      (desktop "$HOME")
-      (documents "$HOME/documents")
-      (download "$HOME/downloads")
-      (music "$HOME/music")
-      (pictures "$HOME/pictures")
-      (publicshare "$HOME/public")
-      (videos "$HOME/videos")
-      (templates "$HOME"))))))
+  (list
+   (feature-gnupg
+    #:gpg-primary-key "5F23F458"
+    #:ssh-keys `((,%default-ssh-keygrip))
+    #:pinentry-flavor
+    (program-file
+     "pinentry-bemenu-wrapper"
+     #~(system* #$(file-append
+                   (@ (gnu packages gnupg) pinentry-bemenu)
+                   "/bin/pinentry-bemenu")
+                #$@(bemenu-options palette)))
+    #:default-ttl 34560000)
+   (feature-desktop-services
+    #:default-desktop-home-services
+    (extra-home-desktop-services source palette))
+   (feature-networking)
+   (feature-pipewire)
+   (feature-swaylock
+    #:swaylock (@ (gnu packages wm) swaylock-effects)
+    #:extra-config
+    `((screenshots)
+      (clock)
+      (indicator)
+      (effect-blur . 7x5)
+      (effect-vignette . "0.5:0.5")
+      (hide-keyboard-layout)
+      ,(cons 'indicator-color (substring (palette 'accent-0) 1))
+      ,(cons 'inside-color (substring (palette 'fg) 1))
+      ,(cons 'ring-color (substring (palette 'accent-0) 1))))
+   (feature-swayidle)
+   (feature-kanshi
+    #:extra-config
+    `((profile headless ((output eDP-1 enable)))
+      (profile single ((output eDP-1 disable)
+                       (output HDMI-A-1 enable)))
+      (profile multi ((output eDP-1 disable)
+                      (output DP-2 mode 1920x1080 position -1920,0)
+                      (output HDMI-A-1 mode 1920x1080 position 0,0)))))
+   (feature-bluetooth)
+   (feature-keyboard
+    #:keyboard-layout %default-keyboard-layout)
+   (feature-xdg
+    #:xdg-user-directories-configuration
+    (home-xdg-user-directories-configuration
+     (desktop "$HOME")
+     (documents "$HOME/documents")
+     (download "$HOME/downloads")
+     (music "$HOME/music")
+     (pictures "$HOME/pictures")
+     (publicshare "$HOME/public")
+     (videos "$HOME/videos")
+     (templates "$HOME")))))
