@@ -463,8 +463,8 @@
     #:extension extra-emacs-nyxt-config)
    (feature-alternative-frontends
     #:frontends `((google . "http://localhost:5000")
-                  (youtube . ,(string-append "https://" %tubo-host))
-                  (soundcloud . ,(string-append "https://" %tubo-host))
+                  (youtube . ,(string-append "http://" %tubo-host))
+                  (soundcloud . ,(string-append "http://" %tubo-host))
                   (reddit . "https://libreddit.bus-hit.me")
                   (medium . "https://scribe.rip")))
    (feature-nyxt-blocker)
