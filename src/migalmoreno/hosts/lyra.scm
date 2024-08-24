@@ -137,6 +137,7 @@
               (list
                "WHOOGLE_MINIMAL=1"
                "WHOOGLE_CONFIG_NEW_TAB=1"
+               "WHOOGLE_CONFIG_VIEW_IMAGE=1"
                "WHOOGLE_RESULTS_PER_PAGE=50"))))
    (service openssh-service-type
             (openssh-configuration
