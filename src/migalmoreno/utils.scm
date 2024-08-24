@@ -3,9 +3,14 @@
   #:use-module (gnu services web)
   #:use-module (gnu system keyboard)
   #:use-module (guix gexp)
+  #:use-module (guix modules)
+  #:use-module (guix utils)
   #:use-module (rde features)
   #:use-module (srfi srfi-1)
-  #:export (feature-home-extension))
+  #:use-module (srfi srfi-26)
+  #:use-module (ice-9 ftw)
+  #:export (feature-home-extension
+            user-features))
 
 
 ;;; Common utilities
@@ -33,6 +38,29 @@
 
 (define-public (project-file subpath)
   (local-file (string-append %project-root "/" subpath)))
+
+(define (submodule-features submodule source palette)
+  (append-map
+   (lambda (file)
+     (let* ((features (module-ref
+                       (resolve-module
+                        `(,@submodule
+                          ,(string->symbol (file-sans-extension file))))
+                       'features))
+            (arity (procedure-minimum-arity features)))
+       (if (or (eq? arity #f) (not (eq? (car arity) 2)))
+           features
+           (features source palette))))
+   (scandir
+    (file-sans-extension
+     (search-path %load-path
+                  (module-name->file-name
+                   (module-name
+                    (resolve-module submodule)))))
+    (cut string-suffix? ".scm" <>))))
+
+(define (user-features name . r)
+  (apply submodule-features `(migalmoreno users ,(string->symbol name)) r))
 
 
 ;;; Defaults
