@@ -309,7 +309,7 @@ Falls back to `default-directory'."
           (expand-file-name "emacs/auto-save-list/.saves-"
                             (xdg-data-home)))))
 
-(define-public features
+(define-public (features _ palette)
   (list
    (feature-emacs
     #:extra-early-init-el %extra-early-init-el
@@ -317,6 +317,13 @@ Falls back to `default-directory'."
     #:default-application-launcher? #f
     #:additional-elisp-packages %extra-elisp-packages
     #:emacs-server-mode? #f)
+   (feature-emacs-appearance)
+   (feature-emacs-modus-themes
+    #:dark? (not (palette 'light?))
+    #:deuteranopia? #f
+    #:headings-scaling? #t
+    #:extra-modus-themes-overrides
+    '((bg-mode-line-active bg-dim)))
    (feature-emacs-completion)
    (feature-emacs-vertico)
    (feature-emacs-corfu #:corfu-doc-auto #t)

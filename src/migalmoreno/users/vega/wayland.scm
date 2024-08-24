@@ -1,5 +1,4 @@
 (define-module (migalmoreno users vega wayland)
-  #:use-module ((migalmoreno users vega multimedia) #:prefix multimedia:)
   #:use-module (migalmoreno utils)
   #:use-module (dtao-guile home-service)
   #:use-module (dwl-guile home-service)
@@ -12,7 +11,9 @@
   #:use-module (guix gexp)
   #:use-module (rde features base)
   #:use-module (rde features bluetooth)
+  #:use-module (rde features fontutils)
   #:use-module (rde features gnupg)
+  #:use-module (rde features gtk)
   #:use-module (rde features keyboard)
   #:use-module (rde features networking)
   #:use-module (rde features linux)
@@ -94,6 +95,26 @@
                        "-avd" "whatsapp_bridge" "-no-snapshot")))
           (icon . "android")
           (comment . "Run an Android emulator")))))))))
+
+(define extra-gtk-settings
+  `((gtk-cursor-blink . #f)
+    (gtk-cursor-theme-size . 16)
+    (gtk-decoration-layout . "")
+    (gtk-dialogs-use-header . #f)
+    (gtk-enable-animations . #t)
+    (gtk-enable-event-sounds . #f)
+    (gtk-enable-input-feedback-sounds . #f)
+    (gtk-error-bell . #f)
+    (gtk-overlay-scrolling . #t)
+    (gtk-recent-files-enabled . #f)
+    (gtk-shell-shows-app-menu . #f)
+    (gtk-shell-shows-desktop . #f)
+    (gtk-shell-shows-menubar . #f)
+    (gtk-xft-antialias . #t)
+    (gtk-xft-dpi . 92)
+    (gtk-xft-hinting . #t)
+    (gtk-xft-hintstyle . hintfull)
+    (gtk-xft-rgba . none)))
 
 (define* (grim-script #:key select? clipboard?)
   `(begin
@@ -388,7 +409,7 @@
    (@@ (rde features base) %rde-desktop-home-services)
    (extra-home-wm-services source palette)
    (list
-    multimedia:extra-mpv-settings-service
+    (@ (migalmoreno users vega multimedia) extra-mpv-settings-service)
     extra-home-packages-service
     extra-xdg-desktop-entries-service
     extra-home-environment-variables-service
@@ -448,4 +469,29 @@
      (pictures "$HOME/pictures")
      (publicshare "$HOME/public")
      (videos "$HOME/videos")
-     (templates "$HOME")))))
+     (templates "$HOME")))
+   (feature-fonts
+    #:use-serif-for-variable-pitch? #f
+    #:font-serif
+    (font
+     (name "IBM Plex Serif")
+     (size 11)
+     (package (@ (gnu packages fonts) font-ibm-plex)))
+    #:font-sans
+    (font
+     (name "IBM Plex Sans")
+     (size 11)
+     (package (@ (gnu packages fonts) font-ibm-plex))
+     (weight 'light))
+    #:font-unicode
+    (font
+     (name "Noto Color Emoji")
+     (size 11)
+     (package (@ (gnu packages fonts) font-google-noto))))
+   (feature-gtk3
+    #:gtk-dark-theme? (not (palette 'light?))
+    #:gtk-theme (make-theme
+                 (format #f "postmarketos-~a"
+                         (if (palette 'light?) "paper" "oled"))
+                 (@ (gnu packages gnome-xyz) postmarketos-theme))
+    #:extra-gtk-settings extra-gtk-settings)))
