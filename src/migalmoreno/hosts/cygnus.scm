@@ -26,20 +26,29 @@
   #:use-module (guix gexp)
   #:use-module (srfi srfi-26))
 
-(define cygnus-file-systems
+(define %file-systems
   (list
    (file-system
      (mount-point "/")
      (device (file-system-label "root"))
      (type "ext4"))))
 
-(define cygnus-swap-devices
+(define %swap-devices
   (list
    (swap-space
     (target (file-system-label "swap")))))
 
-(define cygnus-extra-packages
+(define %extra-packages
   (strings->packages "git" "rsync" "docker-compose"))
+
+(define %nginx-robots-txt
+  (nginx-location-configuration
+   (uri "/robots.txt")
+   (body
+    (list "return 200 \"User-agent: *\\nDisallow: /\\n\";"))))
+
+(define %nginx-crawlers-block
+  "if ($http_user_agent ~* (Bytespider|Amazonbot|MJ12bot|DotBot|FriendlyCrawler)) { return 403; }")
 
 (define cygnus-blog-services
   (list
@@ -59,14 +68,18 @@
                 (ssl-certificate-key
                  (format #f "/etc/letsencrypt/live/~a/privkey.pem"
                          %default-domain))
-                (raw-content (list "error_page 404 = /404.html;"))
+                (raw-content
+                 (list
+                  "error_page 404 = /404.html;"
+                  %nginx-crawlers-block))
                 (locations
                  (append
                   (list
                    (nginx-location-configuration
                     (uri "/404.html")
                     (body
-                     (list "internal;"))))
+                     (list "internal;")))
+                   %nginx-robots-txt)
                   (list %letsencrypt-acme-challenge))))))))
    (simple-service
     'add-blog-ssl-certificate
@@ -180,6 +193,7 @@
       (ssl-certificate-key
        (format #f "/etc/letsencrypt/live/whoogle.~a/privkey.pem"
                %default-domain))
+      (raw-content (list %nginx-crawlers-block))
       (locations
        (list
         (nginx-location-configuration
@@ -191,6 +205,7 @@
                 "proxy_set_header X-NginX-Proxy true;"
                 "proxy_set_header X-Real-IP $remote_addr;"
                 "proxy_set_header Host $http_host;")))
+        %nginx-robots-txt
         %letsencrypt-acme-challenge)))))
    (simple-service
     'add-whoogle-ssl-certificate
@@ -276,7 +291,7 @@
       (domains (list (string-append "git." %default-domain)))
       (deploy-hook %nginx-deploy-hook))))))
 
-(define cygnus-extra-services
+(define %extra-services
   (append
    (list
     (service dhcp-client-service-type)
@@ -319,11 +334,11 @@
      (terminal-outputs '(console))))
    (feature-base-packages
     #:base-home-packages '()
-    #:system-packages cygnus-extra-packages)
+    #:system-packages %extra-packages)
    (feature-file-systems
-    #:file-systems cygnus-file-systems
-    #:swap-devices cygnus-swap-devices)
+    #:file-systems %file-systems
+    #:swap-devices %swap-devices)
    (feature-custom-services
-    #:system-services cygnus-extra-services)
+    #:system-services %extra-services)
    (feature-docker)
    (feature-postgresql)))
