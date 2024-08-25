@@ -5,8 +5,11 @@
   #:use-module (rde features databases)
   #:use-module (rde features docker)
   #:use-module (rde features system)
+  #:use-module (rde gexp)
   #:use-module (rde system services matrix)
   #:use-module (rde packages)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages emacs)
   #:use-module (gnu packages version-control)
   #:use-module (gnu system)
   #:use-module (gnu system file-systems)
@@ -23,8 +26,16 @@
   #:use-module (gnu services web)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
+  #:use-module (guix build utils)
+  #:use-module (guix build-system copy)
+  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
-  #:use-module (srfi srfi-26))
+  #:use-module ((guix licenses) #:prefix license:)
+  #:use-module (guix packages)
+  #:use-module (guix utils)
+  #:use-module (srfi srfi-26)
+  #:use-module (sxml simple))
 
 (define %file-systems
   (list
@@ -221,11 +232,62 @@
       (domains (list (string-append "whoogle." %default-domain)))
       (deploy-hook %nginx-deploy-hook))))))
 
+(define cgit-org2html
+  (let ((commit "e34765572aeb328cc5d9bac08b9df2b34b39da46")
+        (revision "0"))
+    (package
+     (name "cgit-org2html")
+     (version (git-version "0.0.0" revision commit))
+     (source (origin
+               (method git-fetch)
+               (uri (git-reference
+                     (url "https://github.com/amartos/cgit-org2html")
+                     (commit commit)))
+               (file-name (git-file-name name version))
+               (sha256
+                (base32 "1s2yxs8pvb3gjwgd3nxm4gq54lmwrir9fb73sd595b9nyrwk4zaw"))))
+     (build-system copy-build-system)
+     (arguments
+      (list #:phases #~(modify-phases %standard-phases
+                         (add-after 'unpack 'fix-paths
+                           (lambda _
+                             (patch-shebang "org2html")))
+                         (add-after 'fix-paths 'embed-absolute-file-name
+                           (lambda _
+                             (substitute* "org2html"
+                               (("emacs")
+                                (string-append #$(this-package-input "emacs-no-x")
+                                               "/bin/emacs")))))
+                         (add-after 'install 'post-install
+                           (lambda _
+                             (chmod (string-append #$output "/bin/org2html") #o777)))
+                         (add-after 'post-install 'wrap-program
+                           (lambda _
+                             (wrap-program (string-append #$output "/bin/org2html")
+                               `("ORG2HTML_CSS_PATH" =
+                                 (,(string-append #$source "/css/org2html.css")))
+                               `("CGIT_CONFIG" = ("/usr/share/cgit"))))))
+            #:install-plan #~'(("org2html" "bin/org2html"))))
+     (inputs (list emacs-no-x))
+     (home-page "https://github.com/amartos/cgit-org2html")
+     (synopsis "An Org mode files converter for cgit")
+     (description "The @code{org2html} script brings support for Org-Mode formatted about files
+to cgit.")
+     (license license:gpl3))))
+
+(define %cgit-responsive-css
+  (origin
+    (method url-fetch)
+    (uri
+     "https://raw.githubusercontent.com/MatejaMaric/responsive-cgit-css/master/cgit.css")
+    (sha256
+     (base32 "07l53sik7c6r3xj0fxc4gl9aw8315qgl5hhyh570l89fj4vy7yhc"))))
 
 (define cygnus-version-control-services
   (list
    (service fcgiwrap-service-type
             (fcgiwrap-configuration
+             (user "root")
              (group "git")))
    (service gitolite-service-type
             (gitolite-configuration
@@ -249,21 +311,41 @@
      (enable-commit-graph? #t)
      (enable-log-filecount? #t)
      (enable-log-linecount? #t)
-     (readme ":README.md")
+     (readme ":README")
+     (extra-options
+      (list "readme=:README.md"
+            "readme=:README.org"
+            "js=/share/cgit/cgit.js"))
      (remove-suffix? #t)
+     (head-include "/cgit/head.html")
+     (footer "/cgit/footer")
+     (css "/cgit/cgit.css")
      (clone-url
       (list (format #f "https://git.~a/$CGIT_REPO_URL " %default-domain)))
      (about-filter
       (program-file
        "cgit-about-formatting"
-       #~(apply execl (string-append
-                       #$cgit "/lib/cgit/filters/about-formatting.sh")
-                (command-line))))
+       (with-imported-modules '((guix build utils))
+         #~(begin
+             (use-modules (guix build utils)
+                          (ice-9 match))
+             (define (file-extension file)
+               (let ((dot (string-rindex file #\.)))
+                 (and dot (substring file (+ 1 dot) (string-length file)))))
+             (with-directory-excursion #$(file-append cgit "/lib/cgit/filters/html-converters")
+               (apply execl
+                      (match (file-extension (cadr (command-line)))
+                        ((or "org" #f) #$(file-append cgit-org2html "/bin/org2html"))
+                        ((or "md" "markdown" "mdown" "mkd") "./md2html")
+                        ("rst" "./rst2html")
+                        ("txt" "./txt2html")
+                        ((or "html" "htm") #$(file-append coreutils "/bin/cat")))
+                      (command-line)))))))
+     (favicon "/share/cgit/favicon.ico")
      (source-filter
       (program-file
        "cgit-syntax-highlighting"
-       #~(apply execl (string-append
-                       #$cgit "/lib/cgit/filters/syntax-highlighting.py")
+       #~(apply execl #$(file-append cgit "/lib/cgit/filters/syntax-highlighting.py")
                 (command-line))))
      (nginx
       (list
@@ -278,8 +360,37 @@
          (format #f "/etc/letsencrypt/live/git.~a/privkey.pem"
                  %default-domain))
         (try-files (list "$uri" "@cgit"))
+        (raw-content (list %nginx-crawlers-block))
         (locations
          (list
+          (nginx-location-configuration
+           (uri "/cgit/")
+           (body
+            (list
+             #~(format
+                #f "alias ~a/;"
+                #$(file-union
+                   "cgit-style"
+                   `(("cgit.css"
+                      ,(mixed-text-file
+                        "cgit.css"
+                        (slurp-file-like
+                         (file-append cgit "/share/cgit/cgit.css"))
+                        (slurp-file-like %cgit-responsive-css)))
+                     ("head.html"
+                      ,(plain-file
+                        "head.html"
+                        (call-with-output-string
+                         (lambda (port)
+                           (sxml->xml
+                            '(meta
+                              (@ (name "viewport")
+                                 (content
+                                  "width=device-width, initial-scale=1.0")))
+                            port)))))
+                     ("footer"
+                      ,(plain-file "footer" "")))))
+             "try_files $uri =404;")))
           (nginx-location-configuration
            (uri "@cgit")
            (body
@@ -288,7 +399,8 @@
              "fastcgi_param PATH_INFO $uri;"
              "fastcgi_param QUERY_STRING $args;"
              "fastcgi_param HTTP_HOST $server_name;"
-             "fastcgi_pass 127.0.0.1:9000;"))))))))))
+             "fastcgi_pass 127.0.0.1:9000;")))
+          %nginx-robots-txt)))))))
    (simple-service
     'add-cgit-ssl-certificate
     certbot-service-type
