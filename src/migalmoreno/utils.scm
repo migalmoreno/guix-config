@@ -94,8 +94,6 @@
 
 (define-public %default-email "mail@migalmoreno.com")
 
-(define-public %tubo-host (getenv "TUBO_HOST"))
-
 (define-public %default-ssh-key
   (plain-file
    (format #f "~a.pub" %default-username)

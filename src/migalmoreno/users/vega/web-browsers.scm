@@ -445,6 +445,9 @@
       :monospace-font-family
       ,(font-name (get-value 'font-monospace config))))))
 
+(define %tubo-url
+  (string-append "http://" (getenv "AURIGA_TUBO_HOST")))
+
 (define-public (features source palette)
   (list
    (feature-nyxt
@@ -463,8 +466,8 @@
     #:extension extra-emacs-nyxt-config)
    (feature-alternative-frontends
     #:frontends `((google . "http://localhost:5000")
-                  (youtube . ,(string-append "http://" %tubo-host))
-                  (soundcloud . ,(string-append "http://" %tubo-host))
+                  (youtube . ,%tubo-url)
+                  (soundcloud . ,%tubo-url)
                   (reddit . "https://libreddit.bus-hit.me")
                   (medium . "https://scribe.rip")))
    (feature-nyxt-blocker)
