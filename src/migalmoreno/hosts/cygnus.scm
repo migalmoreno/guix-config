@@ -118,6 +118,7 @@
       (server-name (list "conses.eu" "www.conses.eu"))
       (ssl-certificate "/etc/letsencrypt/live/conses.eu/fullchain.pem")
       (ssl-certificate-key "/etc/letsencrypt/live/conses.eu/privkey.pem")
+      (raw-content (list %nginx-crawlers-block))
       (locations
        (list
         (nginx-location-configuration
@@ -125,7 +126,8 @@
          (body
           (list "default_type application/json;"
                 "return 200 '{\"m.server\": \"matrix.conses.eu:443\"}';"
-                "add_header Access-Control-Allow-Origin *;"))))))
+                "add_header Access-Control-Allow-Origin *;")))
+        %nginx-robots-txt)))
      (nginx-server-configuration
       (listen '("443 ssl http2"
                 "[::]:443 ssl http2"
@@ -136,6 +138,7 @@
        "/etc/letsencrypt/live/matrix.conses.eu/fullchain.pem")
       (ssl-certificate-key
        "/etc/letsencrypt/live/matrix.conses.eu/privkey.pem")
+      (raw-content (list %nginx-crawlers-block))
       (locations
        (list
         (nginx-location-configuration
@@ -146,6 +149,7 @@
                 "proxy_set_header X-Forwarded-Proto $scheme;"
                 "proxy_set_header Host $host;"
                 "client_max_body_size 50M;")))
+        %nginx-robots-txt
         %letsencrypt-acme-challenge)))
      (nginx-server-configuration
       (listen '("443 ssl http2"
@@ -155,6 +159,7 @@
        "/etc/letsencrypt/live/pantalaimon.conses.eu/fullchain.pem")
       (ssl-certificate-key
        "/etc/letsencrypt/live/pantalaimon.conses.eu/privkey.pem")
+      (raw-content (list %nginx-crawlers-block))
       (locations
        (list
         (nginx-location-configuration
@@ -163,6 +168,7 @@
           (list "proxy_pass http://localhost:8009;"
                 "proxy_set_header X-Forwarded-For $remote_addr;"
                 "proxy_set_header HOST $http_host;")))
+        %nginx-robots-txt
         %letsencrypt-acme-challenge)))))
    (simple-service
     'add-matrix-ssl-certificates
@@ -308,13 +314,13 @@
               (password-authentication? #f)
               (permit-root-login 'prohibit-password)
               (authorized-keys `(("root" ,%lyra-ssh-key ,%default-ssh-key)
-   cygnus-matrix-services
                                  ("deneb" ,%default-ssh-key)))))
     (service certbot-service-type
             (certbot-configuration
              (email %default-email)
              (webroot "/srv/http"))))
    cygnus-blog-services
+   cygnus-matrix-services
    cygnus-whoogle-services
    cygnus-version-control-services))
 
