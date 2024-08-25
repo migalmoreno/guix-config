@@ -61,7 +61,7 @@
 (define %nginx-crawlers-block
   "if ($http_user_agent ~* (Bytespider|Amazonbot|MJ12bot|DotBot|FriendlyCrawler)) { return 403; }")
 
-(define cygnus-blog-services
+(define %blog-services
   (list
    (service nginx-service-type
             (nginx-configuration
@@ -84,14 +84,17 @@
                   "error_page 404 = /404.html;"
                   %nginx-crawlers-block))
                 (locations
-                 (append
-                  (list
-                   (nginx-location-configuration
-                    (uri "/404.html")
-                    (body
-                     (list "internal;")))
-                   %nginx-robots-txt)
-                  (list %letsencrypt-acme-challenge))))))))
+                 (list
+                  (nginx-location-configuration
+                   (uri "/404.html")
+                   (body
+                    (list "internal;")))
+                  %nginx-robots-txt
+                  %letsencrypt-acme-challenge)))))
+             (extra-content
+              (string-append
+               "limit_req_zone $binary_remote_addr zone=ip:20m rate=10r/s;\n"
+               "limit_req_status 429;\n"))))
    (simple-service
     'add-blog-ssl-certificate
     certbot-service-type
@@ -101,7 +104,65 @@
                      (string-append "www." %default-domain)))
       (deploy-hook %nginx-deploy-hook))))))
 
-(define cygnus-matrix-services
+(define %tubo-services
+  (list
+   (service oci-container-service-type
+            (list
+             (oci-container-configuration
+              (image (string-append %default-username "/tubo"))
+              (network "host")
+              (ports
+               '(("3000" . "3000"))))))
+   (simple-service
+    'add-tubo-nginx-configuration
+    nginx-service-type
+    (list
+     (nginx-server-configuration
+      (listen '("443 ssl http2"))
+      (server-name (list "tubo.media"))
+      (ssl-certificate
+       "/etc/letsencrypt/live/tubo.media/fullchain.pem")
+      (ssl-certificate-key
+       "/etc/letsencrypt/live/tubo.media/privkey.pem")
+      (raw-content (list %nginx-crawlers-block))
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "/")
+         (body
+          (list
+           "limit_req zone=ip burst=20 nodelay;"
+           "proxy_pass http://localhost:3000;"
+           "proxy_set_header X-Forwarded-For $remote_addr;"
+           "proxy_set_header HOST $http_host;")))
+        %nginx-robots-txt)))
+     (nginx-server-configuration
+      (listen '("443 ssl http2"))
+      (server-name (list (string-append "tubo." %default-domain)))
+      (ssl-certificate
+       (format #f "/etc/letsencrypt/live/tubo.~a/fullchain.pem"
+               %default-domain))
+      (ssl-certificate-key
+       (format #f "/etc/letsencrypt/live/tubo.~a/privkey.pem"
+               %default-domain))
+      (raw-content (list %nginx-crawlers-block))
+      (locations
+       (list
+        (nginx-location-configuration
+         (uri "/")
+         (body
+          (list
+           "return 301 https://tubo.media$request_uri;")))
+        %nginx-robots-txt)))))
+   (simple-service
+    'add-tubo-ssl-certificate
+    certbot-service-type
+    (list
+     (certificate-configuration
+      (domains (list "tubo.media"))
+      (deploy-hook %nginx-deploy-hook))))))
+
+(define %matrix-services
   (list
    (service synapse-service-type
             (synapse-configuration
@@ -194,7 +255,7 @@
       (map (cut string-append <> ".conses.eu")
            (list "pantalaimon" "matrix")))))))
 
-(define cygnus-whoogle-services
+(define %whoogle-services
   (list
    (service whoogle-service-type)
    (simple-service
@@ -222,8 +283,7 @@
                 "proxy_set_header X-NginX-Proxy true;"
                 "proxy_set_header X-Real-IP $remote_addr;"
                 "proxy_set_header Host $http_host;")))
-        %nginx-robots-txt
-        %letsencrypt-acme-challenge)))))
+        %nginx-robots-txt)))))
    (simple-service
     'add-whoogle-ssl-certificate
     certbot-service-type
@@ -283,7 +343,7 @@ to cgit.")
     (sha256
      (base32 "07l53sik7c6r3xj0fxc4gl9aw8315qgl5hhyh570l89fj4vy7yhc"))))
 
-(define cygnus-version-control-services
+(define %version-control-services
   (list
    (service fcgiwrap-service-type
             (fcgiwrap-configuration
@@ -431,10 +491,11 @@ to cgit.")
             (certbot-configuration
              (email %default-email)
              (webroot "/srv/http"))))
-   cygnus-blog-services
-   cygnus-matrix-services
-   cygnus-whoogle-services
-   cygnus-version-control-services))
+   %blog-services
+   %matrix-services
+   %tubo-services
+   %version-control-services
+   %whoogle-services))
 
 (define-public features
   (list
