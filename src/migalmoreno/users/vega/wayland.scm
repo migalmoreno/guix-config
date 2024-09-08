@@ -453,8 +453,8 @@
       (profile single ((output eDP-1 disable)
                        (output HDMI-A-1 enable)))
       (profile multi ((output eDP-1 disable)
-                      (output DP-2 mode 1920x1080 position -1920,0)
-                      (output HDMI-A-1 mode 1920x1080 position 0,0)))))
+                      (output HDMI-A-1 mode 1920x1080 position 0,0)
+                      (output DP-2 mode 1920x1080 position -1920,0)))))
    (feature-bluetooth)
    (feature-keyboard
     #:keyboard-layout %default-keyboard-layout)
