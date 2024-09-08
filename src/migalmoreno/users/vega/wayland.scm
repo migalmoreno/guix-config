@@ -43,10 +43,9 @@
    home-profile-service-type
    (strings->packages
     "ddcutil" "light" "v4l-utils" "binutils" "wireguard-tools" "texinfo"
-    "pass-otp" "docker-cli" "docker-compose" "b4"
-    "gst-plugins-good" "gst-plugins-bad" "gst-plugins-ugly"
-    "gst-plugins-base" "gst-libav" "wl-clipboard" "emacs-arei" "guile-next"
-    "guile-ares-rs")))
+    "docker-cli" "docker-compose" "b4" "gst-plugins-good" "gst-plugins-bad"
+    "gst-plugins-ugly" "gst-plugins-base" "gst-libav" "wl-clipboard"
+    "emacs-arei" "guile-next" "guile-ares-rs")))
 
 (define extra-home-environment-variables-service
   (simple-service
