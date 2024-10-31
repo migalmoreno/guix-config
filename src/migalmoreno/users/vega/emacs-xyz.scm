@@ -54,8 +54,6 @@
     (with-eval-after-load 'password-cache
       (setq password-cache t)
       (setq password-cache-expiry (* 60 10)))
-    (with-eval-after-load 'pass
-      (setq pass-show-keybindings nil))
     (with-eval-after-load 'epg-config
       (setq epg-pinentry-mode 'loopback))
     (with-eval-after-load 'password-store
@@ -68,8 +66,6 @@
     (with-eval-after-load 'face-remap
       (setq text-scale-mode-step 1.075))
     (setq-default tab-width 2)
-    (with-eval-after-load 'indent
-      (setq tab-always-indent 'complete))
     (add-hook 'before-save-hook 'delete-trailing-whitespace)
     (with-eval-after-load 'mwheel
       (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
@@ -211,7 +207,6 @@
     (with-eval-after-load 'yaml-mode
       (define-key yaml-mode-map (kbd "RET") 'newline-and-indent))
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
-    (add-hook 'eww-mode-hook 'eww-toggle-images)
     (with-eval-after-load 'window
       (setq split-window-keep-point t)
       (add-to-list 'display-buffer-alist
