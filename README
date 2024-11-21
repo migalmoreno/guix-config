@@ -1,33 +1,25 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; org-export-with-author: nil; org-export-with-date: nil; -*-
 #+OPTIONS: toc:nil num:nil
-* Guix Configuration
+#+TITLE: Guix Configuration
 This is my personal set of configuration files built around the [[https://guix.gnu.org/][GNU Guix]] package manager and the [[https://git.sr.ht/~abcdw/rde][RDE]] configuration framework.
 
-To activate the current user's home configuration:
+Activate the current or a specific user's home configuration:
 
 #+begin_src sh
 make home
-#+end_src
-
-To activate a specific user's home configuration:
-
-#+begin_src sh
+# or
 make home/reconfigure/$USER
 #+end_src
 
-To activate the current host's system configuration:
+Activate the current or a specific host's system configuration:
 
 #+begin_src sh
 make system
-#+end_src
-
-To activate a specific host's system configuration:
-
-#+begin_src sh
+# or
 make system/reconfigure/$HOST
 #+end_src
 
-To deploy an entire system configuration and home configuration to a remote machine:
+Deploy an entire system configuration and home configuration to a remote machine:
 
 #+begin_src sh
 make deploy/$HOST/$USER
